@@ -62,11 +62,9 @@ render(`
 
 <h2>Add Players</h2>
 
-<input id="name">
-
-<button onclick="window.addPlayer()">Add</button>
-
 <ul id="playerList"></ul>
+
+<button onclick="window.addPlayer()">Add Player</button>
 
 <button onclick="window.startGame()">Start Game</button>
 
@@ -124,26 +122,6 @@ ${list}
 window.renamePlayer = function(index,newName){
 
 state.players[index].name = newName
-
-}
-
-function addPlayer(){
-
-const input=document.getElementById("name")
-
-const name=input.value.trim()
-
-if(!name)return
-
-state.players.push({
-name:name,
-role:null,
-alive:true
-})
-
-input.value=""
-
-updatePlayerList()
 
 }
 
@@ -296,12 +274,15 @@ let number = state.players.length + 1
 
 state.players.push({
 name: `Player ${number}`,
+role: null,
 alive: true
 })
 
 renderPlayerSetup()
 
 }
+
+
 window.startGame=startGame
 window.revealRole=revealRole
 window.nextPlayer=nextPlayer
