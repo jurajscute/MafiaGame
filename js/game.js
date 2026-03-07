@@ -22,6 +22,22 @@ jester: "#bb006d"
 
 }
 
+function savePlayers(){
+localStorage.setItem("mafiaPlayers", JSON.stringify(state.players))
+}
+
+function loadPlayers(){
+
+let saved = localStorage.getItem("mafiaPlayers")
+
+if(saved){
+state.players = JSON.parse(saved)
+}
+
+}
+
+loadPlayers()
+
 let revealIndex=0
 
 export function setDay(){
@@ -113,6 +129,8 @@ ${list}
 
 <button onclick="window.addPlayer()">Add Player</button>
 
+<button onclick="window.clearPlayers()">Reset Players</button>
+
 <button onclick="window.startGame()">Start Game</button>
 
 </div>
@@ -124,12 +142,23 @@ ${list}
 window.renamePlayer = function(index,newName){
 
 state.players[index].name = newName
+savePlayers()
 
 }
 
 window.removePlayer = function(index){
 
 state.players.splice(index,1)
+
+savePlayers()
+renderPlayerSetup()
+
+}
+
+window.clearPlayers = function(){
+
+localStorage.removeItem("mafiaPlayers")
+state.players = []
 
 renderPlayerSetup()
 
@@ -288,6 +317,7 @@ role: null,
 alive: true
 })
 
+savePlayers()
 renderPlayerSetup()
 
 }
