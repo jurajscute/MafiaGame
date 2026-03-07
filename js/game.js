@@ -129,8 +129,7 @@ revealIndex=0
 showRoleReveal()
 
 }
-
-let revealIndex = 0
+revealIndex = 0
 
 function showRoleReveal(){
 
