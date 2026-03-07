@@ -76,16 +76,20 @@ advanceNightTurn()
 
 export function revealNightRole(){
 
-let player = state.players[state.nightTurnIndex]
-let role = roles[player.role]
-
-if(!role.nightAction){
+let roleKey = player.role.toLowerCase()
+let color = roleColors[roleKey] || "white"
 
 render(`
 
 <div class="card">
 
-<h2>You are a<span class="role-name role-${player.role.toLowerCase()}">${player.role.toUpperCase()}</span></h2>
+<h2>
+You are a
+<span style="color:${color}; font-weight:bold;">
+${player.role.toUpperCase()}
+</span>
+</h2>
+
 <p>No night action</p>
 
 <button onclick="window.nextNightTurn()">Hide</button>
