@@ -1,14 +1,11 @@
 import {state, resetNightActions} from "./state.js"
-import {render} from "./ui.js"
+import {render, passPhone} from "./ui.js"
 import {roles} from "./roles.js"
-import {passPhone} from "./ui.js"
-
 
 export function startNight(){
 
-state.phase = "night"
-
-state.nightTurnIndex = 0
+state.phase="night"
+state.nightTurnIndex=0
 
 resetNightActions()
 
@@ -17,6 +14,8 @@ nextNightTurn()
 }
 
 export function nextNightTurn(){
+
+state.nightTurnIndex++
 
 let player = state.players[state.nightTurnIndex]
 
@@ -29,20 +28,18 @@ return
 
 if(!player.alive){
 
-state.nightTurnIndex++
 nextNightTurn()
 return
 
 }
 
-passPhone(player.name, "window.revealNightRole()")
+passPhone(player.name,"window.revealNightRole()")
 
 }
 
 export function revealNightRole(){
 
 let player = state.players[state.nightTurnIndex]
-
 let role = roles[player.role]
 
 if(!role.nightAction){
@@ -64,19 +61,19 @@ return
 
 }
 
-showNightAction(player, role)
+showNightAction(player,role)
 
 }
 
-function showNightAction(player, role){
+function showNightAction(player,role){
 
-let targets = ""
+let targets=""
 
 state.players
-.filter(p => p.alive && p.name !== player.name)
-.forEach(p => {
+.filter(p=>p.alive && p.name!==player.name)
+.forEach(p=>{
 
-targets += `<button onclick="window.performNightAction('${p.name}')">${p.name}</button>`
+targets+=`<button onclick="window.performNightAction('${p.name}')">${p.name}</button>`
 
 })
 
@@ -85,6 +82,7 @@ render(`
 <div class="card">
 
 <h2>${player.role.toUpperCase()} ACTION</h2>
+
 <p>Select a target</p>
 
 ${targets}
@@ -95,21 +93,18 @@ ${targets}
 
 }
 
-
 export function performNightAction(targetName){
 
 let player = state.players[state.nightTurnIndex]
-
 let role = roles[player.role]
 
-state.nightActions[role.nightAction] = targetName
+state.nightActions[role.nightAction]=targetName
 
-// Special handling for Sheriff
-if(role.nightAction === "investigate"){
+if(role.nightAction==="investigate"){
 
-let target = state.players.find(p => p.name === targetName)
+let target = state.players.find(p=>p.name===targetName)
 
-let result = target.role === "mafia" ? "MAFIA" : "NOT MAFIA"
+let result = target.role==="mafia" ? "MAFIA" : "NOT MAFIA"
 
 render(`
 
@@ -131,25 +126,25 @@ return
 
 }
 
-state.nightTurnIndex++
-nextNightTurn()
+window.nextNightTurn()
 
 }
 
 function resolveNight(){
 
-let kill = state.nightActions.kill
-let save = state.nightActions.save
+let kill=state.nightActions.kill
+let save=state.nightActions.save
 
-let message = "No one died."
+let message="No one died."
 
-if(kill && kill !== save){
+if(kill && kill!==save){
 
-let victim = state.players.find(p=>p.name===kill)
+let victim=state.players.find(p=>p.name===kill)
 
+if(victim){
 victim.alive=false
-
-message = `${kill} was killed during the night.`
+message=`${kill} was killed during the night.`
+}
 
 }
 
@@ -171,9 +166,9 @@ render(`
 
 export function startVoting(){
 
-state.phase = "voting"
-state.voteTurnIndex = 0
-state.votes = {}
+state.phase="voting"
+state.voteTurnIndex=0
+state.votes={}
 
 nextVoteTurn()
 
@@ -181,9 +176,9 @@ nextVoteTurn()
 
 function nextVoteTurn(){
 
-let alivePlayers = state.players.filter(p => p.alive)
+let alivePlayers = state.players.filter(p=>p.alive)
 
-if(state.voteTurnIndex >= alivePlayers.length){
+if(state.voteTurnIndex>=alivePlayers.length){
 
 resolveVotes()
 return
@@ -192,19 +187,19 @@ return
 
 let player = alivePlayers[state.voteTurnIndex]
 
-passPhone(player.name, "window.showVoteOptions()")
+passPhone(player.name,"window.showVoteOptions()")
 
 }
 
 export function showVoteOptions(){
 
-let alivePlayers = state.players.filter(p => p.alive)
+let alivePlayers = state.players.filter(p=>p.alive)
 
-let buttons = ""
+let buttons=""
 
-alivePlayers.forEach(p => {
+alivePlayers.forEach(p=>{
 
-buttons += `<button onclick="window.castVote('${p.name}')">${p.name}</button>`
+buttons+=`<button onclick="window.castVote('${p.name}')">${p.name}</button>`
 
 })
 
@@ -225,9 +220,7 @@ ${buttons}
 export function castVote(targetName){
 
 if(!state.votes[targetName]){
-
-state.votes[targetName] = 0
-
+state.votes[targetName]=0
 }
 
 state.votes[targetName]++
@@ -240,25 +233,23 @@ nextVoteTurn()
 
 function resolveVotes(){
 
-let highest = 0
-let eliminated = null
+let highest=0
+let eliminated=null
 
 for(let name in state.votes){
 
-if(state.votes[name] > highest){
-
-highest = state.votes[name]
-eliminated = name
-
+if(state.votes[name]>highest){
+highest=state.votes[name]
+eliminated=name
 }
 
 }
 
 if(eliminated){
 
-let player = state.players.find(p => p.name === eliminated)
+let player=state.players.find(p=>p.name===eliminated)
 
-player.alive = false
+if(player) player.alive=false
 
 render(`
 
@@ -287,5 +278,11 @@ render(`
 `)
 
 }
+
+}
+
+window.nextNight=function(){
+
+startNight()
 
 }

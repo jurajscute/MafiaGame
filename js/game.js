@@ -11,6 +11,7 @@ performNightAction,
 showVoteOptions,
 castVote
 } from "./phases.js"
+
 let revealIndex=0
 
 function showHome(){
@@ -62,11 +63,9 @@ const name=input.value.trim()
 if(!name)return
 
 state.players.push({
-
 name:name,
 role:null,
 alive:true
-
 })
 
 input.value=""
@@ -94,7 +93,6 @@ list.innerHTML+=`<li>${p.name}</li>`
 function assignRoles(){
 
 let players=state.players
-
 let pool=[]
 
 let mafia=mafiaCount(players.length)
@@ -106,17 +104,13 @@ if(state.rolesEnabled.sheriff) pool.push("sheriff")
 if(state.rolesEnabled.jester) pool.push("jester")
 
 while(pool.length<players.length){
-
 pool.push("villager")
-
 }
 
 shuffle(pool)
 
 players.forEach((p,i)=>{
-
 p.role=pool[i]
-
 })
 
 }
@@ -124,11 +118,8 @@ p.role=pool[i]
 function startGame(){
 
 if(state.players.length<4){
-
 alert("Minimum 4 players")
-
 return
-
 }
 
 assignRoles()
@@ -208,11 +199,14 @@ window.addPlayer=addPlayer
 window.startGame=startGame
 window.revealRole=revealRole
 window.nextPlayer=nextPlayer
+
 window.startNight=startNight
-window.revealNightRole = revealNightRole
-window.performNightAction = performNightAction
-window.startVoting=startVoting
 window.nextNightTurn=nextNightTurn
-window.showVoteOptions = showVoteOptions
-window.castVote = castVote
+window.revealNightRole=revealNightRole
+window.performNightAction=performNightAction
+
+window.startVoting=startVoting
+window.showVoteOptions=showVoteOptions
+window.castVote=castVote
+
 showHome()
