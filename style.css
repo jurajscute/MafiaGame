@@ -1,0 +1,71 @@
+body {
+
+background:#0f1115;
+color:#e6e6e6;
+font-family:system-ui;
+margin:0;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+height:100vh;
+
+}
+
+#app {
+
+width:90%;
+max-width:600px;
+
+}
+
+.card{
+
+background:#1a1d24;
+padding:25px;
+border-radius:14px;
+margin-top:20px;
+
+animation:fade 0.3s ease;
+
+}
+
+button{
+
+background:#6c8cff;
+border:none;
+color:white;
+
+padding:12px 18px;
+margin:6px;
+
+border-radius:10px;
+
+cursor:pointer;
+
+transition:transform 0.2s;
+
+}
+
+button:hover{
+
+transform:scale(1.05);
+
+}
+
+input{
+
+padding:10px;
+border-radius:8px;
+border:none;
+margin:6px;
+
+}
+
+@keyframes fade{
+
+from{opacity:0; transform:translateY(10px)}
+to{opacity:1; transform:translateY(0)}
+
+}
