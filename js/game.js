@@ -5,10 +5,9 @@ import {render} from "./ui.js"
 import {
 startNight,
 startVoting,
-nextNight,
+nextNightTurn,
 revealNightRole,
 performNightAction,
-finishNightTurn,
 showVoteOptions,
 castVote
 } from "./phases.js"
@@ -212,10 +211,9 @@ window.nextPlayer=nextPlayer
 window.startNight=startNight
 window.revealNightRole = revealNightRole
 window.performNightAction = performNightAction
-window.finishNightTurn = finishNightTurn
 window.startVoting=startVoting
 window.vote=vote
-window.nextNight=nextNight
+window.nextNight=nextNightTurn
 window.showVoteOptions = showVoteOptions
 window.castVote = castVote
 
