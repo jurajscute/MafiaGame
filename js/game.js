@@ -88,10 +88,10 @@ list += `
 
 <input 
 value="${p.name}"
-oninput="renamePlayer(${i}, this.value)"
+oninput="window.renamePlayer(${i}, this.value)"
 >
 
-<button onclick="removePlayer(${i})">❌</button>
+<button onclick="window.removePlayer(${i})">❌</button>
 
 </li>
 
@@ -109,9 +109,9 @@ render(`
 ${list}
 </ul>
 
-<button onclick="addPlayer()">Add Player</button>
+<button onclick="window.addPlayer()">Add Player</button>
 
-<button onclick="startGame()">Start Game</button>
+<button onclick="window.startGame()">Start Game</button>
 
 </div>
 
@@ -122,6 +122,14 @@ ${list}
 window.renamePlayer = function(index,newName){
 
 state.players[index].name = newName
+
+}
+
+window.removePlayer = function(index){
+
+state.players.splice(index,1)
+
+renderPlayerSetup()
 
 }
 
