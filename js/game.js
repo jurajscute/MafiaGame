@@ -6,14 +6,12 @@ import {
 startNight,
 startVoting,
 nextNight,
-finishNight,
 revealNightRole,
 performNightAction,
 finishNightTurn,
 showVoteOptions,
 castVote
 } from "./phases.js"
-
 let revealIndex=0
 
 function showHome(){
@@ -218,7 +216,6 @@ window.finishNightTurn = finishNightTurn
 window.startVoting=startVoting
 window.vote=vote
 window.nextNight=nextNight
-window.finishNight=finishNight
 window.showVoteOptions = showVoteOptions
 window.castVote = castVote
 
