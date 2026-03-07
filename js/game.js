@@ -153,13 +153,19 @@ function revealRole(){
 
 let player = state.players[revealIndex]
 
+let color = roleColors[player.role] || "white"
+
 render(`
 
 <div class="card">
 
 <h2>Your Role</h2>
 
-<h1>${player.role.toUpperCase()}</h1>
+<h1 style="color:${color};">
+
+${player.role.toUpperCase()}
+
+</h1>
 
 <button onclick="window.nextPlayer()">Hide</button>
 

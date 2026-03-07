@@ -421,7 +421,13 @@ let rolesHTML = ""
 
 state.players.forEach(p => {
 
-rolesHTML += `<p><b>${p.name}</b> — ${p.role.toUpperCase()}</p>`
+let color = roleColors[p.role] || "white"
+
+rolesHTML += `
+<p style="color:${color}; font-weight:bold; font-size:20px;">
+${p.name} — ${p.role.toUpperCase()}
+</p>
+`
 
 })
 
@@ -442,6 +448,8 @@ ${rolesHTML}
 `)
 
 }
+
+window.showRoleRevealEnd = showRoleRevealEnd
 
 window.showRoleRevealEnd = showRoleRevealEnd
 
