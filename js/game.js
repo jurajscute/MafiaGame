@@ -12,6 +12,16 @@ showVoteOptions,
 castVote
 } from "./phases.js"
 
+const roleColors = {
+
+mafia: "#e74c3c",
+doctor: "#2ecc71",
+sheriff: "#3498db",
+villager: "#f1c40f",
+jester: "#9b59b6"
+
+}
+
 let revealIndex=0
 
 function showHome(){
