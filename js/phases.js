@@ -2,16 +2,22 @@ import {state, resetNightActions} from "./state.js"
 import {render, passPhone} from "./ui.js"
 import {roles} from "./roles.js"
 
-export function startNight(){
-
-    import { setNight } from "./game.js"
-
-export function startNight(){
-
-setNight()
-
-// rest of night code
+function setDay() {
+    document.body.classList.remove("night");
+    document.body.classList.add("day");
 }
+
+function setNight() {
+    document.body.classList.remove("day");
+    document.body.classList.add("night");
+}
+
+window.setDay = setDay;
+window.setNight = setNight;
+
+export function startNight(){
+
+setNight();
 
 state.phase="night"
 state.nightTurnIndex=0
@@ -214,15 +220,7 @@ return false
 }
 
 function resolveNight(){
-
-    import { setDay } from "./game.js"
-
-export function startDay(){
-
-setDay()
-
-// voting logic
-}
+    setDay();
 
 let kill=state.nightActions.kill
 let save=state.nightActions.save
