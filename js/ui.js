@@ -1,9 +1,7 @@
 const screen=document.getElementById("screen")
 
 export function render(html){
-
-screen.innerHTML=html
-
+document.getElementById("app").innerHTML = html
 }
 
 export function button(text,action){
