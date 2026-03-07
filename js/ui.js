@@ -14,17 +14,13 @@ export function passPhone(name, action){
 
 render(`
 
-<div class="card">
+<div class="card pass-card">
 
-<div class="pass-screen">
+<p class="pass-label">PASS THE PHONE</p>
 
-<p>Pass the phone to</p>
+<h1 class="pass-player"><strong>${name}</strong></h1>
 
-<h2>${name}</h2>
-
-<button onclick="${action}">I'm ready</button>
-
-</div>
+<button onclick="${action}">I'm Ready</button>
 
 </div>
 
