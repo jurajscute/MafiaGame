@@ -1,6 +1,6 @@
 body {
 
-background:#0f1115;
+background:#15130f;
 color:#e6e6e6;
 font-family:system-ui;
 margin:0;
@@ -22,7 +22,7 @@ max-width:600px;
 
 .card{
 
-background:#1a1d24;
+background:#24201a;
 padding:25px;
 border-radius:14px;
 margin-top:20px;
@@ -33,7 +33,7 @@ animation:fade 0.3s ease;
 
 button{
 
-background:#6c8cff;
+background:#856a41;
 border:none;
 color:white;
 
