@@ -17,17 +17,28 @@ nextNightTurn()
 
 }
 
-export function nextNightTurn(){
+export function startNight(){
 
-if(state.nightTurnIndex >= state.players.length){
+state.phase = "night"
 
-resolveNight()
+state.nightTurnIndex = 0
 
-return
+resetNightActions()
+
+nextNightTurn()
 
 }
 
+export function nextNightTurn(){
+
 let player = state.players[state.nightTurnIndex]
+
+if(!player){
+
+resolveNight()
+return
+
+}
 
 if(!player.alive){
 
@@ -37,35 +48,7 @@ return
 
 }
 
-}
-
-export function revealNightRole(){
-
-let player = state.players[state.nightTurnIndex]
-
-let role = roles[player.role]
-
-if(!role.nightAction){
-
-render(`
-
-<div class="card">
-
-<h2>You are ${player.role}</h2>
-
-<p>No night action</p>
-
-<button onclick="window.nextNightTurn()">Hide</button>
-
-</div>
-
-`)
-
-return
-
-}
-
-showNightAction(player, role)
+passPhone(player.name, "window.revealNightRole()")
 
 }
 
