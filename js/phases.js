@@ -3,19 +3,6 @@ import {render} from "./ui.js"
 import {roles} from "./roles.js"
 import {passPhone} from "./ui.js"
 
-export function startNight(){
-
-state.phase="night"
-
-state.nightTurnIndex = 0
-
-resetNightActions()
-
-passPhone(player.name, "window.revealNightRole()")
-
-nextNightTurn()
-
-}
 
 export function startNight(){
 
