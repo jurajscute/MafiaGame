@@ -233,27 +233,40 @@ nextVoteTurn()
 
 function resolveVotes(){
 
-let highest=0
-let eliminated=null
+let highest = 0
+let eliminated = null
+let resultsHTML = ""
 
 for(let name in state.votes){
 
-if(state.votes[name]>highest){
-highest=state.votes[name]
-eliminated=name
+let count = state.votes[name]
+
+resultsHTML += `<p>${name} — ${count} vote${count>1?"s":""}</p>`
+
+if(count > highest){
+
+highest = count
+eliminated = name
+
 }
 
 }
 
 if(eliminated){
 
-let player=state.players.find(p=>p.name===eliminated)
+let player = state.players.find(p => p.name === eliminated)
 
-if(player) player.alive=false
+if(player) player.alive = false
 
 render(`
 
 <div class="card">
+
+<h2>Voting Results</h2>
+
+${resultsHTML}
+
+<hr>
 
 <h2>${eliminated} was voted out</h2>
 
@@ -269,6 +282,12 @@ render(`
 
 <div class="card">
 
+<h2>Voting Results</h2>
+
+${resultsHTML}
+
+<hr>
+
 <h2>No one was eliminated</h2>
 
 <button onclick="window.nextNight()">Next Night</button>
@@ -278,11 +297,5 @@ render(`
 `)
 
 }
-
-}
-
-window.nextNight=function(){
-
-startNight()
 
 }
