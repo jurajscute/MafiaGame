@@ -76,6 +76,11 @@ advanceNightTurn()
 
 export function revealNightRole(){
 
+let player = state.players[state.nightTurnIndex]
+let role = roles[player.role]
+
+if(!role.nightAction){
+
 let roleKey = player.role.toLowerCase()
 let color = roleColors[roleKey] || "white"
 
