@@ -14,9 +14,9 @@ export function passPhone(name, action){
 
 render(`
 
-<div class="card pass-card">
-
 <p class="pass-label">PASS THE PHONE</p>
+
+<div class="card pass-card">
 
 <h1 class="pass-player"><strong>${name}</strong></h1>
 
