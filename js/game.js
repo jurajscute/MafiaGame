@@ -184,7 +184,7 @@ render(`
 
 <h2>Your Role</h2>
 
-<div class="role-card" id="roleCard">
+<div class="role-card" id="roleCard" onclick="flipRole()">
 
 <div class="role-inner">
 
@@ -200,7 +200,6 @@ ${player.role.toUpperCase()}
 
 </div>
 
-<button onclick="flipRole()">Reveal</button>
 <button onclick="window.nextPlayer()">Hide</button>
 
 </div>

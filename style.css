@@ -162,13 +162,13 @@ background:#333;
 }
 
 .role-back{
-background:#332d23;
+background:#25211a;
 transform:rotateY(180deg);
 }
 
 .pass-screen{
 
-background:black;
+background:#25211a;
 color:white;
 
 height:200px;
@@ -186,7 +186,7 @@ font-size:22px;
 /* DAY/NIGHT CYCLE */
 body.day{
 background:linear-gradient(135deg,#2f221e,#1d1402);
-color:#111;
+color:white;
 }
 
 body.night{
