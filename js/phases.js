@@ -139,6 +139,59 @@ advanceNightTurn()
 
 }
 
+function checkWin(){
+
+let alive = state.players.filter(p=>p.alive)
+
+let mafia = alive.filter(p=>p.role==="mafia").length
+let villagers = alive.filter(p=>p.role!=="mafia").length
+
+// Mafia win
+if(mafia >= villagers){
+
+render(`
+
+<div class="card">
+
+<h1>MAFIA WIN</h1>
+
+<p>The mafia have taken control of the town.</p>
+
+<button onclick="location.reload()">Restart Game</button>
+
+</div>
+
+`)
+
+return true
+
+}
+
+// Village win
+if(mafia === 0){
+
+render(`
+
+<div class="card">
+
+<h1>VILLAGE WINS</h1>
+
+<p>All mafia members have been eliminated.</p>
+
+<button onclick="location.reload()">Restart Game</button>
+
+</div>
+
+`)
+
+return true
+
+}
+
+return false
+
+}
+
 function resolveNight(){
 
 let kill=state.nightActions.kill
@@ -156,6 +209,7 @@ message=`${kill} was killed during the night.`
 }
 
 }
+if(checkWin()) return
 
 render(`
 
@@ -242,6 +296,7 @@ function resolveVotes(){
 
 let highest = 0
 let eliminated = null
+let tie = false
 let resultsHTML = ""
 
 for(let name in state.votes){
@@ -251,17 +306,102 @@ let count = state.votes[name]
 resultsHTML += `<p>${name} — ${count} vote${count>1?"s":""}</p>`
 
 if(count > highest){
+
 highest = count
 eliminated = name
-}
+tie = false
+
+}else if(count === highest){
+
+tie = true
 
 }
 
+}
+
+// If tie, nobody dies
+if(tie){
+
+render(`
+
+<div class="card">
+
+<h2>Voting Results</h2>
+
+${resultsHTML}
+
+<hr>
+
+<h2>It's a tie! Nobody was eliminated.</h2>
+
+<button onclick="window.nextNight()">Next Night</button>
+
+</div>
+
+`)
+
+return
+
+}
+
+// Otherwise eliminate player
 if(eliminated){
 
 let player = state.players.find(p => p.name === eliminated)
 
-if(player) player.alive = false
+if(player){
+
+player.alive = false
+
+// Jester win
+if(player.role === "jester"){
+
+render(`
+
+<div class="card">
+
+<h1>JESTER WINS</h1>
+
+<p>${player.name} tricked the town into voting them out!</p>
+
+<button onclick="location.reload()">Restart Game</button>
+
+</div>
+
+`)
+
+return
+
+}
+
+}
+
+// Check mafia/village win
+if(checkWin()) return
+
+render(`
+
+<div class="card">
+
+<h2>Voting Results</h2>
+
+${resultsHTML}
+
+<hr>
+
+<h2>${eliminated} was voted out</h2>
+
+<button onclick="window.nextNight()">Next Night</button>
+
+</div>
+
+`)
+
+}
+
+}
+
+if(checkWin()) return
 
 render(`
 
