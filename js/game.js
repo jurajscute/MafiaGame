@@ -15,10 +15,10 @@ castVote
 const roleColors = {
 
 mafia: "#e74c3c",
-doctor: "#2ecc71",
-sheriff: "#3498db",
-villager: "#f1c40f",
-jester: "#9b59b6"
+doctor: "#2e8dcc",
+sheriff: "#e4c200",
+villager: "#8dc2ff",
+jester: "#bb006d"
 
 }
 
