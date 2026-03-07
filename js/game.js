@@ -84,14 +84,16 @@ state.players.forEach((p,i)=>{
 
 list += `
 
-<li>
+<li class="player-row">
+
+<span class="player-icon">👤</span>
 
 <input 
 value="${p.name}"
 oninput="window.renamePlayer(${i}, this.value)"
 >
 
-<button onclick="window.removePlayer(${i})">❌</button>
+<button onclick="window.removePlayer(${i})">✖</button>
 
 </li>
 
