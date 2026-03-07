@@ -6,6 +6,8 @@ players:[],
 
 night:0,
 
+nightTurnIndex: 0,
+
 rolesEnabled:{
 doctor:true,
 sheriff:true,

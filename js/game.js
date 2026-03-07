@@ -2,7 +2,17 @@ import {state} from "./state.js"
 import {roles} from "./roles.js"
 import {shuffle,mafiaCount} from "./utils.js"
 import {render} from "./ui.js"
-import {startNight,startVoting,vote,nextNight,finishNight} from "./phases.js"
+import {
+startNight,
+startVoting,
+nextNight,
+finishNight,
+revealNightRole,
+performNightAction,
+finishNightTurn,
+showVoteOptions,
+castVote
+} from "./phases.js"
 
 let revealIndex=0
 
@@ -202,9 +212,14 @@ window.startGame=startGame
 window.revealRole=revealRole
 window.nextPlayer=nextPlayer
 window.startNight=startNight
+window.revealNightRole = revealNightRole
+window.performNightAction = performNightAction
+window.finishNightTurn = finishNightTurn
 window.startVoting=startVoting
 window.vote=vote
 window.nextNight=nextNight
 window.finishNight=finishNight
+window.showVoteOptions = showVoteOptions
+window.castVote = castVote
 
 showHome()
