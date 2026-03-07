@@ -102,7 +102,7 @@ showNightAction(player,role)
 
 }
 
-function showNightAction(player,role){
+function showNightAction(player, role){
 
 let targets=""
 
@@ -114,9 +114,9 @@ targets+=`<button onclick="window.performNightAction('${p.name}')">${p.name}</bu
 
 render(`
 
-<div class="card">
+<div class="card role-${role}">
 
-<h2>${player.role.toUpperCase()} ACTION</h2>
+<h2 class="role-title">${player.role.toUpperCase()} ACTION</h2>
 
 <p>Select a target</p>
 

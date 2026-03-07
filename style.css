@@ -197,3 +197,88 @@ color:white;
 body{
 transition:background 0.6s ease,color 0.6s ease;
 }
+
+/* mafia */
+
+.role-mafia{
+background:linear-gradient(135deg,#350000,#120000);
+}
+
+.role-mafia button{
+background:linear-gradient(135deg,#7e0e0e,#690000);
+}
+
+/* doctor */
+
+.role-doctor{
+background:linear-gradient(135deg,#001e3b,#000914);
+}
+
+.role-doctor button{
+background:linear-gradient(135deg,#0b5375,#0038a1);
+}
+
+/* detective */
+
+.role-sheriff{
+background:linear-gradient(135deg,#3b2800,#916300);
+}
+
+.role-sheriff button{
+background:linear-gradient(135deg,#775306,#e68200);
+}
+
+/* jester */
+
+.role-jester{
+background:linear-gradient(135deg,#3b001d,#140009);
+}
+
+.role-jester button{
+background:#690041;
+}
+
+.role-title{
+margin-bottom:20px;
+letter-spacing:2px;
+}
+
+/* mafia */
+
+.role-mafia .role-title{
+color:#ff4d4d;
+text-shadow:
+0 0 10px #ff0000,
+0 0 20px #ff0000,
+0 0 30px #660000;
+}
+
+/* doctor */
+
+.role-doctor .role-title{
+color:#2e8dcc;
+text-shadow:
+0 0 10px #2e9fcc,
+0 0 20px #2e9fcc,
+0 0 30px #224a94;
+}
+
+/* detective */
+
+.role-detective .role-title{
+color:#e4c200;
+text-shadow:
+0 0 10px #c4a600,
+0 0 20px #c4a600,
+0 0 30px #7e6e15;
+}
+
+/* jester */
+
+.role-jester .role-title{
+color:#bb006d;
+text-shadow:
+0 0 10px #990059,
+0 0 20px #990059,
+0 0 30px #66003b;
+}
