@@ -13,6 +13,16 @@ showNightTurn()
 
 }
 
+const roleColors = {
+
+mafia: "#e74c3c",
+doctor: "#2ecc71",
+sheriff: "#3498db",
+villager: "#f1c40f",
+jester: "#9b59b6"
+
+}
+
 function showNightTurn(){
 
 let player = state.players[state.nightTurnIndex]
@@ -157,6 +167,7 @@ render(`
 
 <p>The mafia have taken control of the town.</p>
 
+<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
 <button onclick="location.reload()">Restart Game</button>
 
 </div>
@@ -178,6 +189,7 @@ render(`
 
 <p>All mafia members have been eliminated.</p>
 
+<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
 <button onclick="location.reload()">Restart Game</button>
 
 </div>
@@ -365,6 +377,7 @@ render(`
 
 <p>${player.name} tricked the town into voting them out!</p>
 
+<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
 <button onclick="location.reload()">Restart Game</button>
 
 </div>
@@ -401,6 +414,36 @@ ${resultsHTML}
 }
 
 }
+
+export function showRoleRevealEnd(){
+
+let rolesHTML = ""
+
+state.players.forEach(p => {
+
+rolesHTML += `<p><b>${p.name}</b> — ${p.role.toUpperCase()}</p>`
+
+})
+
+render(`
+
+<div class="card">
+
+<h2>All Roles</h2>
+
+${rolesHTML}
+
+<br>
+
+<button onclick="location.reload()">Restart Game</button>
+
+</div>
+
+`)
+
+}
+
+window.showRoleRevealEnd = showRoleRevealEnd
 
 export function nextNight(){
 
