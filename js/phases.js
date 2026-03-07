@@ -85,7 +85,7 @@ render(`
 
 <div class="card">
 
-<h2>You are ${player.role}</h2>
+<h2>You are a<span class="role-name role-${player.role.toLowerCase()}">${player.role.toUpperCase()}</span></h2>
 <p>No night action</p>
 
 <button onclick="window.nextNightTurn()">Hide</button>
