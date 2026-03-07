@@ -1,21 +1,17 @@
 export function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
 
-for (let i = array.length - 1; i > 0; i--) {
+        const jIndex = Math.floor(Math.random() * (i + 1));
 
-const j = Math.floor(Math.random() * (i + 1));
+        const temp = array[i];
+        array[i] = array[jIndex];
+        array[jIndex] = temp;
 
-const temp = array[i];
-array[i] = array[j];
-array[j] = temp;
+    }
 
-}
-
-return array;
-
+    return array;
 }
 
 export function mafiaCount(playerCount) {
-
-return Math.max(1, Math.floor(playerCount / 5));
-
+    return Math.max(1, Math.floor(playerCount / 5));
 }
