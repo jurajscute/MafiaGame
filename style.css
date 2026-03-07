@@ -298,7 +298,7 @@ display:flex;
 align-items:center;
 gap:10px;
 
-background:#2a2a3d;
+background:#2e241f;
 padding:10px 12px;
 margin:8px 0;
 
@@ -316,7 +316,7 @@ font-size:18px;
 .player-row input{
 flex:1;
 
-background:#1f1f2e;
+background:#201a17;
 color:white;
 
 border:none;
@@ -333,6 +333,10 @@ font-size:15px;
 width:34px;
 height:34px;
 
+display:flex;
+align-items:center;
+justify-content:center;
+
 border:none;
 border-radius:8px;
 
@@ -342,8 +346,7 @@ color:white;
 font-size:16px;
 cursor:pointer;
 
-}
+padding:0;
+line-height:1;
 
-.player-row button:hover{
-background:#c0392b;
 }
