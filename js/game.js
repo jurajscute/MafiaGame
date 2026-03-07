@@ -22,6 +22,50 @@ jester: "#bb006d"
 
 }
 
+function showInfo(){
+
+let modal = document.getElementById("infoModal")
+
+modal.innerHTML = `
+
+<div class="modal-content">
+
+<h2>Game Rules</h2>
+
+<h3 style="color:${roleColors.mafia}">Mafia</h3>
+<p>Chooses one player to eliminate each night.</p>
+
+<h3 style="color:${roleColors.doctor}">Doctor</h3>
+<p>Can protect one player from elimination.</p>
+
+<h3 style="color:${roleColors.sheriff}">Sheriff</h3>
+<p>Investigates a player to see if they are mafia.</p>
+
+<h3 style="color:${roleColors.jester}">Jester</h3>
+<p>Wins if they get voted out during the day.</p>
+
+<h3 style="color:${roleColors.villager}">Villager</h3>
+<p>No special power. Help find the mafia.</p>
+
+<button onclick="closeInfo()">Close</button>
+
+</div>
+
+`
+
+modal.classList.remove("hidden")
+
+}
+
+function closeInfo(){
+document.getElementById("infoModal").classList.add("hidden")
+}
+
+window.showInfo = showInfo
+window.closeInfo = closeInfo
+
+window.showInfo = showInfo
+
 function savePlayers(){
 localStorage.setItem("mafiaPlayers", JSON.stringify(state.players))
 }
