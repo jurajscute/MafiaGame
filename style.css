@@ -1,11 +1,9 @@
-
 body{
 margin:0;
 font-family:Arial, Helvetica, sans-serif;
-background:#15130f;
+background:linear-gradient(135deg,#2f221e,#1d1402);
 color:white;
 
-/* center everything */
 display:flex;
 justify-content:center;
 align-items:center;
@@ -13,45 +11,111 @@ align-items:center;
 height:100vh;
 }
 
+/* main container */
+
 #app{
 width:100%;
-max-width:500px;
+max-width:420px;
+padding:20px;
 }
+
+/* card layout */
 
 .card{
-background:#24201a;
-padding:30px;
-border-radius:12px;
+background:#332d23;
+padding:35px 25px;
+border-radius:16px;
+
 text-align:center;
 
-box-shadow:0 10px 25px rgba(0,0,0,0.4);
+box-shadow:0 15px 35px rgba(0,0,0,0.5);
+
+animation:fadeIn 0.35s ease;
 }
 
+/* headings */
+
+h1{
+font-size:36px;
+margin-bottom:10px;
+}
+
+h2{
+margin-bottom:20px;
+}
+
+/* buttons */
+
 button{
-margin:10px;
-padding:12px 20px;
+display:block;
+width:100%;
+
+margin:12px 0;
+padding:14px;
+
+font-size:18px;
+font-weight:bold;
+
 border:none;
-border-radius:8px;
-background:#856a41;
+border-radius:10px;
+
+background:linear-gradient(135deg,#d18f00,#ffaa49);
 color:white;
-font-size:16px;
+
 cursor:pointer;
+
+transition:all 0.2s ease;
 }
 
 button:hover{
-background:#967443;
+transform:scale(1.05);
+box-shadow:0 5px 15px rgba(0,0,0,0.4);
 }
+
+button:active{
+transform:scale(0.97);
+}
+
+/* inputs */
 
 input{
-padding:10px;
-border-radius:6px;
+width:100%;
+padding:12px;
+margin:10px 0;
+
+border-radius:8px;
 border:none;
-margin:10px;
+
+font-size:16px;
 }
 
-@keyframes fade{
+/* player list */
 
-from{opacity:0; transform:translateY(10px)}
-to{opacity:1; transform:translateY(0)}
+ul{
+list-style:none;
+padding:0;
+margin-top:10px;
+}
+
+li{
+background:#332d23;
+padding:8px;
+margin:5px 0;
+border-radius:6px;
+}
+
+/* animation */
+
+@keyframes fadeIn{
+
+from{
+opacity:0;
+transform:translateY(10px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
 
 }
