@@ -299,6 +299,7 @@ let eliminated = null
 let tie = false
 let resultsHTML = ""
 
+// Build vote results
 for(let name in state.votes){
 
 let count = state.votes[name]
@@ -319,7 +320,7 @@ tie = true
 
 }
 
-// If tie, nobody dies
+// Handle tie
 if(tie){
 
 render(`
@@ -344,7 +345,7 @@ return
 
 }
 
-// Otherwise eliminate player
+// Eliminate player
 if(eliminated){
 
 let player = state.players.find(p => p.name === eliminated)
@@ -376,7 +377,7 @@ return
 
 }
 
-// Check mafia/village win
+// Check village / mafia win
 if(checkWin()) return
 
 render(`
@@ -390,50 +391,6 @@ ${resultsHTML}
 <hr>
 
 <h2>${eliminated} was voted out</h2>
-
-<button onclick="window.nextNight()">Next Night</button>
-
-</div>
-
-`)
-
-}
-
-}
-
-if(checkWin()) return
-
-render(`
-
-<div class="card">
-
-<h2>Voting Results</h2>
-
-${resultsHTML}
-
-<hr>
-
-<h2>${eliminated} was voted out</h2>
-
-<button onclick="window.nextNight()">Next Night</button>
-
-</div>
-
-`)
-
-}else{
-
-render(`
-
-<div class="card">
-
-<h2>Voting Results</h2>
-
-${resultsHTML}
-
-<hr>
-
-<h2>No one was eliminated</h2>
 
 <button onclick="window.nextNight()">Next Night</button>
 
