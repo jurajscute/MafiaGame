@@ -130,37 +130,19 @@ showRoleReveal()
 
 }
 
-export function showRoleRevealEnd(){
+let revealIndex = 0
 
-let rolesHTML = ""
+function showRoleReveal(){
 
-state.players.forEach(p => {
-
-let color = roleColors[p.role] || "white"
-
-rolesHTML += `
-
-<p style="color:${color}; font-weight:bold; font-size:20px">
-
-${p.name} — ${p.role.toUpperCase()}
-
-</p>
-
-`
-
-})
+let player = state.players[revealIndex]
 
 render(`
 
 <div class="card">
 
-<h2>All Roles</h2>
+<h2>Pass device to ${player.name}</h2>
 
-${rolesHTML}
-
-<br>
-
-<button onclick="location.reload()">Restart Game</button>
+<button onclick="window.revealRole()">Reveal Role</button>
 
 </div>
 
@@ -168,11 +150,9 @@ ${rolesHTML}
 
 }
 
-window.showRoleRevealEnd = showRoleRevealEnd
-
 function revealRole(){
 
-let player=state.players[revealIndex]
+let player = state.players[revealIndex]
 
 render(`
 
@@ -194,7 +174,7 @@ function nextPlayer(){
 
 revealIndex++
 
-if(revealIndex>=state.players.length){
+if(revealIndex >= state.players.length){
 
 render(`
 
