@@ -12,17 +12,21 @@ return `<button onclick="${action}">${text}</button>`
 
 }
 
-export function passPhone(playerName, nextAction){
+export function passPhone(name, action){
 
 render(`
 
 <div class="card">
 
-<h2>Pass the phone to</h2>
+<div class="pass-screen">
 
-<h1>${playerName}</h1>
+<p>Pass the phone to</p>
 
-<button onclick="${nextAction}">Ready</button>
+<h2>${name}</h2>
+
+<button onclick="${action}">I'm ready</button>
+
+</div>
 
 </div>
 

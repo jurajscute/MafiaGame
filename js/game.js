@@ -162,7 +162,6 @@ render(`
 function revealRole(){
 
 let player = state.players[revealIndex]
-
 let color = roleColors[player.role] || "white"
 
 render(`
@@ -171,17 +170,34 @@ render(`
 
 <h2>Your Role</h2>
 
-<h1 style="color:${color};">
+<div class="role-card" id="roleCard">
 
+<div class="role-inner">
+
+<div class="role-front">
+Tap to reveal
+</div>
+
+<div class="role-back" style="color:${color}">
 ${player.role.toUpperCase()}
+</div>
 
-</h1>
+</div>
 
+</div>
+
+<button onclick="flipRole()">Reveal</button>
 <button onclick="window.nextPlayer()">Hide</button>
 
 </div>
 
 `)
+
+}
+
+window.flipRole = function(){
+
+document.getElementById("roleCard").classList.add("revealed")
 
 }
 
