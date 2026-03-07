@@ -1,19 +1,19 @@
-export function shuffle(array){
+export function shuffle(array) {
 
-for(let i=array.length-1;i>0;i--){
+for (let i = array.length - 1; i > 0; i--) {
 
-const j=Math.floor(Math.random()*(i+1))
+let j = Math.floor(Math.random() * (i + 1));
 
-[array[i],array[j]]=[array[j],array[i]]
-
-}
-
-return array
+[array[i], array[j]] = [array[j], array[i]];
 
 }
 
-export function mafiaCount(playerCount){
+return array;
 
-return Math.max(1,Math.floor(playerCount/5))
+}
+
+export function mafiaCount(playerCount) {
+
+return Math.max(1, Math.floor(playerCount / 5));
 
 }
