@@ -90,7 +90,14 @@ render(`
 
 <h2>
 You are a
-<span style="color:${color}; font-weight:bold;">
+<span style="
+color:${color};
+font-weight:bold;
+text-shadow:
+0 0 10px ${color},
+0 0 20px ${color},
+0 0 30px ${color};
+">
 ${player.role.toUpperCase()}
 </span>
 </h2>
