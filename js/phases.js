@@ -201,7 +201,7 @@ export function showVoteOptions(){
 
 let alivePlayers = state.players.filter(p => p.alive)
 
-let buttons=""
+let buttons = ""
 
 alivePlayers.forEach(p => {
 
@@ -220,5 +220,73 @@ ${buttons}
 </div>
 
 `)
+
+}
+
+export function castVote(targetName){
+
+if(!state.votes[targetName]){
+
+state.votes[targetName] = 0
+
+}
+
+state.votes[targetName]++
+
+state.voteTurnIndex++
+
+nextVoteTurn()
+
+}
+
+function resolveVotes(){
+
+let highest = 0
+let eliminated = null
+
+for(let name in state.votes){
+
+if(state.votes[name] > highest){
+
+highest = state.votes[name]
+eliminated = name
+
+}
+
+}
+
+if(eliminated){
+
+let player = state.players.find(p => p.name === eliminated)
+
+player.alive = false
+
+render(`
+
+<div class="card">
+
+<h2>${eliminated} was voted out</h2>
+
+<button onclick="window.nextNight()">Next Night</button>
+
+</div>
+
+`)
+
+}else{
+
+render(`
+
+<div class="card">
+
+<h2>No one was eliminated</h2>
+
+<button onclick="window.nextNight()">Next Night</button>
+
+</div>
+
+`)
+
+}
 
 }

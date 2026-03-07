@@ -216,5 +216,4 @@ window.vote=vote
 window.nextNight=nextNightTurn
 window.showVoteOptions = showVoteOptions
 window.castVote = castVote
-
 showHome()
