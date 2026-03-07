@@ -15,8 +15,6 @@ nextNightTurn()
 
 export function nextNightTurn(){
 
-state.nightTurnIndex++
-
 let player = state.players[state.nightTurnIndex]
 
 if(!player){
@@ -28,6 +26,7 @@ return
 
 if(!player.alive){
 
+state.nightTurnIndex++
 nextNightTurn()
 return
 
@@ -126,7 +125,8 @@ return
 
 }
 
-window.nextNightTurn()
+state.nightTurnIndex++
+nextNightTurn()
 
 }
 
@@ -299,3 +299,11 @@ ${resultsHTML}
 }
 
 }
+
+export function nextNight(){
+
+startNight()
+
+}
+
+window.nextNight = nextNight
