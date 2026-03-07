@@ -4,6 +4,15 @@ import {roles} from "./roles.js"
 
 export function startNight(){
 
+    import { setNight } from "./game.js"
+
+export function startNight(){
+
+setNight()
+
+// rest of night code
+}
+
 state.phase="night"
 state.nightTurnIndex=0
 
@@ -205,6 +214,15 @@ return false
 }
 
 function resolveNight(){
+
+    import { setDay } from "./game.js"
+
+export function startDay(){
+
+setDay()
+
+// voting logic
+}
 
 let kill=state.nightActions.kill
 let save=state.nightActions.save

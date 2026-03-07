@@ -24,6 +24,20 @@ jester: "#bb006d"
 
 let revealIndex=0
 
+export function setDay(){
+
+document.body.classList.remove("night")
+document.body.classList.add("day")
+
+}
+
+export function setNight(){
+
+document.body.classList.remove("day")
+document.body.classList.add("night")
+
+}
+
 function showHome(){
 
 render(`
