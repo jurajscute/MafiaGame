@@ -39,9 +39,38 @@ passPhone(player.name, "window.revealNightRole()")
 
 }
 
+export function revealNightRole(){
+
+let player = state.players[state.nightTurnIndex]
+
+let role = roles[player.role]
+
+if(!role.nightAction){
+
+render(`
+
+<div class="card">
+
+<h2>You are ${player.role}</h2>
+<p>No night action</p>
+
+<button onclick="window.nextNightTurn()">Hide</button>
+
+</div>
+
+`)
+
+return
+
+}
+
+showNightAction(player, role)
+
+}
+
 function showNightAction(player, role){
 
-let targets=""
+let targets = ""
 
 state.players
 .filter(p => p.alive && p.name !== player.name)
@@ -56,7 +85,6 @@ render(`
 <div class="card">
 
 <h2>${player.role.toUpperCase()} ACTION</h2>
-
 <p>Select a target</p>
 
 ${targets}
@@ -66,6 +94,7 @@ ${targets}
 `)
 
 }
+
 
 export function performNightAction(targetName){
 
