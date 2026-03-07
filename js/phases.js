@@ -9,11 +9,11 @@ state.nightTurnIndex=0
 
 resetNightActions()
 
-nextNightTurn()
+showNightTurn()
 
 }
 
-export function nextNightTurn(){
+function showNightTurn(){
 
 let player = state.players[state.nightTurnIndex]
 
@@ -26,13 +26,26 @@ return
 
 if(!player.alive){
 
-state.nightTurnIndex++
-nextNightTurn()
+advanceNightTurn()
 return
 
 }
 
 passPhone(player.name,"window.revealNightRole()")
+
+}
+
+function advanceNightTurn(){
+
+state.nightTurnIndex++
+
+showNightTurn()
+
+}
+
+export function nextNightTurn(){
+
+advanceNightTurn()
 
 }
 
@@ -71,9 +84,7 @@ let targets=""
 state.players
 .filter(p=>p.alive && p.name!==player.name)
 .forEach(p=>{
-
 targets+=`<button onclick="window.performNightAction('${p.name}')">${p.name}</button>`
-
 })
 
 render(`
@@ -102,7 +113,6 @@ state.nightActions[role.nightAction]=targetName
 if(role.nightAction==="investigate"){
 
 let target = state.players.find(p=>p.name===targetName)
-
 let result = target.role==="mafia" ? "MAFIA" : "NOT MAFIA"
 
 render(`
@@ -125,8 +135,7 @@ return
 
 }
 
-state.nightTurnIndex++
-nextNightTurn()
+advanceNightTurn()
 
 }
 
@@ -198,9 +207,7 @@ let alivePlayers = state.players.filter(p=>p.alive)
 let buttons=""
 
 alivePlayers.forEach(p=>{
-
 buttons+=`<button onclick="window.castVote('${p.name}')">${p.name}</button>`
-
 })
 
 render(`
@@ -244,10 +251,8 @@ let count = state.votes[name]
 resultsHTML += `<p>${name} — ${count} vote${count>1?"s":""}</p>`
 
 if(count > highest){
-
 highest = count
 eliminated = name
-
 }
 
 }
