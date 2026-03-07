@@ -102,9 +102,11 @@ showNightAction(player,role)
 
 }
 
-function showNightAction(player, role){
+function showNightAction(player,role){
 
 let targets=""
+
+let roleClass = role.toLowerCase()
 
 state.players
 .filter(p=>p.alive && p.name!==player.name)
@@ -114,7 +116,7 @@ targets+=`<button onclick="window.performNightAction('${p.name}')">${p.name}</bu
 
 render(`
 
-<div class="card role-${role}">
+<div class="card role-${roleClass}">
 
 <h2 class="role-title">${player.role.toUpperCase()} ACTION</h2>
 
