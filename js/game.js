@@ -78,6 +78,55 @@ updatePlayerList()
 
 }
 
+function renderPlayerSetup(){
+
+let list=""
+
+state.players.forEach((p,i)=>{
+
+list += `
+
+<li>
+
+<input 
+value="${p.name}"
+oninput="renamePlayer(${i}, this.value)"
+>
+
+<button onclick="removePlayer(${i})">❌</button>
+
+</li>
+
+`
+
+})
+
+render(`
+
+<div class="card">
+
+<h2>Add Players</h2>
+
+<ul>
+${list}
+</ul>
+
+<button onclick="addPlayer()">Add Player</button>
+
+<button onclick="startGame()">Start Game</button>
+
+</div>
+
+`)
+
+}
+
+window.renamePlayer = function(index,newName){
+
+state.players[index].name = newName
+
+}
+
 function addPlayer(){
 
 const input=document.getElementById("name")
@@ -241,7 +290,18 @@ showRoleReveal()
 }
 
 window.showSetup=showSetup
-window.addPlayer=addPlayer
+window.addPlayer = function(){
+
+let number = state.players.length + 1
+
+state.players.push({
+name: `Player ${number}`,
+alive: true
+})
+
+renderPlayerSetup()
+
+}
 window.startGame=startGame
 window.revealRole=revealRole
 window.nextPlayer=nextPlayer
