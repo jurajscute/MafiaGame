@@ -212,7 +212,6 @@ window.startNight=startNight
 window.revealNightRole = revealNightRole
 window.performNightAction = performNightAction
 window.startVoting=startVoting
-window.vote=vote
 window.nextNight=nextNightTurn
 window.showVoteOptions = showVoteOptions
 window.castVote = castVote
