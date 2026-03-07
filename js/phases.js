@@ -104,37 +104,21 @@ showNightAction(player,role)
 
 function showNightAction(player){
 
-let roleKey = player.role.toLowerCase()
-let theme = roleThemes[roleKey]
-
 let targets=""
+
+let roleClass = player.role.toLowerCase()
 
 state.players
 .filter(p=>p.alive && p.name!==player.name)
 .forEach(p=>{
-targets += `
-<button 
-style="background:${theme.button}" 
-onclick="window.performNightAction('${p.name}')">
-${p.name}
-</button>`
+targets+=`<button onclick="window.performNightAction('${p.name}')">${p.name}</button>`
 })
 
 render(`
 
-<div class="card" style="background:${theme.background}">
+<div class="card role-${roleClass}">
 
-<h2 class="role-title"
-style="
-color:${theme.color};
-text-shadow:
-0 0 10px ${theme.color},
-0 0 20px ${theme.color};
-">
-
-${player.role.toUpperCase()} ACTION
-
-</h2>
+<h2 class="role-title">${player.role.toUpperCase()} ACTION</h2>
 
 <p>Select a target</p>
 
@@ -143,6 +127,7 @@ ${targets}
 </div>
 
 `)
+
 }
 
 export function performNightAction(targetName){
