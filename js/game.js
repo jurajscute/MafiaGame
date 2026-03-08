@@ -169,6 +169,8 @@ localStorage.setItem(
 JSON.stringify(state.roleWeights)
 )
 
+showSettings()
+
 }
 
 window.showSettings = showSettings
@@ -181,6 +183,8 @@ localStorage.setItem(
 "mafiaRoles",
 JSON.stringify(state.rolesEnabled)
 )
+
+showSettings()
 
 }
 
