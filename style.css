@@ -784,22 +784,31 @@ gap:10px;
 padding:6px 4px 14px 4px;
 margin-bottom:6px;
 
+max-height:0;
+opacity:0;
+transform:translateY(-8px);
+
 overflow:hidden;
 
-animation:sliderReveal 0.35s ease;
+transition:
+max-height 0.35s ease,
+opacity 0.25s ease,
+transform 0.35s ease;
 
 }
 
-@keyframes sliderReveal{
+.role-weight.show{
 
-0%{
-opacity:0;
-transform:translateY(-10px) scaleY(0.8);
-}
-
-100%{
+max-height:60px;
 opacity:1;
-transform:translateY(0) scaleY(1);
+transform:translateY(0);
+
 }
 
+.role-toggle{
+transition:transform 0.2s ease;
+}
+
+.role-toggle:active{
+transform:scale(0.98);
 }

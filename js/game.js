@@ -167,8 +167,21 @@ modal.classList.remove("hidden")
 
 setTimeout(()=>{
 
+document.querySelectorAll('.role-weight').forEach(el => {
+
+requestAnimationFrame(()=>{
+el.classList.add("show")
+})
+
+})
+
 document.querySelectorAll('.role-weight input[type="range"]')
-.forEach(updateSlider)
+.forEach(slider => {
+
+let role = slider.id.replace("Slider","")
+updateSlider(slider,role)
+
+})
 
 },0)
 
