@@ -24,7 +24,7 @@ jester: "#bb006d"
 
 function showInfo(){
 
-let modal = document.getElementById("infoModal")
+const modal = document.getElementById("infoModal");
 
 modal.innerHTML = `
 
@@ -52,8 +52,7 @@ modal.innerHTML = `
 </div>
 
 `
-
-modal.classList.remove("hidden")
+modal.classList.add("show");
 
 }
 
@@ -113,6 +112,8 @@ function showSettings() {
     let role = slider.id.replace("Slider", "");
     updateSlider(slider, role);
   });
+
+  modal.classList.add("show");
 }
 
 window.updateSlider = function(slider,role){
@@ -182,7 +183,12 @@ slider.classList.remove("show")
 }
 
 function closeInfo(){
+const modal = document.getElementById("infoModal");
 document.getElementById("infoModal").classList.add("hidden")
+modal.classList.remove("show");
+  setTimeout(() => {
+    modal.classList.add("hidden");
+  }, 300);
 }
 
 window.showInfo = showInfo
