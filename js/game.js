@@ -173,22 +173,25 @@ document.querySelectorAll('.role-weight input[type="range"]')
 window.updateSlider = function(slider,role){
 
 let value = slider.value
-let percent = value + "%"
+let percent = (value/slider.max)*100 + "%"
 
-/* get role color */
+/* get colors from CSS */
 
-let color = roleColors[role] || "#2ecc71"
+let style = getComputedStyle(slider)
+let start = style.getPropertyValue("--start")
+let end = style.getPropertyValue("--end")
 
-/* update slider fill */
-
-slider.style.background =
-`linear-gradient(to right,
-${color} 0%,
-${color} ${percent},
+slider.style.background = `
+linear-gradient(
+90deg,
+${start} 0%,
+${end} ${percent},
 #444 ${percent},
-#444 100%)`
+#444 100%
+)
+`
 
-/* update percent label */
+/* update percentage text */
 
 let label = slider.nextElementSibling
 if(label){

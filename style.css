@@ -634,22 +634,19 @@ font-size:14px;
 opacity:0.9;
 }
 
-/* doctor */
-
 .doctor-slider input[type="range"]{
-background:linear-gradient(90deg,#2e8dcc,#1c4c6e);
+--start:#2e8dcc;
+--end:#1c4c6e;
 }
-
-/* sheriff */
 
 .sheriff-slider input[type="range"]{
-background:linear-gradient(90deg,#e4c200,#7e6e15);
+--start:#e4c200;
+--end:#7e6e15;
 }
 
-/* jester */
-
 .jester-slider input[type="range"]{
-background:linear-gradient(90deg,#bb006d,#66003b);
+--start:#bb006d;
+--end:#66003b;
 }
 
 /* modal background */
