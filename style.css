@@ -455,6 +455,18 @@ background:#3a3a55;
 transform:scale(1.08);
 }
 
+.toggle{
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+padding:10px;
+margin:8px 0;
+
+background:rgba(255,255,255,0.05);
+border-radius:6px;
+}
+
 /* modal background */
 
 .modal{

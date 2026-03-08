@@ -57,6 +57,62 @@ modal.classList.remove("hidden")
 
 }
 
+function showSettings(){
+
+let modal = document.getElementById("infoModal")
+
+modal.innerHTML = `
+
+<div class="modal-content">
+
+<h2>Game Settings</h2>
+
+<label class="toggle">
+<input type="checkbox"
+${state.rolesEnabled.doctor ? "checked" : ""}
+onchange="toggleRole('doctor', this.checked)">
+Doctor
+</label>
+
+<label class="toggle">
+<input type="checkbox"
+${state.rolesEnabled.sheriff ? "checked" : ""}
+onchange="toggleRole('sheriff', this.checked)">
+Sheriff
+</label>
+
+<label class="toggle">
+<input type="checkbox"
+${state.rolesEnabled.jester ? "checked" : ""}
+onchange="toggleRole('jester', this.checked)">
+Jester
+</label>
+
+<br>
+
+<button onclick="closeInfo()">Close</button>
+
+</div>
+
+`
+
+modal.classList.remove("hidden")
+
+}
+
+window.showSettings = showSettings
+
+window.toggleRole = function(role, enabled){
+
+state.rolesEnabled[role] = enabled
+
+localStorage.setItem(
+"mafiaRoles",
+JSON.stringify(state.rolesEnabled)
+)
+
+}
+
 function closeInfo(){
 document.getElementById("infoModal").classList.add("hidden")
 }
@@ -82,6 +138,12 @@ state.players = JSON.parse(saved)
 
 loadPlayers()
 
+let savedRoles = localStorage.getItem("mafiaRoles")
+
+if(savedRoles){
+state.rolesEnabled = JSON.parse(savedRoles)
+}
+
 let revealIndex=0
 
 export function setDay(){
@@ -104,7 +166,7 @@ render(`
 
 <div class="card">
 
-<h1>Mafia</h1>
+<h1>Juraj's Mafia</h1>
 
 <button onclick="window.showSetup()">Start Game</button>
 
