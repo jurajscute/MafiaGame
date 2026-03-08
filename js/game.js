@@ -58,11 +58,8 @@ modal.classList.add("show");
 
 function showSettings() {
   const modal = document.getElementById("infoModal");
+  const rolesList = ["doctor", "sheriff", "jester"];
 
-  // List of roles to display in settings
-  const rolesList = Object.keys(roleColors); // automatically gets all roles in roleColors
-
-  // Build the modal HTML dynamically
   let content = `
     <div class="modal-content">
       <h2 class="settings-title">Game Settings</h2>
@@ -83,7 +80,7 @@ function showSettings() {
         </label>
       </div>
 
-      <div id="${role}SliderContainer" class="role-weight">
+      <div id="${role}SliderContainer" class="role-weight ${enabled ? "" : ""}">
         <input type="range"
           id="${role}Slider"
           min="0"
@@ -97,27 +94,24 @@ function showSettings() {
 
   content += `<button onclick="closeInfo()">Close</button></div>`;
 
-  // Render modal and trigger pop-in animation
   modal.innerHTML = content;
   modal.classList.remove("hidden");
-  requestAnimationFrame(() => {
-    modal.classList.add("show");
-  });
+  modal.classList.add("show");
 
-  // Animate sliders that are enabled with a staggered fade + slide
-  const sliders = document.querySelectorAll('.role-weight');
-  sliders.forEach((el, index) => {
-    const role = el.id.replace("SliderContainer", "");
-    if (state.rolesEnabled[role]) {
-      setTimeout(() => {
-        el.classList.add("show");
-      }, index * 100); // stagger each slider by 100ms
-    }
-  });
+  // Animate only the sliders that are enabled, staggered
+ const sliders = document.querySelectorAll('.role-weight');
+sliders.forEach((el, index) => {
+  const role = el.id.replace("SliderContainer", "");
+  if (state.rolesEnabled[role]) {
+    setTimeout(() => {
+      el.classList.add("show");
+    }, index * 100); // 100ms delay per slider
+  }
+});
 
-  // Initialize slider gradients
+  // Initialize slider backgrounds
   document.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
-    const role = slider.id.replace("Slider", "");
+    let role = slider.id.replace("Slider", "");
     updateSlider(slider, role);
   });
 }
