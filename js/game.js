@@ -119,7 +119,7 @@ id="sheriffSlider"
 min="0"
 max="100"
 value="${state.roleWeights.sheriff}"
-oninput="updateSlider(this,'doctor'); setRoleWeight('doctor', this.value)">
+oninput="updateSlider(this,'sheriff'); setRoleWeight('sheriff', this.value)">
 
 <span>${state.roleWeights.sheriff}%</span>
 
