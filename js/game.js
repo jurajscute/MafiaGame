@@ -82,7 +82,7 @@ onchange="toggleRole('doctor', this.checked)">
 
 ${state.rolesEnabled.doctor ? `
 
-<div class="role-weight">
+<div class="role-weight doctor-slider">
 
 <input type="range"
 min="0"
@@ -111,7 +111,7 @@ onchange="toggleRole('sheriff', this.checked)">
 
 ${state.rolesEnabled.sheriff ? `
 
-<div class="role-weight">
+<div class="role-weight sheriff-slider">
 
 <input type="range"
 min="0"
@@ -140,7 +140,7 @@ onchange="toggleRole('jester', this.checked)">
 
 ${state.rolesEnabled.jester ? `
 
-<div class="role-weight">
+<div class="role-weight jester-slider">
 
 <input type="range"
 min="0"

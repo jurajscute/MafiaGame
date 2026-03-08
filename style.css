@@ -575,6 +575,83 @@ font-size:14px;
 opacity:0.8;
 }
 
+/* slider container */
+
+.role-weight{
+display:flex;
+align-items:center;
+gap:10px;
+
+padding:6px 4px 14px 4px;
+margin-bottom:6px;
+}
+
+/* main slider */
+
+.role-weight input[type="range"]{
+
+-webkit-appearance:none;
+appearance:none;
+
+flex:1;
+height:8px;
+
+border-radius:10px;
+background:#444;
+
+outline:none;
+}
+
+/* slider knob */
+
+.role-weight input[type="range"]::-webkit-slider-thumb{
+
+-webkit-appearance:none;
+
+width:18px;
+height:18px;
+
+border-radius:50%;
+
+background:white;
+cursor:pointer;
+
+box-shadow:0 0 6px rgba(0,0,0,0.6);
+
+transition:transform 0.15s;
+}
+
+.role-weight input[type="range"]::-webkit-slider-thumb:hover{
+transform:scale(1.2);
+}
+
+/* percent text */
+
+.role-weight span{
+width:40px;
+text-align:right;
+font-size:14px;
+opacity:0.9;
+}
+
+/* doctor */
+
+.doctor-slider input[type="range"]{
+background:linear-gradient(90deg,#2e8dcc,#1c4c6e);
+}
+
+/* sheriff */
+
+.sheriff-slider input[type="range"]{
+background:linear-gradient(90deg,#e4c200,#7e6e15);
+}
+
+/* jester */
+
+.jester-slider input[type="range"]{
+background:linear-gradient(90deg,#bb006d,#66003b);
+}
+
 /* modal background */
 
 .modal{
