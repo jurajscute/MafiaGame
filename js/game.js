@@ -107,8 +107,8 @@ onchange="toggleRole('sheriff', this.checked)">
 
 </div>
 
-<div id="doctorSliderContainer"
-class="role-weight doctor-slider ${state.rolesEnabled.doctor ? "show" : ""}">
+<div id="sheriffSliderContainer"
+class="role-weight sheriff-slider ${state.rolesEnabled.sheriff ? "show" : ""}">
 
 <input type="range"
 id="sheriffSlider"
