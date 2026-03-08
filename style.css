@@ -455,6 +455,10 @@ body.night .settings-btn{
 box-shadow:0 0 10px rgba(255,255,255,0.4);
 }
 
+body.night .info-btn{
+box-shadow:0 0 10px rgba(255,255,255,0.4);
+}
+
 .top-ui{
 position:fixed;
 top:20px;
