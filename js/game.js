@@ -157,6 +157,10 @@ oninput="updateSlider(this,'jester'); setRoleWeight('jester', this.value)">
 
 ` : ""}
 
+<button onclick="closeInfo()">Close</button>
+
+</div>
+
 `
 
 modal.classList.remove("hidden")
@@ -371,6 +375,20 @@ renderPlayerSetup()
 
 }
 
+function maybeAddRole(role){
+
+if(!state.rolesEnabled[role]) return
+
+let weight = state.roleWeights[role] || 0
+
+let roll = Math.random()*100
+
+if(roll < weight){
+rolesList.push(role)
+}
+
+}
+
 function assignRoles(){
 
 let players=state.players
@@ -380,9 +398,9 @@ let mafia=mafiaCount(players.length)
 
 for(let i=0;i<mafia;i++) pool.push("mafia")
 
-if(state.rolesEnabled.doctor) pool.push("doctor")
-if(state.rolesEnabled.sheriff) pool.push("sheriff")
-if(state.rolesEnabled.jester) pool.push("jester")
+maybeAddRole("doctor")
+maybeAddRole("sheriff")
+maybeAddRole("jester")
 
 while(pool.length<players.length){
 pool.push("villager")
