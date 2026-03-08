@@ -375,16 +375,15 @@ renderPlayerSetup()
 
 }
 
-function maybeAddRole(role){
+function maybeAddRole(role, pool){
 
 if(!state.rolesEnabled[role]) return
 
 let weight = state.roleWeights[role] || 0
-
 let roll = Math.random()*100
 
 if(roll < weight){
-rolesList.push(role)
+pool.push(role)
 }
 
 }
@@ -398,9 +397,9 @@ let mafia=mafiaCount(players.length)
 
 for(let i=0;i<mafia;i++) pool.push("mafia")
 
-maybeAddRole("doctor")
-maybeAddRole("sheriff")
-maybeAddRole("jester")
+maybeAddRole("doctor", pool)
+maybeAddRole("sheriff", pool)
+maybeAddRole("jester", pool)
 
 while(pool.length<players.length){
 pool.push("villager")
