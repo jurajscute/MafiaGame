@@ -653,54 +653,48 @@ opacity:0.9;
 
 /* modal background */
 
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
+.modal{
 
-  width: 100%;
-  height: 100%;
+position:fixed;
+top:0;
+left:0;
 
-  background: rgba(0,0,0,0.7);
+width:100%;
+height:100%;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+background:rgba(0,0,0,0.7);
 
-  opacity: 0;
-  pointer-events: none;
+display:flex;
+align-items:center;
+justify-content:center;
 
-  transition: opacity 0.25s ease;
-  z-index: 1000;
+z-index:1000;
+
 }
 
-.modal-content {
-  background: #1f1f2e;
-  color: white;
+/* hide modal */
 
-  padding: 25px;
-  border-radius: 14px;
-
-  width: 90%;
-  max-width: 400px;
-
-  text-align: center;
-
-  transform: scale(0.9);
-  opacity: 0;
-
-  transition: transform 0.3s ease, opacity 0.3s ease;
+.hidden{
+display:none;
 }
 
-/* Show modal */
-.modal.show {
-  opacity: 1;
-  pointer-events: auto;
-}
+/* modal card */
 
-.modal.show .modal-content {
-  transform: scale(1);
-  opacity: 1;
+.modal-content{
+
+background:#1f1f2e;
+color:white;
+
+padding:25px;
+border-radius:14px;
+
+width:90%;
+max-width:400px;
+
+text-align:center;
+
+box-shadow:0 15px 40px rgba(0,0,0,0.5);
+
 }
 
 /* close button */
@@ -786,20 +780,28 @@ letter-spacing:1px;
   align-items: center;
   gap: 10px;
 
-  height: 46px;
-  margin-bottom: 6px;
-  padding: 6px 4px 14px 4px;
-
+  height: 0;                 /* start collapsed */
+  margin-bottom: 0;          /* collapse margin too */
+  padding: 0 4px 0 4px;      /* collapse padding */
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(-8px) scaleY(0.9);
+
   pointer-events: none;
 
-  transition: opacity 0.35s ease, transform 0.35s ease;
+  transition:
+    opacity 0.25s ease,
+    transform 0.35s ease,
+    height 0.35s ease,
+    margin-bottom 0.35s ease,
+    padding 0.35s ease;
 }
 
 .role-weight.show {
+  height: 46px;               /* actual height of the slider container */
+  margin-bottom: 6px;
+  padding: 6px 4px 14px 4px;
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scaleY(1);
   pointer-events: auto;
 }
 
