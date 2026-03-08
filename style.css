@@ -781,32 +781,28 @@ display:flex;
 align-items:center;
 gap:10px;
 
-padding:0 4px;
-margin-bottom:0;
+height:46px;          /* fixed height so layout never shifts */
 
-max-height:0;
+padding:6px 4px 14px 4px;
+margin-bottom:6px;
+
 opacity:0;
-transform:translateY(-6px);
+transform:translateY(-8px) scaleY(0.9);
 
-overflow:hidden;
+pointer-events:none;
 
 transition:
-max-height 0.35s ease,
 opacity 0.25s ease,
-transform 0.35s ease,
-padding 0.25s ease,
-margin 0.25s ease;
+transform 0.35s ease;
 
 }
 
 .role-weight.show{
 
-padding:6px 4px 14px 4px;
-margin-bottom:6px;
-
-max-height:60px;
 opacity:1;
-transform:translateY(0);
+transform:translateY(0) scaleY(1);
+
+pointer-events:auto;
 
 }
 
