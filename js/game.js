@@ -85,6 +85,7 @@ ${state.rolesEnabled.doctor ? `
 <div class="role-weight doctor-slider">
 
 <input type="range"
+id="doctorSlider"
 min="0"
 max="100"
 value="${state.roleWeights.doctor}"
@@ -114,6 +115,7 @@ ${state.rolesEnabled.sheriff ? `
 <div class="role-weight sheriff-slider">
 
 <input type="range"
+id="sheriffSlider"
 min="0"
 max="100"
 value="${state.roleWeights.sheriff}"
@@ -143,6 +145,7 @@ ${state.rolesEnabled.jester ? `
 <div class="role-weight jester-slider">
 
 <input type="range"
+id="jesterSlider"
 min="0"
 max="100"
 value="${state.roleWeights.jester}"
@@ -158,6 +161,27 @@ oninput="setRoleWeight('jester', this.value)">
 
 modal.classList.remove("hidden")
 
+setTimeout(()=>{
+
+document.querySelectorAll('.role-weight input[type="range"]')
+.forEach(updateSlider)
+
+},0)
+
+}
+
+window.updateSlider = function(slider){
+
+let value = slider.value
+let percent = value + "%"
+
+slider.style.background =
+`linear-gradient(to right,
+#2ecc71 0%,
+#2ecc71 ${percent},
+#444 ${percent},
+#444 100%)`
+
 }
 
 window.setRoleWeight = function(role,value){
@@ -168,8 +192,6 @@ localStorage.setItem(
 "mafiaRoleWeights",
 JSON.stringify(state.roleWeights)
 )
-
-showSettings()
 
 }
 
