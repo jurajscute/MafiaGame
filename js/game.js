@@ -65,34 +65,51 @@ modal.innerHTML = `
 
 <div class="modal-content">
 
-<h2>Settings</h2>
+<h2 class="settings-title">Game Settings</h2>
 
-<label>
+<div class="role-toggle">
+
+<span style="color:${roleColors.doctor}">Doctor</span>
+
+<label class="switch">
 <input type="checkbox"
-${state.rolesEnabled.doctor ? "checked":""}
-onchange="toggleRole('doctor',this.checked)">
- Doctor
+${state.rolesEnabled.doctor ? "checked" : ""}
+onchange="toggleRole('doctor', this.checked)">
+<span class="slider"></span>
 </label>
 
-<label>
+</div>
+
+<div class="role-toggle">
+
+<span style="color:${roleColors.sheriff}">Sheriff</span>
+
+<label class="switch">
 <input type="checkbox"
-${state.rolesEnabled.sheriff ? "checked":""}
-onchange="toggleRole('sheriff',this.checked)">
- Sheriff
+${state.rolesEnabled.sheriff ? "checked" : ""}
+onchange="toggleRole('sheriff', this.checked)">
+<span class="slider"></span>
 </label>
 
-<label>
+</div>
+
+<div class="role-toggle">
+
+<span style="color:${roleColors.jester}">Jester</span>
+
+<label class="switch">
 <input type="checkbox"
-${state.rolesEnabled.jester ? "checked":""}
-onchange="toggleRole('jester',this.checked)">
- Jester
+${state.rolesEnabled.jester ? "checked" : ""}
+onchange="toggleRole('jester', this.checked)">
+<span class="slider"></span>
 </label>
 
-<br>
+</div>
 
 <button onclick="closeInfo()">Close</button>
 
 </div>
+
 `
 
 modal.classList.remove("hidden")
