@@ -58,8 +58,6 @@ modal.classList.add("show");
 
 function showSettings() {
   const modal = document.getElementById("infoModal");
-
-  // List of roles we want to display in settings
   const rolesList = ["doctor", "sheriff", "jester"];
 
   let content = `
@@ -83,7 +81,7 @@ function showSettings() {
       </div>
 
       <div id="${role}SliderContainer"
-        class="role-weight ${role}-slider ${enabled ? "show" : ""}">
+        class="role-weight ${enabled ? "" : ""}">
         <input type="range"
           id="${role}Slider"
           min="0"
@@ -99,12 +97,16 @@ function showSettings() {
 
   modal.innerHTML = content;
   modal.classList.remove("hidden");
+  modal.classList.add("show");
 
-  // Animate only the sliders that are enabled
-  document.querySelectorAll('.role-weight.show').forEach(el => {
-    requestAnimationFrame(() => {
-      el.classList.add("show");
-    });
+  // Animate only the sliders that are enabled, staggered
+  const sliders = document.querySelectorAll('.role-weight');
+  sliders.forEach((el, index) => {
+    if (state.rolesEnabled[el.id.replace("SliderContainer", "")]) {
+      setTimeout(() => {
+        el.classList.add("show");
+      }, index * 100); // 100ms delay per slider for cascading effect
+    }
   });
 
   // Initialize slider backgrounds
@@ -112,8 +114,6 @@ function showSettings() {
     let role = slider.id.replace("Slider", "");
     updateSlider(slider, role);
   });
-
-  modal.classList.add("show");
 }
 
 window.updateSlider = function(slider,role){

@@ -786,28 +786,20 @@ letter-spacing:1px;
   align-items: center;
   gap: 10px;
 
-  height: 0;                 /* start collapsed */
-  margin-bottom: 0;          /* collapse margin too */
-  padding: 0 4px 0 4px;      /* collapse padding */
-  opacity: 0;
-  transform: translateY(-8px) scaleY(0.9);
+  height: 46px;
+  margin-bottom: 6px;
+  padding: 6px 4px 14px 4px;
 
+  opacity: 0;
+  transform: translateY(-10px);
   pointer-events: none;
 
-  transition:
-    opacity 0.25s ease,
-    transform 0.35s ease,
-    height 0.35s ease,
-    margin-bottom 0.35s ease,
-    padding 0.35s ease;
+  transition: opacity 0.35s ease, transform 0.35s ease, height 0.35s ease, margin-bottom 0.35s ease, padding 0.35s ease;
 }
 
 .role-weight.show {
-  height: 46px;               /* actual height of the slider container */
-  margin-bottom: 6px;
-  padding: 6px 4px 14px 4px;
   opacity: 1;
-  transform: translateY(0) scaleY(1);
+  transform: translateY(0);
   pointer-events: auto;
 }
 
