@@ -483,9 +483,17 @@ state.players.forEach(p => {
 let color = roleColors[p.role] || "white"
 
 rolesHTML += `
-<p style="color:${color}; font-weight:bold; font-size:20px;">
-${p.name} — ${p.role.toUpperCase()}
-</p>
+
+<div class="role-row" style="border-left:4px solid ${color};">
+
+<span class="role-player">${p.name}</span>
+
+<span class="role-name" style="color:${color}">
+${p.role.toUpperCase()}
+</span>
+
+</div>
+
 `
 
 })
@@ -494,7 +502,9 @@ render(`
 
 <div class="card">
 
-<h2>All Roles</h2>
+<hr style="opacity:0.3;margin:20px 0;">
+
+<h2 class="role-title">FINAL ROLES</h2>
 
 ${rolesHTML}
 
