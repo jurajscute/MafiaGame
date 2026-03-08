@@ -82,7 +82,7 @@ onchange="toggleRole('doctor', this.checked)">
 
 ${state.rolesEnabled.doctor ? `
 
-<div class="role-weight doctor-slider">
+<div id="doctorSliderContainer" class="role-weight doctor-slider ${state.rolesEnabled.doctor ? "show" : ""}">
 
 <input type="range"
 id="doctorSlider"
@@ -112,7 +112,7 @@ onchange="toggleRole('sheriff', this.checked)">
 
 ${state.rolesEnabled.sheriff ? `
 
-<div class="role-weight sheriff-slider">
+<div id="sheriffSliderContainer" class="role-weight sheriff-slider ${state.rolesEnabled.sheriff ? "show" : ""}">
 
 <input type="range"
 id="sheriffSlider"
@@ -142,7 +142,7 @@ onchange="toggleRole('jester', this.checked)">
 
 ${state.rolesEnabled.jester ? `
 
-<div class="role-weight jester-slider">
+<div id="jesterSliderContainer" class="role-weight jester-slider ${state.rolesEnabled.jester ? "show" : ""}">
 
 <input type="range"
 id="jesterSlider"
@@ -239,7 +239,17 @@ localStorage.setItem(
 JSON.stringify(state.rolesEnabled)
 )
 
-showSettings()
+let slider = document.getElementById(role+"SliderContainer")
+
+if(slider){
+
+if(enabled){
+slider.classList.add("show")
+}else{
+slider.classList.remove("show")
+}
+
+}
 
 }
 
