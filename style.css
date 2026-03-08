@@ -813,3 +813,11 @@ transition:transform 0.2s ease;
 .role-toggle:active{
 transform:scale(0.98);
 }
+
+.role-toggle{
+transition:background 0.25s ease;
+}
+
+.switch input:checked ~ .role-toggle{
+background:rgba(255,255,255,0.08);
+}
