@@ -420,25 +420,30 @@ line-height:1;
 }
 
 .top-ui button{
-margin:0;
+
+display:inline-flex;   /* overrides block layout */
 width:44px;
 height:44px;
 
-display:flex;
+margin:0;
+padding:0;
+
 align-items:center;
 justify-content:center;
 
 border-radius:50%;
 
 font-size:18px;
+font-weight:normal;
 
 background:rgba(255,255,255,0.18);
 color:white;
 
-border:none;
 cursor:pointer;
+border:none;
 
-transition:all 0.2s ease;
+flex:none;             /* prevents flex stretching */
+
 }
 
 .top-ui button:hover{
@@ -452,13 +457,12 @@ box-shadow:0 0 10px rgba(255,255,255,0.4);
 
 .top-ui{
 position:fixed;
-
 top:20px;
 right:20px;
 
 display:flex;
 flex-direction:column;
-gap:6px;
+gap:4px;   /* very small separation */
 
 z-index:5000;
 }
