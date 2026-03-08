@@ -24,7 +24,7 @@ jester: "#bb006d"
 
 function showInfo(){
 
-let modal = document.getElementById("infoModal")
+const modal = document.getElementById("infoModal");
 
 modal.innerHTML = `
 
@@ -52,130 +52,68 @@ modal.innerHTML = `
 </div>
 
 `
-
-modal.classList.remove("hidden")
+modal.classList.add("show");
 
 }
 
-function showSettings(){
+function showSettings() {
+  const modal = document.getElementById("infoModal");
 
-let modal = document.getElementById("infoModal")
+  // List of roles we want to display in settings
+  const rolesList = ["doctor", "sheriff", "jester"];
 
-modal.innerHTML = `
+  let content = `
+    <div class="modal-content">
+      <h2 class="settings-title">Game Settings</h2>
+  `;
 
-<div class="modal-content">
+  rolesList.forEach(role => {
+    const enabled = state.rolesEnabled[role];
+    const weight = state.roleWeights[role] || 0;
+    const color = roleColors[role] || "#fff";
 
-<h2 class="settings-title">Game Settings</h2>
+    content += `
+      <div class="role-toggle">
+        <span style="color:${color}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
+        <label class="switch">
+          <input type="checkbox" ${enabled ? "checked" : ""}
+            onchange="toggleRole('${role}', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
 
-<div class="role-toggle">
+      <div id="${role}SliderContainer"
+        class="role-weight ${role}-slider ${enabled ? "show" : ""}">
+        <input type="range"
+          id="${role}Slider"
+          min="0"
+          max="100"
+          value="${weight}"
+          oninput="updateSlider(this,'${role}'); setRoleWeight('${role}', this.value)">
+        <span>${weight}%</span>
+      </div>
+    `;
+  });
 
-<span style="color:${roleColors.doctor}">Doctor</span>
+  content += `<button onclick="closeInfo()">Close</button></div>`;
 
-<label class="switch">
-<input type="checkbox"
-${state.rolesEnabled.doctor ? "checked" : ""}
-onchange="toggleRole('doctor', this.checked)">
-<span class="slider"></span>
-</label>
+  modal.innerHTML = content;
+  modal.classList.remove("hidden");
 
-</div>
+  // Animate only the sliders that are enabled
+  document.querySelectorAll('.role-weight.show').forEach(el => {
+    requestAnimationFrame(() => {
+      el.classList.add("show");
+    });
+  });
 
-<div id="doctorSliderContainer"
-class="role-weight doctor-slider ${state.rolesEnabled.doctor ? "show" : ""}">
+  // Initialize slider backgrounds
+  document.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
+    let role = slider.id.replace("Slider", "");
+    updateSlider(slider, role);
+  });
 
-<input type="range"
-id="doctorSlider"
-min="0"
-max="100"
-value="${state.roleWeights.doctor}"
-oninput="updateSlider(this,'doctor'); setRoleWeight('doctor', this.value)">
-
-<span>${state.roleWeights.doctor}%</span>
-
-</div>
-
-<div class="role-toggle">
-
-<span style="color:${roleColors.sheriff}">Sheriff</span>
-
-<label class="switch">
-<input type="checkbox"
-${state.rolesEnabled.sheriff ? "checked" : ""}
-onchange="toggleRole('sheriff', this.checked)">
-<span class="slider"></span>
-</label>
-
-</div>
-
-<div id="sheriffSliderContainer"
-class="role-weight sheriff-slider ${state.rolesEnabled.sheriff ? "show" : ""}">
-
-<input type="range"
-id="sheriffSlider"
-min="0"
-max="100"
-value="${state.roleWeights.sheriff}"
-oninput="updateSlider(this,'sheriff'); setRoleWeight('sheriff', this.value)">
-
-<span>${state.roleWeights.sheriff}%</span>
-
-</div>
-
-<div class="role-toggle">
-
-<span style="color:${roleColors.jester}">Jester</span>
-
-<label class="switch">
-<input type="checkbox"
-${state.rolesEnabled.jester ? "checked" : ""}
-onchange="toggleRole('jester', this.checked)">
-<span class="slider"></span>
-</label>
-
-</div>
-
-<div id="jesterSliderContainer"
-class="role-weight jester-slider ${state.rolesEnabled.jester ? "show" : ""}">
-
-<input type="range"
-id="jesterSlider"
-min="0"
-max="100"
-value="${state.roleWeights.jester}"
-oninput="updateSlider(this,'jester'); setRoleWeight('jester', this.value)">
-
-<span>${state.roleWeights.jester}%</span>
-
-</div>
-
-<button onclick="closeInfo()">Close</button>
-
-</div>
-
-`
-
-modal.classList.remove("hidden")
-
-setTimeout(()=>{
-
-document.querySelectorAll('.role-weight').forEach(el => {
-
-requestAnimationFrame(()=>{
-el.classList.add("show")
-})
-
-})
-
-document.querySelectorAll('.role-weight input[type="range"]')
-.forEach(slider => {
-
-let role = slider.id.replace("Slider","")
-updateSlider(slider,role)
-
-})
-
-},0)
-
+  modal.classList.add("show");
 }
 
 window.updateSlider = function(slider,role){
@@ -245,7 +183,12 @@ slider.classList.remove("show")
 }
 
 function closeInfo(){
+const modal = document.getElementById("infoModal");
 document.getElementById("infoModal").classList.add("hidden")
+modal.classList.remove("show");
+  setTimeout(() => {
+    modal.classList.add("hidden");
+  }, 300);
 }
 
 window.showInfo = showInfo
