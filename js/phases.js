@@ -259,6 +259,9 @@ render(`
 return true
 }
 
+return false
+}
+
 function resolveNight(){
     setDay();
 
