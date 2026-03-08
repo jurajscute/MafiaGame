@@ -197,7 +197,7 @@ let mafiaPlayers = state.players
 .map(p => p.name)
 .join("<br>")
 
-document.getElementById("app").style.background =
+document.body.style.background =
 "radial-gradient(circle at top, #350000, #120000)"
 
 render(`
@@ -232,7 +232,7 @@ let mafiaPlayers = state.players
 .map(p => p.name)
 .join("<br>")
 
-document.getElementById("app").style.background =
+document.body.style.background =
 "radial-gradient(circle at top, #001e3b, #000914)"
 
 render(`
@@ -428,7 +428,7 @@ player.alive = false
 // Jester win
 if(player.role === "jester"){
 
-document.getElementById("app").style.background =
+document.body.style.background =
 "radial-gradient(circle at top, #3b001d, #140009)"
 
 render(`
