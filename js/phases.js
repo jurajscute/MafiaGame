@@ -502,9 +502,9 @@ render(`
 
 <div class="card">
 
-<hr style="opacity:0.3;margin:20px 0;">
-
 <h2 class="role-title">FINAL ROLES</h2>
+
+<hr style="opacity:0.3;margin:20px 0;">
 
 ${rolesHTML}
 
@@ -517,8 +517,6 @@ ${rolesHTML}
 `)
 
 }
-
-window.showRoleRevealEnd = showRoleRevealEnd
 
 window.showRoleRevealEnd = showRoleRevealEnd
 
