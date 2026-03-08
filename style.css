@@ -794,7 +794,7 @@ letter-spacing:1px;
   transform: translateY(-10px);
   pointer-events: none;
 
-  transition: opacity 0.35s ease, transform 0.35s ease, height 0.35s ease, margin-bottom 0.35s ease, padding 0.35s ease;
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
 .role-weight.show {
