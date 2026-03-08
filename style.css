@@ -453,15 +453,14 @@ box-shadow:0 0 10px rgba(255,255,255,0.4);
 .top-ui{
 position:fixed;
 
-top:18px;
-right:18px;
+top:20px;
+right:20px;
 
 display:flex;
 flex-direction:column;
+gap:16px;
 
-gap:14px;        /* spacing between buttons */
-
-z-index:2000;
+z-index:5000;
 }
 
 /* modal background */
