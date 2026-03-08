@@ -115,25 +115,7 @@ render(`
 }
 
 function showSetup(){
-
-render(`
-
-<div class="card">
-
-<h2>Add Players</h2>
-
-<ul id="playerList"></ul>
-
-<button onclick="window.addPlayer()">Add Player</button>
-
-<button onclick="window.startGame()">Start Game</button>
-
-</div>
-
-`)
-
-updatePlayerList()
-
+renderPlayerSetup()
 }
 
 function renderPlayerSetup(){
@@ -205,22 +187,6 @@ localStorage.removeItem("mafiaPlayers")
 state.players = []
 
 renderPlayerSetup()
-
-}
-
-function updatePlayerList(){
-
-const list=document.getElementById("playerList")
-
-if(!list)return
-
-list.innerHTML=""
-
-state.players.forEach(p=>{
-
-list.innerHTML+=`<li>${p.name}</li>`
-
-})
 
 }
 
