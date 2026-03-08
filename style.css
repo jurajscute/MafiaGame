@@ -467,6 +467,10 @@ gap:4px;   /* very small separation */
 z-index:5000;
 }
 
+.top-ui{
+outline:2px solid red;
+}
+
 /* modal background */
 
 .modal{
