@@ -59,9 +59,10 @@ modal.classList.add("show");
 function showSettings() {
   const modal = document.getElementById("infoModal");
 
-  // List of roles we want to display in settings
-  const rolesList = ["doctor", "sheriff", "jester"];
+  // List of roles to display in settings
+  const rolesList = Object.keys(roleColors); // automatically gets all roles in roleColors
 
+  // Build the modal HTML dynamically
   let content = `
     <div class="modal-content">
       <h2 class="settings-title">Game Settings</h2>
@@ -82,8 +83,7 @@ function showSettings() {
         </label>
       </div>
 
-      <div id="${role}SliderContainer"
-        class="role-weight ${role}-slider ${enabled ? "show" : ""}">
+      <div id="${role}SliderContainer" class="role-weight">
         <input type="range"
           id="${role}Slider"
           min="0"
@@ -97,23 +97,29 @@ function showSettings() {
 
   content += `<button onclick="closeInfo()">Close</button></div>`;
 
+  // Render modal and trigger pop-in animation
   modal.innerHTML = content;
   modal.classList.remove("hidden");
-
-  // Animate only the sliders that are enabled
-  document.querySelectorAll('.role-weight.show').forEach(el => {
-    requestAnimationFrame(() => {
-      el.classList.add("show");
-    });
+  requestAnimationFrame(() => {
+    modal.classList.add("show");
   });
 
-  // Initialize slider backgrounds
+  // Animate sliders that are enabled with a staggered fade + slide
+  const sliders = document.querySelectorAll('.role-weight');
+  sliders.forEach((el, index) => {
+    const role = el.id.replace("SliderContainer", "");
+    if (state.rolesEnabled[role]) {
+      setTimeout(() => {
+        el.classList.add("show");
+      }, index * 100); // stagger each slider by 100ms
+    }
+  });
+
+  // Initialize slider gradients
   document.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
-    let role = slider.id.replace("Slider", "");
+    const role = slider.id.replace("Slider", "");
     updateSlider(slider, role);
   });
-
-  modal.classList.add("show");
 }
 
 window.updateSlider = function(slider,role){
