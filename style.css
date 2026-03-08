@@ -774,3 +774,32 @@ font-weight:bold;
 .role-name{
 letter-spacing:1px;
 }
+
+.role-weight{
+
+display:flex;
+align-items:center;
+gap:10px;
+
+padding:6px 4px 14px 4px;
+margin-bottom:6px;
+
+overflow:hidden;
+
+animation:sliderReveal 0.35s ease;
+
+}
+
+@keyframes sliderReveal{
+
+0%{
+opacity:0;
+transform:translateY(-10px) scaleY(0.8);
+}
+
+100%{
+opacity:1;
+transform:translateY(0) scaleY(1);
+}
+
+}
