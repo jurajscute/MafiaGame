@@ -80,6 +80,22 @@ onchange="toggleRole('doctor', this.checked)">
 
 </div>
 
+${state.rolesEnabled.doctor ? `
+
+<div class="role-weight">
+
+<input type="range"
+min="0"
+max="100"
+value="${state.roleWeights.doctor}"
+oninput="setRoleWeight('doctor', this.value)">
+
+<span>${state.roleWeights.doctor}%</span>
+
+</div>
+
+` : ""}
+
 <div class="role-toggle">
 
 <span style="color:${roleColors.sheriff}">Sheriff</span>
@@ -92,6 +108,22 @@ onchange="toggleRole('sheriff', this.checked)">
 </label>
 
 </div>
+
+${state.rolesEnabled.sheriff ? `
+
+<div class="role-weight">
+
+<input type="range"
+min="0"
+max="100"
+value="${state.roleWeights.sheriff}"
+oninput="setRoleWeight('sheriff', this.value)">
+
+<span>${state.roleWeights.sheriff}%</span>
+
+</div>
+
+` : ""}
 
 <div class="role-toggle">
 
@@ -106,13 +138,36 @@ onchange="toggleRole('jester', this.checked)">
 
 </div>
 
-<button onclick="closeInfo()">Close</button>
+${state.rolesEnabled.jester ? `
+
+<div class="role-weight">
+
+<input type="range"
+min="0"
+max="100"
+value="${state.roleWeights.jester}"
+oninput="setRoleWeight('jester', this.value)">
+
+<span>${state.roleWeights.jester}%</span>
 
 </div>
+
+` : ""}
 
 `
 
 modal.classList.remove("hidden")
+
+}
+
+window.setRoleWeight = function(role,value){
+
+state.roleWeights[role] = Number(value)
+
+localStorage.setItem(
+"mafiaRoleWeights",
+JSON.stringify(state.roleWeights)
+)
 
 }
 
@@ -155,6 +210,12 @@ state.players = JSON.parse(saved)
 loadPlayers()
 
 let savedRoles = localStorage.getItem("mafiaRoles")
+
+let savedWeights = localStorage.getItem("mafiaRoleWeights")
+
+if(savedWeights){
+state.roleWeights = JSON.parse(savedWeights)
+}
 
 if(savedRoles){
 state.rolesEnabled = JSON.parse(savedRoles)

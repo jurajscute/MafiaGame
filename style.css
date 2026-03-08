@@ -551,6 +551,30 @@ background:#2ecc71;
 box-shadow:0 0 8px #2ecc71;
 }
 
+.role-weight{
+
+display:flex;
+align-items:center;
+gap:10px;
+
+padding:6px 4px 14px 4px;
+margin-bottom:6px;
+
+}
+
+.role-weight input{
+
+flex:1;
+
+}
+
+.role-weight span{
+width:40px;
+text-align:right;
+font-size:14px;
+opacity:0.8;
+}
+
 /* modal background */
 
 .modal{
