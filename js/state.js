@@ -16,6 +16,12 @@ jester:true
 
 votes:{},
 
+roleWeights: {
+doctor: 50,
+sheriff: 50,
+jester: 50
+},
+
 nightActions:{
 kill:null,
 save:null,
@@ -40,8 +46,3 @@ investigate:null
 
 }
 
-roleWeights: {
-doctor: 50,
-sheriff: 50,
-jester: 50
-}
