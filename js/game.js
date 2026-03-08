@@ -80,9 +80,8 @@ onchange="toggleRole('doctor', this.checked)">
 
 </div>
 
-${state.rolesEnabled.doctor ? `
-
-<div id="doctorSliderContainer" class="role-weight doctor-slider ${state.rolesEnabled.doctor ? "show" : ""}">
+<div id="doctorSliderContainer"
+class="role-weight doctor-slider ${state.rolesEnabled.doctor ? "show" : ""}">
 
 <input type="range"
 id="doctorSlider"
@@ -94,8 +93,6 @@ oninput="updateSlider(this,'doctor'); setRoleWeight('doctor', this.value)">
 <span>${state.roleWeights.doctor}%</span>
 
 </div>
-
-` : ""}
 
 <div class="role-toggle">
 
@@ -110,9 +107,8 @@ onchange="toggleRole('sheriff', this.checked)">
 
 </div>
 
-${state.rolesEnabled.sheriff ? `
-
-<div id="sheriffSliderContainer" class="role-weight sheriff-slider ${state.rolesEnabled.sheriff ? "show" : ""}">
+<div id="doctorSliderContainer"
+class="role-weight doctor-slider ${state.rolesEnabled.doctor ? "show" : ""}">
 
 <input type="range"
 id="sheriffSlider"
@@ -124,8 +120,6 @@ oninput="updateSlider(this,'sheriff'); setRoleWeight('sheriff', this.value)">
 <span>${state.roleWeights.sheriff}%</span>
 
 </div>
-
-` : ""}
 
 <div class="role-toggle">
 
@@ -140,9 +134,8 @@ onchange="toggleRole('jester', this.checked)">
 
 </div>
 
-${state.rolesEnabled.jester ? `
-
-<div id="jesterSliderContainer" class="role-weight jester-slider ${state.rolesEnabled.jester ? "show" : ""}">
+<div id="jesterSliderContainer"
+class="role-weight jester-slider ${state.rolesEnabled.jester ? "show" : ""}">
 
 <input type="range"
 id="jesterSlider"
@@ -154,8 +147,6 @@ oninput="updateSlider(this,'jester'); setRoleWeight('jester', this.value)">
 <span>${state.roleWeights.jester}%</span>
 
 </div>
-
-` : ""}
 
 <button onclick="closeInfo()">Close</button>
 
