@@ -192,15 +192,26 @@ let villagers = alive.filter(p=>p.role!=="mafia").length
 // Mafia win
 if(mafia >= villagers){
 
+let mafiaPlayers = state.players
+.filter(p => p.role === "mafia")
+.map(p => p.name)
+.join("<br>")
+
 render(`
 
 <div class="card">
 
-<h1>MAFIA WIN</h1>
+<h1 class="mafia-win">MAFIA WINS</h1>
 
 <p>The mafia have taken control of the town.</p>
 
-<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
+<hr>
+
+<p><strong>The Mafia were:</strong></p>
+
+<p>${mafiaPlayers}</p>
+
+<button onclick="window.showRoleRevealEnd()">Reveal All Roles</button>
 <button onclick="location.reload()">Restart Game</button>
 
 </div>
@@ -208,21 +219,31 @@ render(`
 `)
 
 return true
-
 }
 
 // Village win
 if(mafia === 0){
 
+let mafiaPlayers = state.players
+.filter(p => p.role === "mafia")
+.map(p => p.name)
+.join("<br>")
+
 render(`
 
 <div class="card">
 
-<h1>VILLAGE WINS</h1>
+<h1 class="village-win">VILLAGE WINS</h1>
 
-<p>All mafia members have been eliminated.</p>
+<p>The town has eliminated all mafia members.</p>
 
-<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
+<hr>
+
+<p><strong>The Mafia were:</strong></p>
+
+<p>${mafiaPlayers}</p>
+
+<button onclick="window.showRoleRevealEnd()">Reveal All Roles</button>
 <button onclick="location.reload()">Restart Game</button>
 
 </div>
@@ -230,7 +251,6 @@ render(`
 `)
 
 return true
-
 }
 
 return false
@@ -407,7 +427,7 @@ render(`
 
 <div class="card">
 
-<h1>JESTER WINS</h1>
+<h1 class="jester-win">JESTER WINS</h1>
 
 <p>${player.name} tricked the town into voting them out!</p>
 

@@ -283,6 +283,18 @@ text-shadow:
 0 0 30px #66003b;
 }
 
+.mafia-win{
+color:#e74c3c;
+}
+
+.village-win{
+color:#2e8dcc;
+}
+
+.jester-win{
+color:#ff048e;
+}
+
 /* player list */
 
 ul{
