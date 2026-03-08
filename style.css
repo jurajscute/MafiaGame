@@ -11,6 +11,10 @@ align-items:center;
 height:100vh;
 }
 
+body{
+transition: background 0.6s ease;
+}
+
 /* main container */
 
 #app{
@@ -293,6 +297,20 @@ color:#2e8dcc;
 
 .jester-win{
 color:#ff048e;
+}
+
+/* win backgrounds */
+
+.win-mafia{
+background:radial-gradient(circle at 50% 20%, #5a0000, #120000);
+}
+
+.win-village{
+background:radial-gradient(circle at 50% 20%, #0b3d6b, #000814);
+}
+
+.win-jester{
+background:radial-gradient(circle at 50% 20%, #3b001d, #140009);
 }
 
 @keyframes winGlow{
