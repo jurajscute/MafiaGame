@@ -197,6 +197,9 @@ let mafiaPlayers = state.players
 .map(p => p.name)
 .join("<br>")
 
+document.body.style.background =
+"radial-gradient(circle at top, #350000, #120000)";
+
 render(`
 
 <div class="card role-mafia">
@@ -229,6 +232,9 @@ let mafiaPlayers = state.players
 .map(p => p.name)
 .join("<br>")
 
+document.body.style.background =
+"radial-gradient(circle at top, #001e3b, #000914)";
+
 render(`
 
 <div class="card role-doctor">
@@ -251,10 +257,6 @@ render(`
 `)
 
 return true
-}
-
-return false
-
 }
 
 function resolveNight(){
@@ -422,6 +424,9 @@ player.alive = false
 
 // Jester win
 if(player.role === "jester"){
+
+document.body.style.background =
+"radial-gradient(circle at top, #3b001d, #140009)";
 
 render(`
 
