@@ -65,27 +65,27 @@ modal.innerHTML = `
 
 <div class="modal-content">
 
-<h2>Game Settings</h2>
+<h2>Settings</h2>
 
-<label class="toggle">
+<label>
 <input type="checkbox"
-${state.rolesEnabled.doctor ? "checked" : ""}
-onchange="toggleRole('doctor', this.checked)">
-Doctor
+${state.rolesEnabled.doctor ? "checked":""}
+onchange="toggleRole('doctor',this.checked)">
+ Doctor
 </label>
 
-<label class="toggle">
+<label>
 <input type="checkbox"
-${state.rolesEnabled.sheriff ? "checked" : ""}
-onchange="toggleRole('sheriff', this.checked)">
-Sheriff
+${state.rolesEnabled.sheriff ? "checked":""}
+onchange="toggleRole('sheriff',this.checked)">
+ Sheriff
 </label>
 
-<label class="toggle">
+<label>
 <input type="checkbox"
-${state.rolesEnabled.jester ? "checked" : ""}
-onchange="toggleRole('jester', this.checked)">
-Jester
+${state.rolesEnabled.jester ? "checked":""}
+onchange="toggleRole('jester',this.checked)">
+ Jester
 </label>
 
 <br>
@@ -93,12 +93,13 @@ Jester
 <button onclick="closeInfo()">Close</button>
 
 </div>
-
 `
 
 modal.classList.remove("hidden")
 
 }
+
+window.showSettings = showSettings
 
 window.showSettings = showSettings
 
