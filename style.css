@@ -329,6 +329,10 @@ text-align:center;
 animation:winGlow 2.5s infinite ease-in-out;
 }
 
+#app{
+transition: background 0.8s ease;
+}
+
 /* player list */
 
 ul{
