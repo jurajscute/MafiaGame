@@ -199,9 +199,9 @@ let mafiaPlayers = state.players
 
 render(`
 
-<div class="card">
+<div class="card role-mafia">
 
-<h1 class="mafia-win">MAFIA WINS</h1>
+<h1 class="role-title">MAFIA WINS</h1>
 
 <p>The mafia have taken control of the town.</p>
 
@@ -231,9 +231,9 @@ let mafiaPlayers = state.players
 
 render(`
 
-<div class="card">
+<div class="card role-doctor">
 
-<h1 class="village-win">VILLAGE WINS</h1>
+<h1 class="role-title">VILLAGE WINS</h1>
 
 <p>The town has eliminated all mafia members.</p>
 
@@ -425,9 +425,9 @@ if(player.role === "jester"){
 
 render(`
 
-<div class="card">
+<div class="card role-jester">
 
-<h1 class="jester-win">JESTER WINS</h1>
+<h1 class="role-title">JESTER WINS</h1>
 
 <p>${player.name} tricked the town into voting them out!</p>
 

@@ -295,6 +295,40 @@ color:#2e8dcc;
 color:#ff048e;
 }
 
+@keyframes winGlow{
+
+0%{
+text-shadow:
+0 0 10px currentColor,
+0 0 20px currentColor,
+0 0 30px currentColor;
+}
+
+50%{
+text-shadow:
+0 0 20px currentColor,
+0 0 35px currentColor,
+0 0 50px currentColor;
+}
+
+100%{
+text-shadow:
+0 0 10px currentColor,
+0 0 20px currentColor,
+0 0 30px currentColor;
+}
+
+}
+
+.role-title{
+margin-bottom:20px;
+letter-spacing:3px;
+font-size:36px;
+text-align:center;
+
+animation:winGlow 2.5s infinite ease-in-out;
+}
+
 /* player list */
 
 ul{
