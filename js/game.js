@@ -89,7 +89,7 @@ id="doctorSlider"
 min="0"
 max="100"
 value="${state.roleWeights.doctor}"
-oninput="setRoleWeight('doctor', this.value)">
+oninput="updateSlider(this,'doctor'); setRoleWeight('doctor', this.value)">
 
 <span>${state.roleWeights.doctor}%</span>
 
@@ -119,7 +119,7 @@ id="sheriffSlider"
 min="0"
 max="100"
 value="${state.roleWeights.sheriff}"
-oninput="setRoleWeight('sheriff', this.value)">
+oninput=oninput="updateSlider(this,'doctor'); setRoleWeight('doctor', this.value)">
 
 <span>${state.roleWeights.sheriff}%</span>
 
@@ -149,7 +149,7 @@ id="jesterSlider"
 min="0"
 max="100"
 value="${state.roleWeights.jester}"
-oninput="setRoleWeight('jester', this.value)">
+oninput=oninput="updateSlider(this,'jester'); setRoleWeight('jester', this.value)">
 
 <span>${state.roleWeights.jester}%</span>
 
@@ -170,17 +170,30 @@ document.querySelectorAll('.role-weight input[type="range"]')
 
 }
 
-window.updateSlider = function(slider){
+window.updateSlider = function(slider,role){
 
 let value = slider.value
 let percent = value + "%"
 
+/* get role color */
+
+let color = roleColors[role] || "#2ecc71"
+
+/* update slider fill */
+
 slider.style.background =
 `linear-gradient(to right,
-#2ecc71 0%,
-#2ecc71 ${percent},
+${color} 0%,
+${color} ${percent},
 #444 ${percent},
 #444 100%)`
+
+/* update percent label */
+
+let label = slider.nextElementSibling
+if(label){
+label.textContent = value + "%"
+}
 
 }
 
