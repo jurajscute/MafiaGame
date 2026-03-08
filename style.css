@@ -420,28 +420,48 @@ line-height:1;
 }
 
 .top-ui button{
-width:42px;
-height:42px;
 
-padding:0;
-margin:0;
+width:44px;
+height:44px;
 
 display:flex;
 align-items:center;
 justify-content:center;
 
 border-radius:50%;
-border:none;
-
-background:rgba(255,255,255,0.15);
-color:white;
 
 font-size:18px;
+
+background:rgba(255,255,255,0.18);
+color:white;
+
+border:none;
 cursor:pointer;
+
+transition:all 0.2s ease;
+}
+
+.top-ui button:hover{
+transform:scale(1.08);
+background:rgba(255,255,255,0.28);
 }
 
 body.night .settings-btn{
 box-shadow:0 0 10px rgba(255,255,255,0.4);
+}
+
+.top-ui{
+position:fixed;
+
+top:18px;
+right:18px;
+
+display:flex;
+flex-direction:column;
+
+gap:14px;        /* spacing between buttons */
+
+z-index:2000;
 }
 
 /* modal background */
