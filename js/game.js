@@ -101,8 +101,6 @@ modal.classList.remove("hidden")
 
 window.showSettings = showSettings
 
-window.showSettings = showSettings
-
 window.toggleRole = function(role, enabled){
 
 state.rolesEnabled[role] = enabled
