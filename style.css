@@ -197,23 +197,27 @@ body.day {
 
 #sunGlimmer {
   position: fixed;
-  top: -50px;
-  right: -50px;
+  top: -50px;   /* slightly off-screen for soft glow */
+  left: -50px;  /* top-left now */
   width: 400px;
   height: 400px;
   background: radial-gradient(circle, rgba(255,230,120,0.35), transparent 70%);
   filter: blur(50px);
   pointer-events: none;
-  z-index: 0; /* behind cards */
-  opacity: 0;
-  transition: opacity 1s ease;
+  z-index: 0;        /* behind all cards and UI */
+  opacity: 0;         /* start hidden */
+  transition: opacity 0.8s ease;
   animation: sunGlimmerAnim 6s ease-in-out infinite;
 }
 
+#sunGlimmer {
+  border: 2px solid red; /* debug */
+}
+
 @keyframes sunGlimmerAnim {
-  0% {opacity: 0.25;}
-  50% {opacity: 0.45;}
-  100% {opacity: 0.25;}
+  0% { opacity: 0.25; transform: translate(0, 0); }
+  50% { opacity: 0.45; transform: translate(10px, 10px); }
+  100% { opacity: 0.25; transform: translate(0, 0); }
 }
 
 body.night{
