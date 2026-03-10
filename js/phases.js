@@ -134,25 +134,30 @@ state.players
     // Other roles cannot target themselves
     return p.name !== player.name
 })
-
-state.players
-.filter(p => {
-    if(!p.alive) return false
-    if(player.role === "doctor") return true
-    return p.name !== player.name
-})
-.sort((a,b)=> a.name === player.name ? -1 : b.name === player.name ? 1 : 0)
 .forEach(p=>{
+targets+=`<button onclick="window.performNightAction('${p.name}')">
+${p.name === player.name ? p.name + ' <span style="opacity:0.6">(You)</span>' : p.name}
+</button>`
+})
 
 render(`
 
-<div class="card role-${roleClass}">
+<div class="card role-sheriff">
 
-<h2 class="role-title">${player.role.toUpperCase()} ACTION</h2>
+<h2 class="role-title">SHERIFF RESULT</h2>
 
-<p>Select a target</p>
+<p>${target.name} is</p>
 
-${targets}
+<h1 style="
+color:${result === "MAFIA" ? "#e74c3c" : "#cdf3ff"};
+text-shadow:
+0 0 10px ${result === "MAFIA" ? "#e74c3c" : "#cdf3ff"},
+0 0 20px ${result === "MAFIA" ? "#e74c3c" : "#cdf3ff"};
+">
+${result}
+</h1>
+
+<button onclick="window.nextNightTurn()">Hide</button>
 
 </div>
 
@@ -174,20 +179,13 @@ let result = target.role==="mafia" ? "MAFIA" : "NOT MAFIA"
 
 render(`
 
-<div class="card role-sheriff">
+<div class="card">
 
-<h2 class="role-title">INVESTIGATION RESULT</h2>
+<h2>Investigation Result</h2>
 
 <p>${target.name} is</p>
 
-<h1 style="
-color:${result === "MAFIA" ? "#e74c3c" : "#ffffff"};
-text-shadow:
-0 0 10px ${result === "MAFIA" ? "#e74c3c" : "#ffffff"},
-0 0 20px ${result === "MAFIA" ? "#e74c3c" : "#ffffff"};
-">
-${result}
-</h1>
+<h1>${result}</h1>
 
 <button onclick="window.nextNightTurn()">Hide</button>
 
