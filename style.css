@@ -188,32 +188,31 @@ font-size:22px;
 }
 
 /* DAY/NIGHT CYCLE */
-body.day{
-background:linear-gradient(135deg,#3b4946,#426866);
-color:white;
+body.day {
+  background: linear-gradient(135deg, #3b4946, #426866);
+  color: white;
+  position: relative; /* needed for ::before positioning */
+  overflow: hidden;   /* prevent scrollbars from big sun */
 }
 
-body.day::before{
-content:"";
-position:fixed;
-top:0;
-right:0;
-
-width:350px;
-height:350px;
-
-background:radial-gradient(circle, rgba(255,230,120,0.35), transparent 0%);
-filter:blur(100px);
-
-animation:sunGlimmer 6s ease-in-out infinite;
-
-pointer-events:none;
+body.day::before {
+  content: "";
+  position: fixed;
+  top: -50px;        /* slightly off-screen top */
+  left: -50px;       /* top-left corner */
+  width: 500px;      /* make it bigger */
+  height: 500px;
+  background: radial-gradient(circle, rgba(255,255,160,0.9) 0%, rgba(255,230,120,0.6) 50%, transparent 70%);
+  filter: blur(120px); /* make it glowy */
+  pointer-events: none;
+  z-index: 0;        /* behind all cards */
+  animation: sunGlimmer 6s ease-in-out infinite;
 }
 
-@keyframes sunGlimmer{
-0%{opacity:0.25;}
-50%{opacity:0.45;}
-100%{opacity:0.25;}
+@keyframes sunGlimmer {
+  0%   { opacity: 0.8; transform: translate(0,0) scale(1); }
+  50%  { opacity: 1;   transform: translate(10px,10px) scale(1.05); }
+  100% { opacity: 0.8; transform: translate(0,0) scale(1); }
 }
 
 body.night{
