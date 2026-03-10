@@ -221,10 +221,10 @@ background:linear-gradient(135deg,#0b0f2a,#000);
 color:white;
 }
 
-body.night .card{
-background:#1f2436;
-box-shadow:0 15px 35px rgba(0,0,0,0.6),
-0 0 15px rgba(90,120,255,0.05);
+body.night .card:not(.role-mafia):not(.role-doctor):not(.role-sheriff):not(.role-jester){
+  background:#1f2436;
+  box-shadow:0 15px 35px rgba(14, 14, 14, 0.6),
+             0 0 15px rgba(115, 140, 252, 0.05); /* subtle moonlit glow */
 }
 
 body{
