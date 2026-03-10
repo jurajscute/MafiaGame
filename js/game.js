@@ -230,16 +230,21 @@ export function setDay() {
   document.body.classList.add("day");
   document.body.classList.remove("night");
 
-  const sun = document.getElementById("sunGlimmer");
-  sun.style.opacity = "1";       // show the sun during day
+  // Create sun if it doesn't exist
+  if (!document.getElementById("sunGlimmer")) {
+    const sun = document.createElement("div");
+    sun.id = "sunGlimmer";
+    document.body.appendChild(sun);
+  }
 }
 
 export function setNight() {
   document.body.classList.add("night");
   document.body.classList.remove("day");
 
+  // Remove sun if it exists
   const sun = document.getElementById("sunGlimmer");
-  sun.style.opacity = "0";       // hide the sun at night
+  if (sun) sun.remove();
 }
 
 function showHome(){
