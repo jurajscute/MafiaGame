@@ -172,7 +172,7 @@ render(`
 
 <div class="card role-sheriff">
 
-<h2 class="role-title">SHERIFF RESULT</h2>
+<h2 class="role-title">INVESTIGATION RESULT</h2>
 
 <p>${target.name} is</p>
 
