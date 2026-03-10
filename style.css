@@ -189,7 +189,7 @@ font-size:22px;
 
 /* DAY/NIGHT CYCLE */
 body.day{
-background:linear-gradient(135deg,#66807a,#5ea09d);
+background:linear-gradient(135deg,#3b4946,#426866);
 color:white;
 }
 
