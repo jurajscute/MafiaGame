@@ -198,20 +198,20 @@ body.day {
 body.day::before {
   content: "";
   position: fixed;
-  top: -30px;        /* slightly off-screen top */
-  left: -30px;       /* top-left corner */
-  width: 300px;      /* smaller than before */
-  height: 300px;
-  background: radial-gradient(circle, rgba(255,255,200,1) 0%, rgba(255,245,150,0.8) 50%, transparent 60%);
-  filter: blur(90px); /* keeps glow effect */
+  top: -10px;        /* top-left corner, slightly offscreen */
+  left: -10px;
+  width: 150px;      /* much smaller */
+  height: 150px;
+  background: radial-gradient(circle, rgba(255,255,180,1) 0%, rgba(255,255,150,0.9) 40%, transparent 60%);
+  filter: blur(60px); /* keeps glow but concentrated */
   pointer-events: none;
-  z-index: 0;        /* behind cards/UI */
-  animation: sunGlimmer 6s ease-in-out infinite;
+  z-index: 0;        /* behind all UI/cards */
+  animation: sunGlimmer 3s ease-in-out infinite;
 }
 
 @keyframes sunGlimmer {
   0%   { opacity: 0.9; transform: translate(0,0) scale(1); }
-  50%  { opacity: 1;   transform: translate(5px,5px) scale(1.02); }
+  50%  { opacity: 1;   transform: translate(2px,2px) scale(1.05); }
   100% { opacity: 0.9; transform: translate(0,0) scale(1); }
 }
 
