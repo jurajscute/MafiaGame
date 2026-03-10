@@ -125,9 +125,19 @@ let targets=""
 let roleClass = player.role.toLowerCase()
 
 state.players
-.filter(p=>p.alive && p.name!==player.name)
+.filter(p => {
+    if(!p.alive) return false
+
+    // Doctor can target themselves
+    if(player.role === "doctor") return true
+
+    // Other roles cannot target themselves
+    return p.name !== player.name
+})
 .forEach(p=>{
-targets+=`<button onclick="window.performNightAction('${p.name}')">${p.name}</button>`
+targets+=`<button onclick="window.performNightAction('${p.name}')">
+${p.name === player.name ? p.name + ' <span style="opacity:0.6">(You)</span>' : p.name}
+</button>`
 })
 
 render(`
