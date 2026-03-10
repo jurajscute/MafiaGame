@@ -198,10 +198,10 @@ body.day {
 body.day::before {
   content: "";
   position: fixed;
-  top: -10px;        /* top-left corner */
-  left: -10px;
-  width: 120px;      /* small but noticeable */
-  height: 120px;
+  top: -5px;        /* top-left corner */
+  left: -5px;
+  width: 200px;      /* small but noticeable */
+  height: 200px;
   background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,200,1) 40%, transparent 60%);
   filter: blur(40px); /* concentrated glow */
   pointer-events: none;
