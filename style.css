@@ -826,3 +826,12 @@ transition:background 0.25s ease;
 .switch input:checked ~ .role-toggle{
 background:rgba(255,255,255,0.08);
 }
+
+.skip-btn{
+background:#555;
+opacity:0.9;
+}
+
+.skip-btn:hover{
+opacity:1;
+}

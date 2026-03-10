@@ -333,6 +333,8 @@ alivePlayers.forEach(p=>{
 buttons+=`<button onclick="window.castVote('${p.name}')">${p.name}</button>`
 })
 
+buttons+=`<button class="skip-btn" onclick="window.castVote('skip')">Skip Vote</button>`
+
 render(`
 
 <div class="card">
@@ -373,7 +375,9 @@ for(let name in state.votes){
 
 let count = state.votes[name]
 
-resultsHTML += `<p>${name} — ${count} vote${count>1?"s":""}</p>`
+let label = name === "skip" ? "Skip Vote" : name
+
+resultsHTML += `<p>${label} — ${count} vote${count>1?"s":""}</p>`
 
 if(count > highest){
 
@@ -403,6 +407,31 @@ ${resultsHTML}
 <hr>
 
 <h2>It's a tie! Nobody was eliminated.</h2>
+
+<button onclick="window.nextNight()">Next Night</button>
+
+</div>
+
+`)
+
+return
+
+}
+
+// Skip wins
+if(eliminated === "skip"){
+
+render(`
+
+<div class="card">
+
+<h2>Voting Results</h2>
+
+${resultsHTML}
+
+<hr>
+
+<h2>The town skipped the vote.</h2>
 
 <button onclick="window.nextNight()">Next Night</button>
 
