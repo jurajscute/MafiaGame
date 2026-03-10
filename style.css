@@ -193,6 +193,29 @@ background:linear-gradient(135deg,#3b4946,#426866);
 color:white;
 }
 
+body.day::before{
+content:"";
+position:fixed;
+top:0;
+right:0;
+
+width:350px;
+height:350px;
+
+background:radial-gradient(circle, rgba(255,230,120,0.35), transparent 0%);
+filter:blur(100px);
+
+animation:sunGlimmer 6s ease-in-out infinite;
+
+pointer-events:none;
+}
+
+@keyframes sunGlimmer{
+0%{opacity:0.25;}
+50%{opacity:0.45;}
+100%{opacity:0.25;}
+}
+
 body.night{
 background:linear-gradient(135deg,#0b0f2a,#000);
 color:white;
