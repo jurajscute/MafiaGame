@@ -225,6 +225,11 @@ body.night .card:not(.role-mafia):not(.role-doctor):not(.role-sheriff):not(.role
   background:#1f2436;
   box-shadow:0 15px 35px rgba(14, 14, 14, 0.6),
              0 0 15px rgba(115, 140, 252, 0.05); /* subtle moonlit glow */
+
+}
+
+.card{
+  transition: background 0.6s ease, box-shadow 0.6s ease;
 }
 
 body{
