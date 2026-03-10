@@ -226,18 +226,16 @@ state.rolesEnabled = JSON.parse(savedRoles)
 
 let revealIndex=0
 
-export function setDay(){
-
-document.body.classList.remove("night")
-document.body.classList.add("day")
-
+export function setDay() {
+  document.body.classList.add("day");
+  document.body.classList.remove("night");
+  document.getElementById("sunGlimmer").style.opacity = "1";
 }
 
-export function setNight(){
-
-document.body.classList.remove("day")
-document.body.classList.add("night")
-
+export function setNight() {
+  document.body.classList.add("night");
+  document.body.classList.remove("day");
+  document.getElementById("sunGlimmer").style.opacity = "0";
 }
 
 function showHome(){

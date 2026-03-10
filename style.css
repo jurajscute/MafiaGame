@@ -195,21 +195,22 @@ body.day {
   overflow: hidden;   /* prevent scrollbar from glimmer */
 }
 
-body.day::before {
-  content: "";
-  position: fixed;   /* stays in place when scrolling */
-  top: -50px;        /* move slightly off-screen for soft edge */
+#sunGlimmer {
+  position: fixed;
+  top: -50px;
   right: -50px;
   width: 400px;
   height: 400px;
   background: radial-gradient(circle, rgba(255,230,120,0.35), transparent 70%);
   filter: blur(50px);
   pointer-events: none;
-  z-index: 0;        /* behind all content */
-  animation: sunGlimmer 6s ease-in-out infinite;
+  z-index: 0; /* behind cards */
+  opacity: 0;
+  transition: opacity 1s ease;
+  animation: sunGlimmerAnim 6s ease-in-out infinite;
 }
 
-@keyframes sunGlimmer {
+@keyframes sunGlimmerAnim {
   0% {opacity: 0.25;}
   50% {opacity: 0.45;}
   100% {opacity: 0.25;}
