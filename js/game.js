@@ -229,13 +229,17 @@ let revealIndex=0
 export function setDay() {
   document.body.classList.add("day");
   document.body.classList.remove("night");
-  document.getElementById("sunGlimmer").style.opacity = "1";
+
+  const sun = document.getElementById("sunGlimmer");
+  sun.style.opacity = "1";       // show the sun during day
 }
 
 export function setNight() {
   document.body.classList.add("night");
   document.body.classList.remove("day");
-  document.getElementById("sunGlimmer").style.opacity = "0";
+
+  const sun = document.getElementById("sunGlimmer");
+  sun.style.opacity = "0";       // hide the sun at night
 }
 
 function showHome(){
