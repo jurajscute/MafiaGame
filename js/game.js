@@ -226,32 +226,19 @@ state.rolesEnabled = JSON.parse(savedRoles)
 
 let revealIndex=0
 
-function setDay() {
-  document.body.classList.add("day");
-  document.body.classList.remove("night");
+export function setDay(){
 
-  // Create sun if it doesn't exist
-  if (!document.getElementById("sunGlimmer")) {
-    const sun = document.createElement("div");
-    sun.id = "sunGlimmer";
-    document.body.appendChild(sun);
-  }
+document.body.classList.remove("night")
+document.body.classList.add("day")
+
 }
 
-function setNight() {
-  document.body.classList.add("night");
-  document.body.classList.remove("day");
+export function setNight(){
 
-  // Remove sun if it exists
-  const sun = document.getElementById("sunGlimmer");
-  if (sun) sun.remove();
+document.body.classList.remove("day")
+document.body.classList.add("night")
+
 }
-
-// Make sure this runs **after DOM is ready**
-document.addEventListener("DOMContentLoaded", () => {
-  // Example: start on day
-  setDay();
-});
 
 function showHome(){
 

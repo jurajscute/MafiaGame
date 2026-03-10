@@ -188,32 +188,32 @@ font-size:22px;
 }
 
 /* DAY/NIGHT CYCLE */
-body.day {
-  background: linear-gradient(135deg,#3b4946,#426866);
-  color: white;
-  position: relative; /* needed for ::before positioning */
-  overflow: hidden;   /* prevent scrollbar from glimmer */
+body.day{
+background:linear-gradient(135deg,#3b4946,#426866);
+color:white;
 }
 
-#sunGlimmer {
-  position: fixed;
-  top: -50px;
-  left: -50px;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(255, 220, 100, 0.8), transparent 50%);
-  filter: blur(100px);
-  pointer-events: none;
-  z-index: 0; /* behind all cards/UI */
-  opacity: 0; /* start hidden */
-  transition: opacity 0.8s ease;
-  animation: sunGlimmerAnim 6s ease-in-out infinite;
+@keyframes sunGlimmer{
+0%{opacity:0.25;}
+50%{opacity:0.45;}
+100%{opacity:0.25;}
 }
 
-@keyframes sunGlimmerAnim {
-  0% { opacity: 0.7; transform: translate(0,0) scale(1); }
-  50% { opacity: 1; transform: translate(10px,10px) scale(1.05); }
-  100% { opacity: 0.7; transform: translate(0,0) scale(1); }
+body.day::before{
+content:"";
+position:fixed;
+top:0;
+right:0;
+
+width:350px;
+height:350px;
+
+background:radial-gradient(circle, rgba(255,230,120,0.35), transparent 70%);
+filter:blur(25px);
+
+animation:sunGlimmer 6s ease-in-out infinite;
+
+pointer-events:none;
 }
 
 body.night{
