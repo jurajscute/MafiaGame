@@ -201,7 +201,7 @@ body.day {
   left: -50px;
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(255, 220, 100, 0.8));
+  background: radial-gradient(circle, rgba(255, 220, 100, 0.8), transparent 50%);
   filter: blur(100px);
   pointer-events: none;
   z-index: 0; /* behind all cards/UI */
