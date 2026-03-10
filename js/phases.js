@@ -142,22 +142,13 @@ ${p.name === player.name ? p.name + ' <span style="opacity:0.6">(You)</span>' : 
 
 render(`
 
-<div class="card role-sheriff">
+<div class="card role-${roleClass}">
 
-<h2 class="role-title">SHERIFF RESULT</h2>
+<h2 class="role-title">${player.role.toUpperCase()} ACTION</h2>
 
-<p>${target.name} is</p>
+<p>Select a target</p>
 
-<h1 style="
-color:${result === "MAFIA" ? "#e74c3c" : "#cdf3ff"};
-text-shadow:
-0 0 10px ${result === "MAFIA" ? "#e74c3c" : "#cdf3ff"},
-0 0 20px ${result === "MAFIA" ? "#e74c3c" : "#cdf3ff"};
-">
-${result}
-</h1>
-
-<button onclick="window.nextNightTurn()">Hide</button>
+${targets}
 
 </div>
 
@@ -179,13 +170,20 @@ let result = target.role==="mafia" ? "MAFIA" : "NOT MAFIA"
 
 render(`
 
-<div class="card">
+<div class="card role-sheriff">
 
-<h2>Investigation Result</h2>
+<h2 class="role-title">SHERIFF RESULT</h2>
 
 <p>${target.name} is</p>
 
-<h1>${result}</h1>
+<h1 style="
+color:${result === "MAFIA" ? "#e74c3c" : "#b0e2ff"};
+text-shadow:
+0 0 10px ${result === "MAFIA" ? "#e74c3c" : "#b0e2ff"},
+0 0 20px ${result === "MAFIA" ? "#e74c3c" : "#b0e2ff"};
+">
+${result}
+</h1>
 
 <button onclick="window.nextNightTurn()">Hide</button>
 
