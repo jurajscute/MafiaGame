@@ -188,32 +188,31 @@ font-size:22px;
 }
 
 /* DAY/NIGHT CYCLE */
-body.day{
-background:linear-gradient(135deg,#3b4946,#426866);
-color:white;
+body.day {
+  background: linear-gradient(135deg,#3b4946,#426866);
+  color: white;
+  position: relative; /* needed for ::before positioning */
+  overflow: hidden;   /* prevent scrollbar from glimmer */
 }
 
-@keyframes sunGlimmer{
-0%{opacity:0.25;}
-50%{opacity:0.45;}
-100%{opacity:0.25;}
+body.day::before {
+  content: "";
+  position: fixed;   /* stays in place when scrolling */
+  top: -50px;        /* move slightly off-screen for soft edge */
+  right: -50px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255,230,120,0.35), transparent 70%);
+  filter: blur(50px);
+  pointer-events: none;
+  z-index: 0;        /* behind all content */
+  animation: sunGlimmer 6s ease-in-out infinite;
 }
 
-body.day::before{
-content:"";
-position:fixed;
-top:0;
-right:0;
-
-width:350px;
-height:350px;
-
-background:radial-gradient(circle, rgba(255,230,120,0.35), transparent 70%);
-filter:blur(25px);
-
-animation:sunGlimmer 6s ease-in-out infinite;
-
-pointer-events:none;
+@keyframes sunGlimmer {
+  0% {opacity: 0.25;}
+  50% {opacity: 0.45;}
+  100% {opacity: 0.25;}
 }
 
 body.night{
