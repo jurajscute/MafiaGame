@@ -109,7 +109,7 @@ function showSettings() {
 
 <div class="role-count ${enabled ? "show" : ""}" id="${role}-count">
 
-<label>Players with this role</label>
+<label>Maximum amount:</label>
 
 <input type="number"
 min="1"
