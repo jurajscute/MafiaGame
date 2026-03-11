@@ -71,19 +71,22 @@ modal.classList.add("show")
 function showSettings() {
   const modal = document.getElementById("infoModal");
 
-  // List of roles we want to display in settings
+  // Solid background for modal overlay
+  modal.style.background = "rgba(0,0,0,1)"; // solid black
+  modal.style.pointerEvents = "auto"; // enable interaction
+
   const rolesList = ["doctor", "sheriff", "jester"];
 
   let content = `
-<div class="modal-content">
-<h2 class="settings-title">Game Settings</h2>
+    <div class="modal-content">
+      <h2 class="settings-title">Game Settings</h2>
 
-${state.gameStarted ? `
-<p style="opacity:0.6;margin-bottom:15px;">
-🔒 Settings locked after game start
-</p>
-` : ""}
-`;
+      ${state.gameStarted ? `
+        <p style="opacity:0.6;margin-bottom:15px;">
+        🔒 Settings locked after game start
+        </p>
+      ` : ""}
+  `;
 
   rolesList.forEach(role => {
     const enabled = state.rolesEnabled[role];
@@ -95,17 +98,17 @@ ${state.gameStarted ? `
         <span style="color:${color}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
         <label class="switch">
           <input type="checkbox"
-${enabled ? "checked" : ""}
-${state.gameStarted ? "disabled" : ""}
-onchange="toggleRole('${role}', this.checked)">
-<span class="slider"></span>
+            ${enabled ? "checked" : ""}
+            ${state.gameStarted ? "disabled" : ""}
+            onchange="toggleRole('${role}', this.checked)">
+          <span class="slider"></span>
         </label>
       </div>
 
       <div id="${role}SliderContainer"
         class="role-weight ${role}-slider ${enabled ? "show" : ""}">
         <input type="range"
-${state.gameStarted ? "disabled" : ""}
+          ${state.gameStarted ? "disabled" : ""}
           id="${role}Slider"
           min="0"
           max="100"
@@ -113,30 +116,24 @@ ${state.gameStarted ? "disabled" : ""}
           oninput="updateSlider(this,'${role}'); setRoleWeight('${role}', this.value)">
         <span>${weight}%</span>
       </div>
+
+      <div class="role-count ${enabled ? "show" : ""}" id="${role}-count">
+        <label>Maximum amount:</label>
+        <input type="number"
+          ${state.gameStarted ? "disabled" : ""}
+          min="1"
+          max="10"
+          value="${state.roleCounts[role] || 1}"
+          onchange="window.updateRoleCount('${role}', this.value)">
+      </div>
     `;
-
-    content += `
-
-<div class="role-count ${enabled ? "show" : ""}" id="${role}-count">
-
-<label>Maximum amount:</label>
-
-<input type="number"
-${state.gameStarted ? "disabled" : ""}
-min="1"
-max="10"
-value="${state.roleCounts[role] || 1}"
-onchange="window.updateRoleCount('${role}', this.value)">
-
-</div>
-
-`
   });
 
   content += `<button onclick="closeInfo()">Close</button></div>`;
 
   modal.innerHTML = content;
   modal.classList.remove("hidden");
+  modal.classList.add("show");
 
   // Animate only the sliders that are enabled
   document.querySelectorAll('.role-weight.show').forEach(el => {
@@ -145,20 +142,25 @@ onchange="window.updateRoleCount('${role}', this.value)">
     });
   });
 
-  // Initialize slider backgrounds
+  // Initialize slider colors immediately
   document.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
-  const role = slider.id.replace("Slider", "");
-  const color = roleColors[role] || "#fff";
-  slider.style.setProperty("--start", color);
-  slider.style.setProperty("--end", color);
-  updateSlider(slider, role);
-});
+    const role = slider.id.replace("Slider", "");
+    const color = roleColors[role] || "#fff";
 
-  modal.innerHTML = content
+    // Set gradient CSS variables
+    slider.style.setProperty("--start", color);
+    slider.style.setProperty("--end", color);
 
-modal.classList.remove("hidden")
-modal.classList.add("show")
+    // Update gradient visually
+    updateSlider(slider, role);
+  });
 
+  // Close modal by clicking outside content
+  modal.addEventListener("click", e => {
+    if (e.target.id === "infoModal") {
+      closeInfo();
+    }
+  }, { once: true }); // ensures the listener is removed after one use
 }
 
 window.updateSlider = function(slider,role){
