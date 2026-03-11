@@ -147,9 +147,12 @@ onchange="window.updateRoleCount('${role}', this.value)">
 
   // Initialize slider backgrounds
   document.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
-    let role = slider.id.replace("Slider", "");
-    updateSlider(slider, role);
-  });
+  const role = slider.id.replace("Slider", "");
+  const color = roleColors[role] || "#fff";
+  slider.style.setProperty("--start", color);
+  slider.style.setProperty("--end", color);
+  updateSlider(slider, role);
+});
 
   modal.innerHTML = content
 
