@@ -63,13 +63,8 @@ modal.innerHTML = `
 </div>
 
 `
-modal.classList.add("show");
-
-document.getElementById("infoModal").addEventListener("click", e=>{
-if(e.target.id === "infoModal"){
-closeInfo()
-}
-})
+modal.classList.remove("hidden")
+modal.classList.add("show")
 
 }
 
@@ -156,13 +151,11 @@ onchange="window.updateRoleCount('${role}', this.value)">
     updateSlider(slider, role);
   });
 
-  modal.classList.add("show");
+  modal.innerHTML = content
 
-  document.getElementById("infoModal").addEventListener("click", e=>{
-if(e.target.id === "infoModal"){
-closeInfo()
-}
-})
+modal.classList.remove("hidden")
+modal.classList.add("show")
+
 }
 
 window.updateSlider = function(slider,role){
@@ -582,5 +575,11 @@ window.performNightAction=performNightAction
 window.startVoting=startVoting
 window.showVoteOptions=showVoteOptions
 window.castVote=castVote
+
+document.getElementById("infoModal").addEventListener("click", e=>{
+if(e.target.id === "infoModal"){
+closeInfo()
+}
+})
 
 showHome()
