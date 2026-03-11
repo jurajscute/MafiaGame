@@ -34,6 +34,8 @@ sheriff:1,
 jester:1
 }
 
+gameStarted:false
+
 }
 
 export function resetVotes(){

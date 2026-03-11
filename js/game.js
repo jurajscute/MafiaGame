@@ -78,6 +78,12 @@ function showSettings() {
       <h2 class="settings-title">Game Settings</h2>
   `;
 
+  ${state.gameStarted ? `
+<p style="opacity:0.6;margin-bottom:15px;">
+🔒 Settings locked after game start
+</p>
+` : ""}
+
   rolesList.forEach(role => {
     const enabled = state.rolesEnabled[role];
     const weight = state.roleWeights[role] || 0;
@@ -88,7 +94,8 @@ function showSettings() {
         <span style="color:${color}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
         <label class="switch">
           <input type="checkbox" ${enabled ? "checked" : ""}
-            onchange="toggleRole('${role}', this.checked)">
+            ${state.gameStarted ? "disabled" : ""}
+onchange="toggleRole('${role}', this.checked)"
           <span class="slider"></span>
         </label>
       </div>
@@ -96,6 +103,7 @@ function showSettings() {
       <div id="${role}SliderContainer"
         class="role-weight ${role}-slider ${enabled ? "show" : ""}">
         <input type="range"
+${state.gameStarted ? "disabled" : ""}
           id="${role}Slider"
           min="0"
           max="100"
@@ -112,6 +120,7 @@ function showSettings() {
 <label>Maximum amount:</label>
 
 <input type="number"
+${state.gameStarted ? "disabled" : ""}
 min="1"
 max="10"
 value="${state.roleCounts[role] || 1}"
@@ -429,6 +438,8 @@ if(state.players.length<4){
 alert("Minimum 4 players")
 return
 }
+
+state.gameStarted = true
 
 assignRoles()
 
