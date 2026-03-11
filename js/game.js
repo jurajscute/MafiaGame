@@ -188,15 +188,9 @@ window.showSettings = showSettings
 
 window.toggleRole = function(role, enabled){
 
+let slider = document.getElementById(role+"SliderContainer")
 let count = document.getElementById(role+"-count")
 
-if(enabled){
-slider.classList.add("show")
-count.classList.add("show")
-}else{
-slider.classList.remove("show")
-count.classList.remove("show")
-}
 state.rolesEnabled[role] = enabled
 
 localStorage.setItem(
@@ -204,14 +198,14 @@ localStorage.setItem(
 JSON.stringify(state.rolesEnabled)
 )
 
-let slider = document.getElementById(role+"SliderContainer")
-
-if(slider){
+if(slider && count){
 
 if(enabled){
 slider.classList.add("show")
+count.classList.add("show")
 }else{
 slider.classList.remove("show")
+count.classList.remove("show")
 }
 
 }
@@ -403,13 +397,13 @@ pool.push("mafia")
 if(!state.rolesEnabled[role]) return
 
 let weight = state.roleWeights[role] || 0
+let max = state.roleCounts[role] || 1
+
+for(let i=0;i<max;i++){
+
 let roll = Math.random()*100
 
 if(roll < weight){
-
-let count = state.roleCounts[role] || 1
-
-for(let i=0;i<count;i++){
 pool.push(role)
 }
 
