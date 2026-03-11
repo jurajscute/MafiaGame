@@ -373,6 +373,8 @@ window.clearPlayers = function(){
 localStorage.removeItem("mafiaPlayers")
 state.players = []
 
+state.gameStarted = false
+
 renderPlayerSetup()
 
 }
