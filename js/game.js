@@ -63,29 +63,19 @@ modal.innerHTML = `
 </div>
 
 `
-modal.classList.remove("hidden")
-modal.classList.add("show")
+modal.classList.add("show");
 
 }
 
 function showSettings() {
   const modal = document.getElementById("infoModal");
 
-  // Solid background for modal overlay
-  modal.style.background = "rgba(0,0,0,1)"; // solid black
-  modal.style.pointerEvents = "auto"; // enable interaction
-
+  // List of roles we want to display in settings
   const rolesList = ["doctor", "sheriff", "jester"];
 
   let content = `
     <div class="modal-content">
       <h2 class="settings-title">Game Settings</h2>
-
-      ${state.gameStarted ? `
-        <p style="opacity:0.6;margin-bottom:15px;">
-        🔒 Settings locked after game start
-        </p>
-      ` : ""}
   `;
 
   rolesList.forEach(role => {
@@ -97,9 +87,7 @@ function showSettings() {
       <div class="role-toggle">
         <span style="color:${color}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
         <label class="switch">
-          <input type="checkbox"
-            ${enabled ? "checked" : ""}
-            ${state.gameStarted ? "disabled" : ""}
+          <input type="checkbox" ${enabled ? "checked" : ""}
             onchange="toggleRole('${role}', this.checked)">
           <span class="slider"></span>
         </label>
@@ -108,7 +96,6 @@ function showSettings() {
       <div id="${role}SliderContainer"
         class="role-weight ${role}-slider ${enabled ? "show" : ""}">
         <input type="range"
-          ${state.gameStarted ? "disabled" : ""}
           id="${role}Slider"
           min="0"
           max="100"
@@ -116,24 +103,29 @@ function showSettings() {
           oninput="updateSlider(this,'${role}'); setRoleWeight('${role}', this.value)">
         <span>${weight}%</span>
       </div>
-
-      <div class="role-count ${enabled ? "show" : ""}" id="${role}-count">
-        <label>Maximum amount:</label>
-        <input type="number"
-          ${state.gameStarted ? "disabled" : ""}
-          min="1"
-          max="10"
-          value="${state.roleCounts[role] || 1}"
-          onchange="window.updateRoleCount('${role}', this.value)">
-      </div>
     `;
+
+    content += `
+
+<div class="role-count ${enabled ? "show" : ""}" id="${role}-count">
+
+<label>Maximum amount:</label>
+
+<input type="number"
+min="1"
+max="10"
+value="${state.roleCounts[role] || 1}"
+onchange="window.updateRoleCount('${role}', this.value)">
+
+</div>
+
+`
   });
 
   content += `<button onclick="closeInfo()">Close</button></div>`;
 
   modal.innerHTML = content;
   modal.classList.remove("hidden");
-  modal.classList.add("show");
 
   // Animate only the sliders that are enabled
   document.querySelectorAll('.role-weight.show').forEach(el => {
@@ -142,25 +134,13 @@ function showSettings() {
     });
   });
 
-  // Initialize slider colors immediately
+  // Initialize slider backgrounds
   document.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
-    const role = slider.id.replace("Slider", "");
-    const color = roleColors[role] || "#fff";
-
-    // Set gradient CSS variables
-    slider.style.setProperty("--start", color);
-    slider.style.setProperty("--end", color);
-
-    // Update gradient visually
+    let role = slider.id.replace("Slider", "");
     updateSlider(slider, role);
   });
 
-  // Close modal by clicking outside content
-  modal.addEventListener("click", e => {
-    if (e.target.id === "infoModal") {
-      closeInfo();
-    }
-  }, { once: true }); // ensures the listener is removed after one use
+  modal.classList.add("show");
 }
 
 window.updateSlider = function(slider,role){
@@ -233,15 +213,12 @@ count.classList.remove("show")
 }
 
 function closeInfo(){
-
 const modal = document.getElementById("infoModal");
-
-modal.classList.remove("show")
-
-setTimeout(()=>{
-modal.classList.add("hidden")
-},250)
-
+document.getElementById("infoModal").classList.add("hidden")
+modal.classList.remove("show");
+  setTimeout(() => {
+    modal.classList.add("hidden");
+  }, 300);
 }
 
 window.showInfo = showInfo
@@ -387,8 +364,6 @@ window.clearPlayers = function(){
 localStorage.removeItem("mafiaPlayers")
 state.players = []
 
-state.gameStarted = false
-
 renderPlayerSetup()
 
 }
@@ -454,8 +429,6 @@ if(state.players.length<4){
 alert("Minimum 4 players")
 return
 }
-
-state.gameStarted = true
 
 assignRoles()
 
