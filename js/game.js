@@ -74,9 +74,15 @@ function showSettings() {
   const rolesList = ["doctor", "sheriff", "jester"];
 
   let content = `
-    <div class="modal-content">
-      <h2 class="settings-title">Game Settings</h2>
-  `;
+<div class="modal-content">
+<h2 class="settings-title">Game Settings</h2>
+
+${state.gameStarted ? `
+<p style="opacity:0.6;margin-bottom:15px;">
+🔒 Settings locked after game start
+</p>
+` : ""}
+`;
 
   ${state.gameStarted ? `
 <p style="opacity:0.6;margin-bottom:15px;">
@@ -93,10 +99,11 @@ function showSettings() {
       <div class="role-toggle">
         <span style="color:${color}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
         <label class="switch">
-          <input type="checkbox" ${enabled ? "checked" : ""}
-            ${state.gameStarted ? "disabled" : ""}
-onchange="toggleRole('${role}', this.checked)"
-          <span class="slider"></span>
+          <input type="checkbox"
+${enabled ? "checked" : ""}
+${state.gameStarted ? "disabled" : ""}
+onchange="toggleRole('${role}', this.checked)">
+<span class="slider"></span>
         </label>
       </div>
 
