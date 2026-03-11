@@ -32,9 +32,7 @@ roleCounts:{
 doctor:1,
 sheriff:1,
 jester:1
-},
-
-gameStarted:false
+}
 
 }
 
@@ -53,4 +51,3 @@ investigate:null
 }
 
 }
-
