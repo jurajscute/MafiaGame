@@ -22,6 +22,17 @@ jester: "#bb006d"
 
 }
 
+window.updateRoleCount = function(role,value){
+
+state.roleCounts[role] = Number(value)
+
+localStorage.setItem(
+"mafiaRoleCounts",
+JSON.stringify(state.roleCounts)
+)
+
+}
+
 function showInfo(){
 
 const modal = document.getElementById("infoModal");
@@ -93,6 +104,22 @@ function showSettings() {
         <span>${weight}%</span>
       </div>
     `;
+
+    content += `
+
+<div class="role-count ${enabled ? "show" : ""}" id="${role}-count">
+
+<label>Players with this role</label>
+
+<input type="number"
+min="1"
+max="10"
+value="${state.roleCounts[role] || 1}"
+onchange="window.updateRoleCount('${role}', this.value)">
+
+</div>
+
+`
   });
 
   content += `<button onclick="closeInfo()">Close</button></div>`;
@@ -161,6 +188,15 @@ window.showSettings = showSettings
 
 window.toggleRole = function(role, enabled){
 
+let count = document.getElementById(role+"-count")
+
+if(enabled){
+slider.classList.add("show")
+count.classList.add("show")
+}else{
+slider.classList.remove("show")
+count.classList.remove("show")
+}
 state.rolesEnabled[role] = enabled
 
 localStorage.setItem(
@@ -215,6 +251,12 @@ loadPlayers()
 let savedRoles = localStorage.getItem("mafiaRoles")
 
 let savedWeights = localStorage.getItem("mafiaRoleWeights")
+
+let savedCounts = localStorage.getItem("mafiaRoleCounts")
+
+if(savedCounts){
+state.roleCounts = JSON.parse(savedCounts)
+}
 
 if(savedWeights){
 state.roleWeights = JSON.parse(savedWeights)
@@ -347,25 +389,42 @@ pool.push(role)
 
 function assignRoles(){
 
-let players=state.players
-let pool=[]
+let players = state.players
+let pool = []
 
-let mafia=mafiaCount(players.length)
+let mafia = mafiaCount(players.length)
 
-for(let i=0;i<mafia;i++) pool.push("mafia")
+for(let i=0;i<mafia;i++){
+pool.push("mafia")
+}
 
-maybeAddRole("doctor", pool)
-maybeAddRole("sheriff", pool)
-maybeAddRole("jester", pool)
+["doctor","sheriff","jester"].forEach(role=>{
 
-while(pool.length<players.length){
+if(!state.rolesEnabled[role]) return
+
+let weight = state.roleWeights[role] || 0
+let roll = Math.random()*100
+
+if(roll < weight){
+
+let count = state.roleCounts[role] || 1
+
+for(let i=0;i<count;i++){
+pool.push(role)
+}
+
+}
+
+})
+
+while(pool.length < players.length){
 pool.push("villager")
 }
 
 shuffle(pool)
 
 players.forEach((p,i)=>{
-p.role=pool[i]
+p.role = pool[i]
 })
 
 }

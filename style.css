@@ -586,6 +586,56 @@ background:#2ecc71;
 box-shadow:0 0 8px #2ecc71;
 }
 
+.role-count{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+height:0;
+margin-bottom:0;
+padding:0 4px;
+
+opacity:0;
+transform:translateY(-8px) scaleY(0.9);
+
+pointer-events:none;
+
+transition:
+opacity 0.25s ease,
+transform 0.35s ease,
+height 0.35s ease,
+margin-bottom 0.35s ease,
+padding 0.35s ease;
+
+}
+
+.role-count.show{
+
+height:44px;
+margin-bottom:6px;
+padding:6px 4px 14px 4px;
+
+opacity:1;
+transform:translateY(0) scaleY(1);
+
+pointer-events:auto;
+
+}
+
+.role-count input{
+
+width:60px;
+padding:6px;
+
+border-radius:6px;
+border:none;
+
+text-align:center;
+font-weight:bold;
+
+}
+
 .role-weight{
 
 display:flex;

@@ -26,6 +26,12 @@ nightActions:{
 kill:null,
 save:null,
 investigate:null
+},
+
+roleCounts:{
+doctor:1,
+sheriff:1,
+jester:1
 }
 
 }
