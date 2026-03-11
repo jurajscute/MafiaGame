@@ -65,6 +65,12 @@ modal.innerHTML = `
 `
 modal.classList.add("show");
 
+document.getElementById("infoModal").addEventListener("click", e=>{
+if(e.target.id === "infoModal"){
+closeInfo()
+}
+})
+
 }
 
 function showSettings() {
@@ -151,6 +157,12 @@ onchange="window.updateRoleCount('${role}', this.value)">
   });
 
   modal.classList.add("show");
+
+  document.getElementById("infoModal").addEventListener("click", e=>{
+if(e.target.id === "infoModal"){
+closeInfo()
+}
+})
 }
 
 window.updateSlider = function(slider,role){
@@ -223,12 +235,15 @@ count.classList.remove("show")
 }
 
 function closeInfo(){
+
 const modal = document.getElementById("infoModal");
-document.getElementById("infoModal").classList.add("hidden")
-modal.classList.remove("show");
-  setTimeout(() => {
-    modal.classList.add("hidden");
-  }, 300);
+
+modal.classList.remove("show")
+
+setTimeout(()=>{
+modal.classList.add("hidden")
+},250)
+
 }
 
 window.showInfo = showInfo
