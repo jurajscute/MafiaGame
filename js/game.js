@@ -84,12 +84,6 @@ ${state.gameStarted ? `
 ` : ""}
 `;
 
-  ${state.gameStarted ? `
-<p style="opacity:0.6;margin-bottom:15px;">
-🔒 Settings locked after game start
-</p>
-` : ""}
-
   rolesList.forEach(role => {
     const enabled = state.rolesEnabled[role];
     const weight = state.roleWeights[role] || 0;
