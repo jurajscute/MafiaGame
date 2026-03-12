@@ -134,17 +134,22 @@ onchange="window.updateRoleCount('${role}', this.value)">
 if(role === "doctor" && enabled){
 content += `
 
-<div class="role-toggle" id="doctor-reveal-setting">
+<div class="additional-settings-bar" onclick="toggleDoctorExtras()">
+  <span>Additional Settings</span>
+  <span class="additional-arrow">${state.doctorExtraOpen ? "▴" : "▾"}</span>
+</div>
 
-<span>Reveal Saved Player</span>
+<div class="doctor-extra-settings ${state.doctorExtraOpen ? "show" : ""}">
+  <div class="role-toggle doctor-subsetting">
+    <span>Reveal Saved Player</span>
 
-<label class="switch">
-<input type="checkbox"
-${state.doctorRevealSave ? "checked" : ""}
-onchange="toggleDoctorReveal(this.checked)">
-<span class="slider"></span>
-</label>
-
+    <label class="switch">
+      <input type="checkbox"
+      ${state.doctorRevealSave ? "checked" : ""}
+      onchange="toggleDoctorReveal(this.checked)">
+      <span class="slider"></span>
+    </label>
+  </div>
 </div>
 
 `
@@ -233,6 +238,14 @@ JSON.stringify(state.roleWeights)
 
 window.showSettings = showSettings
 
+window.toggleDoctorExtras = function(){
+
+state.doctorExtraOpen = !state.doctorExtraOpen
+
+showSettings()
+
+}
+
 window.toggleRole = function(role, enabled){
 
 let slider = document.getElementById(role+"SliderContainer")
@@ -268,6 +281,10 @@ if(!enabled && existing){
 existing.remove()
 }
 
+}
+
+if(role === "doctor" && !enabled){
+state.doctorExtraOpen = false
 }
 
 state.rolesEnabled[role] = enabled

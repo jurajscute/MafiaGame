@@ -791,6 +791,61 @@ margin-left:18px;
 opacity:0.9;
 }
 
+.additional-settings-bar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+margin:6px 0 10px 0;
+padding:12px 16px;
+
+background:rgba(255,255,255,0.06);
+border-radius:10px;
+
+cursor:pointer;
+user-select:none;
+
+transition:background 0.2s ease, transform 0.2s ease;
+}
+
+.additional-settings-bar:hover{
+background:rgba(255,255,255,0.1);
+}
+
+.additional-settings-bar:active{
+transform:scale(0.99);
+}
+
+.additional-arrow{
+opacity:0.8;
+font-size:14px;
+}
+
+.doctor-extra-settings{
+height:0;
+opacity:0;
+overflow:hidden;
+transform:translateY(-6px);
+
+transition:
+height 0.25s ease,
+opacity 0.25s ease,
+transform 0.25s ease,
+margin-bottom 0.25s ease;
+}
+
+.doctor-extra-settings.show{
+height:62px;
+opacity:1;
+transform:translateY(0);
+margin-bottom:6px;
+}
+
+.doctor-subsetting{
+margin-left:14px;
+background:rgba(255,255,255,0.03);
+}
+
 /* close button */
 
 .modal-content button{

@@ -8,6 +8,8 @@ gameStarted: false,
 
 doctorRevealSave: false,
 
+doctorExtraOpen: false,
+
 night:0,
 
 nightTurnIndex: 0,
