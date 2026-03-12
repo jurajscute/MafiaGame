@@ -579,7 +579,7 @@ count.insertAdjacentHTML("afterend", `
 
 <div class="sheriff-extra-wrap" id="sheriff-extra-wrap">
 
-  <<div class="additional-settings-bar" onclick="toggleSheriffExtras()">
+  <div class="additional-settings-bar" onclick="toggleSheriffExtras()">
     <span>Additional Settings</span>
     <span class="additional-arrow">▾</span>
   </div>
@@ -1105,6 +1105,7 @@ function revealRole(){
 
 let player = state.players[revealIndex]
 let color = roleColors[player.role] || "white"
+let role = roles[player.role]
 
 render(`
 
@@ -1127,6 +1128,10 @@ ${player.role.toUpperCase()}
 </div>
 
 </div>
+
+<p class="role-description">
+${role.description || ""}
+</p>
 
 <button onclick="window.nextPlayer()">Hide</button>
 
