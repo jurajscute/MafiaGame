@@ -655,6 +655,10 @@ ${resultsHTML}
 
 function showRoleRevealEnd(){
 
+    let logHTML = state.gameLog.length
+? state.gameLog.map(entry => `<p class="log-entry">${entry}</p>`).join("")
+: `<p style="opacity:0.7;">No log entries recorded.</p>`
+
 let mafia = state.players.filter(p => roles[p.role]?.team === "mafia")
 let town = state.players.filter(p => roles[p.role]?.team === "village")
 let neutral = state.players.filter(p => roles[p.role]?.team === "neutral")
@@ -682,10 +686,6 @@ let statsHTML = `
 `
 
 function renderRoleList(list){
-
-    let logHTML = state.gameLog.length
-? state.gameLog.map(entry => `<p class="log-entry">${entry}</p>`).join("")
-: `<p style="opacity:0.7;">No log entries recorded.</p>`
 
 if(!list.length){
 return `<p style="opacity:0.7;">None</p>`
