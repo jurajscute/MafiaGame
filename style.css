@@ -1419,27 +1419,27 @@ background:rgba(255,255,255,0.06);
 border:1px solid rgba(255,255,255,0.08);
 }
 
-.reset-settings-btn{
+.modal-content .reset-settings-btn{
 background:linear-gradient(135deg,#8b1e1e,#5e1010);
 color:white;
 margin-top:10px;
 }
 
-.reset-settings-btn:hover{
+.modal-content .reset-settings-btn:hover{
 background:linear-gradient(135deg,#a32626,#701414);
 }
 
-.reset-settings-btn:active{
+.modal-content .reset-settings-btn:active{
 transform:scale(0.97);
 }
 
-.reset-confirm-modal p{
+.modal-content .reset-confirm-modal p{
 opacity:0.85;
 line-height:1.5;
 margin-bottom:20px;
 }
 
-.reset-confirm-actions{
+.modal-content .reset-confirm-actions{
 display:flex;
 flex-direction:column;
 gap:10px;
