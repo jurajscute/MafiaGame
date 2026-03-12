@@ -658,6 +658,28 @@ function showRoleRevealEnd(){
 let mafia = state.players.filter(p => roles[p.role]?.team === "mafia")
 let town = state.players.filter(p => roles[p.role]?.team === "village")
 let neutral = state.players.filter(p => roles[p.role]?.team === "neutral")
+let statsHTML = `
+
+<hr style="opacity:0.3;margin:20px 0;">
+
+<h2 class="role-title">GAME STATISTICS</h2>
+
+<div class="role-row">
+  <span class="role-player">Nights Played</span>
+  <span class="role-name">${state.gameStats.nights}</span>
+</div>
+
+<div class="role-row">
+  <span class="role-player">Votes Cast</span>
+  <span class="role-name">${state.gameStats.votesCast}</span>
+</div>
+
+<div class="role-row">
+  <span class="role-player">Eliminations</span>
+  <span class="role-name">${state.gameStats.eliminations}</span>
+</div>
+
+`
 
 function renderRoleList(list){
 
@@ -683,29 +705,6 @@ return `
 ${p.role.toUpperCase()}
 </span>
 
-</div>
-
-`
-
-let statsHTML = `
-
-<hr style="opacity:0.3;margin:20px 0;">
-
-<h2 class="role-title">GAME STATISTICS</h2>
-
-<div class="role-row">
-  <span class="role-player">Nights Played</span>
-  <span class="role-name">${state.gameStats.nights}</span>
-</div>
-
-<div class="role-row">
-  <span class="role-player">Votes Cast</span>
-  <span class="role-name">${state.gameStats.votesCast}</span>
-</div>
-
-<div class="role-row">
-  <span class="role-player">Eliminations</span>
-  <span class="role-name">${state.gameStats.eliminations}</span>
 </div>
 
 `
