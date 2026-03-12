@@ -1188,11 +1188,16 @@ opacity:0.5;
 filter:grayscale(30%);
 }
 
-.settings-locked-mode .role-weight.show,
-.settings-locked-mode .role-count.show,
-.settings-locked-mode .doctor-extra-wrap.show{
+.settings-locked-mode .role-toggle,
+.settings-locked-mode .role-weight,
+.settings-locked-mode .role-count,
+.settings-locked-mode .additional-settings-bar{
 opacity:0.5;
 filter:grayscale(30%);
+}
+
+.settings-locked-mode .additional-settings-bar:hover{
+background:rgba(255,255,255,0.08);
 }
 
 .role-count input:disabled{
@@ -1480,13 +1485,3 @@ opacity:0.6;
 filter:grayscale(30%);
 }
 
-.settings-locked-mode .additional-settings-bar{
-opacity:0.5;
-filter:grayscale(30%);
-cursor:not-allowed;
-}
-
-.settings-locked-mode .additional-settings-bar:hover{
-background:rgba(255,255,255,0.05);
-transform:none;
-}
