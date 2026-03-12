@@ -1,6 +1,7 @@
 import {state, resetNightActions} from "./state.js"
 import {render, passPhone} from "./ui.js"
 import {roles} from "./roles.js"
+import {state, resetNightActions, addLogEntry} from "./state.js"
 
 function setDay() {
     document.body.classList.remove("night");
@@ -16,6 +17,8 @@ window.setDay = setDay;
 window.setNight = setNight;
 
 export function startNight(){
+    state.gameStats.nights++
+addLogEntry(`Night ${state.gameStats.nights} began.`)
 
 setNight();
 
@@ -159,6 +162,18 @@ ${targets}
 }
 
 export function performNightAction(targetName){
+
+    if(role.nightAction === "kill"){
+addLogEntry(`Mafia targeted ${targetName}.`)
+}
+
+if(role.nightAction === "save"){
+addLogEntry(`Doctor protected ${targetName}.`)
+}
+
+if(role.nightAction === "investigate"){
+addLogEntry(`Sheriff investigated ${targetName}.`)
+}
 
 let player = state.players[state.nightTurnIndex]
 let role = roles[player.role]
@@ -314,6 +329,8 @@ let results = []
 
 if(kill && kill !== save){
 
+    addLogEntry(`${kill} was killed during the night.`)
+
 let victim = state.players.find(p => p.name === kill)
 
 if(victim){
@@ -325,6 +342,12 @@ text: `${kill} was killed during the night.`
 }
 
 }else if(kill && kill === save){
+
+    if(state.doctorRevealSave){
+addLogEntry(`${save} was saved by the Doctor.`)
+}else{
+addLogEntry(`Someone was attacked but survived the night.`)
+}
 
 if(state.doctorRevealSave){
 results.push({
@@ -339,6 +362,9 @@ text: "Someone was attacked but survived the night."
 }
 
 }else{
+
+    addLogEntry(`The night was quiet.`)
+
 results.push({
 type: "peace",
 text: "The night was quiet."
@@ -427,6 +453,15 @@ ${buttons}
 
 export function castVote(targetName){
 
+let alivePlayers = state.players.filter(p=>p.alive)
+let voter = alivePlayers[state.voteTurnIndex]
+
+if(voter){
+addLogEntry(`${voter.name} voted for ${targetName}.`)
+}
+
+state.gameStats.votesCast++
+
 if(!state.votes[targetName]){
 state.votes[targetName]=0
 }
@@ -483,6 +518,8 @@ tie = true
 
 if(tie){
 
+    addLogEntry(`Voting ended in a tie. Nobody was eliminated.`)
+
 render(`
 
 <div class="card">
@@ -506,6 +543,8 @@ return
 }
 
 if(eliminated === "skip"){
+
+addLogEntry(`The town skipped the vote.`)
 
 render(`
 
@@ -531,6 +570,9 @@ return
 
 if(eliminated){
 
+addLogEntry(`${eliminated} was voted out.`)
+state.gameStats.eliminations++
+
 let player = state.players.find(p => p.name === eliminated)
 
 if(player){
@@ -538,6 +580,8 @@ if(player){
 player.alive = false
 
 if(player.role === "jester"){
+
+    addLogEntry(`${player.name} won as the Jester.`)
 
 document.body.className = "win-jester"
 
@@ -616,6 +660,17 @@ let neutral = state.players.filter(p => roles[p.role]?.team === "neutral")
 
 function renderRoleList(list){
 
+    let logHTML = state.gameLog.length
+? state.gameLog.map(entry => `<p class="log-entry">${entry}</p>`).join("")
+: `<p style="opacity:0.7;">No log entries recorded.</p>`
+<hr style="opacity:0.3;margin:20px 0;">
+
+<h3>Game Log</h3>
+
+<div class="game-log-box">
+${logHTML}
+</div>
+
 if(!list.length){
 return `<p style="opacity:0.7;">None</p>`
 }
@@ -637,6 +692,30 @@ ${p.role.toUpperCase()}
 </div>
 
 `
+
+let statsHTML = `
+
+<hr style="opacity:0.3;margin:20px 0;">
+
+<h2 class="role-title">GAME STATISTICS</h2>
+
+<div class="role-row">
+  <span class="role-player">Nights Played</span>
+  <span class="role-name">${state.gameStats.nights}</span>
+</div>
+
+<div class="role-row">
+  <span class="role-player">Votes Cast</span>
+  <span class="role-name">${state.gameStats.votesCast}</span>
+</div>
+
+<div class="role-row">
+  <span class="role-player">Eliminations</span>
+  <span class="role-name">${state.gameStats.eliminations}</span>
+</div>
+
+`
+
 
 }).join("")
 
@@ -660,6 +739,10 @@ ${renderRoleList(town)}
 
 <h3 class="jester-win">Neutral</h3>
 ${renderRoleList(neutral)}
+
+<br>
+
+${statsHTML}
 
 <br>
 

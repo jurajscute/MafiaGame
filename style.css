@@ -1530,3 +1530,20 @@ transform:scale(1);
 }
 
 }
+
+.game-log-box{
+max-height:220px;
+overflow-y:auto;
+text-align:left;
+padding:10px;
+border-radius:10px;
+background:rgba(255,255,255,0.05);
+margin-top:10px;
+}
+
+.log-entry{
+margin:8px 0;
+opacity:0.9;
+font-size:14px;
+line-height:1.4;
+}

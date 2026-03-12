@@ -19,6 +19,14 @@ rolesSectionOpen: true,
 
 presetsSectionOpen: false,
 
+gameLog: [],
+gameStats: {
+nights: 0,
+votesCast: 0,
+eliminations: 0
+},
+hostMode: false,
+
 night:0,
 
 nightTurnIndex: 0,
@@ -65,4 +73,17 @@ save:null,
 investigate:null
 }
 
+}
+
+export function resetGameTracking(){
+state.gameLog = []
+state.gameStats = {
+nights: 0,
+votesCast: 0,
+eliminations: 0
+}
+}
+
+export function addLogEntry(text){
+state.gameLog.push(text)
 }
