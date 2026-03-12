@@ -70,13 +70,22 @@ modal.classList.add("show");
 function showSettings() {
   const modal = document.getElementById("infoModal");
 
+if(state.gameStarted){
+modal.querySelector(".modal-content")
+.classList.add("settings-locked-mode")
+}
+
   // List of roles we want to display in settings
   const rolesList = ["doctor", "sheriff", "jester"];
 
   let content = `
     <div class="modal-content">
       <h2 class="settings-title">Game Settings</h2>
-${state.gameStarted ? "<p style='opacity:0.7'>Settings locked during game</p>" : ""}
+${state.gameStarted ? `
+<div class="settings-locked">
+🔒 Settings locked during game
+</div>
+` : ""}
   `;
 
   rolesList.forEach(role => {
