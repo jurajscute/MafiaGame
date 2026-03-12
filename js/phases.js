@@ -88,35 +88,33 @@ render(`
 
 <div class="card">
 
-<h2>Your Role</h2>
-
-<div class="role-card" id="roleCard" onclick="flipRole()">
-
-<div class="role-inner">
-
-<div class="role-front">
-Tap to reveal
-</div>
-
-<div class="role-back" style="color:${color}">
+<h2>
+You are a
+<span style="
+color:${color};
+font-weight:bold;
+text-shadow:
+0 0 10px ${color},
+0 0 20px ${color},
+0 0 30px ${color};
+">
 ${player.role.toUpperCase()}
-</div>
-
-</div>
-
-</div>
+</span>
+</h2>
 
 <p class="role-description">
 ${role.description || ""}
 </p>
 
-<button onclick="window.nextPlayer()">Hide</button>
+<button onclick="window.nextNightTurn()">Hide</button>
 
 </div>
 
 `)
 
 return
+
+}
 
 }
 
