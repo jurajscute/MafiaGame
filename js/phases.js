@@ -88,23 +88,29 @@ render(`
 
 <div class="card">
 
-<h2>
-You are a
-<span style="
-color:${color};
-font-weight:bold;
-text-shadow:
-0 0 10px ${color},
-0 0 20px ${color},
-0 0 30px ${color};
-">
+<h2>Your Role</h2>
+
+<div class="role-card" id="roleCard" onclick="flipRole()">
+
+<div class="role-inner">
+
+<div class="role-front">
+Tap to reveal
+</div>
+
+<div class="role-back" style="color:${color}">
 ${player.role.toUpperCase()}
-</span>
-</h2>
+</div>
 
-<p>No night action</p>
+</div>
 
-<button onclick="window.nextNightTurn()">Hide</button>
+</div>
+
+<p class="role-description">
+${role.description || ""}
+</p>
+
+<button onclick="window.nextPlayer()">Hide</button>
 
 </div>
 
@@ -445,50 +451,30 @@ let tie = false
 let resultsHTML = ""
 
 // Build vote results
+let maxVotes = Math.max(...Object.values(state.votes))
+
 for(let name in state.votes){
 
 let count = state.votes[name]
-
 let label = name === "skip" ? "Skip Vote" : name
 
-resultsHTML += `<p>${label} — ${count} vote${count>1?"s":""}</p>`
+let percent = (count / maxVotes) * 100
 
-if(count > highest){
+resultsHTML += `
 
-highest = count
-eliminated = name
-tie = false
+<div class="vote-row">
 
-}else if(count === highest){
+<div class="vote-label">
+${label} — ${count}
+</div>
 
-tie = true
-
-}
-
-}
-
-// Handle tie
-if(tie){
-
-render(`
-
-<div class="card">
-
-<h2>Voting Results</h2>
-
-${resultsHTML}
-
-<hr>
-
-<h2>It's a tie! Nobody was eliminated.</h2>
-
-<button onclick="window.nextNight()">Next Night</button>
+<div class="vote-bar-bg">
+<div class="vote-bar-fill" style="width:${percent}%"></div>
+</div>
 
 </div>
 
-`)
-
-return
+`
 
 }
 
@@ -556,7 +542,6 @@ return
 if(checkWin()) return
 
 render(`
-
 <div class="card">
 
 <h2>Voting Results</h2>
@@ -565,12 +550,13 @@ ${resultsHTML}
 
 <hr>
 
-<h2>${eliminated} was voted out</h2>
+<h2 class="elimination-text">
+${eliminated} was voted out
+</h2>
 
 <button onclick="window.nextNight()">Next Night</button>
 
 </div>
-
 `)
 
 }
@@ -579,13 +565,16 @@ ${resultsHTML}
 
 export function showRoleRevealEnd(){
 
-let rolesHTML = ""
+let mafia = state.players.filter(p => p.role === "mafia")
+let others = state.players.filter(p => p.role !== "mafia")
 
-state.players.forEach(p => {
+function renderRoleList(list){
+
+return list.map(p => {
 
 let color = roleColors[p.role] || "white"
 
-rolesHTML += `
+return `
 
 <div class="role-row" style="border-left:4px solid ${color};">
 
@@ -599,7 +588,9 @@ ${p.role.toUpperCase()}
 
 `
 
-})
+}).join("")
+
+}
 
 render(`
 
@@ -607,9 +598,15 @@ render(`
 
 <h2 class="role-title">FINAL ROLES</h2>
 
+<h3 class="mafia-win">Mafia</h3>
+
+${renderRoleList(mafia)}
+
 <hr style="opacity:0.3;margin:20px 0;">
 
-${rolesHTML}
+<h3 class="village-win">Town</h3>
+
+${renderRoleList(others)}
 
 <br>
 

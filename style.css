@@ -1467,3 +1467,66 @@ opacity:0.6;
 filter:grayscale(30%);
 }
 
+.vote-row{
+margin:10px 0;
+text-align:left;
+}
+
+.vote-label{
+font-size:14px;
+margin-bottom:4px;
+opacity:0.9;
+}
+
+.vote-bar-bg{
+height:10px;
+background:rgba(255,255,255,0.1);
+border-radius:6px;
+overflow:hidden;
+}
+
+.vote-bar-fill{
+height:100%;
+background:linear-gradient(135deg,#ffaa49,#d18f00);
+border-radius:6px;
+transition:width 0.4s ease;
+}
+
+.role-description{
+margin-top:14px;
+opacity:0.85;
+font-size:15px;
+line-height:1.4;
+}
+
+.vote-row{
+animation:fadeIn 0.4s ease;
+}
+
+.role-back{
+animation:rolePulse 2s ease-in-out infinite;
+}
+
+@keyframes rolePulse{
+0%{text-shadow:0 0 10px currentColor}
+50%{text-shadow:0 0 25px currentColor}
+100%{text-shadow:0 0 10px currentColor}
+}
+
+.elimination-text{
+animation:dramaticReveal 0.6s ease;
+}
+
+@keyframes dramaticReveal{
+
+0%{
+opacity:0;
+transform:scale(0.8);
+}
+
+100%{
+opacity:1;
+transform:scale(1);
+}
+
+}
