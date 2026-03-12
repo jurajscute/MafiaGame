@@ -15,6 +15,8 @@ sheriffExtraOpen: false,
 
 mafiaCountOverride: 0,
 
+rolesSectionOpen: true,
+
 night:0,
 
 nightTurnIndex: 0,

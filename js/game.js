@@ -67,8 +67,26 @@ modal.classList.add("show");
 
 }
 
+window.toggleRolesSection = function(){
+
+state.rolesSectionOpen = !state.rolesSectionOpen
+
+let panel = document.getElementById("roles-section-content")
+let arrow = document.querySelector("#roles-section-wrap .section-arrow")
+
+if(panel){
+panel.classList.toggle("show", state.rolesSectionOpen)
+}
+
+if(arrow){
+arrow.style.transform = state.rolesSectionOpen ? "rotate(180deg)" : "rotate(0deg)"
+}
+
+}
+
 function showSettings() {
   const modal = document.getElementById("infoModal");
+  let rolesContent = ""
 
   // List of roles we want to display in settings
   const rolesList = ["doctor", "sheriff", "jester"];
@@ -127,7 +145,7 @@ content += `
     const weight = state.roleWeights[role] || 0;
     const color = roleColors[role] || "#fff";
 
-    content += `
+    rolesContent += `
       <div class="role-toggle">
         <span style="color:${color}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
         <label class="switch">
@@ -149,7 +167,7 @@ content += `
       </div>
     `;
 
-    content += `
+    rolesContent += `
 
 <div class="role-count ${enabled ? "show" : ""}" id="${role}-count">
 
@@ -166,7 +184,7 @@ onchange="window.updateRoleCount('${role}', this.value)">
 `
 
 if(role === "doctor" && enabled){
-content += `
+rolesContent += `
 
 <div class="doctor-extra-wrap show" id="doctor-extra-wrap">
 
@@ -194,7 +212,7 @@ content += `
 }
 
 if(role === "sheriff" && enabled){
-content += `
+rolesContent += `
 
 <div class="sheriff-extra-wrap show" id="sheriff-extra-wrap">
 
@@ -221,6 +239,23 @@ content += `
 `
 }
   });
+
+  content += `
+
+<div class="settings-section-wrap" id="roles-section-wrap">
+
+  <div class="settings-section-bar" onclick="toggleRolesSection()">
+    <span>Roles</span>
+    <span class="section-arrow" style="transform:${state.rolesSectionOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+  </div>
+
+  <div class="settings-section-content ${state.rolesSectionOpen ? "show" : ""}" id="roles-section-content">
+    ${rolesContent}
+  </div>
+
+</div>
+
+`
 
   content += `<button onclick="closeInfo()">Close</button></div>`;
 
