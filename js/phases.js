@@ -671,6 +671,4 @@ ${renderRoleList(neutral)}
 
 }
 
-export { showRoleRevealEnd }
-
 window.nextNight = nextNight
