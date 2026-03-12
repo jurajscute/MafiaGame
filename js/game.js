@@ -76,6 +76,7 @@ function showSettings() {
   let content = `
     <div class="modal-content">
       <h2 class="settings-title">Game Settings</h2>
+${state.gameStarted ? "<p style='opacity:0.7'>Settings locked during game</p>" : ""}
   `;
 
   rolesList.forEach(role => {
@@ -125,6 +126,13 @@ onchange="window.updateRoleCount('${role}', this.value)">
   content += `<button onclick="closeInfo()">Close</button></div>`;
 
   modal.innerHTML = content;
+  if(state.gameStarted){
+
+modal.querySelectorAll("input").forEach(el=>{
+el.disabled = true
+})
+
+}
   modal.classList.remove("hidden");
 
   // Animate only the sliders that are enabled
@@ -430,6 +438,8 @@ if(state.players.length<4){
 alert("Minimum 4 players")
 return
 }
+
+state.gameStarted = true
 
 assignRoles()
 

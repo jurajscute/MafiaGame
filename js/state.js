@@ -4,6 +4,8 @@ phase:"home",
 
 players:[],
 
+gameStarted: false,
+
 night:0,
 
 nightTurnIndex: 0,
