@@ -308,45 +308,59 @@ setDay();
 let kill = state.nightActions.kill
 let save = state.nightActions.save
 
-let message = "The night was peaceful."
-let morningCardClass = "card"
+let results = []
 
-// Mafia kill succeeds
 if(kill && kill !== save){
 
 let victim = state.players.find(p => p.name === kill)
 
 if(victim){
 victim.alive = false
-message = `${kill} was killed during the night.`
+results.push({
+type: "death",
+text: `${kill} was killed during the night.`
+})
 }
 
-}
-
-// Doctor save
-else if(kill && kill === save){
+}else if(kill && kill === save){
 
 if(state.doctorRevealSave){
-message = `${save} was saved by the Doctor!`
-
-morningCardClass = "card role-doctor"
+results.push({
+type: "save",
+text: `🩺 ${save} was saved by the Doctor!`
+})
 }else{
-message = "Someone was attacked but survived the night."
-
-morningCardClass = "card"
+results.push({
+type: "save",
+text: "Someone was attacked but survived the night."
+})
 }
 
+}else{
+results.push({
+type: "peace",
+text: "The night was quiet."
+})
 }
 
 if(checkWin()) return
 
+let resultsHTML = results.map(r => {
+let cls = ""
+if(r.type === "death") cls = "night-result-death"
+if(r.type === "save") cls = "night-result-save"
+if(r.type === "peace") cls = "night-result-peace"
+
+return `<div class="night-result ${cls}">${r.text}</div>`
+}).join("")
+
 render(`
 
-<div class="${morningCardClass}">
+<div class="card">
 
 <h2>Morning</h2>
 
-<p>${message}</p>
+${resultsHTML}
 
 <button onclick="window.startVoting()">Continue</button>
 

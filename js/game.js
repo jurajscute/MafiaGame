@@ -101,6 +101,22 @@ ${state.gameStarted ? `
 ` : ""}
   `;
 
+  content += `
+
+<div class="settings-section-wrap">
+  <div class="settings-section-bar">
+    <span>Presets</span>
+  </div>
+
+  <div class="preset-grid">
+    <button onclick="applyPreset('classic')">Classic</button>
+    <button onclick="applyPreset('beginner')">Beginner</button>
+    <button onclick="applyPreset('chaotic')">Chaotic</button>
+  </div>
+</div>
+
+`
+
 const playerCount = state.players.length
 const mafiaMax = maxAllowedMafia(playerCount)
 const autoMafia = playerCount > 0 ? mafiaCount(playerCount) : 1
@@ -804,20 +820,148 @@ p.role = pool[i]
 
 function startGame(){
 
-if(state.players.length<4){
+if(state.players.length < 4){
 alert("Minimum 4 players")
 return
 }
+
+showPreGameSummary()
+
+}
+
+function showPreGameSummary(){
+
+let playerCount = state.players.length
+let mafia = state.mafiaCountOverride || mafiaCount(playerCount)
+mafia = Math.min(mafia, maxAllowedMafia(playerCount))
+
+let warnings = getBalanceWarnings()
+
+let warningsHTML = warnings.length
+? `
+<div class="settings-locked" style="text-align:left;">
+  <strong>Setup Warnings</strong>
+  ${warnings.map(w => `<p style="margin:8px 0 0 0;">• ${w}</p>`).join("")}
+</div>
+`
+: `
+<div class="settings-locked" style="text-align:left; border-color:rgba(46,204,113,0.25);">
+  <strong>Setup looks balanced</strong>
+</div>
+`
+
+let enabledRoles = []
+
+Object.keys(state.rolesEnabled).forEach(role => {
+if(state.rolesEnabled[role]){
+enabledRoles.push(role)
+}
+})
+
+let rolesHTML = enabledRoles.length
+? enabledRoles.map(role => {
+let color = roleColors[role] || "white"
+let count = state.roleCounts[role] || 1
+let extras = ""
+
+if(role === "doctor" && state.doctorRevealSave){
+extras = ` <span style="opacity:0.7;">• reveals saved player</span>`
+}
+
+if(role === "sheriff"){
+extras = state.sheriffExactReveal
+? ` <span style="opacity:0.7;">• exact role</span>`
+: ` <span style="opacity:0.7;">• innocent / not innocent</span>`
+}
+
+return `
+<div class="role-row" style="border-left:4px solid ${color};">
+  <span class="role-player">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
+  <span class="role-name" style="color:${color}">
+    up to ${count}${extras}
+  </span>
+</div>
+`
+}).join("")
+: `<p style="opacity:0.75;">No special roles enabled</p>`
+
+render(`
+
+<div class="card">
+
+<h2>Game Summary</h2>
+
+<p><strong>Players:</strong> ${playerCount}</p>
+<p><strong>Mafia:</strong> ${mafia}</p>
+
+<hr style="opacity:0.3;margin:20px 0;">
+
+<h3>Special Roles</h3>
+
+${rolesHTML}
+
+${warningsHTML}
+
+<button onclick="window.confirmStartGame()">Start Game</button>
+<button onclick="window.showSetup()">Back</button>
+
+</div>
+
+`)
+
+}
+
+window.confirmStartGame = function(){
 
 state.gameStarted = true
 
 assignRoles()
 
-revealIndex=0
+revealIndex = 0
 
 showRoleReveal()
 
 }
+
+function getBalanceWarnings(){
+
+let warnings = []
+let playerCount = state.players.length
+let mafia = state.mafiaCountOverride || mafiaCount(playerCount)
+mafia = Math.min(mafia, maxAllowedMafia(playerCount))
+
+let specialRoles = 0
+
+Object.keys(state.rolesEnabled).forEach(role => {
+if(state.rolesEnabled[role]){
+specialRoles += state.roleCounts[role] || 1
+}
+})
+
+if(mafia >= Math.ceil(playerCount / 2)){
+warnings.push("Too many mafia for this player count.")
+}
+
+if(playerCount <= 5 && mafia >= 2){
+warnings.push("2 mafia with 5 or fewer players may end the game very quickly.")
+}
+
+if(specialRoles > playerCount - mafia){
+warnings.push("There may be more special roles than available non-mafia players.")
+}
+
+if(state.rolesEnabled.jester && playerCount < 6){
+warnings.push("Jester can feel very swingy in smaller games.")
+}
+
+if(state.rolesEnabled.doctor && state.rolesEnabled.sheriff && playerCount < 6){
+warnings.push("Doctor + Sheriff together may be too strong in a very small lobby.")
+}
+
+return warnings
+
+}
+
 revealIndex = 0
 
 function showRoleReveal(){
@@ -902,6 +1046,79 @@ render(`
 showRoleReveal()
 
 }
+
+}
+
+
+window.applyPreset = function(preset){
+
+if(preset === "classic"){
+state.rolesEnabled.doctor = true
+state.rolesEnabled.sheriff = true
+state.rolesEnabled.jester = false
+
+state.roleWeights.doctor = 100
+state.roleWeights.sheriff = 100
+state.roleWeights.jester = 0
+
+state.roleCounts.doctor = 1
+state.roleCounts.sheriff = 1
+state.roleCounts.jester = 1
+
+state.doctorRevealSave = false
+state.sheriffExactReveal = false
+state.mafiaCountOverride = 0
+}
+
+if(preset === "beginner"){
+state.rolesEnabled.doctor = true
+state.rolesEnabled.sheriff = false
+state.rolesEnabled.jester = false
+
+state.roleWeights.doctor = 100
+state.roleWeights.sheriff = 0
+state.roleWeights.jester = 0
+
+state.roleCounts.doctor = 1
+state.roleCounts.sheriff = 1
+state.roleCounts.jester = 1
+
+state.doctorRevealSave = true
+state.sheriffExactReveal = false
+state.mafiaCountOverride = 0
+}
+
+if(preset === "chaotic"){
+state.rolesEnabled.doctor = true
+state.rolesEnabled.sheriff = true
+state.rolesEnabled.jester = true
+
+state.roleWeights.doctor = 100
+state.roleWeights.sheriff = 100
+state.roleWeights.jester = 100
+
+state.roleCounts.doctor = 1
+state.roleCounts.sheriff = 1
+state.roleCounts.jester = 1
+
+state.doctorRevealSave = true
+state.sheriffExactReveal = true
+state.mafiaCountOverride = 0
+}
+
+saveSettingsToStorage()
+showSettings()
+
+}
+
+function saveSettingsToStorage(){
+
+localStorage.setItem("mafiaRoles", JSON.stringify(state.rolesEnabled))
+localStorage.setItem("mafiaRoleWeights", JSON.stringify(state.roleWeights))
+localStorage.setItem("mafiaRoleCounts", JSON.stringify(state.roleCounts))
+localStorage.setItem("mafiaDoctorReveal", JSON.stringify(state.doctorRevealSave))
+localStorage.setItem("mafiaSheriffExactReveal", JSON.stringify(state.sheriffExactReveal))
+localStorage.setItem("mafiaCountOverride", JSON.stringify(state.mafiaCountOverride))
 
 }
 

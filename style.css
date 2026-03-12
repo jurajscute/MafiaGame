@@ -1382,3 +1382,39 @@ filter:grayscale(30%);
 cursor:not-allowed;
 opacity:0.75;
 }
+
+.preset-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-bottom:16px;
+}
+
+.preset-grid button{
+margin:0;
+padding:12px;
+font-size:15px;
+}
+
+.night-result{
+padding:14px 16px;
+margin:12px 0;
+border-radius:12px;
+font-weight:bold;
+background:rgba(255,255,255,0.05);
+}
+
+.night-result-death{
+background:rgba(231,76,60,0.14);
+border:1px solid rgba(231,76,60,0.25);
+}
+
+.night-result-save{
+background:rgba(46,141,204,0.14);
+border:1px solid rgba(46,141,204,0.25);
+}
+
+.night-result-peace{
+background:rgba(255,255,255,0.06);
+border:1px solid rgba(255,255,255,0.08);
+}
