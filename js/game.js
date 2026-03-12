@@ -345,35 +345,59 @@ Reset Settings
 
   content += `<button onclick="closeInfo()">Close</button></div>`;
 
-  modal.innerHTML = content;
+  swapModalContent(content)
 
   if(state.gameStarted){
   modal.querySelector(".modal-content")?.classList.add("settings-locked-mode")
 }
 
-  if(state.gameStarted){
+  setTimeout(() => {
 
-modal.querySelectorAll("input").forEach(el=>{
-el.disabled = true
-})
+if(state.gameStarted){
+  modal.querySelector(".modal-content")?.classList.add("settings-locked-mode")
 
+  modal.querySelectorAll("input").forEach(el=>{
+    el.disabled = true
+  })
 }
-  modal.classList.remove("hidden");
 
-  // Animate only the sliders that are enabled
-  document.querySelectorAll('.role-weight.show').forEach(el => {
-    requestAnimationFrame(() => {
-      el.classList.add("show");
-    });
+document.querySelectorAll('.role-weight.show').forEach(el => {
+  requestAnimationFrame(() => {
+    el.classList.add("show");
   });
+});
 
-  // Initialize slider backgrounds
-  document.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
-    let role = slider.id.replace("Slider", "");
-    updateSlider(slider, role);
-  });
+document.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
+  let role = slider.id.replace("Slider", "");
+  updateSlider(slider, role);
+});
+
+}, 200)
 
   modal.classList.add("show");
+}
+
+function swapModalContent(newContent){
+
+const modal = document.getElementById("infoModal")
+const currentContent = modal.querySelector(".modal-content")
+
+if(!currentContent){
+modal.innerHTML = newContent
+return
+}
+
+currentContent.classList.add("modal-content-swap-out")
+
+setTimeout(() => {
+modal.innerHTML = newContent
+
+const nextContent = modal.querySelector(".modal-content")
+if(nextContent){
+nextContent.classList.add("modal-content-swap-in")
+}
+}, 180)
+
 }
 
 window.toggleDoctorReveal = function(enabled){
@@ -389,9 +413,7 @@ JSON.stringify(enabled)
 
 window.confirmResetSettings = function(){
 
-const modal = document.getElementById("infoModal")
-
-modal.innerHTML = `
+swapModalContent(`
 
 <div class="modal-content reset-confirm-modal">
 
@@ -406,10 +428,7 @@ modal.innerHTML = `
 
 </div>
 
-`
-
-modal.classList.remove("hidden")
-modal.classList.add("show")
+`)
 
 }
 
