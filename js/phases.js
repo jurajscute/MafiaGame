@@ -283,7 +283,7 @@ setDay();
 let kill = state.nightActions.kill
 let save = state.nightActions.save
 
-let message = "No one died."
+let message = "The night was peaceful."
 let morningCardClass = "card"
 
 // Mafia kill succeeds
