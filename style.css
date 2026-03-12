@@ -1056,9 +1056,14 @@ letter-spacing:1px;
 opacity:0.9;
 }
 
-.settings-locked-mode .role-toggle,
-.settings-locked-mode .role-weight,
-.settings-locked-mode .role-count{
+.settings-locked-mode .role-toggle{
+opacity:0.5;
+filter:grayscale(30%);
+}
+
+.settings-locked-mode .role-weight.show,
+.settings-locked-mode .role-count.show,
+.settings-locked-mode .doctor-extra-wrap.show{
 opacity:0.5;
 filter:grayscale(30%);
 }
