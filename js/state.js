@@ -87,3 +87,14 @@ eliminations: 0
 export function addLogEntry(text){
 state.gameLog.push(text)
 }
+
+window.toggleHostMode = function(enabled){
+
+state.hostMode = enabled
+
+localStorage.setItem(
+"mafiaHostMode",
+JSON.stringify(enabled)
+)
+
+}

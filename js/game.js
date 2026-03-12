@@ -160,6 +160,55 @@ function initSettingsModal(){
 
 }
 
+function renderHostControls(){
+
+if(!state.hostMode || !state.gameStarted) return ""
+
+return `
+
+<div class="host-panel">
+  <button class="host-btn" onclick="window.forceNextPhase()">Skip Phase</button>
+  <button class="host-btn" onclick="window.forceRevealRoles()">Reveal Roles</button>
+</div>
+
+`
+
+}
+
+window.forceNextPhase = function(){
+
+if(state.phase === "night"){
+addLogEntry("Host skipped the rest of the night.")
+resolveNight()
+return
+}
+
+if(state.phase === "voting"){
+addLogEntry("Host skipped the rest of voting.")
+resolveVotes()
+return
+}
+
+}
+
+window.forceRevealRoles = function(){
+addLogEntry("Host revealed final roles early.")
+showRoleRevealEnd()
+}
+
+window.confirmStartGame = function(){
+
+state.gameStarted = true
+resetGameTracking()
+
+assignRoles()
+
+revealIndex = 0
+
+showRoleReveal()
+
+}
+
 function showSettings() {
   const modal = document.getElementById("infoModal");
   let rolesContent = ""
@@ -176,6 +225,20 @@ ${state.gameStarted ? `
 </div>
 ` : ""}
   `;
+
+content += `
+
+<div class="role-toggle">
+  <span>Host Mode</span>
+  <label class="switch">
+    <input type="checkbox"
+      ${state.hostMode ? "checked" : ""}
+      onchange="toggleHostMode(this.checked)">
+    <span class="slider"></span>
+  </label>
+</div>
+
+`
 
   content += `
 
