@@ -35,11 +35,7 @@ JSON.stringify(state.roleCounts)
 
 function showInfo(){
 
-const modal = document.getElementById("infoModal");
-
-modal.classList.remove("hidden")
-
-modal.innerHTML = `
+openModal(`
 
 <div class="modal-content">
 
@@ -64,8 +60,7 @@ modal.innerHTML = `
 
 </div>
 
-`
-modal.classList.add("show");
+`)
 
 }
 
@@ -347,9 +342,11 @@ Reset Settings
 
   content += `<button onclick="closeInfo()">Close</button></div>`;
 
-  modal.classList.remove("hidden")
+if(modal.classList.contains("show")){
   swapModalContent(content)
-  modal.classList.add("show")
+}else{
+  openModal(content)
+}
 
   setTimeout(() => {
 
@@ -361,12 +358,26 @@ Reset Settings
       })
     }
 
-    document.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
+    modal.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
       let role = slider.id.replace("Slider", "");
       updateSlider(slider, role);
     });
 
   }, 200)
+}
+
+function openModal(content){
+
+const modal = document.getElementById("infoModal")
+
+modal.classList.remove("hidden")
+modal.classList.remove("show")
+modal.innerHTML = content
+
+requestAnimationFrame(() => {
+  modal.classList.add("show")
+})
+
 }
 
 function swapModalContent(newContent){
@@ -375,19 +386,19 @@ const modal = document.getElementById("infoModal")
 const currentContent = modal.querySelector(".modal-content")
 
 if(!currentContent){
-modal.innerHTML = newContent
-return
+  openModal(newContent)
+  return
 }
 
 currentContent.classList.add("modal-content-swap-out")
 
 setTimeout(() => {
-modal.innerHTML = newContent
+  modal.innerHTML = newContent
 
-const nextContent = modal.querySelector(".modal-content")
-if(nextContent){
-nextContent.classList.add("modal-content-swap-in")
-}
+  const nextContent = modal.querySelector(".modal-content")
+  if(nextContent){
+    nextContent.classList.add("modal-content-swap-in")
+  }
 }, 180)
 
 }
