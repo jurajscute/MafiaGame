@@ -138,6 +138,28 @@ showSettings()
 
 }
 
+function initSettingsModal(){
+
+  const modal = document.getElementById("infoModal")
+  const modalContent = modal.querySelector(".modal-content")
+
+  if(state.gameStarted){
+    modalContent?.classList.add("settings-locked-mode")
+
+    modal.querySelectorAll("input, select, button").forEach(el => {
+      if(!el.classList.contains("close-settings-btn")){
+        el.disabled = true
+      }
+    })
+  }
+
+  modal.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
+    let role = slider.id.replace("Slider", "")
+    updateSlider(slider, role)
+  })
+
+}
+
 function showSettings() {
   const modal = document.getElementById("infoModal");
   let rolesContent = ""
@@ -343,76 +365,53 @@ Reset Settings
   content += `<button class="close-settings-btn" onclick="closeInfo()">Close</button></div>`;
 
 if(modal.classList.contains("show")){
-  swapModalContent(content)
+  swapModalContent(content, initSettingsModal)
 }else{
-  openModal(content)
+  openModal(content, initSettingsModal)
 }
+}
+
+function openModal(content, onOpen){
+
+  const modal = document.getElementById("infoModal")
+
+  modal.classList.remove("hidden")
+  modal.classList.remove("show")
+  modal.innerHTML = content
 
   requestAnimationFrame(() => {
-  const modalContent = modal.querySelector(".modal-content")
-
-  if(state.gameStarted){
-    modalContent?.classList.add("settings-locked-mode")
-
-    modal.querySelectorAll("input, select, button").forEach(el => {
-      if(!el.classList.contains("close-settings-btn")){
-        el.disabled = true
-      }
-    })
-  }
-
-  modal.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
-    let role = slider.id.replace("Slider", "")
-    updateSlider(slider, role)
+    if(onOpen) onOpen()
+    modal.classList.add("show")
   })
-})
-}
-
-function openModal(content){
-
-const modal = document.getElementById("infoModal")
-
-modal.classList.remove("hidden")
-modal.classList.remove("show")
-modal.innerHTML = content
-
-requestAnimationFrame(() => {
-  modal.classList.add("show")
-})
 
 }
 
-function swapModalContent(newContent){
+function swapModalContent(newContent, onSwapDone){
 
-const modal = document.getElementById("infoModal")
-const currentContent = modal.querySelector(".modal-content")
+  const modal = document.getElementById("infoModal")
+  const currentContent = modal.querySelector(".modal-content")
 
-if(!currentContent){
-  openModal(newContent)
-  return
-}
-
-currentContent.classList.add("modal-content-swap-out")
-
-setTimeout(() => {
-  modal.innerHTML = newContent
-
-  const nextContent = modal.querySelector(".modal-content")
-  if(nextContent){
-    nextContent.classList.add("modal-content-swap-in")
+  if(!currentContent){
+    openModal(newContent, onSwapDone)
+    return
   }
-}, 180)
 
-}
+  currentContent.classList.add("modal-content-swap-out")
 
-window.toggleDoctorReveal = function(enabled){
+  setTimeout(() => {
+    modal.innerHTML = newContent
 
-state.doctorRevealSave = enabled
+    const nextContent = modal.querySelector(".modal-content")
+    if(nextContent){
+      nextContent.classList.add("modal-content-swap-in")
+    }
 
-localStorage.setItem(
-"mafiaDoctorReveal",
-JSON.stringify(enabled)
-)
+    if(onSwapDone){
+      requestAnimationFrame(() => {
+        onSwapDone()
+      })
+    }
+  }, 180)
 
 }
 
@@ -1171,6 +1170,9 @@ showRoleReveal()
 
 
 window.applyPreset = function(preset){
+
+state.doctorExtraOpen = false
+state.sheriffExtraOpen = false
 
 if(preset === "classic"){
 state.rolesEnabled.doctor = true
