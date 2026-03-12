@@ -116,8 +116,6 @@ return
 
 }
 
-}
-
 showNightAction(player,role)
 
 }
