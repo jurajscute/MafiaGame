@@ -278,30 +278,43 @@ return false
 }
 
 function resolveNight(){
-    setDay();
+setDay();
 
-let kill=state.nightActions.kill
-let save=state.nightActions.save
+let kill = state.nightActions.kill
+let save = state.nightActions.save
 
-let message="No one died."
+let message = "This night was peaceful."
 
-if(kill && kill!==save){
+// Mafia kill succeeds
+if(kill && kill !== save){
 
-let victim=state.players.find(p=>p.name===kill)
+let victim = state.players.find(p=>p.name===kill)
 
 if(victim){
-victim.alive=false
-message=`${kill} was killed during the night.`
+victim.alive = false
+message = `${kill} was killed during the night.`
 }
 
 }
+
+// Doctor save
+else if(kill && kill === save){
+
+if(state.doctorRevealSave){
+message = `<p style="color:#2e8dcc;text-shadow:0 0 10px #2e8dcc;">${save} was saved by the Doctor!</p>`
+}else{
+message = "Someone was attacked but survived the night."
+}
+
+}
+
 if(checkWin()) return
 
 render(`
 
-<div class="card">
+<div class="card role-doctor">
 
-<h2>Morning</h2>
+<h2 class="role-title">Morning</h2>
 
 <p>${message}</p>
 

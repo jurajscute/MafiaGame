@@ -6,6 +6,8 @@ players:[],
 
 gameStarted: false,
 
+doctorRevealSave: false,
+
 night:0,
 
 nightTurnIndex: 0,

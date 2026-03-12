@@ -132,6 +132,22 @@ onchange="window.updateRoleCount('${role}', this.value)">
 `
   });
 
+  content += `
+
+<div class="role-toggle">
+<span>Reveal Doctor Save</span>
+
+<label class="switch">
+<input type="checkbox"
+${state.doctorRevealSave ? "checked" : ""}
+onchange="toggleDoctorReveal(this.checked)">
+<span class="slider"></span>
+</label>
+
+</div>
+
+`
+
   content += `<button onclick="closeInfo()">Close</button></div>`;
 
   modal.innerHTML = content;
@@ -158,6 +174,17 @@ el.disabled = true
   });
 
   modal.classList.add("show");
+}
+
+window.toggleDoctorReveal = function(enabled){
+
+state.doctorRevealSave = enabled
+
+localStorage.setItem(
+"mafiaDoctorReveal",
+JSON.stringify(enabled)
+)
+
 }
 
 window.updateSlider = function(slider,role){
@@ -265,6 +292,12 @@ let savedRoles = localStorage.getItem("mafiaRoles")
 let savedWeights = localStorage.getItem("mafiaRoleWeights")
 
 let savedCounts = localStorage.getItem("mafiaRoleCounts")
+
+let savedDoctorReveal = localStorage.getItem("mafiaDoctorReveal")
+
+if(savedDoctorReveal){
+state.doctorRevealSave = JSON.parse(savedDoctorReveal)
+}
 
 if(savedCounts){
 state.roleCounts = JSON.parse(savedCounts)
