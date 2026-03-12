@@ -349,35 +349,24 @@ Reset Settings
 
   modal.classList.remove("hidden")
   swapModalContent(content)
-
-  if(state.gameStarted){
-  modal.querySelector(".modal-content")?.classList.add("settings-locked-mode")
-}
+  modal.classList.add("show")
 
   setTimeout(() => {
 
-if(state.gameStarted){
-  modal.querySelector(".modal-content")?.classList.add("settings-locked-mode")
+    if(state.gameStarted){
+      modal.querySelector(".modal-content")?.classList.add("settings-locked-mode")
 
-  modal.querySelectorAll("input").forEach(el=>{
-    el.disabled = true
-  })
-}
+      modal.querySelectorAll("input").forEach(el=>{
+        el.disabled = true
+      })
+    }
 
-document.querySelectorAll('.role-weight.show').forEach(el => {
-  requestAnimationFrame(() => {
-    el.classList.add("show");
-  });
-});
+    document.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
+      let role = slider.id.replace("Slider", "");
+      updateSlider(slider, role);
+    });
 
-document.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
-  let role = slider.id.replace("Slider", "");
-  updateSlider(slider, role);
-});
-
-}, 200)
-
-  modal.classList.add("show");
+  }, 200)
 }
 
 function swapModalContent(newContent){
