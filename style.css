@@ -786,6 +786,10 @@ opacity:0.9;
   opacity: 1;
 }
 
+#doctor-reveal-setting{
+margin-top:4px;
+}
+
 /* close button */
 
 .modal-content button{

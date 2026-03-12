@@ -130,12 +130,13 @@ onchange="window.updateRoleCount('${role}', this.value)">
 </div>
 
 `
-  });
 
-  content += `
+if(role === "doctor"){
+content += `
 
-<div class="role-toggle">
-<span>Reveal Doctor Save</span>
+<div class="role-toggle ${enabled ? "show" : ""}" id="doctor-reveal-setting">
+
+<span>Reveal Saved Player</span>
 
 <label class="switch">
 <input type="checkbox"
@@ -147,6 +148,8 @@ onchange="toggleDoctorReveal(this.checked)">
 </div>
 
 `
+}
+  });
 
   content += `<button onclick="closeInfo()">Close</button></div>`;
 
@@ -234,6 +237,7 @@ window.toggleRole = function(role, enabled){
 
 let slider = document.getElementById(role+"SliderContainer")
 let count = document.getElementById(role+"-count")
+let reveal = document.getElementById("doctor-reveal-setting")
 
 state.rolesEnabled[role] = enabled
 
@@ -245,11 +249,23 @@ JSON.stringify(state.rolesEnabled)
 if(slider && count){
 
 if(enabled){
+
 slider.classList.add("show")
 count.classList.add("show")
+
+if(role==="doctor" && reveal){
+reveal.classList.add("show")
+}
+
 }else{
+
 slider.classList.remove("show")
 count.classList.remove("show")
+
+if(role==="doctor" && reveal){
+reveal.classList.remove("show")
+}
+
 }
 
 }
