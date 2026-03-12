@@ -166,7 +166,59 @@ state.nightActions[role.nightAction]=targetName
 if(role.nightAction==="investigate"){
 
 let target = state.players.find(p=>p.name===targetName)
-let result = target.role==="mafia" ? "MAFIA" : "NOT MAFIA"
+
+let result = ""
+let resultColor = "#b0e2ff"
+
+if(state.sheriffExactReveal){
+
+result = target.role.toUpperCase()
+
+if(target.role === "mafia"){
+resultColor = "#e74c3c"
+}else if(target.role === "jester"){
+resultColor = "#bb006d"
+}else if(target.role === "doctor"){
+resultColor = "#2e8dcc"
+}else if(target.role === "sheriff"){
+resultColor = "#e4c200"
+}
+
+}else{
+
+let notInnocent = target.role === "mafia" || target.role === "jester"
+
+result = notInnocent ? "NOT INNOCENT" : "INNOCENT"
+resultColor = notInnocent ? "#e74c3c" : "#b0e2ff"
+
+}
+
+render(`
+
+<div class="card role-sheriff">
+
+<h2 class="role-title">INVESTIGATION RESULT</h2>
+
+<p>${target.name} is</p>
+
+<h1 style="
+color:${resultColor};
+text-shadow:
+0 0 10px ${resultColor},
+0 0 20px ${resultColor};
+">
+${result}
+</h1>
+
+<button onclick="window.nextNightTurn()">Hide</button>
+
+</div>
+
+`)
+
+return
+
+}
 
 render(`
 

@@ -10,6 +10,9 @@ doctorRevealSave: false,
 
 doctorExtraOpen: false,
 
+sheriffExactReveal: false,
+sheriffExtraOpen: false,
+
 night:0,
 
 nightTurnIndex: 0,

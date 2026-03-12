@@ -153,6 +153,34 @@ content += `
 
 `
 }
+
+if(role === "sheriff" && enabled){
+content += `
+
+<div class="sheriff-extra-wrap show" id="sheriff-extra-wrap">
+
+  <div class="additional-settings-bar" onclick="toggleSheriffExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow" style="transform:${state.sheriffExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+  </div>
+
+  <div class="sheriff-extra-settings ${state.sheriffExtraOpen ? "show" : ""}" id="sheriff-extra-settings">
+    <div class="role-toggle sheriff-subsetting">
+      <span>Reveal Exact Role</span>
+
+      <label class="switch">
+        <input type="checkbox"
+          ${state.sheriffExactReveal ? "checked" : ""}
+          onchange="toggleSheriffExactReveal(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+</div>
+
+`
+}
   });
 
   content += `<button onclick="closeInfo()">Close</button></div>`;
@@ -319,6 +347,62 @@ inserted.classList.add("show")
 
 }
 
+if(role === "sheriff"){
+
+let extraWrap = document.getElementById("sheriff-extra-wrap")
+
+if(!enabled){
+state.sheriffExtraOpen = false
+
+if(extraWrap){
+extraWrap.classList.remove("show")
+setTimeout(() => {
+  extraWrap.remove()
+}, 300)
+}
+}
+
+if(enabled && !extraWrap){
+
+let count = document.getElementById("sheriff-count")
+
+count.insertAdjacentHTML("afterend", `
+
+<div class="sheriff-extra-wrap" id="sheriff-extra-wrap">
+
+  <div class="additional-settings-bar" onclick="toggleSheriffExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow">▾</span>
+  </div>
+
+  <div class="sheriff-extra-settings" id="sheriff-extra-settings">
+    <div class="role-toggle sheriff-subsetting">
+      <span>Reveal Exact Role</span>
+
+      <label class="switch">
+        <input type="checkbox"
+          ${state.sheriffExactReveal ? "checked" : ""}
+          onchange="toggleSheriffExactReveal(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+</div>
+
+`)
+
+requestAnimationFrame(() => {
+let inserted = document.getElementById("sheriff-extra-wrap")
+if(inserted){
+inserted.classList.add("show")
+}
+})
+
+}
+
+}
+
 if(role === "doctor" && !enabled){
 state.doctorExtraOpen = false
 }
@@ -387,6 +471,12 @@ let savedCounts = localStorage.getItem("mafiaRoleCounts")
 
 let savedDoctorReveal = localStorage.getItem("mafiaDoctorReveal")
 
+let savedSheriffExactReveal = localStorage.getItem("mafiaSheriffExactReveal")
+
+if(savedSheriffExactReveal){
+state.sheriffExactReveal = JSON.parse(savedSheriffExactReveal)
+}
+
 if(savedDoctorReveal){
 state.doctorRevealSave = JSON.parse(savedDoctorReveal)
 }
@@ -416,6 +506,34 @@ export function setNight(){
 
 document.body.classList.remove("day")
 document.body.classList.add("night")
+
+}
+
+window.toggleSheriffExactReveal = function(enabled){
+
+state.sheriffExactReveal = enabled
+
+localStorage.setItem(
+"mafiaSheriffExactReveal",
+JSON.stringify(enabled)
+)
+
+}
+
+window.toggleSheriffExtras = function(){
+
+state.sheriffExtraOpen = !state.sheriffExtraOpen
+
+let panel = document.getElementById("sheriff-extra-settings")
+let arrow = document.querySelector("#sheriff-extra-wrap .additional-arrow")
+
+if(panel){
+panel.classList.toggle("show", state.sheriffExtraOpen)
+}
+
+if(arrow){
+arrow.style.transform = state.sheriffExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
+}
 
 }
 
