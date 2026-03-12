@@ -608,7 +608,7 @@ ${resultsHTML}
 
 }
 
-export function showRoleRevealEnd(){
+function showRoleRevealEnd(){
 
 let mafia = state.players.filter(p => roles[p.role]?.team === "mafia")
 let town = state.players.filter(p => roles[p.role]?.team === "village")
@@ -668,6 +668,16 @@ ${renderRoleList(neutral)}
 </div>
 
 `)
+
+}
+
+export { showRoleRevealEnd }
+
+window.showRoleRevealEnd = showRoleRevealEnd
+
+export function nextNight(){
+
+startNight()
 
 }
 
