@@ -446,14 +446,13 @@ let eliminated = null
 let tie = false
 let resultsHTML = ""
 
-// Build vote results
-let maxVotes = Math.max(...Object.values(state.votes))
+let voteCounts = Object.values(state.votes)
+let maxVotes = voteCounts.length ? Math.max(...voteCounts) : 1
 
 for(let name in state.votes){
 
 let count = state.votes[name]
 let label = name === "skip" ? "Skip Vote" : name
-
 let percent = (count / maxVotes) * 100
 
 resultsHTML += `
@@ -472,9 +471,40 @@ ${label} — ${count}
 
 `
 
+if(count > highest){
+highest = count
+eliminated = name
+tie = false
+}else if(count === highest){
+tie = true
 }
 
-// Skip wins
+}
+
+if(tie){
+
+render(`
+
+<div class="card">
+
+<h2>Voting Results</h2>
+
+${resultsHTML}
+
+<hr>
+
+<h2>It's a tie! Nobody was eliminated.</h2>
+
+<button onclick="window.nextNight()">Next Night</button>
+
+</div>
+
+`)
+
+return
+
+}
+
 if(eliminated === "skip"){
 
 render(`
@@ -499,7 +529,6 @@ return
 
 }
 
-// Eliminate player
 if(eliminated){
 
 let player = state.players.find(p => p.name === eliminated)
@@ -508,7 +537,6 @@ if(player){
 
 player.alive = false
 
-// Jester win
 if(player.role === "jester"){
 
 document.body.className = "win-jester"
@@ -534,10 +562,10 @@ return
 
 }
 
-// Check village / mafia win
 if(checkWin()) return
 
 render(`
+
 <div class="card">
 
 <h2>Voting Results</h2>
@@ -553,38 +581,10 @@ ${eliminated} was voted out
 <button onclick="window.nextNight()">Next Night</button>
 
 </div>
+
 `)
 
-}
-
-}
-
-export function showRoleRevealEnd(){
-
-let mafia = state.players.filter(p => p.role === "mafia")
-let others = state.players.filter(p => p.role !== "mafia")
-
-function renderRoleList(list){
-
-return list.map(p => {
-
-let color = roleColors[p.role] || "white"
-
-return `
-
-<div class="role-row" style="border-left:4px solid ${color};">
-
-<span class="role-player">${p.name}</span>
-
-<span class="role-name" style="color:${color}">
-${p.role.toUpperCase()}
-</span>
-
-</div>
-
-`
-
-}).join("")
+return
 
 }
 
@@ -592,21 +592,15 @@ render(`
 
 <div class="card">
 
-<h2 class="role-title">FINAL ROLES</h2>
+<h2>Voting Results</h2>
 
-<h3 class="mafia-win">Mafia</h3>
+${resultsHTML}
 
-${renderRoleList(mafia)}
+<hr>
 
-<hr style="opacity:0.3;margin:20px 0;">
+<h2>Nobody was eliminated.</h2>
 
-<h3 class="village-win">Town</h3>
-
-${renderRoleList(others)}
-
-<br>
-
-<button onclick="location.reload()">Restart Game</button>
+<button onclick="window.nextNight()">Next Night</button>
 
 </div>
 
