@@ -134,7 +134,8 @@ onchange="window.updateRoleCount('${role}', this.value)">
 if(role === "doctor"){
 content += `
 
-<div class="role-toggle ${enabled ? "show" : ""}" id="doctor-reveal-setting">
+<div class="role-toggle" id="doctor-reveal-setting"
+style="${enabled ? "" : "display:none;"}">
 
 <span>Reveal Saved Player</span>
 
