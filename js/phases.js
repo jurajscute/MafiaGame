@@ -608,6 +608,61 @@ ${resultsHTML}
 
 }
 
+export function showRoleRevealEnd(){
+
+let mafia = state.players.filter(p => p.role === "mafia")
+let others = state.players.filter(p => p.role !== "mafia")
+
+function renderRoleList(list){
+
+return list.map(p => {
+
+let color = roleColors[p.role] || "white"
+
+return `
+
+<div class="role-row" style="border-left:4px solid ${color};">
+
+<span class="role-player">${p.name}</span>
+
+<span class="role-name" style="color:${color}">
+${p.role.toUpperCase()}
+</span>
+
+</div>
+
+`
+
+}).join("")
+
+}
+
+render(`
+
+<div class="card">
+
+<h2 class="role-title">FINAL ROLES</h2>
+
+<h3 class="mafia-win">Mafia</h3>
+
+${renderRoleList(mafia)}
+
+<hr style="opacity:0.3;margin:20px 0;">
+
+<h3 class="village-win">Town</h3>
+
+${renderRoleList(others)}
+
+<br>
+
+<button onclick="location.reload()">Restart Game</button>
+
+</div>
+
+`)
+
+}
+
 window.showRoleRevealEnd = showRoleRevealEnd
 
 export function nextNight(){
