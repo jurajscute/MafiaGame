@@ -84,6 +84,63 @@ arrow.style.transform = state.rolesSectionOpen ? "rotate(180deg)" : "rotate(0deg
 
 }
 
+window.togglePresetsSection = function(){
+
+state.presetsSectionOpen = !state.presetsSectionOpen
+
+let panel = document.getElementById("presets-section-content")
+let arrow = document.querySelector("#presets-section-wrap .section-arrow")
+
+if(panel){
+panel.classList.toggle("show", state.presetsSectionOpen)
+}
+
+if(arrow){
+arrow.style.transform = state.presetsSectionOpen ? "rotate(180deg)" : "rotate(0deg)"
+}
+
+}
+
+window.resetSettings = function(){
+
+state.rolesEnabled = {
+doctor: false,
+sheriff: false,
+jester: false
+}
+
+state.roleWeights = {
+doctor: 50,
+sheriff: 50,
+jester: 50
+}
+
+state.roleCounts = {
+doctor: 1,
+sheriff: 1,
+jester: 1
+}
+
+state.doctorRevealSave = false
+state.sheriffExactReveal = false
+state.mafiaCountOverride = 0
+
+state.doctorExtraOpen = false
+state.sheriffExtraOpen = false
+state.rolesSectionOpen = true
+state.presetsSectionOpen = false
+
+localStorage.setItem("mafiaRoles", JSON.stringify(state.rolesEnabled))
+localStorage.setItem("mafiaRoleWeights", JSON.stringify(state.roleWeights))
+localStorage.setItem("mafiaRoleCounts", JSON.stringify(state.roleCounts))
+localStorage.setItem("mafiaDoctorReveal", JSON.stringify(state.doctorRevealSave))
+localStorage.setItem("mafiaSheriffExactReveal", JSON.stringify(state.sheriffExactReveal))
+localStorage.setItem("mafiaCountOverride", JSON.stringify(state.mafiaCountOverride))
+
+showSettings()
+
+}
+
 function showSettings() {
   const modal = document.getElementById("infoModal");
   let rolesContent = ""
@@ -103,16 +160,21 @@ ${state.gameStarted ? `
 
   content += `
 
-<div class="settings-section-wrap">
-  <div class="settings-section-bar">
+<div class="settings-section-wrap" id="presets-section-wrap">
+
+  <div class="settings-section-bar" onclick="togglePresetsSection()">
     <span>Presets</span>
+    <span class="section-arrow" style="transform:${state.presetsSectionOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
   </div>
 
-  <div class="preset-grid">
-    <button onclick="applyPreset('classic')">Classic</button>
-    <button onclick="applyPreset('beginner')">Beginner</button>
-    <button onclick="applyPreset('chaotic')">Chaotic</button>
+  <div class="settings-section-content ${state.presetsSectionOpen ? "show" : ""}" id="presets-section-content">
+    <div class="preset-grid">
+      <button type="button" onclick="applyPreset('classic')">Classic</button>
+      <button type="button" onclick="applyPreset('beginner')">Beginner</button>
+      <button type="button" onclick="applyPreset('chaotic')">Chaotic</button>
+    </div>
   </div>
+
 </div>
 
 `
@@ -270,6 +332,14 @@ rolesContent += `
   </div>
 
 </div>
+
+`
+
+content += `
+
+<button type="button" class="reset-settings-btn" onclick="resetSettings()">
+Reset Settings
+</button>
 
 `
 

@@ -1418,3 +1418,11 @@ border:1px solid rgba(46,141,204,0.25);
 background:rgba(255,255,255,0.06);
 border:1px solid rgba(255,255,255,0.08);
 }
+
+.reset-settings-btn{
+background:linear-gradient(135deg,#6e2b2b,#4e1d1d);
+}
+
+.reset-settings-btn:hover{
+background:linear-gradient(135deg,#844040,#5d2525);
+}

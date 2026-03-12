@@ -17,6 +17,8 @@ mafiaCountOverride: 0,
 
 rolesSectionOpen: true,
 
+presetsSectionOpen: false,
+
 night:0,
 
 nightTurnIndex: 0,
