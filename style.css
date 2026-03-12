@@ -1479,3 +1479,14 @@ filter:grayscale(35%);
 opacity:0.6;
 filter:grayscale(30%);
 }
+
+.settings-locked-mode .additional-settings-bar{
+opacity:0.5;
+filter:grayscale(30%);
+cursor:not-allowed;
+}
+
+.settings-locked-mode .additional-settings-bar:hover{
+background:rgba(255,255,255,0.05);
+transform:none;
+}
