@@ -283,12 +283,13 @@ setDay();
 let kill = state.nightActions.kill
 let save = state.nightActions.save
 
-let message = "This night was peaceful."
+let message = "No one died."
+let morningCardClass = "card"
 
 // Mafia kill succeeds
 if(kill && kill !== save){
 
-let victim = state.players.find(p=>p.name===kill)
+let victim = state.players.find(p => p.name === kill)
 
 if(victim){
 victim.alive = false
@@ -301,20 +302,21 @@ message = `${kill} was killed during the night.`
 else if(kill && kill === save){
 
 if(state.doctorRevealSave){
-message = `<p style="color:#2e8dcc;text-shadow:0 0 10px #2e8dcc;">${save} was saved by the Doctor!</p>`
+message = `${save} was saved by the Doctor!`
 }else{
 message = "Someone was attacked but survived the night."
 }
 
+morningCardClass = "card role-doctor"
 }
 
 if(checkWin()) return
 
 render(`
 
-<div class="card role-doctor">
+<div class="${morningCardClass}">
 
-<h2 class="role-title">Morning</h2>
+<h2${morningCardClass.includes("role-doctor") ? ' class="role-title"' : ""}>Morning</h2>
 
 <p>${message}</p>
 
