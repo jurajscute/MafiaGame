@@ -340,7 +340,7 @@ Reset Settings
 
 `
 
-  content += `<button class="close-settings-btn" onclick="closeInfo()">Close</button>`;
+  content += `<button class="close-settings-btn" onclick="closeInfo()">Close</button></div>`;
 
 if(modal.classList.contains("show")){
   swapModalContent(content)
@@ -348,24 +348,24 @@ if(modal.classList.contains("show")){
   openModal(content)
 }
 
-  setTimeout(() => {
+  requestAnimationFrame(() => {
+  const modalContent = modal.querySelector(".modal-content")
 
-    if(state.gameStarted){
-      modal.querySelector(".modal-content")?.classList.add("settings-locked-mode")
+  if(state.gameStarted){
+    modalContent?.classList.add("settings-locked-mode")
 
-      modal.querySelectorAll("input, select, button").forEach(el=>{
-  if(!el.classList.contains("close-settings-btn")){
-    el.disabled = true
+    modal.querySelectorAll("input, select, button").forEach(el => {
+      if(!el.classList.contains("close-settings-btn")){
+        el.disabled = true
+      }
+    })
   }
+
+  modal.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
+    let role = slider.id.replace("Slider", "")
+    updateSlider(slider, role)
+  })
 })
-    }
-
-    modal.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
-      let role = slider.id.replace("Slider", "");
-      updateSlider(slider, role);
-    });
-
-  }, 200)
 }
 
 function openModal(content){
