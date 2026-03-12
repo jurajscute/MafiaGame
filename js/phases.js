@@ -663,13 +663,6 @@ function renderRoleList(list){
     let logHTML = state.gameLog.length
 ? state.gameLog.map(entry => `<p class="log-entry">${entry}</p>`).join("")
 : `<p style="opacity:0.7;">No log entries recorded.</p>`
-<hr style="opacity:0.3;margin:20px 0;">
-
-<h3>Game Log</h3>
-
-<div class="game-log-box">
-${logHTML}
-</div>
 
 if(!list.length){
 return `<p style="opacity:0.7;">None</p>`
@@ -743,6 +736,16 @@ ${renderRoleList(neutral)}
 <br>
 
 ${statsHTML}
+
+<br>
+
+<hr style="opacity:0.3;margin:20px 0;">
+
+<h2 class="role-title">LOG</h2>
+
+<div class="game-log-box">
+${logHTML}
+</div>
 
 <br>
 
