@@ -316,7 +316,7 @@ render(`
 
 <div class="${morningCardClass}">
 
-<h2${morningCardClass.includes("role-doctor") ? ' class="role-title"' : ""}>Morning</h2>
+<h2>Morning</h2>
 
 <p>${message}</p>
 
