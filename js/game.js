@@ -337,7 +337,7 @@ rolesContent += `
 
 content += `
 
-<button type="button" class="reset-settings-btn" onclick="resetSettings()">
+<button type="button" class="reset-settings-btn" onclick="confirmResetSettings()">
 Reset Settings
 </button>
 
@@ -384,6 +384,32 @@ localStorage.setItem(
 "mafiaDoctorReveal",
 JSON.stringify(enabled)
 )
+
+}
+
+window.confirmResetSettings = function(){
+
+const modal = document.getElementById("infoModal")
+
+modal.innerHTML = `
+
+<div class="modal-content reset-confirm-modal">
+
+<h2>Reset Settings?</h2>
+
+<p>This will restore all game settings to their default values.</p>
+
+<div class="reset-confirm-actions">
+  <button type="button" class="reset-settings-btn" onclick="resetSettings()">Yes, Reset</button>
+  <button type="button" onclick="showSettings()">Cancel</button>
+</div>
+
+</div>
+
+`
+
+modal.classList.remove("hidden")
+modal.classList.add("show")
 
 }
 
