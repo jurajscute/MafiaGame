@@ -37,6 +37,8 @@ function showInfo(){
 
 const modal = document.getElementById("infoModal");
 
+modal.classList.remove("hidden")
+
 modal.innerHTML = `
 
 <div class="modal-content">
@@ -345,6 +347,7 @@ Reset Settings
 
   content += `<button onclick="closeInfo()">Close</button></div>`;
 
+  modal.classList.remove("hidden")
   swapModalContent(content)
 
   if(state.gameStarted){
