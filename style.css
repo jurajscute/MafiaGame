@@ -822,7 +822,7 @@ font-size:14px;
 }
 
 .doctor-extra-wrap{
-height:0;
+max-height:54px;
 opacity:0;
 overflow:hidden;
 transform:translateY(-8px) scaleY(0.96);
@@ -833,12 +833,12 @@ pointer-events:none;
 transition:
 opacity 0.25s ease,
 transform 0.35s ease,
-height 0.35s ease,
+max-height 0.35s ease,
 margin-bottom 0.35s ease;
 }
 
 .doctor-extra-wrap.show{
-height:54px;
+max-height:140px;
 opacity:1;
 transform:translateY(0) scaleY(1);
 margin-bottom:6px;

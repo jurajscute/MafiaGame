@@ -70,11 +70,6 @@ modal.classList.add("show");
 function showSettings() {
   const modal = document.getElementById("infoModal");
 
-if(state.gameStarted){
-modal.querySelector(".modal-content")
-.classList.add("settings-locked-mode")
-}
-
   // List of roles we want to display in settings
   const rolesList = ["doctor", "sheriff", "jester"];
 
@@ -138,7 +133,7 @@ content += `
 
   <div class="additional-settings-bar" onclick="toggleDoctorExtras()">
     <span>Additional Settings</span>
-    <span class="additional-arrow">${state.doctorExtraOpen ? "▴" : "▾"}</span>
+    <span class="additional-arrow">▾</span>
   </div>
 
   <div class="doctor-extra-settings ${state.doctorExtraOpen ? "show" : ""}" id="doctor-extra-settings">
@@ -163,6 +158,11 @@ content += `
   content += `<button onclick="closeInfo()">Close</button></div>`;
 
   modal.innerHTML = content;
+
+  if(state.gameStarted){
+  modal.querySelector(".modal-content")?.classList.add("settings-locked-mode")
+}
+
   if(state.gameStarted){
 
 modal.querySelectorAll("input").forEach(el=>{
@@ -254,7 +254,7 @@ panel.classList.toggle("show", state.doctorExtraOpen)
 }
 
 if(arrow){
-arrow.textContent = state.doctorExtraOpen ? "▴" : "▾"
+arrow.style.transform = state.doctorExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
 }
 
 }
@@ -337,18 +337,10 @@ if(enabled){
 slider.classList.add("show")
 count.classList.add("show")
 
-if(role==="doctor" && reveal){
-reveal.classList.add("show")
-}
-
 }else{
 
 slider.classList.remove("show")
 count.classList.remove("show")
-
-if(role==="doctor" && reveal){
-reveal.classList.remove("show")
-}
 
 }
 
