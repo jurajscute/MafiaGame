@@ -1,7 +1,7 @@
 import {state, resetNightActions} from "./state.js"
 import {render, passPhone} from "./ui.js"
 import {roles} from "./roles.js"
-import {state, resetNightActions, addLogEntry} from "./state.js"
+import {addLogEntry} from "./state.js"
 
 function setDay() {
     document.body.classList.remove("night");
