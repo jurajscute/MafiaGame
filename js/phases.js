@@ -610,10 +610,15 @@ ${resultsHTML}
 
 export function showRoleRevealEnd(){
 
-let mafia = state.players.filter(p => p.role === "mafia")
-let others = state.players.filter(p => p.role !== "mafia")
+let mafia = state.players.filter(p => roles[p.role]?.team === "mafia")
+let town = state.players.filter(p => roles[p.role]?.team === "village")
+let neutral = state.players.filter(p => roles[p.role]?.team === "neutral")
 
 function renderRoleList(list){
+
+if(!list.length){
+return `<p style="opacity:0.7;">None</p>`
+}
 
 return list.map(p => {
 
@@ -644,14 +649,17 @@ render(`
 <h2 class="role-title">FINAL ROLES</h2>
 
 <h3 class="mafia-win">Mafia</h3>
-
 ${renderRoleList(mafia)}
 
 <hr style="opacity:0.3;margin:20px 0;">
 
 <h3 class="village-win">Town</h3>
+${renderRoleList(town)}
 
-${renderRoleList(others)}
+<hr style="opacity:0.3;margin:20px 0;">
+
+<h3 class="jester-win">Neutral</h3>
+${renderRoleList(neutral)}
 
 <br>
 
@@ -663,12 +671,6 @@ ${renderRoleList(others)}
 
 }
 
-window.showRoleRevealEnd = showRoleRevealEnd
-
-export function nextNight(){
-
-startNight()
-
-}
+export { showRoleRevealEnd }
 
 window.nextNight = nextNight
