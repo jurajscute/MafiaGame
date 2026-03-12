@@ -13,6 +13,8 @@ doctorExtraOpen: false,
 sheriffExactReveal: false,
 sheriffExtraOpen: false,
 
+mafiaCountOverride: 0,
+
 night:0,
 
 nightTurnIndex: 0,

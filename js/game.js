@@ -83,6 +83,33 @@ ${state.gameStarted ? `
 ` : ""}
   `;
 
+const playerCount = state.players.length
+const mafiaMax = maxAllowedMafia(playerCount)
+const autoMafia = playerCount > 0 ? mafiaCount(playerCount) : 1
+
+content += `
+
+<div class="role-toggle">
+  <span style="color:${roleColors.mafia}">Mafia Count</span>
+</div>
+
+<div class="role-count show" id="mafia-global-count">
+  <label>How many mafia:</label>
+
+  <input type="number"
+    min="0"
+    max="${mafiaMax}"
+    value="${state.mafiaCountOverride || 0}"
+    onchange="window.updateMafiaCountOverride(Math.min(${mafiaMax}, Math.max(0, this.value)))">
+
+</div>
+
+<p class="global-setting-note">
+  0 = Auto (${autoMafia}) • Max allowed with ${playerCount} player${playerCount === 1 ? "" : "s"}: ${mafiaMax}
+</p>
+
+`
+
   rolesList.forEach(role => {
     const enabled = state.rolesEnabled[role];
     const weight = state.roleWeights[role] || 0;
@@ -451,12 +478,28 @@ function savePlayers(){
 localStorage.setItem("mafiaPlayers", JSON.stringify(state.players))
 }
 
+function clampMafiaOverride(){
+
+let max = maxAllowedMafia(state.players.length)
+
+if(state.mafiaCountOverride > max){
+state.mafiaCountOverride = max
+
+localStorage.setItem(
+"mafiaCountOverride",
+JSON.stringify(state.mafiaCountOverride)
+)
+}
+
+}
+
 function loadPlayers(){
 
 let saved = localStorage.getItem("mafiaPlayers")
 
 if(saved){
 state.players = JSON.parse(saved)
+clampMafiaOverride()
 }
 
 }
@@ -472,6 +515,12 @@ let savedCounts = localStorage.getItem("mafiaRoleCounts")
 let savedDoctorReveal = localStorage.getItem("mafiaDoctorReveal")
 
 let savedSheriffExactReveal = localStorage.getItem("mafiaSheriffExactReveal")
+
+let savedMafiaCountOverride = localStorage.getItem("mafiaCountOverride")
+
+if(savedMafiaCountOverride){
+state.mafiaCountOverride = JSON.parse(savedMafiaCountOverride)
+}
 
 if(savedSheriffExactReveal){
 state.sheriffExactReveal = JSON.parse(savedSheriffExactReveal)
@@ -506,6 +555,27 @@ export function setNight(){
 
 document.body.classList.remove("day")
 document.body.classList.add("night")
+
+}
+
+window.updateMafiaCountOverride = function(value){
+
+state.mafiaCountOverride = Number(value)
+
+localStorage.setItem(
+"mafiaCountOverride",
+JSON.stringify(state.mafiaCountOverride)
+)
+
+}
+
+function maxAllowedMafia(playerCount){
+
+if(playerCount < 4) return 1
+if(playerCount <= 7) return 2
+if(playerCount <= 10) return 3
+if(playerCount <= 13) return 4
+return 5
 
 }
 
@@ -617,7 +687,7 @@ state.players.splice(index,1)
 
 savePlayers()
 renderPlayerSetup()
-
+clampMafiaOverride()
 }
 
 window.clearPlayers = function(){
@@ -626,7 +696,7 @@ localStorage.removeItem("mafiaPlayers")
 state.players = []
 
 renderPlayerSetup()
-
+clampMafiaOverride()
 }
 
 function maybeAddRole(role, pool){
@@ -647,7 +717,8 @@ function assignRoles(){
 let players = state.players
 let pool = []
 
-let mafia = mafiaCount(players.length)
+let mafia = state.mafiaCountOverride || mafiaCount(players.length)
+mafia = Math.min(mafia, maxAllowedMafia(players.length))
 
 for(let i=0;i<mafia;i++){
 pool.push("mafia")
@@ -800,7 +871,7 @@ alive: true
 
 savePlayers()
 renderPlayerSetup()
-
+clampMafiaOverride()
 }
 
 
