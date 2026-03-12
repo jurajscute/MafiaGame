@@ -1466,3 +1466,16 @@ opacity:1;
 transform:scale(1) translateY(0);
 }
 }
+
+.modal-content button:disabled{
+opacity:0.5;
+cursor:not-allowed;
+transform:none;
+box-shadow:none;
+filter:grayscale(35%);
+}
+
+.settings-locked-mode #presets-section-wrap{
+opacity:0.6;
+filter:grayscale(30%);
+}

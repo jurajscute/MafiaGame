@@ -340,7 +340,7 @@ Reset Settings
 
 `
 
-  content += `<button onclick="closeInfo()">Close</button></div>`;
+  content += `<button class="close-settings-btn" onclick="closeInfo()">Close</button>`;
 
 if(modal.classList.contains("show")){
   swapModalContent(content)
@@ -353,9 +353,11 @@ if(modal.classList.contains("show")){
     if(state.gameStarted){
       modal.querySelector(".modal-content")?.classList.add("settings-locked-mode")
 
-      modal.querySelectorAll("input").forEach(el=>{
-        el.disabled = true
-      })
+      modal.querySelectorAll("input, select, button").forEach(el=>{
+  if(!el.classList.contains("close-settings-btn")){
+    el.disabled = true
+  }
+})
     }
 
     modal.querySelectorAll('.role-weight input[type="range"]').forEach(slider => {
@@ -578,7 +580,7 @@ count.insertAdjacentHTML("afterend", `
 
 <div class="sheriff-extra-wrap" id="sheriff-extra-wrap">
 
-  <div class="additional-settings-bar" onclick="toggleSheriffExtras()">
+  <<div class="additional-settings-bar" onclick="toggleSheriffExtras()">
     <span>Additional Settings</span>
     <span class="additional-arrow">▾</span>
   </div>
