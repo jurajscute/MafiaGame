@@ -303,11 +303,14 @@ else if(kill && kill === save){
 
 if(state.doctorRevealSave){
 message = `${save} was saved by the Doctor!`
-}else{
-message = "Someone was attacked but survived the night."
-}
 
 morningCardClass = "card role-doctor"
+}else{
+message = "Someone was attacked but survived the night."
+
+morningCardClass = "card"
+}
+
 }
 
 if(checkWin()) return
