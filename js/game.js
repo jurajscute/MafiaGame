@@ -213,9 +213,10 @@ count.classList.remove("show")
 }
 
 function closeInfo(){
-const modal = document.getElementById("infoModal");
-document.getElementById("infoModal").classList.add("hidden")
-modal.classList.remove("show");
+  const modal = document.getElementById("infoModal");
+
+  modal.classList.remove("show");
+
   setTimeout(() => {
     modal.classList.add("hidden");
   }, 300);

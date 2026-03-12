@@ -918,3 +918,7 @@ opacity:0.9;
 .skip-btn:hover{
 opacity:1;
 }
+
+.hidden{
+display:none;
+}
