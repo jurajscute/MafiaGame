@@ -134,22 +134,26 @@ onchange="window.updateRoleCount('${role}', this.value)">
 if(role === "doctor" && enabled){
 content += `
 
-<div class="additional-settings-bar" onclick="toggleDoctorExtras()">
-  <span>Additional Settings</span>
-  <span class="additional-arrow">${state.doctorExtraOpen ? "▴" : "▾"}</span>
-</div>
+<div class="doctor-extra-wrap show" id="doctor-extra-wrap">
 
-<div class="doctor-extra-settings ${state.doctorExtraOpen ? "show" : ""}">
-  <div class="role-toggle doctor-subsetting">
-    <span>Reveal Saved Player</span>
-
-    <label class="switch">
-      <input type="checkbox"
-      ${state.doctorRevealSave ? "checked" : ""}
-      onchange="toggleDoctorReveal(this.checked)">
-      <span class="slider"></span>
-    </label>
+  <div class="additional-settings-bar" onclick="toggleDoctorExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow">${state.doctorExtraOpen ? "▴" : "▾"}</span>
   </div>
+
+  <div class="doctor-extra-settings ${state.doctorExtraOpen ? "show" : ""}" id="doctor-extra-settings">
+    <div class="role-toggle doctor-subsetting">
+      <span>Reveal Saved Player</span>
+
+      <label class="switch">
+        <input type="checkbox"
+          ${state.doctorRevealSave ? "checked" : ""}
+          onchange="toggleDoctorReveal(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
 </div>
 
 `
@@ -242,7 +246,16 @@ window.toggleDoctorExtras = function(){
 
 state.doctorExtraOpen = !state.doctorExtraOpen
 
-showSettings()
+let panel = document.getElementById("doctor-extra-settings")
+let arrow = document.querySelector("#doctor-extra-wrap .additional-arrow")
+
+if(panel){
+panel.classList.toggle("show", state.doctorExtraOpen)
+}
+
+if(arrow){
+arrow.textContent = state.doctorExtraOpen ? "▴" : "▾"
+}
 
 }
 
@@ -252,33 +265,56 @@ let slider = document.getElementById(role+"SliderContainer")
 let count = document.getElementById(role+"-count")
 if(role === "doctor"){
 
-let existing = document.getElementById("doctor-reveal-setting")
+let extraWrap = document.getElementById("doctor-extra-wrap")
 
-if(enabled && !existing){
+if(!enabled){
+state.doctorExtraOpen = false
 
-let container = document.getElementById("doctor-count")
+if(extraWrap){
+extraWrap.classList.remove("show")
+setTimeout(() => {
+  extraWrap.remove()
+}, 300)
+}
+}
 
-container.insertAdjacentHTML("afterend", `
+if(enabled && !extraWrap){
 
-<div class="role-toggle" id="doctor-reveal-setting">
+let count = document.getElementById("doctor-count")
 
-<span>Reveal Saved Player</span>
+count.insertAdjacentHTML("afterend", `
 
-<label class="switch">
-<input type="checkbox"
-${state.doctorRevealSave ? "checked" : ""}
-onchange="toggleDoctorReveal(this.checked)">
-<span class="slider"></span>
-</label>
+<div class="doctor-extra-wrap" id="doctor-extra-wrap">
+
+  <div class="additional-settings-bar" onclick="toggleDoctorExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow">▾</span>
+  </div>
+
+  <div class="doctor-extra-settings" id="doctor-extra-settings">
+    <div class="role-toggle doctor-subsetting">
+      <span>Reveal Saved Player:</span>
+
+      <label class="switch">
+        <input type="checkbox"
+          ${state.doctorRevealSave ? "checked" : ""}
+          onchange="toggleDoctorReveal(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
 
 </div>
 
 `)
 
+requestAnimationFrame(() => {
+let inserted = document.getElementById("doctor-extra-wrap")
+if(inserted){
+inserted.classList.add("show")
 }
+})
 
-if(!enabled && existing){
-existing.remove()
 }
 
 }
