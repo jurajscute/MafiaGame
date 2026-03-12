@@ -87,25 +87,29 @@ const playerCount = state.players.length
 const mafiaMax = maxAllowedMafia(playerCount)
 const autoMafia = playerCount > 0 ? mafiaCount(playerCount) : 1
 
+let mafiaOptions = `<option value="0" ${state.mafiaCountOverride === 0 ? "selected" : ""}>Auto (${autoMafia})</option>`
+
+for(let i = 1; i <= mafiaMax; i++){
+let label = i === 1 ? "1 Mafia Member" : `${i} Mafia`
+mafiaOptions += `<option value="${i}" ${state.mafiaCountOverride === i ? "selected" : ""}>${label}</option>`
+}
+
 content += `
 
-<div class="role-toggle">
+<div class="role-toggle global-setting-header">
   <span style="color:${roleColors.mafia}">Mafia Count</span>
 </div>
 
-<div class="role-count show" id="mafia-global-count">
-  <label>How many mafia:</label>
+<div class="global-setting-row">
+  <label for="mafiaCountSelect">How many mafia:</label>
 
-  <input type="number"
-    min="0"
-    max="${mafiaMax}"
-    value="${state.mafiaCountOverride || 0}"
-    onchange="window.updateMafiaCountOverride(Math.min(${mafiaMax}, Math.max(0, this.value)))">
-
+  <select id="mafiaCountSelect" onchange="window.updateMafiaCountOverride(this.value)">
+    ${mafiaOptions}
+  </select>
 </div>
 
 <p class="global-setting-note">
-  0 = Auto (${autoMafia}) • Max allowed with ${playerCount} player${playerCount === 1 ? "" : "s"}: ${mafiaMax}
+  Max allowed with ${playerCount} player${playerCount === 1 ? "" : "s"}: ${mafiaMax}
 </p>
 
 `
