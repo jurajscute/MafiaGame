@@ -163,18 +163,6 @@ ${targets}
 
 export function performNightAction(targetName){
 
-    if(role.nightAction === "kill"){
-addLogEntry(`Mafia targeted ${targetName}.`)
-}
-
-if(role.nightAction === "save"){
-addLogEntry(`Doctor protected ${targetName}.`)
-}
-
-if(role.nightAction === "investigate"){
-addLogEntry(`Sheriff investigated ${targetName}.`)
-}
-
 let player = state.players[state.nightTurnIndex]
 let role = roles[player.role]
 
@@ -238,6 +226,19 @@ return
 }
 
 advanceNightTurn()
+
+    if(role.nightAction === "kill"){
+addLogEntry(`Mafia targeted ${targetName}.`)
+}
+
+if(role.nightAction === "save"){
+addLogEntry(`Doctor protected ${targetName}.`)
+}
+
+if(role.nightAction === "investigate"){
+addLogEntry(`Sheriff investigated ${targetName}.`)
+}
+
 
 }
 
