@@ -96,21 +96,29 @@ mafiaOptions += `<option value="${i}" ${state.mafiaCountOverride === i ? "select
 
 content += `
 
-<div class="role-toggle global-setting-header">
-  <span style="color:${roleColors.mafia}">Mafia Count</span>
+<div class="global-setting-card mafia-setting-card">
+
+  <div class="global-setting-top">
+    <span class="global-setting-title" style="color:${roleColors.mafia}">
+      Mafia Count
+    </span>
+    <span class="global-setting-badge">Global</span>
+  </div>
+
+  <div class="global-setting-row mafia-setting-row">
+    <label for="mafiaCountSelect">How many mafia?</label>
+
+    <select id="mafiaCountSelect" onchange="window.updateMafiaCountOverride(this.value)">
+      ${mafiaOptions}
+    </select>
+  </div>
+
+  <p class="global-setting-note">
+    Recommended in Auto mode: <strong>${autoMafia}</strong><br>
+    Max allowed with ${playerCount} player${playerCount === 1 ? "" : "s"}: <strong>${mafiaMax}</strong>
+  </p>
+
 </div>
-
-<div class="global-setting-row">
-  <label for="mafiaCountSelect">How many mafia:</label>
-
-  <select id="mafiaCountSelect" onchange="window.updateMafiaCountOverride(this.value)">
-    ${mafiaOptions}
-  </select>
-</div>
-
-<p class="global-setting-note">
-  Max allowed with ${playerCount} player${playerCount === 1 ? "" : "s"}: ${mafiaMax}
-</p>
 
 `
 
