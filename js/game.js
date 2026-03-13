@@ -14,13 +14,12 @@ castVote
 } from "./phases.js"
 
 const roleColors = {
-
 mafia: "#e74c3c",
 doctor: "#2e8dcc",
 sheriff: "#e4c200",
 villager: "#8dc2ff",
-jester: "#bb006d"
-
+jester: "#ff3ea5",
+executioner: "#7a2f6f"
 }
 
 window.updateRoleCount = function(role,value){

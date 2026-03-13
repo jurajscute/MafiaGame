@@ -67,13 +67,12 @@ showNightTurn()
 }
 
 const roleColors = {
-
 mafia: "#e74c3c",
 doctor: "#2e8dcc",
 sheriff: "#e4c200",
 villager: "#8dc2ff",
-jester: "#bb006d"
-
+jester: "#ff3ea5",
+executioner: "#7a2f6f"
 }
 
 function showNightTurn(){
@@ -661,11 +660,11 @@ if(executionerWinner){
 
 addLogEntry(`${executionerWinner.name} won as the Executioner by getting ${eliminated} voted out.`)
 
-document.body.className = "win-jester"
+document.body.className = "win-executioner"
 
 render(`
 
-<div class="card role-jester">
+<div class="card role-executioner">
 
 <h1 class="role-title">EXECUTIONER WINS</h1>
 
@@ -836,7 +835,7 @@ ${renderRoleList(town)}
 
 <hr style="opacity:0.3;margin:20px 0;">
 
-<h3 class="jester-win">Neutral</h3>
+<h3 class="neutral-win">Neutral</h3>
 ${renderRoleList(neutral)}
 
 <br>
