@@ -976,6 +976,17 @@ return 5
 
 }
 
+window.toggleDoctorReveal = function(enabled){
+
+state.doctorRevealSave = enabled
+
+localStorage.setItem(
+"mafiaDoctorReveal",
+JSON.stringify(enabled)
+)
+
+}
+
 window.toggleSheriffExactReveal = function(enabled){
 
 state.sheriffExactReveal = enabled
