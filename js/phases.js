@@ -13,6 +13,20 @@ function setNight() {
     document.body.classList.add("night");
 }
 
+window.forceNextPhase = function(){
+
+if(state.phase === "night"){
+resolveNight()
+return
+}
+
+if(state.phase === "voting"){
+resolveVotes()
+return
+}
+
+}
+
 window.setDay = setDay;
 window.setNight = setNight;
 
@@ -74,6 +88,21 @@ showNightTurn()
 export function nextNightTurn(){
 
 advanceNightTurn()
+
+}
+
+function renderHostControls(){
+
+if(!state.hostMode || !state.gameStarted) return ""
+
+return `
+
+<div class="host-panel">
+  <button class="host-btn" onclick="window.forceNextPhase()">Skip Phase</button>
+  <button class="host-btn" onclick="window.forceRevealRoles()">Reveal Roles</button>
+</div>
+
+`
 
 }
 

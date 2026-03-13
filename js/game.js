@@ -160,35 +160,6 @@ function initSettingsModal(){
 
 }
 
-function renderHostControls(){
-
-if(!state.hostMode || !state.gameStarted) return ""
-
-return `
-
-<div class="host-panel">
-  <button class="host-btn" onclick="window.forceNextPhase()">Skip Phase</button>
-  <button class="host-btn" onclick="window.forceRevealRoles()">Reveal Roles</button>
-</div>
-
-`
-
-}
-
-window.forceNextPhase = function(){
-
-if(state.phase === "night"){
-resolveNight()
-return
-}
-
-if(state.phase === "voting"){
-resolveVotes()
-return
-}
-
-}
-
 window.forceRevealRoles = function(){
 addLogEntry("Host revealed final roles early.")
 showRoleRevealEnd()
