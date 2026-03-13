@@ -34,6 +34,19 @@ return `
 `
 }
 
+function shouldRevealOnNightDeath(){
+return state.revealRolesOnElimination === "death" ||
+       state.revealRolesOnElimination === "death_and_vote"
+}
+
+function shouldRevealOnVoteDeath(){
+return state.revealRolesOnElimination === "death_and_vote"
+}
+
+function revealedRoleText(player){
+return `${player.role.toUpperCase()}`
+}
+
 window.forceNextPhase = function(){
 
 if(state.phase === "night"){
@@ -389,9 +402,15 @@ let victim = state.players.find(p => p.name === kill)
 
 if(victim){
 victim.alive = false
+let deathText = `${kill} was killed during the night.`
+
+if(victim && shouldRevealOnNightDeath()){
+deathText += `<br><span class="revealed-role-inline">${revealedRoleText(victim)}</span>`
+}
+
 results.push({
 type: "death",
-text: `${kill} was killed during the night.`
+text: deathText
 })
 }
 
@@ -780,6 +799,12 @@ ${resultsHTML}
 <h2 class="elimination-text">
 ${eliminated} was voted out
 </h2>
+
+${player && shouldRevealOnVoteDeath() ? `
+<p class="revealed-role-inline">
+${revealedRoleText(player)}
+</p>
+` : ""}
 
 ${renderPlayerStatus()}
 

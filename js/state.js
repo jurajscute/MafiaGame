@@ -19,6 +19,8 @@ mafiaCountOverride: 0,
 
 rolesSectionOpen: true,
 
+revealRolesOnElimination: "none",
+
 presetsSectionOpen: false,
 
 gameLog: [],

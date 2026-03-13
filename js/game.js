@@ -132,6 +132,7 @@ state.doctorExtraOpen = false
 state.sheriffExtraOpen = false
 state.rolesSectionOpen = true
 state.presetsSectionOpen = false
+state.revealRolesOnElimination = "none"
 
 localStorage.setItem("mafiaRoles", JSON.stringify(state.rolesEnabled))
 localStorage.setItem("mafiaRoleWeights", JSON.stringify(state.roleWeights))
@@ -139,10 +140,8 @@ localStorage.setItem("mafiaRoleCounts", JSON.stringify(state.roleCounts))
 localStorage.setItem("mafiaDoctorReveal", JSON.stringify(state.doctorRevealSave))
 localStorage.setItem("mafiaSheriffExactReveal", JSON.stringify(state.sheriffExactReveal))
 localStorage.setItem("mafiaCountOverride", JSON.stringify(state.mafiaCountOverride))
-localStorage.setItem(
-"mafiaExecutionerTargetRule",
-JSON.stringify(state.executionerTargetRule)
-)
+localStorage.setItem("mafiaExecutionerTargetRule", JSON.stringify(state.executionerTargetRule))
+localStorage.setItem("mafiaRevealRolesOnElimination", JSON.stringify(state.revealRolesOnElimination))
 
 showSettings()
 
@@ -252,6 +251,31 @@ for(let i = 1; i <= mafiaMax; i++){
 let label = i === 1 ? "1 Mafia Member" : `${i} Mafia`
 mafiaOptions += `<option value="${i}" ${state.mafiaCountOverride === i ? "selected" : ""}>${label}</option>`
 }
+
+content += `
+
+<div class="global-setting-card">
+
+  <div class="global-setting-top">
+    <span class="global-setting-title">
+      Role Reveal
+    </span>
+    <span class="global-setting-badge">Global</span>
+  </div>
+
+  <div class="global-setting-row">
+    <label for="revealRolesSelect">Reveal roles on elimination?</label>
+
+    <select id="revealRolesSelect" onchange="setRevealRolesOnElimination(this.value)">
+      <option value="none" ${state.revealRolesOnElimination === "none" ? "selected" : ""}>Never</option>
+      <option value="death" ${state.revealRolesOnElimination === "death" ? "selected" : ""}>Night kill only</option>
+      <option value="death_and_vote" ${state.revealRolesOnElimination === "death_and_vote" ? "selected" : ""}>Night kill and vote</option>
+    </select>
+  </div>
+
+</div>
+
+`
 
 content += `
 
@@ -854,6 +878,12 @@ let savedHostMode = localStorage.getItem("mafiaHostMode")
 
 let savedExecutionerTargetRule = localStorage.getItem("mafiaExecutionerTargetRule")
 
+let savedRevealRolesOnElimination = localStorage.getItem("mafiaRevealRolesOnElimination")
+
+if(savedRevealRolesOnElimination){
+state.revealRolesOnElimination = JSON.parse(savedRevealRolesOnElimination)
+}
+
 if(savedExecutionerTargetRule){
 state.executionerTargetRule = JSON.parse(savedExecutionerTargetRule)
 }
@@ -887,6 +917,17 @@ state.rolesEnabled = JSON.parse(savedRoles)
 }
 
 let revealIndex=0
+
+window.setRevealRolesOnElimination = function(value){
+
+state.revealRolesOnElimination = value
+
+localStorage.setItem(
+"mafiaRevealRolesOnElimination",
+JSON.stringify(value)
+)
+
+}
 
 window.setExecutionerTargetRule = function(value){
 
@@ -1424,6 +1465,7 @@ state.doctorRevealSave = false
 state.sheriffExactReveal = false
 state.executionerTargetRule = "neither"
 state.mafiaCountOverride = 0
+state.revealRolesOnElimination = "none"
 }
 
 if(preset === "beginner"){
@@ -1448,6 +1490,7 @@ state.doctorRevealSave = true
 state.sheriffExactReveal = false
 state.executionerTargetRule = "neither"
 state.mafiaCountOverride = 0
+state.revealRolesOnElimination = "death_and_vote"
 }
 
 if(preset === "chaotic"){
@@ -1471,6 +1514,7 @@ state.doctorRevealSave = true
 state.sheriffExactReveal = true
 state.executionerTargetRule = "both"
 state.mafiaCountOverride = 0
+state.revealRolesOnElimination = "death_and_vote"
 }
 
 saveSettingsToStorage()
@@ -1487,6 +1531,7 @@ localStorage.setItem("mafiaRoleCounts", JSON.stringify(state.roleCounts))
 localStorage.setItem("mafiaDoctorReveal", JSON.stringify(state.doctorRevealSave))
 localStorage.setItem("mafiaSheriffExactReveal", JSON.stringify(state.sheriffExactReveal))
 localStorage.setItem("mafiaCountOverride", JSON.stringify(state.mafiaCountOverride))
+localStorage.setItem("mafiaRevealRolesOnElimination", JSON.stringify(state.revealRolesOnElimination))
 
 }
 
