@@ -138,6 +138,8 @@ state.rolesSectionOpen = true
 state.presetsSectionOpen = false
 state.revealRolesOnElimination = "none"
 state.executionerWinIfDead = false
+state.jesterExtraOpen = false
+state.sheriffJesterResult = "not_innocent"
 
 localStorage.setItem("mafiaRoles", JSON.stringify(state.rolesEnabled))
 localStorage.setItem("mafiaRoleWeights", JSON.stringify(state.roleWeights))
@@ -148,6 +150,7 @@ localStorage.setItem("mafiaCountOverride", JSON.stringify(state.mafiaCountOverri
 localStorage.setItem("mafiaExecutionerTargetRule", JSON.stringify(state.executionerTargetRule))
 localStorage.setItem("mafiaRevealRolesOnElimination", JSON.stringify(state.revealRolesOnElimination))
 localStorage.setItem("mafiaExecutionerWinIfDead", JSON.stringify(state.executionerWinIfDead))
+localStorage.setItem("mafiaSheriffJesterResult", JSON.stringify(state.sheriffJesterResult))
 
 showSettings()
 
@@ -373,6 +376,39 @@ content += `
     `
   }
 
+if(role === "jester" && enabled){
+roleBlock += `
+
+<div class="jester-extra-wrap show" id="jester-extra-wrap">
+
+  <div class="additional-settings-bar" onclick="toggleJesterExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow" style="transform:${state.jesterExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+  </div>
+
+  <div class="jester-extra-settings ${state.jesterExtraOpen ? "show" : ""}" id="jester-extra-settings">
+
+    <div class="jester-settings-card">
+
+      <div class="jester-setting-row">
+        <span class="jester-setting-label">Sheriff sees Jester as...</span>
+
+        <select class="jester-setting-select" onchange="setSheriffJesterResult(this.value)">
+          <option value="innocent" ${state.sheriffJesterResult === "innocent" ? "selected" : ""}>Innocent</option>
+          <option value="not_innocent" ${state.sheriffJesterResult === "not_innocent" ? "selected" : ""}>Not Innocent</option>
+          <option value="exact" ${state.sheriffJesterResult === "exact" ? "selected" : ""}>Exact Role</option>
+        </select>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+`
+}
+
   if(role === "sheriff" && enabled){
     roleBlock += `
       <div class="sheriff-extra-wrap show" id="sheriff-extra-wrap">
@@ -498,6 +534,23 @@ function openModal(content, onOpen){
     if(onOpen) onOpen()
     modal.classList.add("show")
   })
+
+}
+
+window.toggleJesterExtras = function(){
+
+state.jesterExtraOpen = !state.jesterExtraOpen
+
+let panel = document.getElementById("jester-extra-settings")
+let arrow = document.querySelector("#jester-extra-wrap .additional-arrow")
+
+if(panel){
+panel.classList.toggle("show", state.jesterExtraOpen)
+}
+
+if(arrow){
+arrow.style.transform = state.jesterExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
+}
 
 }
 
@@ -645,6 +698,67 @@ setTimeout(() => {
   extraWrap.remove()
 }, 300)
 }
+}
+
+if(role === "jester"){
+
+let extraWrap = document.getElementById("jester-extra-wrap")
+
+if(!enabled){
+state.jesterExtraOpen = false
+
+if(extraWrap){
+extraWrap.classList.remove("show")
+setTimeout(() => {
+  extraWrap.remove()
+}, 300)
+}
+}
+
+if(enabled && !extraWrap){
+
+let count = document.getElementById("jester-count")
+
+count.insertAdjacentHTML("afterend", `
+
+<div class="jester-extra-wrap" id="jester-extra-wrap">
+
+  <div class="additional-settings-bar" onclick="toggleJesterExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow">▾</span>
+  </div>
+
+  <div class="jester-extra-settings" id="jester-extra-settings">
+
+    <div class="jester-settings-card">
+
+      <div class="jester-setting-row">
+        <span class="jester-setting-label">Sheriff sees Jester as</span>
+
+        <select class="jester-setting-select" onchange="setSheriffJesterResult(this.value)">
+          <option value="innocent" ${state.sheriffJesterResult === "innocent" ? "selected" : ""}>Innocent</option>
+          <option value="not_innocent" ${state.sheriffJesterResult === "not_innocent" ? "selected" : ""}>Not Innocent</option>
+          <option value="exact" ${state.sheriffJesterResult === "exact" ? "selected" : ""}>Exact Role</option>
+        </select>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+`)
+
+requestAnimationFrame(() => {
+let inserted = document.getElementById("jester-extra-wrap")
+if(inserted){
+inserted.classList.add("show")
+}
+})
+
+}
+
 }
 
 if(enabled && !extraWrap){
@@ -827,6 +941,10 @@ if(role === "doctor" && !enabled){
 state.doctorExtraOpen = false
 }
 
+if(role === "jester" && !enabled){
+state.jesterExtraOpen = false
+}
+
 state.rolesEnabled[role] = enabled
 
 localStorage.setItem(
@@ -919,6 +1037,12 @@ let savedRevealRolesOnElimination = localStorage.getItem("mafiaRevealRolesOnElim
 
 let savedExecutionerWinIfDead = localStorage.getItem("mafiaExecutionerWinIfDead")
 
+let savedSheriffJesterResult = localStorage.getItem("mafiaSheriffJesterResult")
+
+if(savedSheriffJesterResult){
+state.sheriffJesterResult = JSON.parse(savedSheriffJesterResult)
+}
+
 if(savedExecutionerWinIfDead){
 state.executionerWinIfDead = JSON.parse(savedExecutionerWinIfDead)
 }
@@ -960,6 +1084,17 @@ state.rolesEnabled = JSON.parse(savedRoles)
 }
 
 let revealIndex=0
+
+window.setSheriffJesterResult = function(value){
+
+state.sheriffJesterResult = value
+
+localStorage.setItem(
+"mafiaSheriffJesterResult",
+JSON.stringify(value)
+)
+
+}
 
 window.setRevealRolesOnElimination = function(value){
 

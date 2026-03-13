@@ -23,6 +23,8 @@ revealRolesOnElimination: "none",
 
 presetsSectionOpen: false,
 
+sheriffJesterResult: "not_innocent",
+
 gameLog: [],
 gameStats: {
 nights: 0,
