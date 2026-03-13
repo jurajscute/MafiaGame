@@ -423,26 +423,32 @@ rolesContent += `
 
   <div class="executioner-extra-settings ${state.executionerExtraOpen ? "show" : ""}" id="executioner-extra-settings">
 
-    <div class="role-toggle executioner-subsetting">
-      <span>Can target Jester or Mafia?</span>
+    <div class="executioner-settings-card">
 
-      <select onchange="setExecutionerTargetRule(this.value)">
-        <option value="neither" ${state.executionerTargetRule === "neither" ? "selected" : ""}>Neither</option>
-        <option value="mafia" ${state.executionerTargetRule === "mafia" ? "selected" : ""}>Mafia</option>
-        <option value="jester" ${state.executionerTargetRule === "jester" ? "selected" : ""}>Jester</option>
-        <option value="both" ${state.executionerTargetRule === "both" ? "selected" : ""}>Both</option>
-      </select>
-    </div>
+      <div class="executioner-setting-row">
+        <span class="executioner-setting-label">Can target Jester or Mafia?</span>
 
-    <div class="role-toggle executioner-subsetting">
-      <span>Can win while dead</span>
+        <select class="executioner-setting-select" onchange="setExecutionerTargetRule(this.value)">
+          <option value="neither" ${state.executionerTargetRule === "neither" ? "selected" : ""}>Neither</option>
+          <option value="mafia" ${state.executionerTargetRule === "mafia" ? "selected" : ""}>Mafia</option>
+          <option value="jester" ${state.executionerTargetRule === "jester" ? "selected" : ""}>Jester</option>
+          <option value="both" ${state.executionerTargetRule === "both" ? "selected" : ""}>Both</option>
+        </select>
+      </div>
 
-      <label class="switch">
-        <input type="checkbox"
-          ${state.executionerWinIfDead ? "checked" : ""}
-          onchange="toggleExecutionerWinIfDead(this.checked)">
-        <span class="slider"></span>
-      </label>
+      <div class="executioner-setting-divider"></div>
+
+      <div class="executioner-setting-row">
+        <span class="executioner-setting-label">Can win while dead</span>
+
+        <label class="switch">
+          <input type="checkbox"
+            ${state.executionerWinIfDead ? "checked" : ""}
+            onchange="toggleExecutionerWinIfDead(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
     </div>
 
   </div>
@@ -776,26 +782,32 @@ count.insertAdjacentHTML("afterend", `
 
   <div class="executioner-extra-settings" id="executioner-extra-settings">
 
-    <div class="role-toggle executioner-subsetting">
-      <span>Can target Jester or Mafia?</span>
+    <div class="executioner-settings-card">
 
-      <select onchange="setExecutionerTargetRule(this.value)">
-        <option value="neither" ${state.executionerTargetRule === "neither" ? "selected" : ""}>Neither</option>
-        <option value="mafia" ${state.executionerTargetRule === "mafia" ? "selected" : ""}>Mafia</option>
-        <option value="jester" ${state.executionerTargetRule === "jester" ? "selected" : ""}>Jester</option>
-        <option value="both" ${state.executionerTargetRule === "both" ? "selected" : ""}>Both</option>
-      </select>
-    </div>
+      <div class="executioner-setting-row">
+        <span class="executioner-setting-label">Can target Jester or Mafia?</span>
 
-    <div class="role-toggle executioner-subsetting">
-      <span>Can win while dead</span>
+        <select class="executioner-setting-select" onchange="setExecutionerTargetRule(this.value)">
+          <option value="neither" ${state.executionerTargetRule === "neither" ? "selected" : ""}>Neither</option>
+          <option value="mafia" ${state.executionerTargetRule === "mafia" ? "selected" : ""}>Mafia</option>
+          <option value="jester" ${state.executionerTargetRule === "jester" ? "selected" : ""}>Jester</option>
+          <option value="both" ${state.executionerTargetRule === "both" ? "selected" : ""}>Both</option>
+        </select>
+      </div>
 
-      <label class="switch">
-        <input type="checkbox"
-          ${state.executionerWinIfDead ? "checked" : ""}
-          onchange="toggleExecutionerWinIfDead(this.checked)">
-        <span class="slider"></span>
-      </label>
+      <div class="executioner-setting-divider"></div>
+
+      <div class="executioner-setting-row">
+        <span class="executioner-setting-label">Can win while dead</span>
+
+        <label class="switch">
+          <input type="checkbox"
+            ${state.executionerWinIfDead ? "checked" : ""}
+            onchange="toggleExecutionerWinIfDead(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
     </div>
 
   </div>
