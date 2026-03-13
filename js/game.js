@@ -1,4 +1,5 @@
 import {state} from "./state.js"
+import {addLogEntry} from "./state.js"
 import {roles} from "./roles.js"
 import {shuffle,mafiaCount} from "./utils.js"
 import {render} from "./ui.js"
