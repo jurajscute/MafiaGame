@@ -815,13 +815,25 @@ ${resultsHTML}
 
 window.toggleExecutionerReveal = function(playerName){
 
-if(state.openExecutionerReveal === playerName){
-state.openExecutionerReveal = null
-}else{
-state.openExecutionerReveal = playerName
-}
+const panel = document.getElementById(`executioner-target-${playerName}`)
+const arrow = document.getElementById(`executioner-arrow-${playerName}`)
 
-showRoleRevealEnd()
+if(!panel || !arrow) return
+
+const isOpen = panel.classList.contains("show")
+
+document.querySelectorAll(".executioner-target-reveal.show").forEach(el => {
+  el.classList.remove("show")
+})
+
+document.querySelectorAll(".executioner-arrow").forEach(el => {
+  el.style.transform = "rotate(0deg)"
+})
+
+if(!isOpen){
+  panel.classList.add("show")
+  arrow.style.transform = "rotate(90deg)"
+}
 
 }
 
@@ -883,13 +895,14 @@ return `
   <span class="role-player">${p.name}</span>
 
   <span class="role-name" style="color:${color}">
-    ${p.role.toUpperCase()} ${isOpen ? "▴" : "▾"}
+    <span class="executioner-arrow" id="executioner-arrow-${p.name}">▸</span>
+    EXECUTIONER
   </span>
 
 </div>
 
-${isOpen && target ? `
-<div class="executioner-target-reveal">
+${target ? `
+<div class="executioner-target-reveal" id="executioner-target-${p.name}">
   <span class="executioner-target-reveal-label">Target:</span>
   <span class="executioner-target-reveal-name">${target}</span>
 </div>

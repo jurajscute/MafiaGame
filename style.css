@@ -494,14 +494,38 @@ background:rgba(122,47,111,0.12);
 transform:scale(0.99);
 }
 
+.executioner-arrow{
+display:inline-block;
+width:18px;
+margin-right:6px;
+transition:transform 0.25s ease;
+}
+
 .executioner-target-reveal{
-margin:-2px 0 10px 18px;
-padding:10px 14px;
+max-height:0;
+opacity:0;
+overflow:hidden;
+margin:0 0 0 18px;
+padding:0 14px;
 border-radius:10px;
 background:linear-gradient(135deg, rgba(122,47,111,0.14), rgba(58,16,47,0.18));
 border-left:3px solid #7a2f6f;
 text-align:left;
-animation:fadeIn 0.25s ease;
+transform:translateY(-6px);
+transition:
+max-height 0.28s ease,
+opacity 0.22s ease,
+transform 0.28s ease,
+margin 0.28s ease,
+padding 0.28s ease;
+}
+
+.executioner-target-reveal.show{
+max-height:80px;
+opacity:1;
+margin:6px 0 10px 18px;
+padding:10px 14px;
+transform:translateY(0);
 }
 
 .executioner-target-reveal-label{
