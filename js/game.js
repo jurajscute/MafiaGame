@@ -178,13 +178,11 @@ return `
 window.forceNextPhase = function(){
 
 if(state.phase === "night"){
-addLogEntry("Host skipped the rest of the night.")
 resolveNight()
 return
 }
 
 if(state.phase === "voting"){
-addLogEntry("Host skipped the rest of voting.")
 resolveVotes()
 return
 }
@@ -762,6 +760,12 @@ let savedDoctorReveal = localStorage.getItem("mafiaDoctorReveal")
 let savedSheriffExactReveal = localStorage.getItem("mafiaSheriffExactReveal")
 
 let savedMafiaCountOverride = localStorage.getItem("mafiaCountOverride")
+
+let savedHostMode = localStorage.getItem("mafiaHostMode")
+
+if(savedHostMode){
+state.hostMode = JSON.parse(savedHostMode)
+}
 
 if(savedMafiaCountOverride){
 state.mafiaCountOverride = JSON.parse(savedMafiaCountOverride)

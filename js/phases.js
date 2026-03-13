@@ -111,6 +111,8 @@ ${role.description || ""}
 
 <button onclick="window.nextNightTurn()">Hide</button>
 
+${renderHostControls()}
+
 </div>
 
 `)
@@ -154,6 +156,8 @@ render(`
 <p>Select a target</p>
 
 ${targets}
+
+${renderHostControls()}
 
 </div>
 
@@ -393,6 +397,8 @@ ${resultsHTML}
 
 <button onclick="window.startVoting()">Continue</button>
 
+${renderHostControls()}
+
 </div>
 
 `)
@@ -445,6 +451,8 @@ render(`
 <h2>Cast Your Vote</h2>
 
 ${buttons}
+
+${renderHostControls()}
 
 </div>
 
@@ -534,6 +542,8 @@ ${resultsHTML}
 <h2>It's a tie! Nobody was eliminated.</h2>
 
 <button onclick="window.nextNight()">Next Night</button>
+
+${renderHostControls()}
 
 </div>
 
@@ -716,7 +726,7 @@ ${p.role.toUpperCase()}
 
 render(`
 
-<div class="card">
+<div class="card final-results-card">
 
 <h2 class="role-title">FINAL ROLES</h2>
 
