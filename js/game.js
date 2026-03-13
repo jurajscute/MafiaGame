@@ -484,7 +484,7 @@ if(modal.classList.contains("show")){
 }else{
   openModal(content, initSettingsModal)
 }
-}
+
 
 function openModal(content, onOpen){
 
