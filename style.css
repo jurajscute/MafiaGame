@@ -219,7 +219,7 @@ body.night{
 background:linear-gradient(135deg,#0b0f2a,#000);
 color:white;
 }
-body.night .card:not(.role-mafia):not(.role-doctor):not(.role-sheriff):not(.role-jester):not(.role-executioner){
+body.night .card:not(.role-mafia):not(.role-doctor):not(.role-sheriff):not(.role-jester):not(.role-executioner):not(.role-mayor){
   background:#1f2436;
   box-shadow:0 15px 35px rgba(14, 14, 14, 0.6),
              0 0 15px rgba(115, 140, 252, 0.05); /* subtle moonlit glow */
@@ -1032,6 +1032,29 @@ opacity:0.9;
 .executioner-slider input[type="range"]{
 --start:#7a2f6f;
 --end:#4a1b43;
+}
+
+.mayor-slider input[type="range"]{
+--start:#2ecc9a;
+--end:#1b7a5d;
+}
+
+/* mayor */
+
+.role-mayor{
+background:linear-gradient(135deg,#06382b,#021a14);
+}
+
+.role-mayor button{
+background:linear-gradient(135deg,#1f9f78,#147457);
+}
+
+.role-mayor .role-title{
+color:#2ecc9a;
+text-shadow:
+0 0 10px #2ecc9a,
+0 0 20px #2ecc9a,
+0 0 30px #1b7a5d;
 }
 
 /* modal background */

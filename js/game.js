@@ -19,7 +19,8 @@ doctor: "#2e8dcc",
 sheriff: "#e4c200",
 villager: "#8dc2ff",
 jester: "#ff3ea5",
-executioner: "#7a2f6f"
+executioner: "#7a2f6f",
+mayor: "#1d8161"
 }
 
 window.updateRoleCount = function(role,value){
@@ -104,21 +105,24 @@ state.rolesEnabled = {
 doctor: false,
 sheriff: false,
 jester: false,
-executioner: false
+executioner: false,
+mayor: false
 }
 
 state.roleWeights = {
-doctor: 50,
-sheriff: 50,
-jester: 50,
-executioner: 50
+doctor: 100,
+sheriff: 100,
+jester: 100,
+executioner: 100,
+mayor: 100
 }
 
 state.roleCounts = {
 doctor: 1,
 sheriff: 1,
 jester: 1,
-executioner: 1
+executioner: 1,
+mayor: 1
 }
 
 state.executionerTargetRule = "neither"
@@ -196,7 +200,7 @@ function showSettings() {
   let rolesContent = ""
 
   // List of roles we want to display in settings
-  const rolesList = ["doctor", "sheriff", "jester", "executioner"];
+  const rolesList = ["doctor", "sheriff", "jester", "executioner", "mayor"];
 
   let content = `
     <div class="modal-content">
@@ -1177,7 +1181,7 @@ for(let i=0;i<mafia;i++){
 pool.push("mafia")
 }
 
-["doctor","sheriff","jester","executioner"].forEach(role=>{
+["doctor","sheriff","jester","executioner","mayor"].forEach(role=>{
 
 if(!state.rolesEnabled[role]) return
 
@@ -1290,6 +1294,10 @@ if(role === "doctor" && state.doctorRevealSave){
 extras = ` <span style="opacity:0.7;">• reveals saved player</span>`
 }
 
+if(role === "mayor"){
+extras = ` <span style="opacity:0.7;">• vote counts double</span>`
+}
+
 if(role === "sheriff"){
 extras = state.sheriffExactReveal
 ? ` <span style="opacity:0.7;">• exact role</span>`
@@ -1299,10 +1307,10 @@ extras = state.sheriffExactReveal
 if(role === "executioner"){
 
 let executionerRuleText = {
-  neither: "targets neither mafia nor jester",
-  mafia: "can target mafia",
-  jester: "can target jester",
-  both: "can target mafia or jester"
+  neither: "targets only town",
+  mafia: "targets mafia",
+  jester: "targets jester",
+  both: "targets mafia or jester"
 }
 
 extras = ` <span style="opacity:0.7;">• ${executionerRuleText[state.executionerTargetRule]}</span>`
@@ -1399,6 +1407,22 @@ warnings.push("Doctor + Sheriff together may be too strong in a very small lobby
 
 if(state.rolesEnabled.executioner && playerCount < 6){
 warnings.push("Executioner can be very strong in smaller games.")
+}
+
+if(state.rolesEnabled.mayor && playerCount < 5){
+warnings.push("Mayor can be very strong in smaller games.")
+}
+
+if(state.rolesEnabled.mayor && state.rolesEnabled.sheriff && playerCount < 6){
+warnings.push("Mayor + Sheriff may be too strong in a smaller lobby.")
+}
+
+if(state.rolesEnabled.mayor && state.rolesEnabled.sheriff && state.rolesEnabled.doctor && playerCount < 7){
+warnings.push("Mayor + Sheriff + Doctor may be too strong in a smaller lobby.")
+}
+
+if(state.rolesEnabled.doctor && state.rolesEnabled.mayor && playerCount < 6){
+warnings.push("Doctor + Mayor together may be too strong in a very small lobby.")
 }
 
 return warnings
@@ -1535,6 +1559,10 @@ state.rolesEnabled.executioner = false
 state.roleWeights.executioner = 0
 state.roleCounts.executioner = 1
 
+state.rolesEnabled.mayor = false
+state.roleWeights.mayor = 0
+state.roleCounts.mayor = 1
+
 state.doctorRevealSave = false
 state.sheriffExactReveal = false
 state.executionerTargetRule = "neither"
@@ -1559,6 +1587,9 @@ state.rolesEnabled.executioner = false
 state.roleWeights.executioner = 0
 state.roleCounts.executioner = 1
 
+state.rolesEnabled.mayor = false
+state.roleWeights.mayor = 0
+state.roleCounts.mayor = 1
 
 state.doctorRevealSave = true
 state.sheriffExactReveal = false
@@ -1583,6 +1614,10 @@ state.roleCounts.jester = 1
 state.rolesEnabled.executioner = true
 state.roleWeights.executioner = 100
 state.roleCounts.executioner = 1
+
+state.rolesEnabled.mayor = true
+state.roleWeights.mayor = 100
+state.roleCounts.mayor = 1
 
 state.doctorRevealSave = true
 state.sheriffExactReveal = true

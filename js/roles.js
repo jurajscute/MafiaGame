@@ -24,6 +24,13 @@ nightAction:"investigate",
 description:"Investigate a player each night to learn if they are suspicious."
 },
 
+
+mayor:{
+team:"village",
+nightAction:null,
+description:"You have no night action, but your vote counts as 2."
+},
+
 jester:{
 team:"neutral",
 nightAction:null,

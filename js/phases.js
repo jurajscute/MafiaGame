@@ -121,7 +121,8 @@ doctor: "#2e8dcc",
 sheriff: "#e4c200",
 villager: "#8dc2ff",
 jester: "#ff3ea5",
-executioner: "#7a2f6f"
+executioner: "#7a2f6f",
+mayor: "#1d8161"
 }
 
 function showNightTurn(){
@@ -576,16 +577,29 @@ let alivePlayers = state.players.filter(p=>p.alive)
 let voter = alivePlayers[state.voteTurnIndex]
 
 if(voter){
-addLogEntry(`${voter.name} voted for ${targetName}.`)
+let voteText = voter.role === "mayor"
+  ? `${voter.name} voted for ${targetName} with 2 votes as Mayor.`
+  : `${voter.name} voted for ${targetName}.`
+
+addLogEntry(voteText)
 }
 
 state.gameStats.votesCast++
+
+let alivePlayers = state.players.filter(p=>p.alive)
+let voter = alivePlayers[state.voteTurnIndex]
+
+let votePower = 1
+
+if(voter && voter.role === "mayor"){
+votePower = 2
+}
 
 if(!state.votes[targetName]){
 state.votes[targetName]=0
 }
 
-state.votes[targetName]++
+state.votes[targetName] += votePower
 
 state.voteTurnIndex++
 
