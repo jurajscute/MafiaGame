@@ -1609,3 +1609,50 @@ padding:12px;
 .host-btn:hover{
 transform:scale(1.02);
 }
+
+.player-status-box{
+margin:16px 0;
+padding:12px;
+border-radius:12px;
+background:rgba(255,255,255,0.05);
+text-align:left;
+}
+
+.player-status-box h3{
+margin:0 0 10px 0;
+font-size:16px;
+opacity:0.9;
+}
+
+.status-row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:8px 10px;
+margin:6px 0;
+border-radius:8px;
+background:rgba(255,255,255,0.04);
+}
+
+.status-row.dead{
+opacity:0.55;
+text-decoration:line-through;
+}
+
+.status-row.alive{
+opacity:0.95;
+}
+
+.log-entry{
+margin:8px 0;
+opacity:0.9;
+font-size:14px;
+line-height:1.4;
+}
+
+.log-header{
+margin-top:14px;
+font-weight:bold;
+color:#ffaa49;
+letter-spacing:0.5px;
+}

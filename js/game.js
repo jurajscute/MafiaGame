@@ -104,19 +104,22 @@ window.resetSettings = function(){
 state.rolesEnabled = {
 doctor: false,
 sheriff: false,
-jester: false
+jester: false,
+executioner: false
 }
 
 state.roleWeights = {
 doctor: 50,
 sheriff: 50,
-jester: 50
+jester: 50,
+executioner: 50
 }
 
 state.roleCounts = {
 doctor: 1,
 sheriff: 1,
-jester: 1
+jester: 1,
+executioner: 1
 }
 
 state.doctorRevealSave = false
@@ -1129,6 +1132,10 @@ if(state.rolesEnabled.doctor && state.rolesEnabled.sheriff && playerCount < 6){
 warnings.push("Doctor + Sheriff together may be too strong in a very small lobby.")
 }
 
+if(state.rolesEnabled.executioner && playerCount < 6){
+warnings.push("Executioner can be very strong in smaller games.")
+}
+
 return warnings
 
 }
@@ -1254,6 +1261,10 @@ state.roleCounts.doctor = 1
 state.roleCounts.sheriff = 1
 state.roleCounts.jester = 1
 
+state.rolesEnabled.executioner = false
+state.roleWeights.executioner = 0
+state.roleCounts.executioner = 1
+
 state.doctorRevealSave = false
 state.sheriffExactReveal = false
 state.mafiaCountOverride = 0
@@ -1272,6 +1283,11 @@ state.roleCounts.doctor = 1
 state.roleCounts.sheriff = 1
 state.roleCounts.jester = 1
 
+state.rolesEnabled.executioner = false
+state.roleWeights.executioner = 0
+state.roleCounts.executioner = 1
+
+
 state.doctorRevealSave = true
 state.sheriffExactReveal = false
 state.mafiaCountOverride = 0
@@ -1289,6 +1305,10 @@ state.roleWeights.jester = 100
 state.roleCounts.doctor = 1
 state.roleCounts.sheriff = 1
 state.roleCounts.jester = 1
+
+state.rolesEnabled.executioner = true
+state.roleWeights.executioner = 100
+state.roleCounts.executioner = 1
 
 state.doctorRevealSave = true
 state.sheriffExactReveal = true

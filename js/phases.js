@@ -13,6 +13,27 @@ function setNight() {
     document.body.classList.add("night");
 }
 
+function renderPlayerStatus(){
+
+let playersHTML = state.players.map(p => {
+  return `
+    <div class="status-row ${p.alive ? "alive" : "dead"}">
+      <span>${p.name}</span>
+      <span>${p.alive ? "Alive" : "Dead ☠"}</span>
+    </div>
+  `
+}).join("")
+
+return `
+
+<div class="player-status-box">
+  <h3>Players</h3>
+  ${playersHTML}
+</div>
+
+`
+}
+
 window.forceNextPhase = function(){
 
 if(state.phase === "night"){
@@ -424,6 +445,8 @@ render(`
 
 ${resultsHTML}
 
+${renderPlayerStatus()}
+
 <button onclick="window.startVoting()">Continue</button>
 
 ${renderHostControls()}
@@ -439,6 +462,8 @@ export function startVoting(){
 state.phase="voting"
 state.voteTurnIndex=0
 state.votes={}
+
+ addLogEntry(`Day ${state.gameStats.nights} voting began.`)
 
 nextVoteTurn()
 
@@ -480,6 +505,8 @@ render(`
 <h2>Cast Your Vote</h2>
 
 ${buttons}
+
+${renderPlayerStatus()}
 
 ${renderHostControls()}
 
@@ -570,6 +597,8 @@ ${resultsHTML}
 
 <h2>It's a tie! Nobody was eliminated.</h2>
 
+${renderPlayerStatus()}
+
 <button onclick="window.nextNight()">Next Night</button>
 
 ${renderHostControls()}
@@ -598,7 +627,11 @@ ${resultsHTML}
 
 <h2>The town skipped the vote.</h2>
 
+${renderPlayerStatus()}
+
 <button onclick="window.nextNight()">Next Night</button>
+
+${renderHostControls()}
 
 </div>
 
@@ -691,6 +724,8 @@ ${resultsHTML}
 ${eliminated} was voted out
 </h2>
 
+${renderPlayerStatus()}
+
 <button onclick="window.nextNight()">Next Night</button>
 
 </div>
@@ -723,8 +758,11 @@ ${resultsHTML}
 
 function showRoleRevealEnd(){
 
-    let logHTML = state.gameLog.length
-? state.gameLog.map(entry => `<p class="log-entry">${entry}</p>`).join("")
+   let logHTML = state.gameLog.length
+? state.gameLog.map(entry => {
+    let isHeader = entry.startsWith("Night ") || entry.startsWith("Day ")
+    return `<p class="log-entry ${isHeader ? "log-header" : ""}">${entry}</p>`
+  }).join("")
 : `<p style="opacity:0.7;">No log entries recorded.</p>`
 
 let mafia = state.players.filter(p => roles[p.role]?.team === "mafia")
