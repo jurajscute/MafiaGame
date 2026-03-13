@@ -26,6 +26,7 @@ presetsSectionOpen: false,
 sheriffJesterResult: "not_innocent",
 
 mayorVotePower: 2,
+mayorExtraOpen: false,
 
 gameLog: [],
 gameStats: {

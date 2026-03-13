@@ -128,6 +128,9 @@ mayor: 1
 state.executionerTargetRule = "neither"
 state.executionerExtraOpen = false
 
+state.mayorExtraOpen = false
+state.mayorVotePower = 2
+
 state.doctorRevealSave = false
 state.sheriffExactReveal = false
 state.mafiaCountOverride = 0
@@ -151,6 +154,7 @@ localStorage.setItem("mafiaExecutionerTargetRule", JSON.stringify(state.executio
 localStorage.setItem("mafiaRevealRolesOnElimination", JSON.stringify(state.revealRolesOnElimination))
 localStorage.setItem("mafiaExecutionerWinIfDead", JSON.stringify(state.executionerWinIfDead))
 localStorage.setItem("mafiaSheriffJesterResult", JSON.stringify(state.sheriffJesterResult))
+localStorage.setItem("mafiaMayorVotePower", JSON.stringify(state.sheriffJesterResult))
 
 showSettings()
 
@@ -377,38 +381,37 @@ content += `
   }
 
 if(role === "mayor" && enabled){
-
 roleBlock += `
 
 <div class="mayor-extra-wrap show" id="mayor-extra-wrap">
 
-<div class="additional-settings-bar">
-<span>Additional Settings</span>
-</div>
+  <div class="additional-settings-bar" onclick="toggleMayorExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow" style="transform:${state.mayorExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+  </div>
 
-<div class="mayor-extra-settings">
+  <div class="mayor-extra-settings ${state.mayorExtraOpen ? "show" : ""}" id="mayor-extra-settings">
 
-<div class="role-toggle mayor-subsetting">
+    <div class="mayor-settings-card">
 
-<span>Vote Power</span>
+      <div class="mayor-setting-row">
+        <span class="mayor-setting-label">Vote Power</span>
 
-<select onchange="setMayorVotePower(this.value)">
+        <select class="mayor-setting-select" onchange="setMayorVotePower(this.value)">
+          <option value="1.5" ${state.mayorVotePower == 1.5 ? "selected" : ""}>1.5 votes</option>
+          <option value="2" ${state.mayorVotePower == 2 ? "selected" : ""}>2 votes</option>
+          <option value="2.5" ${state.mayorVotePower == 2.5 ? "selected" : ""}>2.5 votes</option>
+          <option value="3" ${state.mayorVotePower == 3 ? "selected" : ""}>3 votes</option>
+        </select>
+      </div>
 
-<option value="1.5" ${state.mayorVotePower==1.5?"selected":""}>1.5 votes</option>
-<option value="2" ${state.mayorVotePower==2?"selected":""}>2 votes</option>
-<option value="2.5" ${state.mayorVotePower==2.5?"selected":""}>2.5 votes</option>
-<option value="3" ${state.mayorVotePower==3?"selected":""}>3 votes</option>
+    </div>
 
-</select>
-
-</div>
-
-</div>
+  </div>
 
 </div>
 
 `
-
 }
 
 if(role === "jester" && enabled){
@@ -585,6 +588,23 @@ panel.classList.toggle("show", state.jesterExtraOpen)
 
 if(arrow){
 arrow.style.transform = state.jesterExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
+}
+
+}
+
+window.toggleMayorExtras = function(){
+
+state.mayorExtraOpen = !state.mayorExtraOpen
+
+let panel = document.getElementById("mayor-extra-settings")
+let arrow = document.querySelector("#mayor-extra-wrap .additional-arrow")
+
+if(panel){
+panel.classList.toggle("show", state.mayorExtraOpen)
+}
+
+if(arrow){
+arrow.style.transform = state.mayorExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
 }
 
 }
@@ -893,6 +913,68 @@ inserted.classList.add("show")
 
 }
 
+if(role === "mayor"){
+
+let extraWrap = document.getElementById("mayor-extra-wrap")
+
+if(!enabled){
+state.mayorExtraOpen = false
+
+if(extraWrap){
+extraWrap.classList.remove("show")
+setTimeout(() => {
+  extraWrap.remove()
+}, 300)
+}
+}
+
+if(enabled && !extraWrap){
+
+let count = document.getElementById("mayor-count")
+
+count.insertAdjacentHTML("afterend", `
+
+<div class="mayor-extra-wrap" id="mayor-extra-wrap">
+
+  <div class="additional-settings-bar" onclick="toggleMayorExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow">▾</span>
+  </div>
+
+  <div class="mayor-extra-settings" id="mayor-extra-settings">
+
+    <div class="mayor-settings-card">
+
+      <div class="mayor-setting-row">
+        <span class="mayor-setting-label">Vote Power</span>
+
+        <select class="mayor-setting-select" onchange="setMayorVotePower(this.value)">
+          <option value="1.5" ${state.mayorVotePower == 1.5 ? "selected" : ""}>1.5 votes</option>
+          <option value="2" ${state.mayorVotePower == 2 ? "selected" : ""}>2 votes</option>
+          <option value="2.5" ${state.mayorVotePower == 2.5 ? "selected" : ""}>2.5 votes</option>
+          <option value="3" ${state.mayorVotePower == 3 ? "selected" : ""}>3 votes</option>
+        </select>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+`)
+
+requestAnimationFrame(() => {
+let inserted = document.getElementById("mayor-extra-wrap")
+if(inserted){
+inserted.classList.add("show")
+}
+})
+
+}
+
+}
+
 if(role === "executioner"){
 
 let extraWrap = document.getElementById("executioner-extra-wrap")
@@ -978,6 +1060,10 @@ state.doctorExtraOpen = false
 
 if(role === "jester" && !enabled){
 state.jesterExtraOpen = false
+}
+
+if(role === "mayor" && !enabled){
+state.mayorExtraOpen = false
 }
 
 state.rolesEnabled[role] = enabled
@@ -1832,6 +1918,8 @@ showSettings()
 
 function saveSettingsToStorage(){
 
+localStorage.setItem("mafiaMayorVotePower", JSON.stringify(state.mayorVotePower))
+localStorage.setItem("mafiaSheriffJesterResult", JSON.stringify(state.sheriffJesterResult))
 localStorage.setItem("mafiaExecutionerTargetRule", JSON.stringify(state.executionerTargetRule))
 localStorage.setItem("mafiaRoles", JSON.stringify(state.rolesEnabled))
 localStorage.setItem("mafiaRoleWeights", JSON.stringify(state.roleWeights))

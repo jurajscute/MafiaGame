@@ -271,33 +271,60 @@ let role = roles[player.role]
 
 state.nightActions[role.nightAction]=targetName
 
-if(role.nightAction==="investigate"){
+if(role.nightAction === "investigate"){
 
-let target = state.players.find(p=>p.name===targetName)
+let target = state.players.find(p => p.name === targetName)
 
 let result = ""
 let resultColor = "#b0e2ff"
 
 if(state.sheriffExactReveal){
 
-result = target.role.toUpperCase()
+  if(target.role === "jester" && state.sheriffJesterResult === "innocent"){
+    result = "VILLAGER"
+    resultColor = roleColors.villager
+  }else{
+    result = target.role.toUpperCase()
 
-if(target.role === "mafia"){
-resultColor = "#e74c3c"
-}else if(target.role === "jester"){
-resultColor = "#bb006d"
-}else if(target.role === "doctor"){
-resultColor = "#2e8dcc"
-}else if(target.role === "sheriff"){
-resultColor = "#e4c200"
-}
+    if(target.role === "mafia"){
+      resultColor = "#e74c3c"
+    }else if(target.role === "jester"){
+      resultColor = roleColors.jester
+    }else if(target.role === "doctor"){
+      resultColor = "#2e8dcc"
+    }else if(target.role === "sheriff"){
+      resultColor = "#e4c200"
+    }else if(target.role === "executioner"){
+      resultColor = roleColors.executioner
+    }else if(target.role === "mayor"){
+      resultColor = roleColors.mayor
+    }else{
+      resultColor = roleColors.villager
+    }
+  }
 
 }else{
 
-let notInnocent = target.role === "mafia" || target.role === "jester"
+  if(target.role === "jester"){
 
-result = notInnocent ? "NOT INNOCENT" : "INNOCENT"
-resultColor = notInnocent ? "#e74c3c" : "#b0e2ff"
+    if(state.sheriffJesterResult === "innocent"){
+      result = "INNOCENT"
+      resultColor = "#b0e2ff"
+    }else if(state.sheriffJesterResult === "exact"){
+      result = "JESTER"
+      resultColor = roleColors.jester
+    }else{
+      result = "NOT INNOCENT"
+      resultColor = "#e74c3c"
+    }
+
+  }else{
+
+    let notInnocent = target.role === "mafia"
+    result = notInnocent ? "NOT INNOCENT" : "INNOCENT"
+    resultColor = notInnocent ? "#e74c3c" : "#b0e2ff"
+
+  }
 
 }
 
