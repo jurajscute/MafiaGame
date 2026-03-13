@@ -586,9 +586,6 @@ addLogEntry(voteText)
 
 state.gameStats.votesCast++
 
-let alivePlayers = state.players.filter(p=>p.alive)
-let voter = alivePlayers[state.voteTurnIndex]
-
 let votePower = 1
 
 if(voter && voter.role === "mayor"){
