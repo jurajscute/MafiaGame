@@ -362,6 +362,117 @@ text-shadow:
 0 0 10px rgba(214,123,199,0.25);
 }
 
+.executioner-extra-wrap{
+max-height:54px;
+opacity:0;
+overflow:hidden;
+transform:translateY(-8px) scaleY(0.96);
+transform-origin:top;
+
+pointer-events:none;
+
+transition:
+opacity 0.25s ease,
+transform 0.35s ease,
+max-height 0.35s ease,
+margin-bottom 0.35s ease;
+}
+
+.executioner-extra-wrap.show{
+max-height:140px;
+opacity:1;
+transform:translateY(0) scaleY(1);
+margin-bottom:6px;
+pointer-events:auto;
+}
+
+.executioner-extra-settings{
+height:0;
+opacity:0;
+overflow:hidden;
+transform:translateY(-6px) scaleY(0.96);
+transform-origin:top;
+
+pointer-events:none;
+
+transition:
+opacity 0.25s ease,
+transform 0.3s ease,
+height 0.3s ease,
+margin-top 0.3s ease;
+}
+
+.executioner-extra-settings.show{
+height:64px;
+opacity:1;
+transform:translateY(0) scaleY(1);
+margin-top:8px;
+pointer-events:auto;
+}
+
+.executioner-subsetting{
+margin-left:14px;
+background:rgba(255,255,255,0.03);
+}
+
+.executioner-subsetting select{
+background:#2c2030;
+color:white;
+border:none;
+border-radius:8px;
+padding:8px 10px;
+font-size:14px;
+font-weight:bold;
+}
+
+.executioner-target-box{
+margin-top:16px;
+padding:14px 16px;
+border-radius:12px;
+background:linear-gradient(135deg, rgba(122,47,111,0.16), rgba(58,16,47,0.22));
+border:1px solid rgba(200,107,184,0.28);
+box-shadow:
+0 0 12px rgba(122,47,111,0.22),
+inset 0 0 10px rgba(255,255,255,0.03);
+animation:executionerTargetPulse 2s ease-in-out infinite;
+}
+
+.executioner-target-label{
+font-size:13px;
+letter-spacing:1.5px;
+text-transform:uppercase;
+opacity:0.75;
+margin-bottom:6px;
+}
+
+.executioner-target-name{
+font-size:26px;
+font-weight:bold;
+color:#c86bb8;
+text-shadow:
+0 0 10px #a64d96,
+0 0 20px #7a2f6f,
+0 0 30px #4a1b43;
+}
+
+@keyframes executionerTargetPulse{
+0%{
+box-shadow:
+0 0 10px rgba(122,47,111,0.18),
+inset 0 0 8px rgba(255,255,255,0.02);
+}
+50%{
+box-shadow:
+0 0 18px rgba(200,107,184,0.28),
+inset 0 0 12px rgba(255,255,255,0.04);
+}
+100%{
+box-shadow:
+0 0 10px rgba(122,47,111,0.18),
+inset 0 0 8px rgba(255,255,255,0.02);
+}
+}
+
 /* win backgrounds */
 
 .win-mafia{

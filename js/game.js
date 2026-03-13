@@ -121,6 +121,9 @@ jester: 1,
 executioner: 1
 }
 
+state.executionerTargetRule = "neither"
+state.executionerExtraOpen = false
+
 state.doctorRevealSave = false
 state.sheriffExactReveal = false
 state.mafiaCountOverride = 0
@@ -370,6 +373,35 @@ rolesContent += `
 
 `
 }
+
+if(role === "executioner" && enabled){
+rolesContent += `
+
+<div class="executioner-extra-wrap show" id="executioner-extra-wrap">
+
+  <div class="additional-settings-bar" onclick="toggleExecutionerExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow" style="transform:${state.executionerExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+  </div>
+
+  <div class="executioner-extra-settings ${state.executionerExtraOpen ? "show" : ""}" id="executioner-extra-settings">
+    <div class="role-toggle executioner-subsetting">
+      <span>Can target Jester or Mafia?</span>
+
+      <select onchange="setExecutionerTargetRule(this.value)">
+        <option value="neither" ${state.executionerTargetRule === "neither" ? "selected" : ""}>Neither</option>
+        <option value="mafia" ${state.executionerTargetRule === "mafia" ? "selected" : ""}>Mafia</option>
+        <option value="jester" ${state.executionerTargetRule === "jester" ? "selected" : ""}>Jester</option>
+        <option value="both" ${state.executionerTargetRule === "both" ? "selected" : ""}>Both</option>
+      </select>
+    </div>
+  </div>
+
+</div>
+
+`
+}
+
   });
 
   content += `
@@ -418,6 +450,23 @@ function openModal(content, onOpen){
     if(onOpen) onOpen()
     modal.classList.add("show")
   })
+
+}
+
+window.toggleExecutionerExtras = function(){
+
+state.executionerExtraOpen = !state.executionerExtraOpen
+
+let panel = document.getElementById("executioner-extra-settings")
+let arrow = document.querySelector("#executioner-extra-wrap .additional-arrow")
+
+if(panel){
+panel.classList.toggle("show", state.executionerExtraOpen)
+}
+
+if(arrow){
+arrow.style.transform = state.executionerExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
+}
 
 }
 
@@ -737,6 +786,12 @@ let savedMafiaCountOverride = localStorage.getItem("mafiaCountOverride")
 
 let savedHostMode = localStorage.getItem("mafiaHostMode")
 
+let savedExecutionerTargetRule = localStorage.getItem("mafiaExecutionerTargetRule")
+
+if(savedExecutionerTargetRule){
+state.executionerTargetRule = JSON.parse(savedExecutionerTargetRule)
+}
+
 if(savedHostMode){
 state.hostMode = JSON.parse(savedHostMode)
 }
@@ -766,6 +821,17 @@ state.rolesEnabled = JSON.parse(savedRoles)
 }
 
 let revealIndex=0
+
+window.setExecutionerTargetRule = function(value){
+
+state.executionerTargetRule = value
+
+localStorage.setItem(
+"mafiaExecutionerTargetRule",
+JSON.stringify(value)
+)
+
+}
 
 export function setDay(){
 
@@ -979,14 +1045,33 @@ p.role = pool[i]
 state.executionerTargets = {}
 
 let executioners = players.filter(p => p.role === "executioner")
-let eligibleTargets = players.filter(p => p.role !== "executioner")
 
 executioners.forEach(executioner => {
-  let possibleTargets = eligibleTargets.filter(p => p.name !== executioner.name)
+
+  let possibleTargets = players.filter(p => {
+    if(p.name === executioner.name) return false
+    if(p.role === "executioner") return false
+
+    if(state.executionerTargetRule === "neither"){
+      return p.role !== "mafia" && p.role !== "jester"
+    }
+
+    if(state.executionerTargetRule === "mafia"){
+      return p.role !== "jester"
+    }
+
+    if(state.executionerTargetRule === "jester"){
+      return p.role !== "mafia"
+    }
+
+    return true // both
+  })
+
   if(possibleTargets.length){
     let target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)]
     state.executionerTargets[executioner.name] = target.name
   }
+
 })
 
 }
@@ -1166,10 +1251,17 @@ let color = roleColors[player.role] || "white"
 let role = roles[player.role]
 let extraInfo = ""
 
+let extraInfo = ""
+
 if(player.role === "executioner"){
   let target = state.executionerTargets[player.name]
   if(target){
-    extraInfo = `<p class="role-description"><strong>Your target is</strong> ${target}</p>`
+    extraInfo = `
+      <div class="executioner-target-box">
+        <div class="executioner-target-label">Your target is</div>
+        <div class="executioner-target-name">${target}</div>
+      </div>
+    `
   }
 }
 
@@ -1266,6 +1358,7 @@ state.roleCounts.executioner = 1
 
 state.doctorRevealSave = false
 state.sheriffExactReveal = false
+state.executionerTargetRule = "neither"
 state.mafiaCountOverride = 0
 }
 
@@ -1289,6 +1382,7 @@ state.roleCounts.executioner = 1
 
 state.doctorRevealSave = true
 state.sheriffExactReveal = false
+state.executionerTargetRule = "neither"
 state.mafiaCountOverride = 0
 }
 
@@ -1311,6 +1405,7 @@ state.roleCounts.executioner = 1
 
 state.doctorRevealSave = true
 state.sheriffExactReveal = true
+state.executionerTargetRule = "both"
 state.mafiaCountOverride = 0
 }
 
