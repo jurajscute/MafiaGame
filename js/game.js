@@ -139,6 +139,10 @@ localStorage.setItem("mafiaRoleCounts", JSON.stringify(state.roleCounts))
 localStorage.setItem("mafiaDoctorReveal", JSON.stringify(state.doctorRevealSave))
 localStorage.setItem("mafiaSheriffExactReveal", JSON.stringify(state.sheriffExactReveal))
 localStorage.setItem("mafiaCountOverride", JSON.stringify(state.mafiaCountOverride))
+localStorage.setItem(
+"mafiaExecutionerTargetRule",
+JSON.stringify(state.executionerTargetRule)
+)
 
 showSettings()
 
@@ -694,6 +698,66 @@ inserted.classList.add("show")
 
 }
 
+}
+
+if(role === "executioner"){
+
+let extraWrap = document.getElementById("executioner-extra-wrap")
+
+if(!enabled){
+state.executionerExtraOpen = false
+
+if(extraWrap){
+extraWrap.classList.remove("show")
+setTimeout(() => {
+  extraWrap.remove()
+}, 300)
+}
+}
+
+if(enabled && !extraWrap){
+
+let count = document.getElementById("executioner-count")
+
+count.insertAdjacentHTML("afterend", `
+
+<div class="executioner-extra-wrap" id="executioner-extra-wrap">
+
+  <div class="additional-settings-bar" onclick="toggleExecutionerExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow">▾</span>
+  </div>
+
+  <div class="executioner-extra-settings" id="executioner-extra-settings">
+    <div class="role-toggle executioner-subsetting">
+      <span>Can target Jester or Mafia?</span>
+
+      <select onchange="setExecutionerTargetRule(this.value)">
+        <option value="neither" ${state.executionerTargetRule === "neither" ? "selected" : ""}>Neither</option>
+        <option value="mafia" ${state.executionerTargetRule === "mafia" ? "selected" : ""}>Mafia</option>
+        <option value="jester" ${state.executionerTargetRule === "jester" ? "selected" : ""}>Jester</option>
+        <option value="both" ${state.executionerTargetRule === "both" ? "selected" : ""}>Both</option>
+      </select>
+    </div>
+  </div>
+
+</div>
+
+`)
+
+requestAnimationFrame(() => {
+let inserted = document.getElementById("executioner-extra-wrap")
+if(inserted){
+inserted.classList.add("show")
+}
+})
+
+}
+
+}
+
+if(role === "executioner" && !enabled){
+state.executionerExtraOpen = false
 }
 
 if(role === "doctor" && !enabled){
@@ -1414,6 +1478,7 @@ showSettings()
 
 function saveSettingsToStorage(){
 
+localStorage.setItem("mafiaExecutionerTargetRule", JSON.stringify(state.executionerTargetRule))
 localStorage.setItem("mafiaRoles", JSON.stringify(state.rolesEnabled))
 localStorage.setItem("mafiaRoleWeights", JSON.stringify(state.roleWeights))
 localStorage.setItem("mafiaRoleCounts", JSON.stringify(state.roleCounts))
