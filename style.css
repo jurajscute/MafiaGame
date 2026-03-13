@@ -726,6 +726,23 @@ transform:translateY(0) scale(1);
 }
 }
 
+.role-group-title{
+margin:16px 0 10px 0;
+padding:8px 12px;
+border-radius:10px;
+background:rgba(255,255,255,0.05);
+font-size:13px;
+font-weight:bold;
+letter-spacing:1.5px;
+text-transform:uppercase;
+text-align:left;
+opacity:0.85;
+}
+
+.role-group-title:first-child{
+margin-top:0;
+}
+
 /* win backgrounds */
 
 .win-mafia{

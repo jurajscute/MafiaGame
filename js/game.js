@@ -197,10 +197,11 @@ showRoleReveal()
 
 function showSettings() {
   const modal = document.getElementById("infoModal");
-  let rolesContent = ""
+let townRolesContent = ""
+let neutralRolesContent = ""
 
-  // List of roles we want to display in settings
-  const rolesList = ["doctor", "sheriff", "jester", "executioner", "mayor"];
+const townRoles = ["doctor", "sheriff", "mayor"]
+const neutralRoles = ["jester", "executioner"]
 
   let content = `
     <div class="modal-content">
@@ -312,34 +313,46 @@ content += `
 
 `
 
-  rolesList.forEach(role => {
+  ;[...townRoles, ...neutralRoles].forEach(role => {
     const enabled = state.rolesEnabled[role];
     const weight = state.roleWeights[role] || 0;
     const color = roleColors[role] || "#fff";
+let targetContent = townRoles.includes(role) ? "town" : "neutral"
 
-    rolesContent += `
-      <div class="role-toggle">
-        <span style="color:${color}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
-        <label class="switch">
-          <input type="checkbox" ${enabled ? "checked" : ""}
-            onchange="toggleRole('${role}', this.checked)">
-          <span class="slider"></span>
-        </label>
-      </div>
+    if(targetContent === "town"){
+let roleBlock = `
+  <div class="role-toggle">
+    <span style="color:${color}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
+    <label class="switch">
+      <input type="checkbox" ${enabled ? "checked" : ""}
+        onchange="toggleRole('${role}', this.checked)">
+      <span class="slider"></span>
+    </label>
+  </div>
 
-      <div id="${role}SliderContainer"
-        class="role-weight ${role}-slider ${enabled ? "show" : ""}">
-        <input type="range"
-          id="${role}Slider"
-          min="0"
-          max="100"
-          value="${weight}"
-          oninput="updateSlider(this,'${role}'); setRoleWeight('${role}', this.value)">
-        <span>${weight}%</span>
-      </div>
-    `;
+  <div id="${role}SliderContainer"
+    class="role-weight ${role}-slider ${enabled ? "show" : ""}">
+    <input type="range"
+      id="${role}Slider"
+      min="0"
+      max="100"
+      value="${weight}"
+      oninput="updateSlider(this,'${role}'); setRoleWeight('${role}', this.value)">
+    <span>${weight}%</span>
+  </div>
 
-    rolesContent += `
+  <div class="role-count ${enabled ? "show" : ""}" id="${role}-count">
+    <label>Maximum amount:</label>
+
+    <input type="number"
+    min="1"
+    max="10"
+    value="${state.roleCounts[role] || 1}"
+    onchange="window.updateRoleCount('${role}', this.value)">
+  </div>
+`;
+
+    roleBlock += `
 
 <div class="role-count ${enabled ? "show" : ""}" id="${role}-count">
 
@@ -356,7 +369,7 @@ onchange="window.updateRoleCount('${role}', this.value)">
 `
 
 if(role === "doctor" && enabled){
-rolesContent += `
+roleBlock += `
 
 <div class="doctor-extra-wrap show" id="doctor-extra-wrap">
 
@@ -384,7 +397,7 @@ rolesContent += `
 }
 
 if(role === "sheriff" && enabled){
-rolesContent += `
+roleBlock += `
 
 <div class="sheriff-extra-wrap show" id="sheriff-extra-wrap">
 
@@ -412,7 +425,7 @@ rolesContent += `
 }
 
 if(role === "executioner" && enabled){
-rolesContent += `
+roleBlock += `
 
 <div class="executioner-extra-wrap show" id="executioner-extra-wrap">
 
@@ -470,7 +483,13 @@ rolesContent += `
   </div>
 
   <div class="settings-section-content ${state.rolesSectionOpen ? "show" : ""}" id="roles-section-content">
-    ${rolesContent}
+
+    <div class="role-group-title">Town Roles</div>
+    ${townRolesContent}
+
+    <div class="role-group-title">Neutral Roles</div>
+    ${neutralRolesContent}
+
   </div>
 
 </div>
@@ -1384,7 +1403,6 @@ showRoleReveal()
 
 function getBalanceWarnings(){
 
-let warnings = []
 let playerCount = state.players.length
 let mafia = state.mafiaCountOverride || mafiaCount(playerCount)
 mafia = Math.min(mafia, maxAllowedMafia(playerCount))
@@ -1397,47 +1415,56 @@ specialRoles += state.roleCounts[role] || 1
 }
 })
 
+const hasDoctor = state.rolesEnabled.doctor
+const hasSheriff = state.rolesEnabled.sheriff
+const hasMayor = state.rolesEnabled.mayor
+const hasJester = state.rolesEnabled.jester
+const hasExecutioner = state.rolesEnabled.executioner
+
+// Most specific combo warnings first
+if(hasMayor && hasSheriff && hasDoctor && playerCount < 7){
+return ["Mayor + Sheriff + Doctor may be too strong in a medium lobby."]
+}
+
+if(hasMayor && hasSheriff && playerCount < 6){
+return ["Mayor + Sheriff may be too strong in a smaller lobby."]
+}
+
+if(hasDoctor && hasMayor && playerCount < 6){
+return ["Doctor + Mayor together may be too strong in a very small lobby."]
+}
+
+if(hasDoctor && hasSheriff && playerCount < 6){
+return ["Doctor + Sheriff together may be too strong in a very small lobby."]
+}
+
+// Then broader setup warnings
 if(mafia >= Math.ceil(playerCount / 2)){
-warnings.push("Too many mafia for this player count.")
+return ["Too many mafia for this player count."]
 }
 
 if(playerCount <= 5 && mafia >= 2){
-warnings.push("2 mafia with 5 or fewer players may end the game very quickly.")
+return ["2 mafia with 5 or fewer players may end the game very quickly."]
 }
 
 if(specialRoles > playerCount - mafia){
-warnings.push("There may be more special roles than available non-mafia players.")
+return ["There may be more special roles than available non-mafia players."]
 }
 
-if(state.rolesEnabled.jester && playerCount < 6){
-warnings.push("Jester can feel very swingy in smaller games.")
+// Then single-role warnings
+if(hasMayor && playerCount < 5){
+return ["Mayor can be very strong in smaller games."]
 }
 
-if(state.rolesEnabled.doctor && state.rolesEnabled.sheriff && playerCount < 6){
-warnings.push("Doctor + Sheriff together may be too strong in a very small lobby.")
+if(hasExecutioner && playerCount < 6){
+return ["Executioner can be very strong in smaller games."]
 }
 
-if(state.rolesEnabled.executioner && playerCount < 6){
-warnings.push("Executioner can be very strong in smaller games.")
+if(hasJester && playerCount < 6){
+return ["Jester can feel very swingy in smaller games."]
 }
 
-if(state.rolesEnabled.mayor && playerCount < 5){
-warnings.push("Mayor can be very strong in smaller games.")
-}
-
-if(state.rolesEnabled.mayor && state.rolesEnabled.sheriff && playerCount < 6){
-warnings.push("Mayor + Sheriff may be too strong in a smaller lobby.")
-}
-
-if(state.rolesEnabled.mayor && state.rolesEnabled.sheriff && state.rolesEnabled.doctor && playerCount < 7){
-warnings.push("Mayor + Sheriff + Doctor may be too strong in a smaller lobby.")
-}
-
-if(state.rolesEnabled.doctor && state.rolesEnabled.mayor && playerCount < 6){
-warnings.push("Doctor + Mayor together may be too strong in a very small lobby.")
-}
-
-return warnings
+return []
 
 }
 
