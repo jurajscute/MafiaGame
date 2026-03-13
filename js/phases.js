@@ -40,11 +40,17 @@ return state.revealRolesOnElimination === "death" ||
 }
 
 function shouldRevealOnVoteDeath(){
+return state.revealRolesOnElimination === "vote_only" ||
+       state.revealRolesOnElimination === "death_and_vote"
+}
+
+function shouldRevealOnVoteDeath(){
 return state.revealRolesOnElimination === "death_and_vote"
 }
 
 function revealedRoleText(player){
-return `${player.role.toUpperCase()}`
+let color = roleColors[player.role] || "white"
+return `<span class="revealed-role-name" style="color:${color}; text-shadow:0 0 8px ${color};">${player.role.toUpperCase()}</span>`
 }
 
 window.forceNextPhase = function(){

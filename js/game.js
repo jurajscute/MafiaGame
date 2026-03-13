@@ -263,12 +263,13 @@ content += `
     <span class="global-setting-badge">Global</span>
   </div>
 
-  <div class="global-setting-row">
+  <div class="global-setting-row reveal-setting-row">
     <label for="revealRolesSelect">Reveal roles on elimination?</label>
 
     <select id="revealRolesSelect" onchange="setRevealRolesOnElimination(this.value)">
       <option value="none" ${state.revealRolesOnElimination === "none" ? "selected" : ""}>Never</option>
       <option value="death" ${state.revealRolesOnElimination === "death" ? "selected" : ""}>Night kill only</option>
+      <option value="vote_only" ${state.revealRolesOnElimination === "vote_only" ? "selected" : ""}>Vote only</option>
       <option value="death_and_vote" ${state.revealRolesOnElimination === "death_and_vote" ? "selected" : ""}>Night kill and vote</option>
     </select>
   </div>
