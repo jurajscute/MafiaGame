@@ -418,6 +418,7 @@ rolesContent += `
   </div>
 
   <div class="executioner-extra-settings ${state.executionerExtraOpen ? "show" : ""}" id="executioner-extra-settings">
+
     <div class="role-toggle executioner-subsetting">
       <span>Can target Jester or Mafia?</span>
 
@@ -428,32 +429,18 @@ rolesContent += `
         <option value="both" ${state.executionerTargetRule === "both" ? "selected" : ""}>Both</option>
       </select>
     </div>
-  </div>
 
-</div>
+    <div class="role-toggle executioner-subsetting">
+      <span>Can win while dead</span>
 
-`
+      <label class="switch">
+        <input type="checkbox"
+          ${state.executionerWinIfDead ? "checked" : ""}
+          onchange="toggleExecutionerWinIfDead(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
 
-rolesContent += `
-
-<div class="global-setting-card">
-
-  <div class="global-setting-top">
-    <span class="global-setting-title" style="color:${roleColors.executioner}">
-      Executioner Win Rule
-    </span>
-    <span class="global-setting-badge">Global</span>
-  </div>
-
-  <div class="role-toggle">
-    <span>Executioner can win while dead</span>
-
-    <label class="switch">
-      <input type="checkbox"
-        ${state.executionerWinIfDead ? "checked" : ""}
-        onchange="toggleExecutionerWinIfDead(this.checked)">
-      <span class="slider"></span>
-    </label>
   </div>
 
 </div>
@@ -784,6 +771,7 @@ count.insertAdjacentHTML("afterend", `
   </div>
 
   <div class="executioner-extra-settings" id="executioner-extra-settings">
+
     <div class="role-toggle executioner-subsetting">
       <span>Can target Jester or Mafia?</span>
 
@@ -794,6 +782,18 @@ count.insertAdjacentHTML("afterend", `
         <option value="both" ${state.executionerTargetRule === "both" ? "selected" : ""}>Both</option>
       </select>
     </div>
+
+    <div class="role-toggle executioner-subsetting">
+      <span>Can win while dead</span>
+
+      <label class="switch">
+        <input type="checkbox"
+          ${state.executionerWinIfDead ? "checked" : ""}
+          onchange="toggleExecutionerWinIfDead(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
+
   </div>
 
 </div>

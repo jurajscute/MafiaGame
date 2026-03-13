@@ -379,7 +379,7 @@ margin-bottom 0.35s ease;
 }
 
 .executioner-extra-wrap.show{
-max-height:140px;
+max-height:220px;
 opacity:1;
 transform:translateY(0) scaleY(1);
 margin-bottom:6px;
@@ -403,7 +403,7 @@ margin-top 0.3s ease;
 }
 
 .executioner-extra-settings.show{
-height:64px;
+height:126px;
 opacity:1;
 transform:translateY(0) scaleY(1);
 margin-top:8px;
