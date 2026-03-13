@@ -481,6 +481,42 @@ background:radial-gradient(circle at 50% 20%, #5a1b4f, #1a0010);
 background:radial-gradient(circle at 50% 20%, #3d4f6e, #170814);
 }
 
+.executioner-row{
+cursor:pointer;
+transition:background 0.2s ease, transform 0.2s ease;
+}
+
+.executioner-row:hover{
+background:rgba(122,47,111,0.12);
+}
+
+.executioner-row:active{
+transform:scale(0.99);
+}
+
+.executioner-target-reveal{
+margin:-2px 0 10px 18px;
+padding:10px 14px;
+border-radius:10px;
+background:linear-gradient(135deg, rgba(122,47,111,0.14), rgba(58,16,47,0.18));
+border-left:3px solid #7a2f6f;
+text-align:left;
+animation:fadeIn 0.25s ease;
+}
+
+.executioner-target-reveal-label{
+opacity:0.75;
+margin-right:8px;
+font-size:14px;
+}
+
+.executioner-target-reveal-name{
+color:#c86bb8;
+font-weight:bold;
+text-shadow:
+0 0 8px rgba(200,107,184,0.3);
+}
+
 /* win backgrounds */
 
 .win-mafia{

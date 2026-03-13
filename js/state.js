@@ -6,6 +6,8 @@ players:[],
 
 gameStarted: false,
 
+openExecutionerReveal: null,
+
 doctorRevealSave: false,
 
 doctorExtraOpen: false,

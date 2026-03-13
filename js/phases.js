@@ -813,6 +813,18 @@ ${resultsHTML}
 
 }
 
+window.toggleExecutionerReveal = function(playerName){
+
+if(state.openExecutionerReveal === playerName){
+state.openExecutionerReveal = null
+}else{
+state.openExecutionerReveal = playerName
+}
+
+showRoleRevealEnd()
+
+}
+
 function showRoleRevealEnd(){
 
    let logHTML = state.gameLog.length
@@ -857,6 +869,34 @@ return `<p style="opacity:0.7;">None</p>`
 return list.map(p => {
 
 let color = roleColors[p.role] || "white"
+let isExecutioner = p.role === "executioner"
+let isOpen = state.openExecutionerReveal === p.name
+let target = state.executionerTargets?.[p.name]
+
+if(isExecutioner){
+return `
+
+<div class="role-row executioner-row"
+     style="border-left:4px solid ${color};"
+     onclick="window.toggleExecutionerReveal('${p.name}')">
+
+  <span class="role-player">${p.name}</span>
+
+  <span class="role-name" style="color:${color}">
+    ${p.role.toUpperCase()} ${isOpen ? "▴" : "▾"}
+  </span>
+
+</div>
+
+${isOpen && target ? `
+<div class="executioner-target-reveal">
+  <span class="executioner-target-reveal-label">Target:</span>
+  <span class="executioner-target-reveal-name">${target}</span>
+</div>
+` : ""}
+
+`
+}
 
 return `
 
@@ -871,7 +911,6 @@ ${p.role.toUpperCase()}
 </div>
 
 `
-
 
 }).join("")
 
