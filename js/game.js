@@ -1251,6 +1251,17 @@ extras = state.sheriffExactReveal
 : ` <span style="opacity:0.7;">• innocent / not innocent</span>`
 }
 
+if(role === "executioner"){
+let executionerRuleText = {
+  neither: "targets only town",
+  mafia: "targets mafia",
+  jester: "targets jester",
+  both: "targets mafia/jester"
+}
+
+extras = ` <span style="opacity:0.7;">• ${executionerRuleText[state.executionerTargetRule] || executionerRuleText.neither}</span>`
+}
+
 return `
 <div class="role-row" style="border-left:4px solid ${color};">
   <span class="role-player">${role.charAt(0).toUpperCase() + role.slice(1)}</span>

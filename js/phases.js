@@ -49,25 +49,36 @@ function revealedRoleText(player){
 let color = roleColors[player.role] || "white"
 
 return `
-<div class="revealed-role-inline"
-     style="
-     border-left:4px solid ${color};
-     background:linear-gradient(
-        135deg,
-        ${color}22,
-        rgba(0,0,0,0.35)
-     );
-     box-shadow:
-        0 0 12px ${color}33;
-     ">
+<div class="revealed-role-sequence">
 
-  <span class="revealed-role-name"
-        style="
-        color:${color};
-        text-shadow:0 0 8px ${color};
-        ">
-    ${player.role.toUpperCase()}
-  </span>
+  <div class="revealed-role-label" style="
+    color:${color};
+    text-shadow:0 0 8px ${color};
+  ">
+    ROLE REVEALED
+  </div>
+
+  <div class="revealed-role-inline"
+       style="
+       border-left:4px solid ${color};
+       background:linear-gradient(
+          135deg,
+          ${color}22,
+          rgba(0,0,0,0.35)
+       );
+       box-shadow:
+          0 0 12px ${color}33;
+       ">
+
+    <span class="revealed-role-name"
+          style="
+          color:${color};
+          text-shadow:0 0 8px ${color};
+          ">
+      ${player.role.toUpperCase()}
+    </span>
+
+  </div>
 
 </div>
 `
