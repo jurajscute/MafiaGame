@@ -1251,8 +1251,6 @@ let color = roleColors[player.role] || "white"
 let role = roles[player.role]
 let extraInfo = ""
 
-let extraInfo = ""
-
 if(player.role === "executioner"){
   let target = state.executionerTargets[player.name]
   if(target){
