@@ -60,7 +60,6 @@ return `
 
   <div class="revealed-role-inline"
        style="
-       border-left:4px solid ${color};
        background:linear-gradient(
           135deg,
           ${color}22,
@@ -837,13 +836,7 @@ ${resultsHTML}
 ${eliminated} was voted out
 </h2>
 
-${player && shouldRevealOnVoteDeath() ? `
-<p class="revealed-role-inline">
-${revealedRoleText(player)}
-</p>
-` : ""}
-
-${renderPlayerStatus()}
+${player && shouldRevealOnVoteDeath() ? revealedRoleText(player) : ""}
 
 <button onclick="window.nextNight()">Next Night</button>
 

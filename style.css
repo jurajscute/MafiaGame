@@ -541,34 +541,15 @@ text-shadow:
 0 0 8px rgba(200,107,184,0.3);
 }
 
-.revealed-role-inline{
-
-margin-top:12px;
-
-padding:10px 14px;
-
-border-radius:10px;
-
-font-weight:bold;
-letter-spacing:1px;
-
-display:inline-block;
-
-animation:fadeIn 0.3s ease;
-
-}
-
-.revealed-role-name{
-font-weight:bold;
-letter-spacing:1px;
-}
-
 .revealed-role-sequence{
 margin-top:12px;
 display:flex;
 flex-direction:column;
-align-items:flex-start;
+align-items:center;
+justify-content:center;
 gap:8px;
+text-align:center;
+width:100%;
 }
 
 .revealed-role-label{
@@ -577,16 +558,23 @@ font-weight:bold;
 letter-spacing:2px;
 opacity:0;
 transform:translateY(6px);
+text-align:center;
+width:100%;
 animation:revealedLabelIn 0.28s ease forwards;
 animation-delay:0.12s;
 }
 
 .revealed-role-inline{
-padding:10px 14px;
+animation:
+revealedBoxIn 0.38s ease forwards,
+revealedPulse 1.8s ease-in-out 0.5s infinite;
+padding:10px 16px;
 border-radius:10px;
 font-weight:bold;
 letter-spacing:1px;
 display:inline-block;
+text-align:center;
+min-width:160px;
 
 opacity:0;
 transform:translateY(10px) scale(0.96);
@@ -597,6 +585,20 @@ animation-delay:0.32s;
 .revealed-role-name{
 font-weight:bold;
 letter-spacing:1px;
+display:block;
+text-align:center;
+}
+
+@keyframes revealedPulse{
+0%{
+box-shadow:0 0 10px rgba(255,255,255,0.06);
+}
+50%{
+box-shadow:0 0 18px rgba(255,255,255,0.14);
+}
+100%{
+box-shadow:0 0 10px rgba(255,255,255,0.06);
+}
 }
 
 @keyframes revealedLabelIn{
