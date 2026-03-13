@@ -314,166 +314,138 @@ content += `
 `
 
   ;[...townRoles, ...neutralRoles].forEach(role => {
-    const enabled = state.rolesEnabled[role];
-    const weight = state.roleWeights[role] || 0;
-    const color = roleColors[role] || "#fff";
-let targetContent = townRoles.includes(role) ? "town" : "neutral"
+  const enabled = state.rolesEnabled[role];
+  const weight = state.roleWeights[role] || 0;
+  const color = roleColors[role] || "#fff";
 
-    if(targetContent === "town"){
-let roleBlock = `
-  <div class="role-toggle">
-    <span style="color:${color}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
-    <label class="switch">
-      <input type="checkbox" ${enabled ? "checked" : ""}
-        onchange="toggleRole('${role}', this.checked)">
-      <span class="slider"></span>
-    </label>
-  </div>
+  let roleBlock = `
+    <div class="role-toggle">
+      <span style="color:${color}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
+      <label class="switch">
+        <input type="checkbox" ${enabled ? "checked" : ""}
+          onchange="toggleRole('${role}', this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
 
-  <div id="${role}SliderContainer"
-    class="role-weight ${role}-slider ${enabled ? "show" : ""}">
-    <input type="range"
-      id="${role}Slider"
-      min="0"
-      max="100"
-      value="${weight}"
-      oninput="updateSlider(this,'${role}'); setRoleWeight('${role}', this.value)">
-    <span>${weight}%</span>
-  </div>
+    <div id="${role}SliderContainer"
+      class="role-weight ${role}-slider ${enabled ? "show" : ""}">
+      <input type="range"
+        id="${role}Slider"
+        min="0"
+        max="100"
+        value="${weight}"
+        oninput="updateSlider(this,'${role}'); setRoleWeight('${role}', this.value)">
+      <span>${weight}%</span>
+    </div>
 
-  <div class="role-count ${enabled ? "show" : ""}" id="${role}-count">
-    <label>Maximum amount:</label>
+    <div class="role-count ${enabled ? "show" : ""}" id="${role}-count">
+      <label>Maximum amount:</label>
+      <input type="number"
+        min="1"
+        max="10"
+        value="${state.roleCounts[role] || 1}"
+        onchange="window.updateRoleCount('${role}', this.value)">
+    </div>
+  `
 
-    <input type="number"
-    min="1"
-    max="10"
-    value="${state.roleCounts[role] || 1}"
-    onchange="window.updateRoleCount('${role}', this.value)">
-  </div>
-`;
-
+  if(role === "doctor" && enabled){
     roleBlock += `
+      <div class="doctor-extra-wrap show" id="doctor-extra-wrap">
+        <div class="additional-settings-bar" onclick="toggleDoctorExtras()">
+          <span>Additional Settings</span>
+          <span class="additional-arrow">▾</span>
+        </div>
 
-<div class="role-count ${enabled ? "show" : ""}" id="${role}-count">
+        <div class="doctor-extra-settings ${state.doctorExtraOpen ? "show" : ""}" id="doctor-extra-settings">
+          <div class="role-toggle doctor-subsetting">
+            <span>Reveal Saved Player</span>
 
-<label>Maximum amount:</label>
-
-<input type="number"
-min="1"
-max="10"
-value="${state.roleCounts[role] || 1}"
-onchange="window.updateRoleCount('${role}', this.value)">
-
-</div>
-
-`
-
-if(role === "doctor" && enabled){
-roleBlock += `
-
-<div class="doctor-extra-wrap show" id="doctor-extra-wrap">
-
-  <div class="additional-settings-bar" onclick="toggleDoctorExtras()">
-    <span>Additional Settings</span>
-    <span class="additional-arrow">▾</span>
-  </div>
-
-  <div class="doctor-extra-settings ${state.doctorExtraOpen ? "show" : ""}" id="doctor-extra-settings">
-    <div class="role-toggle doctor-subsetting">
-      <span>Reveal Saved Player</span>
-
-      <label class="switch">
-        <input type="checkbox"
-          ${state.doctorRevealSave ? "checked" : ""}
-          onchange="toggleDoctorReveal(this.checked)">
-        <span class="slider"></span>
-      </label>
-    </div>
-  </div>
-
-</div>
-
-`
-}
-
-if(role === "sheriff" && enabled){
-roleBlock += `
-
-<div class="sheriff-extra-wrap show" id="sheriff-extra-wrap">
-
-  <div class="additional-settings-bar" onclick="toggleSheriffExtras()">
-    <span>Additional Settings</span>
-    <span class="additional-arrow" style="transform:${state.sheriffExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
-  </div>
-
-  <div class="sheriff-extra-settings ${state.sheriffExtraOpen ? "show" : ""}" id="sheriff-extra-settings">
-    <div class="role-toggle sheriff-subsetting">
-      <span>Reveal Exact Role</span>
-
-      <label class="switch">
-        <input type="checkbox"
-          ${state.sheriffExactReveal ? "checked" : ""}
-          onchange="toggleSheriffExactReveal(this.checked)">
-        <span class="slider"></span>
-      </label>
-    </div>
-  </div>
-
-</div>
-
-`
-}
-
-if(role === "executioner" && enabled){
-roleBlock += `
-
-<div class="executioner-extra-wrap show" id="executioner-extra-wrap">
-
-  <div class="additional-settings-bar" onclick="toggleExecutionerExtras()">
-    <span>Additional Settings</span>
-    <span class="additional-arrow" style="transform:${state.executionerExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
-  </div>
-
-  <div class="executioner-extra-settings ${state.executionerExtraOpen ? "show" : ""}" id="executioner-extra-settings">
-
-    <div class="executioner-settings-card">
-
-      <div class="executioner-setting-row">
-        <span class="executioner-setting-label">Can target Jester or Mafia?</span>
-
-        <select class="executioner-setting-select" onchange="setExecutionerTargetRule(this.value)">
-          <option value="neither" ${state.executionerTargetRule === "neither" ? "selected" : ""}>Neither</option>
-          <option value="mafia" ${state.executionerTargetRule === "mafia" ? "selected" : ""}>Mafia</option>
-          <option value="jester" ${state.executionerTargetRule === "jester" ? "selected" : ""}>Jester</option>
-          <option value="both" ${state.executionerTargetRule === "both" ? "selected" : ""}>Both</option>
-        </select>
+            <label class="switch">
+              <input type="checkbox"
+                ${state.doctorRevealSave ? "checked" : ""}
+                onchange="toggleDoctorReveal(this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
       </div>
+    `
+  }
 
-      <div class="executioner-setting-divider"></div>
+  if(role === "sheriff" && enabled){
+    roleBlock += `
+      <div class="sheriff-extra-wrap show" id="sheriff-extra-wrap">
+        <div class="additional-settings-bar" onclick="toggleSheriffExtras()">
+          <span>Additional Settings</span>
+          <span class="additional-arrow" style="transform:${state.sheriffExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+        </div>
 
-      <div class="executioner-setting-row">
-        <span class="executioner-setting-label">Can win while dead</span>
+        <div class="sheriff-extra-settings ${state.sheriffExtraOpen ? "show" : ""}" id="sheriff-extra-settings">
+          <div class="role-toggle sheriff-subsetting">
+            <span>Reveal Exact Role</span>
 
-        <label class="switch">
-          <input type="checkbox"
-            ${state.executionerWinIfDead ? "checked" : ""}
-            onchange="toggleExecutionerWinIfDead(this.checked)">
-          <span class="slider"></span>
-        </label>
+            <label class="switch">
+              <input type="checkbox"
+                ${state.sheriffExactReveal ? "checked" : ""}
+                onchange="toggleSheriffExactReveal(this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
       </div>
+    `
+  }
 
-    </div>
+  if(role === "executioner" && enabled){
+    roleBlock += `
+      <div class="executioner-extra-wrap show" id="executioner-extra-wrap">
+        <div class="additional-settings-bar" onclick="toggleExecutionerExtras()">
+          <span>Additional Settings</span>
+          <span class="additional-arrow" style="transform:${state.executionerExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+        </div>
 
-  </div>
+        <div class="executioner-extra-settings ${state.executionerExtraOpen ? "show" : ""}" id="executioner-extra-settings">
+          <div class="executioner-settings-card">
 
-</div>
+            <div class="executioner-setting-row">
+              <span class="executioner-setting-label">Can target Jester or Mafia?</span>
 
-`
-}
+              <select class="executioner-setting-select" onchange="setExecutionerTargetRule(this.value)">
+                <option value="neither" ${state.executionerTargetRule === "neither" ? "selected" : ""}>Neither</option>
+                <option value="mafia" ${state.executionerTargetRule === "mafia" ? "selected" : ""}>Mafia</option>
+                <option value="jester" ${state.executionerTargetRule === "jester" ? "selected" : ""}>Jester</option>
+                <option value="both" ${state.executionerTargetRule === "both" ? "selected" : ""}>Both</option>
+              </select>
+            </div>
 
-  });
+            <div class="executioner-setting-divider"></div>
 
-  content += `
+            <div class="executioner-setting-row">
+              <span class="executioner-setting-label">Can win while dead</span>
+
+              <label class="switch">
+                <input type="checkbox"
+                  ${state.executionerWinIfDead ? "checked" : ""}
+                  onchange="toggleExecutionerWinIfDead(this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    `
+  }
+
+  if(townRoles.includes(role)){
+    townRolesContent += roleBlock
+  }else{
+    neutralRolesContent += roleBlock
+  }
+})
+
+content += `
 
 <div class="settings-section-wrap" id="roles-section-wrap">
 
@@ -495,6 +467,7 @@ roleBlock += `
 </div>
 
 `
+}
 
 content += `
 
