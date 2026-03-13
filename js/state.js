@@ -44,6 +44,7 @@ jester:true
 executionerTargets: {},
 executionerTargetRule: "neither",
 executionerExtraOpen: false,
+executionerWinIfDead: false,
 
 votes:{},
 

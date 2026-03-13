@@ -133,6 +133,7 @@ state.sheriffExtraOpen = false
 state.rolesSectionOpen = true
 state.presetsSectionOpen = false
 state.revealRolesOnElimination = "none"
+state.executionerWinIfDead = false
 
 localStorage.setItem("mafiaRoles", JSON.stringify(state.rolesEnabled))
 localStorage.setItem("mafiaRoleWeights", JSON.stringify(state.roleWeights))
@@ -142,6 +143,7 @@ localStorage.setItem("mafiaSheriffExactReveal", JSON.stringify(state.sheriffExac
 localStorage.setItem("mafiaCountOverride", JSON.stringify(state.mafiaCountOverride))
 localStorage.setItem("mafiaExecutionerTargetRule", JSON.stringify(state.executionerTargetRule))
 localStorage.setItem("mafiaRevealRolesOnElimination", JSON.stringify(state.revealRolesOnElimination))
+localStorage.setItem("mafiaExecutionerWinIfDead", JSON.stringify(state.executionerWinIfDead))
 
 showSettings()
 
@@ -426,6 +428,32 @@ rolesContent += `
         <option value="both" ${state.executionerTargetRule === "both" ? "selected" : ""}>Both</option>
       </select>
     </div>
+  </div>
+
+</div>
+
+`
+
+rolesContent += `
+
+<div class="global-setting-card">
+
+  <div class="global-setting-top">
+    <span class="global-setting-title" style="color:${roleColors.executioner}">
+      Executioner Win Rule
+    </span>
+    <span class="global-setting-badge">Global</span>
+  </div>
+
+  <div class="role-toggle">
+    <span>Executioner can win while dead</span>
+
+    <label class="switch">
+      <input type="checkbox"
+        ${state.executionerWinIfDead ? "checked" : ""}
+        onchange="toggleExecutionerWinIfDead(this.checked)">
+      <span class="slider"></span>
+    </label>
   </div>
 
 </div>
@@ -881,6 +909,12 @@ let savedExecutionerTargetRule = localStorage.getItem("mafiaExecutionerTargetRul
 
 let savedRevealRolesOnElimination = localStorage.getItem("mafiaRevealRolesOnElimination")
 
+let savedExecutionerWinIfDead = localStorage.getItem("mafiaExecutionerWinIfDead")
+
+if(savedExecutionerWinIfDead){
+state.executionerWinIfDead = JSON.parse(savedExecutionerWinIfDead)
+}
+
 if(savedRevealRolesOnElimination){
 state.revealRolesOnElimination = JSON.parse(savedRevealRolesOnElimination)
 }
@@ -926,6 +960,17 @@ state.revealRolesOnElimination = value
 localStorage.setItem(
 "mafiaRevealRolesOnElimination",
 JSON.stringify(value)
+)
+
+}
+
+window.toggleExecutionerWinIfDead = function(enabled){
+
+state.executionerWinIfDead = enabled
+
+localStorage.setItem(
+"mafiaExecutionerWinIfDead",
+JSON.stringify(enabled)
 )
 
 }
@@ -1252,14 +1297,20 @@ extras = state.sheriffExactReveal
 }
 
 if(role === "executioner"){
+
 let executionerRuleText = {
-  neither: "targets only town",
-  mafia: "targets mafia",
-  jester: "targets jester",
-  both: "targets mafia/jester"
+  neither: "targets neither mafia nor jester",
+  mafia: "can target mafia",
+  jester: "can target jester",
+  both: "can target mafia or jester"
 }
 
-extras = ` <span style="opacity:0.7;">• ${executionerRuleText[state.executionerTargetRule] || executionerRuleText.neither}</span>`
+extras = ` <span style="opacity:0.7;">• ${executionerRuleText[state.executionerTargetRule]}</span>`
+
+if(state.executionerWinIfDead){
+extras += ` <span style="opacity:0.7;">• wins even if dead</span>`
+}
+
 }
 
 return `

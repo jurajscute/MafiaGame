@@ -707,8 +707,15 @@ if(player){
 player.alive = false
 
 let executionerWinner = state.players.find(p => {
-  return p.role === "executioner" &&
-         state.executionerTargets[p.name] === eliminated
+
+if(p.role !== "executioner") return false
+
+if(state.executionerTargets[p.name] !== eliminated) return false
+
+if(!state.executionerWinIfDead && !p.alive) return false
+
+return true
+
 })
 
 let mafiaAliveAfterVote = state.players.filter(p => p.alive && p.role === "mafia").length
