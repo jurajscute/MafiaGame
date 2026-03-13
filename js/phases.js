@@ -619,6 +619,35 @@ if(player){
 
 player.alive = false
 
+let executionerWinner = state.players.find(p => {
+  return p.role === "executioner" &&
+         state.executionerTargets[p.name] === eliminated
+})
+
+if(executionerWinner){
+
+addLogEntry(`${executionerWinner.name} won as the Executioner by getting ${eliminated} voted out.`)
+
+document.body.className = "win-jester"
+
+render(`
+
+<div class="card role-jester">
+
+<h1 class="role-title">EXECUTIONER WINS</h1>
+
+<p>${executionerWinner.name} succeeded in getting ${eliminated} voted out!</p>
+
+<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
+<button onclick="location.reload()">Restart Game</button>
+
+</div>
+
+`)
+
+return
+}
+
 if(player.role === "jester"){
 
     addLogEntry(`${player.name} won as the Jester.`)

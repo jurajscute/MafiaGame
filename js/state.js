@@ -37,6 +37,8 @@ sheriff:true,
 jester:true
 },
 
+executionerTargets: {},
+
 votes:{},
 
 roleWeights: {

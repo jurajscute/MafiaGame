@@ -184,7 +184,7 @@ function showSettings() {
   let rolesContent = ""
 
   // List of roles we want to display in settings
-  const rolesList = ["doctor", "sheriff", "jester"];
+  const rolesList = ["doctor", "sheriff", "jester", "executioner"];
 
   let content = `
     <div class="modal-content">
@@ -945,7 +945,7 @@ for(let i=0;i<mafia;i++){
 pool.push("mafia")
 }
 
-["doctor","sheriff","jester"].forEach(role=>{
+["doctor","sheriff","jester","executioner"].forEach(role=>{
 
 if(!state.rolesEnabled[role]) return
 
@@ -972,6 +972,19 @@ shuffle(pool)
 
 players.forEach((p,i)=>{
 p.role = pool[i]
+})
+
+state.executionerTargets = {}
+
+let executioners = players.filter(p => p.role === "executioner")
+let eligibleTargets = players.filter(p => p.role !== "executioner")
+
+executioners.forEach(executioner => {
+  let possibleTargets = eligibleTargets.filter(p => p.name !== executioner.name)
+  if(possibleTargets.length){
+    let target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)]
+    state.executionerTargets[executioner.name] = target.name
+  }
 })
 
 }
@@ -1145,6 +1158,14 @@ function revealRole(){
 let player = state.players[revealIndex]
 let color = roleColors[player.role] || "white"
 let role = roles[player.role]
+let extraInfo = ""
+
+if(player.role === "executioner"){
+  let target = state.executionerTargets[player.name]
+  if(target){
+    extraInfo = `<p class="role-description"><strong>Your target is</strong> ${target}</p>`
+  }
+}
 
 render(`
 
@@ -1171,6 +1192,8 @@ ${player.role.toUpperCase()}
 <p class="role-description">
 ${role.description || ""}
 </p>
+
+${extraInfo}
 
 <button onclick="window.nextPlayer()">Hide</button>
 

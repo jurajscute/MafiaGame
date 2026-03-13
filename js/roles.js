@@ -28,6 +28,12 @@ jester:{
 team:"neutral",
 nightAction:null,
 description:"You win if the town votes you out."
+},
+
+executioner:{
+team:"neutral",
+nightAction:null,
+description:"You win if your assigned target is voted out by the town."
 }
 
 }
