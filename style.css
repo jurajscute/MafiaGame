@@ -473,6 +473,14 @@ inset 0 0 8px rgba(255,255,255,0.02);
 }
 }
 
+.win-jester-executioner{
+background:radial-gradient(circle at 50% 20%, #5a1b4f, #1a0010);
+}
+
+.win-village-executioner{
+background:radial-gradient(circle at 50% 20%, #3d4f6e, #170814);
+}
+
 /* win backgrounds */
 
 .win-mafia{
