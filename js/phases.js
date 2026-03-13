@@ -596,7 +596,13 @@ if(!state.votes[targetName]){
 state.votes[targetName]=0
 }
 
-state.votes[targetName] += votePower
+let voteWeight = 1
+
+if(voter.role === "mayor"){
+voteWeight = state.mayorVotePower
+}
+
+state.votes[targetName] += voteWeight
 
 state.voteTurnIndex++
 

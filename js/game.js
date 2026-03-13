@@ -376,6 +376,41 @@ content += `
     `
   }
 
+if(role === "mayor" && enabled){
+
+roleBlock += `
+
+<div class="mayor-extra-wrap show" id="mayor-extra-wrap">
+
+<div class="additional-settings-bar">
+<span>Additional Settings</span>
+</div>
+
+<div class="mayor-extra-settings">
+
+<div class="role-toggle mayor-subsetting">
+
+<span>Vote Power</span>
+
+<select onchange="setMayorVotePower(this.value)">
+
+<option value="1.5" ${state.mayorVotePower==1.5?"selected":""}>1.5 votes</option>
+<option value="2" ${state.mayorVotePower==2?"selected":""}>2 votes</option>
+<option value="2.5" ${state.mayorVotePower==2.5?"selected":""}>2.5 votes</option>
+<option value="3" ${state.mayorVotePower==3?"selected":""}>3 votes</option>
+
+</select>
+
+</div>
+
+</div>
+
+</div>
+
+`
+
+}
+
 if(role === "jester" && enabled){
 roleBlock += `
 
@@ -1039,6 +1074,12 @@ let savedExecutionerWinIfDead = localStorage.getItem("mafiaExecutionerWinIfDead"
 
 let savedSheriffJesterResult = localStorage.getItem("mafiaSheriffJesterResult")
 
+let savedMayorVotePower = localStorage.getItem("mafiaMayorVotePower")
+
+if(savedMayorVotePower){
+state.mayorVotePower = JSON.parse(savedMayorVotePower)
+}
+
 if(savedSheriffJesterResult){
 state.sheriffJesterResult = JSON.parse(savedSheriffJesterResult)
 }
@@ -1084,6 +1125,17 @@ state.rolesEnabled = JSON.parse(savedRoles)
 }
 
 let revealIndex=0
+
+window.setMayorVotePower = function(value){
+
+state.mayorVotePower = Number(value)
+
+localStorage.setItem(
+"mafiaMayorVotePower",
+JSON.stringify(state.mayorVotePower)
+)
+
+}
 
 window.setSheriffJesterResult = function(value){
 
@@ -1434,7 +1486,7 @@ extras = ` <span style="opacity:0.7;">• reveals saved player</span>`
 }
 
 if(role === "mayor"){
-extras = ` <span style="opacity:0.7;">• vote counts double</span>`
+extras = ` <span style="opacity:0.7;">• ${state.mayorVotePower} vote power</span>`
 }
 
 if(role === "sheriff"){

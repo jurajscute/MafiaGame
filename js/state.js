@@ -25,6 +25,8 @@ presetsSectionOpen: false,
 
 sheriffJesterResult: "not_innocent",
 
+mayorVotePower: 2,
+
 gameLog: [],
 gameStats: {
 nights: 0,
