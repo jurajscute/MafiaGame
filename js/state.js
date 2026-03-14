@@ -17,7 +17,7 @@ sheriffExtraOpen: false,
 
 mafiaCountOverride: 0,
 
-rolesSectionOpen: true,
+rolesSectionOpen: false,
 
 revealRolesOnElimination: "none",
 
@@ -26,8 +26,8 @@ presetsSectionOpen: false,
 sheriffJesterResult: "not_innocent",
 sheriffExecutionerResult: "not_innocent",
 
-townRolesOpen: true,
-neutralRolesOpen: true,
+townRolesOpen: false,
+neutralRolesOpen: false,
 
 mayorVotePower: 2,
 mayorExtraOpen: false,

@@ -126,22 +126,26 @@ mayor: 1
 }
 
 state.executionerTargetRule = "neither"
-state.executionerExtraOpen = false
 
-state.mayorExtraOpen = false
 state.mayorVotePower = 2
 
 state.doctorRevealSave = false
 state.sheriffExactReveal = false
 state.mafiaCountOverride = 0
 
-state.doctorExtraOpen = false
-state.sheriffExtraOpen = false
-state.rolesSectionOpen = true
-state.presetsSectionOpen = false
 state.revealRolesOnElimination = "none"
 state.executionerWinIfDead = false
+
+state.executionerExtraOpen = false
+state.mayorExtraOpen = false
+state.doctorExtraOpen = false
+state.sheriffExtraOpen = false
 state.jesterExtraOpen = false
+
+state.rolesSectionOpen = false
+state.presetsSectionOpen = false
+state.townRolesOpen = false
+state.neutralRolesOpen = false
 
 state.sheriffJesterResult = "not_innocent"
 state.sheriffExecutionerResult = "not_innocent"
