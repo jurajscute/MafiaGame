@@ -4,7 +4,7 @@ villager:{
 team:"village",
 nightAction:null,
 receivesNightResult:false,
-noResultText:[
+noResultTexts:[
 "You dream about a big carrot.",
 "'Maybe the mafia isn't so bad?' you think to yourself...",
 "Seeing a person die isn't something you really want.",
@@ -26,7 +26,7 @@ doctor:{
 team:"village",
 nightAction:"save",
 receivesNightResult:false,
-noResultText:[
+noResultTexts:[
 "Your patient didn't need any help tonight.",
 "Nothing major with the patient tonight.",
 "All seems in order with your patient.",
@@ -41,7 +41,7 @@ mafia:{
 team:"mafia",
 nightAction:"kill",
 receivesNightResult:false,
-noResultText:[
+noResultTexts:[
 "Kill successful...",
 "Your target has been killed.",
 "Blood drips from the end of your knife.",
@@ -63,7 +63,7 @@ mayor:{
 team:"village",
 nightAction:null,
 receivesNightResult:false,
-noResultText:[
+noResultTexts:[
 "Your snoring echos through the town.",
 "You sleep comfortably in your rich bed.",
 "The town depends on you, remember that!",
@@ -78,7 +78,7 @@ jester:{
 team:"neutral",
 nightAction:null,
 receivesNightResult:false,
-noResultText:[
+noResultTexts:[
 "You're thinking of a way to trick the town.",
 "You try to sleep, but you're too excited!",
 "You can't stop giggling to yourself.",
@@ -93,7 +93,7 @@ executioner:{
 team:"neutral",
 nightAction:null,
 receivesNightResult:false,
-noResultText:[
+noResultTexts:[
 "The hate towards your target grows stronger.",
 "You want them out, now.",
 "If it was legal you'd kill your target yourself.",
@@ -108,7 +108,7 @@ spirit:{
 team:"village",
 nightAction:null,
 receivesNightResult:true,
-noResultText:[
+noResultTexts:[
 "You drift into the realm of dreams.",
 "You enter the spirit realm.",
 "It feels nice being so spiritually connected.",
