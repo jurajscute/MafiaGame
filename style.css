@@ -401,11 +401,6 @@ text-shadow:
 0 0 30px #4a1b43;
 }
 
-.executioner-slider input[type="range"]{
---start:#7a2f6f;
---end:#4a1b43;
-}
-
 .win-executioner{
 background:radial-gradient(circle at 50% 20%, #4a183f, #170814);
 }
@@ -1386,6 +1381,11 @@ opacity:0.9;
 .mayor-slider input[type="range"]{
 --start:#2ecc9a;
 --end:#1b7a5d;
+}
+
+.spirit-slider input[type="range"]{
+--start:#f8b0ff;
+--end:#c074ff;
 }
 
 /* mayor */

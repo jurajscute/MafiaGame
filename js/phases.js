@@ -110,6 +110,9 @@ state.phase = "night"
 state.nightStep = "select"
 state.nightTurnIndex = 0
 state.nightResultIndex = 0
+state.nightResultOrder = state.players
+  .filter(p => p.alive)
+  .map(p => p.name)
 
 resetNightActions()
 
@@ -320,6 +323,10 @@ return
 
 let roleColor = roleColors[player.role] || "white"
 let noResultText = roles[player.role]?.noResultText || "No results tonight."
+
+if(state.nightDeaths?.includes(player.name)){
+  noResultText = "You had a terrifying nightmare, you have bad feeling about tonight..."
+}
 
 render(`
 
@@ -730,6 +737,7 @@ if(kill && kill !== save){
 
   if(victim){
     victim.alive = false
+    state.nightDeaths.push(victim.name)
 
     let deathText = `${kill} was killed during the night.`
 
@@ -853,18 +861,9 @@ nextVoteTurn()
 }
 
 function getNightResultPlayers(){
-
-  let alivePlayers = state.players.filter(p => p.alive)
-
-  let extraPlayers = state.nightPrivateResults
-    .map(r => r.playerName)
-    .filter(name => {
-      return !alivePlayers.some(p => p.name === name)
-    })
+  return (state.nightResultOrder || [])
     .map(name => state.players.find(p => p.name === name))
     .filter(Boolean)
-
-  return [...alivePlayers, ...extraPlayers]
 }
 
 function nextVoteTurn(){

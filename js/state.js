@@ -100,6 +100,7 @@ export function resetNightActions(){
     frame: null
   }
 
+  state.nightDeaths = []
   state.spiritReveal = null
   state.nightPrivateResults = []
   state.nightResolved = null
