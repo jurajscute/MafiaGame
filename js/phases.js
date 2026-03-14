@@ -143,13 +143,6 @@ if(!player.alive){
   return
 }
 
-let role = roles[player.role]
-
-if(!role.nightAction){
-  advanceNightTurn()
-  return
-}
-
 passPhone(player.name, "window.revealNightRole()")
 }
 
@@ -175,41 +168,38 @@ if(state.nightStep === "results"){
 
 }
 
+function showNightResultsTurn(){
+
+let alivePlayers = state.players.filter(p => p.alive)
+let player = alivePlayers[state.nightResultIndex]
+
+if(!player){
+  showMorning()
+  return
+}
+
+passPhone(player.name, "window.revealNightPrivateResult()")
+}
+
 export function nextNightTurn(){
   state.nightTurnIndex++
   showNightSelectionTurn()
 }
 
-function startNightResultsPhase(){
-  state.nightStep = "results"
-  state.nightResultIndex = 0
-  showNightResultTurn()
-}
+window.revealNightPrivateResult = function(){
 
-function showNightResultsTurn(){
+let alivePlayers = state.players.filter(p => p.alive)
+let player = alivePlayers[state.nightResultIndex]
 
-let resultPlayers = state.nightPrivateResults
-let item = resultPlayers[state.nightResultIndex]
-
-if(!item){
+if(!player){
   showMorning()
   return
 }
 
-passPhone(item.playerName, "window.revealNightPrivateResult()")
-}
+let item = state.nightPrivateResults.find(r => r.playerName === player.name)
 
-window.revealNightPrivateResult = function(){
-
-  let item = state.nightPrivateResults[state.nightResultIndex]
-
-  if(!item){
-    showMorning()
-    return
-  }
-
-  if(item.type === "investigate"){
-    render(`
+if(item && item.type === "investigate"){
+render(`
 
 <div class="card role-sheriff">
 
@@ -232,8 +222,40 @@ ${renderHostControls()}
 
 </div>
 
-    `)
-  }
+`)
+return
+}
+
+let roleColor = roleColors[player.role] || "white"
+
+render(`
+
+<div class="card">
+
+<h2>
+Night Results
+</h2>
+
+<p style="
+color:${roleColor};
+font-weight:bold;
+text-shadow:
+0 0 10px ${roleColor};
+">
+${player.role.toUpperCase()}
+</p>
+
+<p class="role-description">
+Certain roles are getting their results!.
+</p>
+
+<button onclick="window.nextNightResultTurn()">Hide</button>
+
+${renderHostControls()}
+
+</div>
+
+`)
 }
 
 window.nextNightResultTurn = function(){
@@ -534,7 +556,7 @@ return { result, resultColor }
 
 function showNightPrivateResultTurn(){
 
-  let item = state.nightPrivateResults[state.nightRevealIndex]
+  let item = state.nightPrivateResults[state.nightResultIndex]
 
   if(!item){
     showMorning()
@@ -544,47 +566,6 @@ function showNightPrivateResultTurn(){
   passPhone(item.playerName, "window.revealNightPrivateResult()")
 }
 
-window.revealNightPrivateResult = function(){
-
-let item = state.nightPrivateResults[state.nightResultIndex]
-
-if(!item){
-  showMorning()
-  return
-}
-
-if(item.type === "investigate"){
-render(`
-
-<div class="card role-sheriff">
-
-<h2 class="role-title">INVESTIGATION RESULT</h2>
-
-<p>${item.targetName} is</p>
-
-<h1 style="
-color:${item.resultColor};
-text-shadow:
-0 0 10px ${item.resultColor},
-0 0 20px ${item.resultColor};
-">
-${item.result}
-</h1>
-
-<button onclick="window.nextNightResultTurn()">Hide</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-}
-}
-
-window.nextNightPrivateResult = function(){
-  state.nightRevealIndex++
-  showNightPrivateResultTurn()
-}
 
 function resolveNightSelections(){
 
