@@ -1538,7 +1538,7 @@ transform 0.3s ease;
 }
 
 .settings-section-content.show{
-max-height:1200px;
+max-height:3000px;
 opacity:1;
 transform:translateY(0) scaleY(1);
 pointer-events:auto;
