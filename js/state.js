@@ -26,6 +26,9 @@ presetsSectionOpen: false,
 sheriffJesterResult: "not_innocent",
 sheriffExecutionerResult: "not_innocent",
 
+townRolesOpen: true,
+neutralRolesOpen: true,
+
 mayorVotePower: 2,
 mayorExtraOpen: false,
 

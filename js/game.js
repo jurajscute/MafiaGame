@@ -360,16 +360,17 @@ content += `
   `
 
   if(role === "doctor" && enabled){
-    roleBlock += `
-      <div class="doctor-extra-wrap show" id="doctor-extra-wrap">
-        <div class="additional-settings-bar" onclick="toggleDoctorExtras()">
-          <span>Additional Settings</span>
-          <span class="additional-arrow">▾</span>
-        </div>
+  roleBlock += `
+    <div class="doctor-extra-wrap show" id="doctor-extra-wrap">
+      <div class="additional-settings-bar" onclick="toggleDoctorExtras()">
+        <span>Additional Settings</span>
+        <span class="additional-arrow" style="transform:${state.doctorExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+      </div>
 
-        <div class="doctor-extra-settings ${state.doctorExtraOpen ? "show" : ""}" id="doctor-extra-settings">
-          <div class="role-toggle doctor-subsetting">
-            <span>Reveal Saved Player</span>
+      <div class="doctor-extra-settings ${state.doctorExtraOpen ? "show" : ""}" id="doctor-extra-settings">
+        <div class="doctor-settings-card">
+          <div class="doctor-setting-row">
+            <span class="doctor-setting-label">Reveal Saved Player</span>
 
             <label class="switch">
               <input type="checkbox"
@@ -380,8 +381,9 @@ content += `
           </div>
         </div>
       </div>
-    `
-  }
+    </div>
+  `
+}
 
 if(role === "mayor" && enabled){
 roleBlock += `
@@ -451,16 +453,17 @@ roleBlock += `
 }
 
   if(role === "sheriff" && enabled){
-    roleBlock += `
-      <div class="sheriff-extra-wrap show" id="sheriff-extra-wrap">
-        <div class="additional-settings-bar" onclick="toggleSheriffExtras()">
-          <span>Additional Settings</span>
-          <span class="additional-arrow" style="transform:${state.sheriffExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
-        </div>
+  roleBlock += `
+    <div class="sheriff-extra-wrap show" id="sheriff-extra-wrap">
+      <div class="additional-settings-bar" onclick="toggleSheriffExtras()">
+        <span>Additional Settings</span>
+        <span class="additional-arrow" style="transform:${state.sheriffExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+      </div>
 
-        <div class="sheriff-extra-settings ${state.sheriffExtraOpen ? "show" : ""}" id="sheriff-extra-settings">
-          <div class="role-toggle sheriff-subsetting">
-            <span>Reveal Exact Role</span>
+      <div class="sheriff-extra-settings ${state.sheriffExtraOpen ? "show" : ""}" id="sheriff-extra-settings">
+        <div class="sheriff-settings-card">
+          <div class="sheriff-setting-row">
+            <span class="sheriff-setting-label">Reveal Exact Role</span>
 
             <label class="switch">
               <input type="checkbox"
@@ -471,8 +474,9 @@ roleBlock += `
           </div>
         </div>
       </div>
-    `
-  }
+    </div>
+  `
+}
 
   if(role === "executioner" && enabled){
   roleBlock += `
@@ -545,11 +549,27 @@ content += `
 
   <div class="settings-section-content ${state.rolesSectionOpen ? "show" : ""}" id="roles-section-content">
 
-    <div class="role-group-title">Town Roles</div>
-    ${townRolesContent}
+    <div class="settings-section-wrap" id="town-roles-wrap">
+      <div class="settings-section-bar" onclick="toggleTownRolesGroup()">
+        <span>Town Roles</span>
+        <span class="section-arrow" style="transform:${state.townRolesOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+      </div>
 
-    <div class="role-group-title">Neutral Roles</div>
-    ${neutralRolesContent}
+      <div class="settings-section-content ${state.townRolesOpen ? "show" : ""}" id="town-roles-content">
+        ${townRolesContent}
+      </div>
+    </div>
+
+    <div class="settings-section-wrap" id="neutral-roles-wrap">
+      <div class="settings-section-bar" onclick="toggleNeutralRolesGroup()">
+        <span>Neutral Roles</span>
+        <span class="section-arrow" style="transform:${state.neutralRolesOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+      </div>
+
+      <div class="settings-section-content ${state.neutralRolesOpen ? "show" : ""}" id="neutral-roles-content">
+        ${neutralRolesContent}
+      </div>
+    </div>
 
   </div>
 
@@ -732,6 +752,36 @@ JSON.stringify(state.roleWeights)
 
 }
 
+window.toggleTownRolesGroup = function(){
+  state.townRolesOpen = !state.townRolesOpen
+
+  const panel = document.getElementById("town-roles-content")
+  const arrow = document.querySelector("#town-roles-wrap .section-arrow")
+
+  if(panel){
+    panel.classList.toggle("show", state.townRolesOpen)
+  }
+
+  if(arrow){
+    arrow.style.transform = state.townRolesOpen ? "rotate(180deg)" : "rotate(0deg)"
+  }
+}
+
+window.toggleNeutralRolesGroup = function(){
+  state.neutralRolesOpen = !state.neutralRolesOpen
+
+  const panel = document.getElementById("neutral-roles-content")
+  const arrow = document.querySelector("#neutral-roles-wrap .section-arrow")
+
+  if(panel){
+    panel.classList.toggle("show", state.neutralRolesOpen)
+  }
+
+  if(arrow){
+    arrow.style.transform = state.neutralRolesOpen ? "rotate(180deg)" : "rotate(0deg)"
+  }
+}
+
 window.showSettings = showSettings
 
 window.toggleDoctorExtras = function(){
@@ -774,29 +824,29 @@ if(role === "doctor"){
     let count = document.getElementById("doctor-count")
 
     count.insertAdjacentHTML("afterend", `
-
 <div class="doctor-extra-wrap" id="doctor-extra-wrap">
 
   <div class="additional-settings-bar" onclick="toggleDoctorExtras()">
     <span>Additional Settings</span>
-    <span class="additional-arrow">▾</span>
+    <span class="additional-arrow" style="transform:${state.doctorExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
   </div>
 
-  <div class="doctor-extra-settings" id="doctor-extra-settings">
-    <div class="role-toggle doctor-subsetting">
-      <span>Reveal Saved Player:</span>
+  <div class="doctor-extra-settings ${state.doctorExtraOpen ? "show" : ""}" id="doctor-extra-settings">
+    <div class="doctor-settings-card">
+      <div class="doctor-setting-row">
+        <span class="doctor-setting-label">Reveal Saved Player</span>
 
-      <label class="switch">
-        <input type="checkbox"
-          ${state.doctorRevealSave ? "checked" : ""}
-          onchange="toggleDoctorReveal(this.checked)">
-        <span class="slider"></span>
-      </label>
+        <label class="switch">
+          <input type="checkbox"
+            ${state.doctorRevealSave ? "checked" : ""}
+            onchange="toggleDoctorReveal(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
     </div>
   </div>
 
 </div>
-
 `)
 
     requestAnimationFrame(() => {
@@ -883,29 +933,29 @@ if(role === "sheriff"){
     let count = document.getElementById("sheriff-count")
 
     count.insertAdjacentHTML("afterend", `
-
 <div class="sheriff-extra-wrap" id="sheriff-extra-wrap">
 
   <div class="additional-settings-bar" onclick="toggleSheriffExtras()">
     <span>Additional Settings</span>
-    <span class="additional-arrow">▾</span>
+    <span class="additional-arrow" style="transform:${state.sheriffExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
   </div>
 
-  <div class="sheriff-extra-settings" id="sheriff-extra-settings">
-    <div class="role-toggle sheriff-subsetting">
-      <span>Reveal Exact Role</span>
+  <div class="sheriff-extra-settings ${state.sheriffExtraOpen ? "show" : ""}" id="sheriff-extra-settings">
+    <div class="sheriff-settings-card">
+      <div class="sheriff-setting-row">
+        <span class="sheriff-setting-label">Reveal Exact Role</span>
 
-      <label class="switch">
-        <input type="checkbox"
-          ${state.sheriffExactReveal ? "checked" : ""}
-          onchange="toggleSheriffExactReveal(this.checked)">
-        <span class="slider"></span>
-      </label>
+        <label class="switch">
+          <input type="checkbox"
+            ${state.sheriffExactReveal ? "checked" : ""}
+            onchange="toggleSheriffExactReveal(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
     </div>
   </div>
 
 </div>
-
 `)
 
     requestAnimationFrame(() => {
