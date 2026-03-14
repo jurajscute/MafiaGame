@@ -379,23 +379,15 @@ margin-bottom 0.35s ease;
 }
 
 .executioner-extra-wrap.show{
-max-height:320px;
+max-height:340px;
 opacity:1;
 transform:translateY(0) scaleY(1);
 margin-bottom:6px;
 pointer-events:auto;
 }
 
-.executioner-extra-settings.show{
-height:220px;
-opacity:1;
-transform:translateY(0) scaleY(1);
-margin-top:8px;
-pointer-events:auto;
-}
-
 .executioner-extra-settings{
-height:0;
+max-height:0;
 opacity:0;
 overflow:hidden;
 transform:translateY(-6px) scaleY(0.96);
@@ -406,8 +398,16 @@ pointer-events:none;
 transition:
 opacity 0.25s ease,
 transform 0.3s ease,
-height 0.3s ease,
+max-height 0.35s ease,
 margin-top 0.3s ease;
+}
+
+.executioner-extra-settings.show{
+max-height:260px;
+opacity:1;
+transform:translateY(0) scaleY(1);
+margin-top:8px;
+pointer-events:auto;
 }
 
 .executioner-subsetting{
