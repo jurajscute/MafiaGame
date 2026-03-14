@@ -325,7 +325,7 @@ let roleColor = roleColors[player.role] || "white"
 let noResultText = roles[player.role]?.noResultText || "No results tonight."
 
 if(state.nightDeaths?.includes(player.name)){
-  noResultText = "You had a terrifying nightmare, you have bad feeling about tonight..."
+  noResultText = "You had a terrifying nightmare, you have a bad feeling about tonight..."
 }
 
 render(`
