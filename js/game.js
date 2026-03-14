@@ -475,7 +475,7 @@ roleBlock += `
   }
 
   if(role === "executioner" && enabled){
-    roleBlock += `
+  roleBlock += `
       <div class="executioner-extra-wrap show" id="executioner-extra-wrap">
         <div class="additional-settings-bar" onclick="toggleExecutionerExtras()">
           <span>Additional Settings</span>
@@ -499,6 +499,18 @@ roleBlock += `
             <div class="executioner-setting-divider"></div>
 
             <div class="executioner-setting-row">
+              <span class="executioner-setting-label">Sheriff sees Executioner as</span>
+
+              <select class="executioner-setting-select" onchange="setSheriffExecutionerResult(this.value)">
+                <option value="innocent" ${state.sheriffExecutionerResult === "innocent" ? "selected" : ""}>Innocent</option>
+                <option value="not_innocent" ${state.sheriffExecutionerResult === "not_innocent" ? "selected" : ""}>Not Innocent</option>
+                <option value="exact" ${state.sheriffExecutionerResult === "exact" ? "selected" : ""}>Exact Role</option>
+              </select>
+            </div>
+
+            <div class="executioner-setting-divider"></div>
+
+            <div class="executioner-setting-row">
               <span class="executioner-setting-label">Can win while dead</span>
 
               <label class="switch">
@@ -513,7 +525,7 @@ roleBlock += `
         </div>
       </div>
     `
-  }
+}
 
   if(townRoles.includes(role)){
     townRolesContent += roleBlock
