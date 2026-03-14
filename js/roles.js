@@ -35,7 +35,7 @@ mayor:{
 team:"village",
 nightAction:null,
 receivesNightResult:false,
-noResultText:"You're fast asleep.",
+noResultText:"Your snoring echos through the town.",
 description:"You have no night action, but your vote counts as 2."
 },
 
@@ -51,8 +51,16 @@ executioner:{
 team:"neutral",
 nightAction:null,
 receivesNightResult:false,
-noResultText:"The hate for your target grows.",
+noResultText:"The hate towards your target grows stronger.",
 description:"You win if your assigned target is voted out by the town."
-}
+},
+
+spirit:{
+team:"village",
+nightAction:null,
+receivesNightResult:true,
+noResultText:"You drift into the realm of dreams.",
+description:"If you are killed at night and not saved, you may reveal one player's role to the town before morning."
+},
 
 }

@@ -39,6 +39,8 @@ neutralRolesOpen: false,
 mayorVotePower: 2,
 mayorExtraOpen: false,
 
+spiritReveal: null,
+
 gameLog: [],
 gameStats: {
 nights: 0,
@@ -98,6 +100,7 @@ export function resetNightActions(){
     frame: null
   }
 
+  state.spiritReveal = null
   state.nightPrivateResults = []
   state.nightResolved = null
   state.nightResultIndex = 0

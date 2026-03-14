@@ -2107,6 +2107,12 @@ background:rgba(46,141,204,0.14);
 border:1px solid rgba(46,141,204,0.25);
 }
 
+.night-result-spirit{
+background:rgba(225, 160, 255, 0.14);
+border:1px solid rgba(245, 136, 255, 0.25);
+}
+
+
 .night-result-peace{
 background:rgba(255,255,255,0.06);
 border:1px solid rgba(255,255,255,0.08);
@@ -2423,4 +2429,20 @@ box-shadow:
 box-shadow:
 0 0 0 2px rgba(120,120,255,0.25),
 0 8px 18px rgba(0,0,0,0.3);
+}
+
+.role-spirit{
+background:linear-gradient(135deg,#2c1440,#12081f);
+}
+
+.role-spirit button{
+background:linear-gradient(135deg,#9b59b6,#6c3483);
+}
+
+.role-spirit .role-title{
+color:#c084fc;
+text-shadow:
+0 0 10px #c084fc,
+0 0 20px #9b59b6,
+0 0 30px #6c3483;
 }

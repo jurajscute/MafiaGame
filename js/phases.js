@@ -123,7 +123,8 @@ sheriff: "#e4c200",
 villager: "#8dc2ff",
 jester: "#ff3ea5",
 executioner: "#7a2f6f",
-mayor: "#1d8161"
+mayor: "#1d8161",
+spirit: "#e6aafd"
 }
 
 function showNightSelectionTurn(){
@@ -170,8 +171,8 @@ if(state.nightStep === "results"){
 
 function showNightResultsTurn(){
 
-let alivePlayers = state.players.filter(p => p.alive)
-let player = alivePlayers[state.nightResultIndex]
+let resultPlayers = getNightResultPlayers()
+let player = resultPlayers[state.nightResultIndex]
 
 if(!player){
   showMorning()
@@ -188,8 +189,8 @@ export function nextNightTurn(){
 
 window.revealNightPrivateResult = function(){
 
-let alivePlayers = state.players.filter(p => p.alive)
-let player = alivePlayers[state.nightResultIndex]
+let resultPlayers = getNightResultPlayers()
+let player = resultPlayers[state.nightResultIndex]
 
 if(!player){
   showMorning()
@@ -286,6 +287,37 @@ ${renderHostControls()}
 return
 }
 
+if(item && item.type === "spirit_reveal_choice"){
+
+let targets = state.players
+  .filter(p => p.alive && p.name !== player.name)
+  .map(p => `
+    <button onclick="window.chooseSpiritReveal('${p.name}')">
+      ${p.name}
+    </button>
+  `)
+  .join("")
+
+render(`
+
+<div class="card role-spirit">
+
+<h2 class="role-title">YOU WERE KILLED</h2>
+
+<p class="role-description">
+Before morning, expose a player and show the world who they truly are.
+</p>
+
+${targets}
+
+${renderHostControls()}
+
+</div>
+
+`)
+return
+}
+
 let roleColor = roleColors[player.role] || "white"
 let noResultText = roles[player.role]?.noResultText || "No results tonight."
 
@@ -320,6 +352,15 @@ ${renderHostControls()}
 window.nextNightResultTurn = function(){
 state.nightResultIndex++
 showNightTurn()
+}
+
+window.chooseSpiritReveal = function(targetName){
+
+state.spiritReveal = targetName
+
+addLogEntry(`Spirit chose to reveal ${targetName}'s role.`)
+
+window.nextNightResultTurn()
 }
 
 function renderHostControls(){
@@ -700,6 +741,14 @@ if(kill && kill !== save){
       type: "death",
       text: deathText
     })
+
+    // Spirit special private result
+    if(victim.role === "spirit"){
+      privateResults.push({
+        type: "spirit_reveal_choice",
+        playerName: victim.name
+      })
+    }
   }
 
 }else if(saveSucceeded){
@@ -738,13 +787,36 @@ setDay()
 
 if(checkWin()) return
 
-let results = state.nightResolved?.publicResults || []
+let results = [...(state.nightResolved?.publicResults || [])]
+
+if(state.spiritReveal){
+  let revealedPlayer = state.players.find(p => p.name === state.spiritReveal)
+
+  if(revealedPlayer){
+    let color = roleColors[revealedPlayer.role] || "white"
+
+    results.push({
+      type: "spirit_reveal",
+      text: `
+        The Spirit reveals that <strong>${revealedPlayer.name}</strong> is
+        <span style="
+          color:${color};
+          font-weight:bold;
+          text-shadow:0 0 8px ${color};
+        ">
+          ${revealedPlayer.role.toUpperCase()}
+        </span>
+      `
+    })
+  }
+}
 
 let resultsHTML = results.map(r => {
   let cls = ""
   if(r.type === "death") cls = "night-result-death"
   if(r.type === "save") cls = "night-result-save"
   if(r.type === "peace") cls = "night-result-peace"
+  if(r.type === "spirit_reveal") cls = "night-result-spirit"
 
   return `<div class="night-result ${cls}">${r.text}</div>`
 }).join("")
@@ -778,6 +850,21 @@ state.votes={}
 
 nextVoteTurn()
 
+}
+
+function getNightResultPlayers(){
+
+  let alivePlayers = state.players.filter(p => p.alive)
+
+  let extraPlayers = state.nightPrivateResults
+    .map(r => r.playerName)
+    .filter(name => {
+      return !alivePlayers.some(p => p.name === name)
+    })
+    .map(name => state.players.find(p => p.name === name))
+    .filter(Boolean)
+
+  return [...alivePlayers, ...extraPlayers]
 }
 
 function nextVoteTurn(){
