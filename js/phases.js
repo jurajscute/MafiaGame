@@ -271,6 +271,14 @@ let role = roles[player.role]
 
 state.nightActions[role.nightAction]=targetName
 
+if(role.nightAction === "investigate"){
+
+let target = state.players.find(p => p.name === targetName)
+
+let result = ""
+let resultColor = "#b0e2ff"
+
+
 if(state.sheriffExactReveal){
 
   if(target.role === "jester" && state.sheriffJesterResult === "innocent"){
