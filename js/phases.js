@@ -322,7 +322,7 @@ return
 }
 
 let roleColor = roleColors[player.role] || "white"
-let noResultText = roles[player.role]?.noResultText || "No results tonight."
+let noResultText = getRandomNoResultText(player.role)
 
 if(state.nightDeaths?.includes(player.name)){
   noResultText = "You had a terrifying nightmare, you have a bad feeling about tonight..."
@@ -354,6 +354,33 @@ ${renderHostControls()}
 </div>
 
 `)
+}
+
+function getRandomNoResultText(roleName){
+  const role = roles[roleName]
+
+  if(!role) return "No results tonight."
+
+  const texts = role.noResultTexts
+
+  if(!Array.isArray(texts) || !texts.length){
+    return role.noResultText || "No results tonight."
+  }
+
+  if(!state.lastNoResultTexts){
+    state.lastNoResultTexts = {}
+  }
+
+  let filtered = texts
+
+  if(texts.length > 1 && state.lastNoResultTexts[roleName]){
+    filtered = texts.filter(t => t !== state.lastNoResultTexts[roleName])
+  }
+
+  const choice = filtered[Math.floor(Math.random() * filtered.length)]
+  state.lastNoResultTexts[roleName] = choice
+
+  return choice
 }
 
 window.nextNightResultTurn = function(){
