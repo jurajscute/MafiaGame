@@ -379,10 +379,18 @@ margin-bottom 0.35s ease;
 }
 
 .executioner-extra-wrap.show{
-max-height:220px;
+max-height:320px;
 opacity:1;
 transform:translateY(0) scaleY(1);
 margin-bottom:6px;
+pointer-events:auto;
+}
+
+.executioner-extra-settings.show{
+height:220px;
+opacity:1;
+transform:translateY(0) scaleY(1);
+margin-top:8px;
 pointer-events:auto;
 }
 
@@ -400,14 +408,6 @@ opacity 0.25s ease,
 transform 0.3s ease,
 height 0.3s ease,
 margin-top 0.3s ease;
-}
-
-.executioner-extra-settings.show{
-height:126px;
-opacity:1;
-transform:translateY(0) scaleY(1);
-margin-top:8px;
-pointer-events:auto;
 }
 
 .executioner-subsetting{

@@ -142,7 +142,9 @@ state.presetsSectionOpen = false
 state.revealRolesOnElimination = "none"
 state.executionerWinIfDead = false
 state.jesterExtraOpen = false
+
 state.sheriffJesterResult = "not_innocent"
+state.sheriffExecutionerResult = "not_innocent"
 
 localStorage.setItem("mafiaRoles", JSON.stringify(state.rolesEnabled))
 localStorage.setItem("mafiaRoleWeights", JSON.stringify(state.roleWeights))
@@ -154,6 +156,7 @@ localStorage.setItem("mafiaExecutionerTargetRule", JSON.stringify(state.executio
 localStorage.setItem("mafiaRevealRolesOnElimination", JSON.stringify(state.revealRolesOnElimination))
 localStorage.setItem("mafiaExecutionerWinIfDead", JSON.stringify(state.executionerWinIfDead))
 localStorage.setItem("mafiaSheriffJesterResult", JSON.stringify(state.sheriffJesterResult))
+localStorage.setItem("mafiaSheriffExecutionerResult", JSON.stringify(state.sheriffExecutionerResult))
 localStorage.setItem("mafiaMayorVotePower", JSON.stringify(state.mayorVotePower))
 
 showSettings()
@@ -990,32 +993,40 @@ if(role === "executioner"){
 
     <div class="executioner-settings-card">
 
-      <div class="executioner-setting-row">
-        <span class="executioner-setting-label">Can target Jester or Mafia?</span>
+  <div class="executioner-setting-row">
+    <span class="executioner-setting-label">Can target Jester or Mafia?</span>
 
-        <select class="executioner-setting-select" onchange="setExecutionerTargetRule(this.value)">
-          <option value="neither" ${state.executionerTargetRule === "neither" ? "selected" : ""}>Neither</option>
-          <option value="mafia" ${state.executionerTargetRule === "mafia" ? "selected" : ""}>Mafia</option>
-          <option value="jester" ${state.executionerTargetRule === "jester" ? "selected" : ""}>Jester</option>
-          <option value="both" ${state.executionerTargetRule === "both" ? "selected" : ""}>Both</option>
-        </select>
-      </div>
+    <select class="executioner-setting-select" onchange="setExecutionerTargetRule(this.value)">
+      <option value="neither" ${state.executionerTargetRule === "neither" ? "selected" : ""}>Neither</option>
+      <option value="mafia" ${state.executionerTargetRule === "mafia" ? "selected" : ""}>Mafia</option>
+      <option value="jester" ${state.executionerTargetRule === "jester" ? "selected" : ""}>Jester</option>
+      <option value="both" ${state.executionerTargetRule === "both" ? "selected" : ""}>Both</option>
+    </select>
+  </div>
 
-      <div class="executioner-setting-divider"></div>
+  <div class="executioner-setting-divider"></div>
 
-      <div class="executioner-setting-row">
-        <span class="executioner-setting-label">Can win while dead</span>
+  <div class="executioner-setting-row">
+    <span class="executioner-setting-label">Sheriff sees Executioner as</span>
 
-        <label class="switch">
-          <input type="checkbox"
-            ${state.executionerWinIfDead ? "checked" : ""}
-            onchange="toggleExecutionerWinIfDead(this.checked)">
-          <span class="slider"></span>
-        </label>
-      </div>
+    <select class="executioner-setting-select" onchange="setSheriffExecutionerResult(this.value)">
+      <option value="innocent" ${state.sheriffExecutionerResult === "innocent" ? "selected" : ""}>Innocent</option>
+      <option value="not_innocent" ${state.sheriffExecutionerResult === "not_innocent" ? "selected" : ""}>Not Innocent</option>
+      <option value="exact" ${state.sheriffExecutionerResult === "exact" ? "selected" : ""}>Exact Role</option>
+    </select>
+  </div>
 
-    </div>
+  <div class="executioner-setting-divider"></div>
 
+  <div class="executioner-setting-row">
+    <span class="executioner-setting-label">Can win while dead</span>
+
+    <label class="switch">
+      <input type="checkbox"
+        ${state.executionerWinIfDead ? "checked" : ""}
+        onchange="toggleExecutionerWinIfDead(this.checked)">
+      <span class="slider"></span>
+    </label>
   </div>
 
 </div>
@@ -1127,6 +1138,12 @@ let savedSheriffJesterResult = localStorage.getItem("mafiaSheriffJesterResult")
 
 let savedMayorVotePower = localStorage.getItem("mafiaMayorVotePower")
 
+let savedSheriffExecutionerResult = localStorage.getItem("mafiaSheriffExecutionerResult")
+
+if(savedSheriffExecutionerResult){
+state.sheriffExecutionerResult = JSON.parse(savedSheriffExecutionerResult)
+}
+
 if(savedMayorVotePower){
 state.mayorVotePower = JSON.parse(savedMayorVotePower)
 }
@@ -1184,6 +1201,17 @@ state.mayorVotePower = Number(value)
 localStorage.setItem(
 "mafiaMayorVotePower",
 JSON.stringify(state.mayorVotePower)
+)
+
+}
+
+window.setSheriffExecutionerResult = function(value){
+
+state.sheriffExecutionerResult = value
+
+localStorage.setItem(
+"mafiaSheriffExecutionerResult",
+JSON.stringify(value)
 )
 
 }
@@ -1565,10 +1593,17 @@ let executionerRuleText = {
   both: "targets mafia or jester"
 }
 
+let executionerSheriffText = {
+  innocent: "innocent to Sheriff",
+  not_innocent: "not innocent to Sheriff",
+  exact: "revealed exactly by Sheriff"
+}
+
 extras = ` <span style="opacity:0.7;">• ${executionerRuleText[state.executionerTargetRule]}</span>`
+extras += ` <span style="opacity:0.7;">• ${executionerSheriffText[state.sheriffExecutionerResult]}</span>`
 
 if(state.executionerWinIfDead){
-extras += ` <span style="opacity:0.7;">• wins even if dead</span>`
+  extras += ` <span style="opacity:0.7;">• wins even if dead</span>`
 }
 
 }
@@ -1893,6 +1928,7 @@ showSettings()
 
 function saveSettingsToStorage(){
 
+  localStorage.setItem("mafiaSheriffExecutionerResult", JSON.stringify(state.sheriffExecutionerResult))
 localStorage.setItem("mafiaMayorVotePower", JSON.stringify(state.mayorVotePower))
 localStorage.setItem("mafiaSheriffJesterResult", JSON.stringify(state.sheriffJesterResult))
 localStorage.setItem("mafiaExecutionerTargetRule", JSON.stringify(state.executionerTargetRule))

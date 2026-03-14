@@ -24,6 +24,7 @@ revealRolesOnElimination: "none",
 presetsSectionOpen: false,
 
 sheriffJesterResult: "not_innocent",
+sheriffExecutionerResult: "not_innocent",
 
 mayorVotePower: 2,
 mayorExtraOpen: false,

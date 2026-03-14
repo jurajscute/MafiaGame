@@ -271,29 +271,25 @@ let role = roles[player.role]
 
 state.nightActions[role.nightAction]=targetName
 
-if(role.nightAction === "investigate"){
-
-let target = state.players.find(p => p.name === targetName)
-
-let result = ""
-let resultColor = "#b0e2ff"
-
 if(state.sheriffExactReveal){
 
   if(target.role === "jester" && state.sheriffJesterResult === "innocent"){
+    result = "VILLAGER"
+    resultColor = roleColors.villager
+  }else if(target.role === "executioner" && state.sheriffExecutionerResult === "innocent"){
     result = "VILLAGER"
     resultColor = roleColors.villager
   }else{
     result = target.role.toUpperCase()
 
     if(target.role === "mafia"){
-      resultColor = "#e74c3c"
+      resultColor = roleColors.mafia
     }else if(target.role === "jester"){
       resultColor = roleColors.jester
     }else if(target.role === "doctor"){
-      resultColor = "#2e8dcc"
+      resultColor = roleColors.doctor
     }else if(target.role === "sheriff"){
-      resultColor = "#e4c200"
+      resultColor = roleColors.sheriff
     }else if(target.role === "executioner"){
       resultColor = roleColors.executioner
     }else if(target.role === "mayor"){
@@ -313,6 +309,19 @@ if(state.sheriffExactReveal){
     }else if(state.sheriffJesterResult === "exact"){
       result = "JESTER"
       resultColor = roleColors.jester
+    }else{
+      result = "NOT INNOCENT"
+      resultColor = "#e74c3c"
+    }
+
+  }else if(target.role === "executioner"){
+
+    if(state.sheriffExecutionerResult === "innocent"){
+      result = "INNOCENT"
+      resultColor = "#b0e2ff"
+    }else if(state.sheriffExecutionerResult === "exact"){
+      result = "EXECUTIONER"
+      resultColor = roleColors.executioner
     }else{
       result = "NOT INNOCENT"
       resultColor = "#e74c3c"
