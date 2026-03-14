@@ -154,7 +154,7 @@ localStorage.setItem("mafiaExecutionerTargetRule", JSON.stringify(state.executio
 localStorage.setItem("mafiaRevealRolesOnElimination", JSON.stringify(state.revealRolesOnElimination))
 localStorage.setItem("mafiaExecutionerWinIfDead", JSON.stringify(state.executionerWinIfDead))
 localStorage.setItem("mafiaSheriffJesterResult", JSON.stringify(state.sheriffJesterResult))
-localStorage.setItem("mafiaMayorVotePower", JSON.stringify(state.sheriffJesterResult))
+localStorage.setItem("mafiaMayorVotePower", JSON.stringify(state.mayorVotePower))
 
 showSettings()
 
@@ -738,43 +738,79 @@ arrow.style.transform = state.doctorExtraOpen ? "rotate(180deg)" : "rotate(0deg)
 
 window.toggleRole = function(role, enabled){
 
-let slider = document.getElementById(role+"SliderContainer")
-let count = document.getElementById(role+"-count")
+let slider = document.getElementById(role + "SliderContainer")
+let count = document.getElementById(role + "-count")
+
 if(role === "doctor"){
+  let extraWrap = document.getElementById("doctor-extra-wrap")
 
-let extraWrap = document.getElementById("doctor-extra-wrap")
+  if(!enabled){
+    state.doctorExtraOpen = false
 
-if(!enabled){
-state.doctorExtraOpen = false
+    if(extraWrap){
+      extraWrap.classList.remove("show")
+      setTimeout(() => {
+        extraWrap.remove()
+      }, 300)
+    }
+  }
 
-if(extraWrap){
-extraWrap.classList.remove("show")
-setTimeout(() => {
-  extraWrap.remove()
-}, 300)
-}
+  if(enabled && !extraWrap){
+    let count = document.getElementById("doctor-count")
+
+    count.insertAdjacentHTML("afterend", `
+
+<div class="doctor-extra-wrap" id="doctor-extra-wrap">
+
+  <div class="additional-settings-bar" onclick="toggleDoctorExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow">▾</span>
+  </div>
+
+  <div class="doctor-extra-settings" id="doctor-extra-settings">
+    <div class="role-toggle doctor-subsetting">
+      <span>Reveal Saved Player:</span>
+
+      <label class="switch">
+        <input type="checkbox"
+          ${state.doctorRevealSave ? "checked" : ""}
+          onchange="toggleDoctorReveal(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+</div>
+
+`)
+
+    requestAnimationFrame(() => {
+      let inserted = document.getElementById("doctor-extra-wrap")
+      if(inserted){
+        inserted.classList.add("show")
+      }
+    })
+  }
 }
 
 if(role === "jester"){
+  let extraWrap = document.getElementById("jester-extra-wrap")
 
-let extraWrap = document.getElementById("jester-extra-wrap")
+  if(!enabled){
+    state.jesterExtraOpen = false
 
-if(!enabled){
-state.jesterExtraOpen = false
+    if(extraWrap){
+      extraWrap.classList.remove("show")
+      setTimeout(() => {
+        extraWrap.remove()
+      }, 300)
+    }
+  }
 
-if(extraWrap){
-extraWrap.classList.remove("show")
-setTimeout(() => {
-  extraWrap.remove()
-}, 300)
-}
-}
+  if(enabled && !extraWrap){
+    let count = document.getElementById("jester-count")
 
-if(enabled && !extraWrap){
-
-let count = document.getElementById("jester-count")
-
-count.insertAdjacentHTML("afterend", `
+    count.insertAdjacentHTML("afterend", `
 
 <div class="jester-extra-wrap" id="jester-extra-wrap">
 
@@ -805,78 +841,33 @@ count.insertAdjacentHTML("afterend", `
 
 `)
 
-requestAnimationFrame(() => {
-let inserted = document.getElementById("jester-extra-wrap")
-if(inserted){
-inserted.classList.add("show")
-}
-})
-
-}
-
-}
-
-if(enabled && !extraWrap){
-
-let count = document.getElementById("doctor-count")
-
-count.insertAdjacentHTML("afterend", `
-
-<div class="doctor-extra-wrap" id="doctor-extra-wrap">
-
-  <div class="additional-settings-bar" onclick="toggleDoctorExtras()">
-    <span>Additional Settings</span>
-    <span class="additional-arrow">▾</span>
-  </div>
-
-  <div class="doctor-extra-settings" id="doctor-extra-settings">
-    <div class="role-toggle doctor-subsetting">
-      <span>Reveal Saved Player:</span>
-
-      <label class="switch">
-        <input type="checkbox"
-          ${state.doctorRevealSave ? "checked" : ""}
-          onchange="toggleDoctorReveal(this.checked)">
-        <span class="slider"></span>
-      </label>
-    </div>
-  </div>
-
-</div>
-
-`)
-
-requestAnimationFrame(() => {
-let inserted = document.getElementById("doctor-extra-wrap")
-if(inserted){
-inserted.classList.add("show")
-}
-})
-
-}
-
+    requestAnimationFrame(() => {
+      let inserted = document.getElementById("jester-extra-wrap")
+      if(inserted){
+        inserted.classList.add("show")
+      }
+    })
+  }
 }
 
 if(role === "sheriff"){
+  let extraWrap = document.getElementById("sheriff-extra-wrap")
 
-let extraWrap = document.getElementById("sheriff-extra-wrap")
+  if(!enabled){
+    state.sheriffExtraOpen = false
 
-if(!enabled){
-state.sheriffExtraOpen = false
+    if(extraWrap){
+      extraWrap.classList.remove("show")
+      setTimeout(() => {
+        extraWrap.remove()
+      }, 300)
+    }
+  }
 
-if(extraWrap){
-extraWrap.classList.remove("show")
-setTimeout(() => {
-  extraWrap.remove()
-}, 300)
-}
-}
+  if(enabled && !extraWrap){
+    let count = document.getElementById("sheriff-count")
 
-if(enabled && !extraWrap){
-
-let count = document.getElementById("sheriff-count")
-
-count.insertAdjacentHTML("afterend", `
+    count.insertAdjacentHTML("afterend", `
 
 <div class="sheriff-extra-wrap" id="sheriff-extra-wrap">
 
@@ -902,37 +893,33 @@ count.insertAdjacentHTML("afterend", `
 
 `)
 
-requestAnimationFrame(() => {
-let inserted = document.getElementById("sheriff-extra-wrap")
-if(inserted){
-inserted.classList.add("show")
-}
-})
-
-}
-
+    requestAnimationFrame(() => {
+      let inserted = document.getElementById("sheriff-extra-wrap")
+      if(inserted){
+        inserted.classList.add("show")
+      }
+    })
+  }
 }
 
 if(role === "mayor"){
+  let extraWrap = document.getElementById("mayor-extra-wrap")
 
-let extraWrap = document.getElementById("mayor-extra-wrap")
+  if(!enabled){
+    state.mayorExtraOpen = false
 
-if(!enabled){
-state.mayorExtraOpen = false
+    if(extraWrap){
+      extraWrap.classList.remove("show")
+      setTimeout(() => {
+        extraWrap.remove()
+      }, 300)
+    }
+  }
 
-if(extraWrap){
-extraWrap.classList.remove("show")
-setTimeout(() => {
-  extraWrap.remove()
-}, 300)
-}
-}
+  if(enabled && !extraWrap){
+    let count = document.getElementById("mayor-count")
 
-if(enabled && !extraWrap){
-
-let count = document.getElementById("mayor-count")
-
-count.insertAdjacentHTML("afterend", `
+    count.insertAdjacentHTML("afterend", `
 
 <div class="mayor-extra-wrap" id="mayor-extra-wrap">
 
@@ -964,37 +951,33 @@ count.insertAdjacentHTML("afterend", `
 
 `)
 
-requestAnimationFrame(() => {
-let inserted = document.getElementById("mayor-extra-wrap")
-if(inserted){
-inserted.classList.add("show")
-}
-})
-
-}
-
+    requestAnimationFrame(() => {
+      let inserted = document.getElementById("mayor-extra-wrap")
+      if(inserted){
+        inserted.classList.add("show")
+      }
+    })
+  }
 }
 
 if(role === "executioner"){
+  let extraWrap = document.getElementById("executioner-extra-wrap")
 
-let extraWrap = document.getElementById("executioner-extra-wrap")
+  if(!enabled){
+    state.executionerExtraOpen = false
 
-if(!enabled){
-state.executionerExtraOpen = false
+    if(extraWrap){
+      extraWrap.classList.remove("show")
+      setTimeout(() => {
+        extraWrap.remove()
+      }, 300)
+    }
+  }
 
-if(extraWrap){
-extraWrap.classList.remove("show")
-setTimeout(() => {
-  extraWrap.remove()
-}, 300)
-}
-}
+  if(enabled && !extraWrap){
+    let count = document.getElementById("executioner-count")
 
-if(enabled && !extraWrap){
-
-let count = document.getElementById("executioner-count")
-
-count.insertAdjacentHTML("afterend", `
+    count.insertAdjacentHTML("afterend", `
 
 <div class="executioner-extra-wrap" id="executioner-extra-wrap">
 
@@ -1039,32 +1022,20 @@ count.insertAdjacentHTML("afterend", `
 
 `)
 
-requestAnimationFrame(() => {
-let inserted = document.getElementById("executioner-extra-wrap")
-if(inserted){
-inserted.classList.add("show")
-}
-})
-
-}
-
+    requestAnimationFrame(() => {
+      let inserted = document.getElementById("executioner-extra-wrap")
+      if(inserted){
+        inserted.classList.add("show")
+      }
+    })
+  }
 }
 
-if(role === "executioner" && !enabled){
-state.executionerExtraOpen = false
-}
-
-if(role === "doctor" && !enabled){
-state.doctorExtraOpen = false
-}
-
-if(role === "jester" && !enabled){
-state.jesterExtraOpen = false
-}
-
-if(role === "mayor" && !enabled){
-state.mayorExtraOpen = false
-}
+if(role === "doctor" && !enabled) state.doctorExtraOpen = false
+if(role === "jester" && !enabled) state.jesterExtraOpen = false
+if(role === "sheriff" && !enabled) state.sheriffExtraOpen = false
+if(role === "mayor" && !enabled) state.mayorExtraOpen = false
+if(role === "executioner" && !enabled) state.executionerExtraOpen = false
 
 state.rolesEnabled[role] = enabled
 
@@ -1074,19 +1045,13 @@ JSON.stringify(state.rolesEnabled)
 )
 
 if(slider && count){
-
-if(enabled){
-
-slider.classList.add("show")
-count.classList.add("show")
-
-}else{
-
-slider.classList.remove("show")
-count.classList.remove("show")
-
-}
-
+  if(enabled){
+    slider.classList.add("show")
+    count.classList.add("show")
+  }else{
+    slider.classList.remove("show")
+    count.classList.remove("show")
+  }
 }
 
 }
@@ -1569,6 +1534,16 @@ let extras = ""
 
 if(role === "doctor" && state.doctorRevealSave){
 extras = ` <span style="opacity:0.7;">• reveals saved player</span>`
+}
+
+if(role === "jester"){
+let jesterRuleText = {
+  innocent: "innocent to Sheriff",
+  not_innocent: "not innocent to Sheriff",
+  exact: "revealed exactly by Sheriff"
+}
+
+extras = ` <span style="opacity:0.7;">• ${jesterRuleText[state.sheriffJesterResult]}</span>`
 }
 
 if(role === "mayor"){
