@@ -237,7 +237,7 @@ render(`
 
 <h2 class="role-title">SAVE SUCCESSFUL</h2>
 
-<p>You successfully saved your pacient!</p>
+<p>You successfully saved your patient!</p>
 
 <h1 style="
 color:${roleColors.doctor};
