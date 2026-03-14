@@ -2071,6 +2071,18 @@ gap:10px;
 margin-bottom:16px;
 }
 
+#global-settings-content{
+margin-top:10px;
+}
+
+#global-settings-content .global-setting-card{
+margin-top:10px;
+}
+
+#global-settings-content .global-setting-card:first-child{
+margin-top:0;
+}
+
 .preset-grid button{
 margin:0;
 padding:12px;

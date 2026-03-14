@@ -21,6 +21,8 @@ rolesSectionOpen: false,
 
 revealRolesOnElimination: "none",
 
+globalSettingsOpen: false,
+
 presetsSectionOpen: false,
 
 sheriffJesterResult: "not_innocent",

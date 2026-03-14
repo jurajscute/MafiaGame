@@ -82,6 +82,23 @@ arrow.style.transform = state.rolesSectionOpen ? "rotate(180deg)" : "rotate(0deg
 
 }
 
+window.toggleGlobalSettingsSection = function(){
+
+state.globalSettingsOpen = !state.globalSettingsOpen
+
+let panel = document.getElementById("global-settings-content")
+let arrow = document.querySelector("#global-settings-wrap .section-arrow")
+
+if(panel){
+panel.classList.toggle("show", state.globalSettingsOpen)
+}
+
+if(arrow){
+arrow.style.transform = state.globalSettingsOpen ? "rotate(180deg)" : "rotate(0deg)"
+}
+
+}
+
 window.togglePresetsSection = function(){
 
 state.presetsSectionOpen = !state.presetsSectionOpen
@@ -136,6 +153,7 @@ state.mafiaCountOverride = 0
 state.revealRolesOnElimination = "none"
 state.executionerWinIfDead = false
 
+state.globalSettingsOpen = false
 state.executionerExtraOpen = false
 state.mayorExtraOpen = false
 state.doctorExtraOpen = false
@@ -275,53 +293,62 @@ mafiaOptions += `<option value="${i}" ${state.mafiaCountOverride === i ? "select
 
 content += `
 
-<div class="global-setting-card">
+<div class="settings-section-wrap" id="global-settings-wrap">
 
-  <div class="global-setting-top">
-    <span class="global-setting-title">
-      Role Reveal
-    </span>
-    <span class="global-setting-badge">Global</span>
+  <div class="settings-section-bar" onclick="toggleGlobalSettingsSection()">
+    <span>Global Settings</span>
+    <span class="section-arrow" style="transform:${state.globalSettingsOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
   </div>
 
-  <div class="global-setting-row reveal-setting-row">
-    <label for="revealRolesSelect">Reveal roles on elimination?</label>
+  <div class="settings-section-content ${state.globalSettingsOpen ? "show" : ""}" id="global-settings-content">
 
-    <select id="revealRolesSelect" onchange="setRevealRolesOnElimination(this.value)">
-      <option value="none" ${state.revealRolesOnElimination === "none" ? "selected" : ""}>Never</option>
-      <option value="death" ${state.revealRolesOnElimination === "death" ? "selected" : ""}>Night kill only</option>
-      <option value="vote_only" ${state.revealRolesOnElimination === "vote_only" ? "selected" : ""}>Vote only</option>
-      <option value="death_and_vote" ${state.revealRolesOnElimination === "death_and_vote" ? "selected" : ""}>Night kill and vote</option>
-    </select>
+    <div class="global-setting-card">
+
+      <div class="global-setting-top">
+        <span class="global-setting-title">
+          Role Reveal
+        </span>
+        <span class="global-setting-badge">Global</span>
+      </div>
+
+      <div class="global-setting-row reveal-setting-row">
+        <label for="revealRolesSelect">Reveal roles on elimination?</label>
+
+        <select id="revealRolesSelect" onchange="setRevealRolesOnElimination(this.value)">
+          <option value="none" ${state.revealRolesOnElimination === "none" ? "selected" : ""}>Never</option>
+          <option value="death" ${state.revealRolesOnElimination === "death" ? "selected" : ""}>Night kill only</option>
+          <option value="vote_only" ${state.revealRolesOnElimination === "vote_only" ? "selected" : ""}>Vote only</option>
+          <option value="death_and_vote" ${state.revealRolesOnElimination === "death_and_vote" ? "selected" : ""}>Night kill and vote</option>
+        </select>
+      </div>
+
+    </div>
+
+    <div class="global-setting-card mafia-setting-card">
+
+      <div class="global-setting-top">
+        <span class="global-setting-title" style="color:${roleColors.mafia}">
+          Mafia Count
+        </span>
+        <span class="global-setting-badge">Global</span>
+      </div>
+
+      <div class="global-setting-row mafia-setting-row">
+        <label for="mafiaCountSelect">How many mafia?</label>
+
+        <select id="mafiaCountSelect" onchange="window.updateMafiaCountOverride(this.value)">
+          ${mafiaOptions}
+        </select>
+      </div>
+
+      <p class="global-setting-note">
+        Recommended in Auto mode: <strong>${autoMafia}</strong><br>
+        Max allowed with ${playerCount} player${playerCount === 1 ? "" : "s"}: <strong>${mafiaMax}</strong>
+      </p>
+
+    </div>
+
   </div>
-
-</div>
-
-`
-
-content += `
-
-<div class="global-setting-card mafia-setting-card">
-
-  <div class="global-setting-top">
-    <span class="global-setting-title" style="color:${roleColors.mafia}">
-      Mafia Count
-    </span>
-    <span class="global-setting-badge">Global</span>
-  </div>
-
-  <div class="global-setting-row mafia-setting-row">
-    <label for="mafiaCountSelect">How many mafia?</label>
-
-    <select id="mafiaCountSelect" onchange="window.updateMafiaCountOverride(this.value)">
-      ${mafiaOptions}
-    </select>
-  </div>
-
-  <p class="global-setting-note">
-    Recommended in Auto mode: <strong>${autoMafia}</strong><br>
-    Max allowed with ${playerCount} player${playerCount === 1 ? "" : "s"}: <strong>${mafiaMax}</strong>
-  </p>
 
 </div>
 
