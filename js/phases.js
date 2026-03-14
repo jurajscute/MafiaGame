@@ -226,15 +226,74 @@ ${renderHostControls()}
 return
 }
 
+if(item && item.type === "doctor_save_success"){
+render(`
+
+<div class="card role-doctor">
+
+<h2 class="role-title">SAVE SUCCESSFUL</h2>
+
+<p>You successfully saved your pacient!</p>
+
+<h1 style="
+color:${roleColors.doctor};
+text-shadow:
+0 0 10px ${roleColors.doctor},
+0 0 20px ${roleColors.doctor};
+">
+${item.targetName.toUpperCase()}
+</h1>
+
+<button onclick="window.nextNightResultTurn()">Hide</button>
+
+${renderHostControls()}
+
+</div>
+
+`)
+return
+}
+
+if(item && item.type === "mafia_kill_blocked"){
+render(`
+
+<div class="card role-mafia">
+
+<h2 class="role-title">ATTACK FAILED</h2>
+
+<p>Your attack on</p>
+
+<h1 style="
+color:${roleColors.mafia};
+text-shadow:
+0 0 10px ${roleColors.mafia},
+0 0 20px ${roleColors.mafia};
+">
+${item.targetName.toUpperCase()}
+</h1>
+
+<p class="role-description">
+was stopped by the doctor!
+</p>
+
+<button onclick="window.nextNightResultTurn()">Hide</button>
+
+${renderHostControls()}
+
+</div>
+
+`)
+return
+}
+
 let roleColor = roleColors[player.role] || "white"
+let noResultText = roles[player.role]?.noResultText || "No results tonight."
 
 render(`
 
 <div class="card">
 
-<h2>
-Night Results
-</h2>
+<h2>Night Results</h2>
 
 <p style="
 color:${roleColor};
@@ -246,7 +305,7 @@ ${player.role.toUpperCase()}
 </p>
 
 <p class="role-description">
-Certain roles are getting their results!.
+${noResultText}
 </p>
 
 <button onclick="window.nextNightResultTurn()">Hide</button>
@@ -577,6 +636,9 @@ let frame = state.nightActions.frame
 let publicResults = []
 let privateResults = []
 
+const saveSucceeded = !!(kill && save && kill === save)
+
+// Sheriff private result
 if(investigate){
   let sheriff = state.players.find(p => p.alive && p.role === "sheriff")
   let target = state.players.find(p => p.name === investigate)
@@ -595,6 +657,30 @@ if(investigate){
   }
 }
 
+// Doctor successful save result
+if(saveSucceeded){
+  let doctor = state.players.find(p => p.alive && p.role === "doctor")
+
+  if(doctor){
+    privateResults.push({
+      type: "doctor_save_success",
+      playerName: doctor.name,
+      targetName: save
+    })
+  }
+
+  let mafiaPlayers = state.players.filter(p => p.alive && p.role === "mafia")
+
+  mafiaPlayers.forEach(mafiaPlayer => {
+    privateResults.push({
+      type: "mafia_kill_blocked",
+      playerName: mafiaPlayer.name,
+      targetName: kill
+    })
+  })
+}
+
+// Public morning result
 if(kill && kill !== save){
 
   addLogEntry(`${kill} was killed during the night.`)
@@ -616,7 +702,7 @@ if(kill && kill !== save){
     })
   }
 
-}else if(kill && kill === save){
+}else if(saveSucceeded){
 
   if(state.doctorRevealSave){
     addLogEntry(`${save} was saved by the Doctor.`)
