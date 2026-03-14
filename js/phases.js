@@ -85,15 +85,15 @@ return `
 
 window.forceNextPhase = function(){
 
-if(state.phase === "night"){
-resolveNight()
-return
-}
+  if(state.phase === "night"){
+    resolveNightSelections()
+    return
+  }
 
-if(state.phase === "voting"){
-resolveVotes()
-return
-}
+  if(state.phase === "voting"){
+    resolveVotes()
+    return
+  }
 
 }
 
@@ -127,24 +127,19 @@ mayor: "#1d8161"
 
 function showNightTurn(){
 
-let player = state.players[state.nightTurnIndex]
+  let player = state.players[state.nightTurnIndex]
 
-if(!player){
+  if(!player){
+    resolveNightSelections()
+    return
+  }
 
-resolveNight()
-return
+  if(!player.alive){
+    advanceNightTurn()
+    return
+  }
 
-}
-
-if(!player.alive){
-
-advanceNightTurn()
-return
-
-}
-
-passPhone(player.name,"window.revealNightRole()")
-
+  passPhone(player.name, "window.revealNightRole()")
 }
 
 function advanceNightTurn(){
@@ -266,127 +261,28 @@ ${renderHostControls()}
 
 export function performNightAction(targetName){
 
-let player = state.players[state.nightTurnIndex]
-let role = roles[player.role]
+  let player = state.players[state.nightTurnIndex]
+  let role = roles[player.role]
 
-state.nightActions[role.nightAction]=targetName
+  state.nightActions[role.nightAction] = targetName
 
-if(role.nightAction === "investigate"){
-
-let target = state.players.find(p => p.name === targetName)
-
-let result = ""
-let resultColor = "#b0e2ff"
-
-
-if(state.sheriffExactReveal){
-
-  if(target.role === "jester" && state.sheriffJesterResult === "innocent"){
-    result = "VILLAGER"
-    resultColor = roleColors.villager
-  }else if(target.role === "executioner" && state.sheriffExecutionerResult === "innocent"){
-    result = "VILLAGER"
-    resultColor = roleColors.villager
-  }else{
-    result = target.role.toUpperCase()
-
-    if(target.role === "mafia"){
-      resultColor = roleColors.mafia
-    }else if(target.role === "jester"){
-      resultColor = roleColors.jester
-    }else if(target.role === "doctor"){
-      resultColor = roleColors.doctor
-    }else if(target.role === "sheriff"){
-      resultColor = roleColors.sheriff
-    }else if(target.role === "executioner"){
-      resultColor = roleColors.executioner
-    }else if(target.role === "mayor"){
-      resultColor = roleColors.mayor
-    }else{
-      resultColor = roleColors.villager
-    }
+  if(role.nightAction === "kill"){
+    addLogEntry(`Mafia targeted ${targetName}.`)
   }
 
-}else{
-
-  if(target.role === "jester"){
-
-    if(state.sheriffJesterResult === "innocent"){
-      result = "INNOCENT"
-      resultColor = "#b0e2ff"
-    }else if(state.sheriffJesterResult === "exact"){
-      result = "JESTER"
-      resultColor = roleColors.jester
-    }else{
-      result = "NOT INNOCENT"
-      resultColor = "#e74c3c"
-    }
-
-  }else if(target.role === "executioner"){
-
-    if(state.sheriffExecutionerResult === "innocent"){
-      result = "INNOCENT"
-      resultColor = "#b0e2ff"
-    }else if(state.sheriffExecutionerResult === "exact"){
-      result = "EXECUTIONER"
-      resultColor = roleColors.executioner
-    }else{
-      result = "NOT INNOCENT"
-      resultColor = "#e74c3c"
-    }
-
-  }else{
-
-    let notInnocent = target.role === "mafia"
-    result = notInnocent ? "NOT INNOCENT" : "INNOCENT"
-    resultColor = notInnocent ? "#e74c3c" : "#b0e2ff"
-
+  if(role.nightAction === "save"){
+    addLogEntry(`Doctor protected ${targetName}.`)
   }
 
-}
+  if(role.nightAction === "investigate"){
+    addLogEntry(`Sheriff investigated ${targetName}.`)
+  }
 
-render(`
+  if(role.nightAction === "frame"){
+    addLogEntry(`Framer framed ${targetName}.`)
+  }
 
-<div class="card role-sheriff">
-
-<h2 class="role-title">INVESTIGATION RESULT</h2>
-
-<p>${target.name} is</p>
-
-<h1 style="
-color:${resultColor};
-text-shadow:
-0 0 10px ${resultColor},
-0 0 20px ${resultColor};
-">
-${result}
-</h1>
-
-<button onclick="window.nextNightTurn()">Hide</button>
-
-</div>
-
-`)
-
-return
-
-}
-
-advanceNightTurn()
-
-    if(role.nightAction === "kill"){
-addLogEntry(`Mafia targeted ${targetName}.`)
-}
-
-if(role.nightAction === "save"){
-addLogEntry(`Doctor protected ${targetName}.`)
-}
-
-if(role.nightAction === "investigate"){
-addLogEntry(`Sheriff investigated ${targetName}.`)
-}
-
-
+  advanceNightTurn()
 }
 
 function checkWin(){
@@ -467,76 +363,251 @@ return true
 return false
 }
 
-function resolveNight(){
-setDay();
+function buildSheriffResult(target, isFramed){
 
-let kill = state.nightActions.kill
-let save = state.nightActions.save
+  let result = ""
+  let resultColor = "#b0e2ff"
 
-let results = []
+  if(state.sheriffExactReveal){
 
-if(kill && kill !== save){
+    if(isFramed){
+      result = "MAFIA"
+      resultColor = roleColors.mafia
+      return { result, resultColor }
+    }
+
+    if(target.role === "jester" && state.sheriffJesterResult === "innocent"){
+      result = "VILLAGER"
+      resultColor = roleColors.villager
+    }else if(target.role === "executioner" && state.sheriffExecutionerResult === "innocent"){
+      result = "VILLAGER"
+      resultColor = roleColors.villager
+    }else{
+      result = target.role.toUpperCase()
+
+      if(target.role === "mafia"){
+        resultColor = roleColors.mafia
+      }else if(target.role === "jester"){
+        resultColor = roleColors.jester
+      }else if(target.role === "doctor"){
+        resultColor = roleColors.doctor
+      }else if(target.role === "sheriff"){
+        resultColor = roleColors.sheriff
+      }else if(target.role === "executioner"){
+        resultColor = roleColors.executioner
+      }else if(target.role === "mayor"){
+        resultColor = roleColors.mayor
+      }else{
+        resultColor = roleColors.villager
+      }
+    }
+
+  }else{
+
+    if(isFramed){
+      result = "NOT INNOCENT"
+      resultColor = "#e74c3c"
+      return { result, resultColor }
+    }
+
+    if(target.role === "jester"){
+
+      if(state.sheriffJesterResult === "innocent"){
+        result = "INNOCENT"
+        resultColor = "#b0e2ff"
+      }else if(state.sheriffJesterResult === "exact"){
+        result = "JESTER"
+        resultColor = roleColors.jester
+      }else{
+        result = "NOT INNOCENT"
+        resultColor = "#e74c3c"
+      }
+
+    }else if(target.role === "executioner"){
+
+      if(state.sheriffExecutionerResult === "innocent"){
+        result = "INNOCENT"
+        resultColor = "#b0e2ff"
+      }else if(state.sheriffExecutionerResult === "exact"){
+        result = "EXECUTIONER"
+        resultColor = roleColors.executioner
+      }else{
+        result = "NOT INNOCENT"
+        resultColor = "#e74c3c"
+      }
+
+    }else{
+      let notInnocent = target.role === "mafia"
+      result = notInnocent ? "NOT INNOCENT" : "INNOCENT"
+      resultColor = notInnocent ? "#e74c3c" : "#b0e2ff"
+    }
+  }
+
+  return { result, resultColor }
+}
+
+function showNightPrivateResultTurn(){
+
+  let item = state.nightPrivateResults[state.nightRevealIndex]
+
+  if(!item){
+    showMorning()
+    return
+  }
+
+  passPhone(item.playerName, "window.revealNightPrivateResult()")
+}
+
+window.revealNightPrivateResult = function(){
+
+  let item = state.nightPrivateResults[state.nightRevealIndex]
+
+  if(!item){
+    showMorning()
+    return
+  }
+
+  if(item.type === "investigate"){
+    render(`
+
+<div class="card role-sheriff">
+
+<h2 class="role-title">INVESTIGATION RESULT</h2>
+
+<p>${item.targetName} is</p>
+
+<h1 style="
+color:${item.resultColor};
+text-shadow:
+0 0 10px ${item.resultColor},
+0 0 20px ${item.resultColor};
+">
+${item.result}
+</h1>
+
+<button onclick="window.nextNightPrivateResult()">Hide</button>
+
+${renderHostControls()}
+
+</div>
+
+    `)
+  }
+}
+
+window.nextNightPrivateResult = function(){
+  state.nightRevealIndex++
+  showNightPrivateResultTurn()
+}
+
+function resolveNightSelections(){
+
+  let kill = state.nightActions.kill
+  let save = state.nightActions.save
+  let investigate = state.nightActions.investigate
+  let frame = state.nightActions.frame
+
+  let publicResults = []
+  let privateResults = []
+
+  // ---- private results first ----
+
+  if(investigate){
+    let sheriff = state.players.find(p => p.alive && p.role === "sheriff")
+    let target = state.players.find(p => p.name === investigate)
+
+    if(sheriff && target){
+      let isFramed = frame === target.name
+      let { result, resultColor } = buildSheriffResult(target, isFramed)
+
+      privateResults.push({
+        type: "investigate",
+        playerName: sheriff.name,
+        targetName: target.name,
+        result,
+        resultColor
+      })
+    }
+  }
+
+  // ---- public results ----
+
+  if(kill && kill !== save){
 
     addLogEntry(`${kill} was killed during the night.`)
 
-let victim = state.players.find(p => p.name === kill)
+    let victim = state.players.find(p => p.name === kill)
 
-if(victim){
-victim.alive = false
-let deathText = `${kill} was killed during the night.`
+    if(victim){
+      victim.alive = false
 
-if(victim && shouldRevealOnNightDeath()){
-deathText += `<br><span class="revealed-role-inline">${revealedRoleText(victim)}</span>`
-}
+      let deathText = `${kill} was killed during the night.`
 
-results.push({
-type: "death",
-text: deathText
-})
-}
+      if(shouldRevealOnNightDeath()){
+        deathText += `<br>${revealedRoleText(victim)}`
+      }
 
-}else if(kill && kill === save){
+      publicResults.push({
+        type: "death",
+        text: deathText
+      })
+    }
+
+  }else if(kill && kill === save){
 
     if(state.doctorRevealSave){
-addLogEntry(`${save} was saved by the Doctor.`)
-}else{
-addLogEntry(`Someone was attacked but survived the night.`)
-}
+      addLogEntry(`${save} was saved by the Doctor.`)
+    }else{
+      addLogEntry(`Someone was attacked but survived the night.`)
+    }
 
-if(state.doctorRevealSave){
-results.push({
-type: "save",
-text: `🩺 ${save} was saved by the Doctor!`
-})
-}else{
-results.push({
-type: "save",
-text: "Someone was attacked but survived the night."
-})
-}
+    publicResults.push({
+      type: "save",
+      text: state.doctorRevealSave
+        ? `🩺 ${save} was saved by the Doctor!`
+        : "Someone was attacked but survived the night."
+    })
 
-}else{
+  }else{
 
     addLogEntry(`The night was quiet.`)
 
-results.push({
-type: "peace",
-text: "The night was quiet."
-})
+    publicResults.push({
+      type: "peace",
+      text: "The night was quiet."
+    })
+  }
+
+  state.nightPrivateResults = privateResults
+  state.nightResolved = {
+    publicResults
+  }
+  state.nightRevealIndex = 0
+
+  if(state.nightPrivateResults.length){
+    showNightPrivateResultTurn()
+  }else{
+    showMorning()
+  }
 }
 
-if(checkWin()) return
+function showMorning(){
+  setDay()
 
-let resultsHTML = results.map(r => {
-let cls = ""
-if(r.type === "death") cls = "night-result-death"
-if(r.type === "save") cls = "night-result-save"
-if(r.type === "peace") cls = "night-result-peace"
+  if(checkWin()) return
 
-return `<div class="night-result ${cls}">${r.text}</div>`
-}).join("")
+  let results = state.nightResolved?.publicResults || []
 
-render(`
+  let resultsHTML = results.map(r => {
+    let cls = ""
+    if(r.type === "death") cls = "night-result-death"
+    if(r.type === "save") cls = "night-result-save"
+    if(r.type === "peace") cls = "night-result-peace"
+
+    return `<div class="night-result ${cls}">${r.text}</div>`
+  }).join("")
+
+  render(`
 
 <div class="card">
 
@@ -552,8 +623,7 @@ ${renderHostControls()}
 
 </div>
 
-`)
-
+  `)
 }
 
 export function startVoting(){

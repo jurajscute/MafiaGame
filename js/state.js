@@ -25,6 +25,10 @@ globalSettingsOpen: false,
 
 presetsSectionOpen: false,
 
+nightPrivateResults: [],
+nightRevealIndex: 0,
+nightResolved: null,
+
 sheriffJesterResult: "not_innocent",
 sheriffExecutionerResult: "not_innocent",
 
@@ -86,13 +90,16 @@ state.votes={}
 }
 
 export function resetNightActions(){
+  state.nightActions = {
+    kill: null,
+    save: null,
+    investigate: null,
+    frame: null
+  }
 
-state.nightActions={
-kill:null,
-save:null,
-investigate:null
-}
-
+  state.nightPrivateResults = []
+  state.nightRevealIndex = 0
+  state.nightResolved = null
 }
 
 export function resetGameTracking(){
