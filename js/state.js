@@ -25,8 +25,9 @@ globalSettingsOpen: false,
 
 presetsSectionOpen: false,
 
+nightStep: "select",
+nightResultIndex: 0,
 nightPrivateResults: [],
-nightRevealIndex: 0,
 nightResolved: null,
 
 sheriffJesterResult: "not_innocent",
@@ -98,8 +99,8 @@ export function resetNightActions(){
   }
 
   state.nightPrivateResults = []
-  state.nightRevealIndex = 0
   state.nightResolved = null
+  state.nightResultIndex = 0
 }
 
 export function resetGameTracking(){
