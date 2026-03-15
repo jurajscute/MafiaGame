@@ -938,6 +938,17 @@ transform:translateY(0) scale(1);
 }
 }
 
+.global-setting-divider{
+height:1px;
+margin:10px 0;
+background:linear-gradient(
+90deg,
+rgba(255,255,255,0.04),
+rgba(231,76,60,0.18),
+rgba(255,255,255,0.04)
+);
+}
+
 .jester-extra-wrap{
 max-height:54px;
 opacity:0;
