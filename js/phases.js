@@ -179,7 +179,12 @@ function showNightSelectionTurn(){
 let player = state.players[state.nightTurnIndex]
 
 if(!player){
-  resolveNightSelections()
+  const endedGame = resolveNightSelections()
+
+  if(endedGame){
+    return
+  }
+
   state.nightStep = "results"
   state.nightResultIndex = 0
   showNightTurn()
@@ -1230,6 +1235,10 @@ if(vigilanteDies && shooter.alive){
   state.vigilantePublicReveal = state.vigilanteOutcomeToShow
 })
 
+if(instantNightWin){
+  return true
+}
+
 // Resolve mafia kill AFTER Vigilante deaths
 let killTarget = resolveMafiaKillTarget(kills)
 const saveSucceeded = !!(killTarget && protectedTargets.includes(killTarget))
@@ -1348,6 +1357,8 @@ state.nightPrivateResults = privateResults
 state.nightResolved = {
   publicResults
 }
+
+return false
 }
 
 function showMorning(){
