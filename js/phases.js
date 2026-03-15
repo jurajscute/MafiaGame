@@ -131,6 +131,42 @@ spirit: "#e6aafd",
 framer: "#8b0000"
 }
 
+function showSpiritVoteRevealPrompt(player){
+
+let targets = state.players
+  .filter(p => p.name !== player.name)
+  .map(p => `
+    <button onclick="window.chooseSpiritVoteReveal('${p.name}')">
+      ${p.name}
+    </button>
+  `)
+  .join("")
+
+if(state.spiritCanSkipReveal){
+  targets += `
+    <button class="skip-btn" onclick="window.chooseSpiritVoteReveal('__skip__')">
+      Skip Reveal
+    </button>
+  `
+}
+
+render(`
+
+<div class="card role-spirit">
+
+<h2 class="role-title">SPIRIT AWAKENS</h2>
+
+<p class="role-description">
+Before the day ends, choose one player to reveal publicly.
+</p>
+
+${targets}
+
+</div>
+
+`)
+}
+
 function showNightSelectionTurn(){
 
 let player = state.players[state.nightTurnIndex]
@@ -330,6 +366,14 @@ let targets = state.players
   `)
   .join("")
 
+if(state.spiritCanSkipReveal){
+  targets += `
+    <button class="skip-btn" onclick="window.chooseSpiritReveal('__skip__')">
+      Skip Reveal
+    </button>
+  `
+}
+
 render(`
 
 <div class="card role-spirit">
@@ -348,6 +392,20 @@ ${renderHostControls()}
 
 `)
 return
+
+window.chooseSpiritReveal = function(targetName){
+
+if(targetName === "__skip__"){
+  state.spiritReveal = null
+  addLogEntry("Spirit chose not to reveal anyone.")
+}else{
+  state.spiritReveal = targetName
+  addLogEntry(`Spirit chose to reveal ${targetName}'s role.`)
+}
+
+window.nextNightResultTurn()
+}
+
 }
 
 let roleColor = roleColors[player.role] || "white"
@@ -821,12 +879,13 @@ if(kill && kill !== save){
     })
 
     // Spirit special private result
-    if(victim.role === "spirit"){
-      privateResults.push({
-        type: "spirit_reveal_choice",
-        playerName: victim.name
-      })
-    }
+    if(victim.role === "spirit" &&
+   (state.spiritActivation === "night_only" || state.spiritActivation === "any_death")){
+  privateResults.push({
+    type: "spirit_reveal_choice",
+    playerName: victim.name
+  })
+}
   }
 
 }else if(saveSucceeded){
@@ -871,18 +930,35 @@ if(state.spiritReveal){
   let revealedPlayer = state.players.find(p => p.name === state.spiritReveal)
 
   if(revealedPlayer){
-    let color = roleColors[revealedPlayer.role] || "white"
+    let revealLabel = ""
+    let revealColor = "white"
+
+    if(state.spiritRevealType === "team"){
+      if(roles[revealedPlayer.role]?.team === "mafia"){
+        revealLabel = "MAFIA"
+        revealColor = roleColors.mafia
+      }else if(roles[revealedPlayer.role]?.team === "neutral"){
+        revealLabel = "NEUTRAL"
+        revealColor = roleColors.executioner
+      }else{
+        revealLabel = "TOWN"
+        revealColor = roleColors.villager
+      }
+    }else{
+      revealLabel = revealedPlayer.role.toUpperCase()
+      revealColor = roleColors[revealedPlayer.role] || "white"
+    }
 
     results.push({
       type: "spirit_reveal",
       text: `
         The Spirit reveals that <strong>${revealedPlayer.name}</strong> is
         <span style="
-          color:${color};
+          color:${revealColor};
           font-weight:bold;
-          text-shadow:0 0 8px ${color};
+          text-shadow:0 0 8px ${revealColor};
         ">
-          ${revealedPlayer.role.toUpperCase()}
+          ${revealLabel}
         </span>
       `
     })
@@ -1134,6 +1210,23 @@ let player = state.players.find(p => p.name === eliminated)
 if(player){
 
 player.alive = false
+if(player.role === "spirit" && state.spiritActivation === "any_death"){
+  state.pendingSpiritVoteReveal = player.name
+}
+showSpiritVoteRevealPrompt(player)
+return
+
+window.chooseSpiritVoteReveal = function(targetName){
+
+if(targetName === "__skip__"){
+  state.spiritReveal = null
+}else{
+  state.spiritReveal = targetName
+  addLogEntry(`Spirit chose to reveal ${targetName}'s role.`)
+}
+
+continueResolveVotesAfterSpirit()
+}
 
 let executionerWinner = state.players.find(p => {
 

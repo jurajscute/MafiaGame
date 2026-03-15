@@ -179,9 +179,17 @@ state.mafiaRolesOpen = false
 state.townRolesOpen = false
 state.neutralRolesOpen = false
 
+state.spiritExtraOpen = false
+state.spiritRevealType = "exact"
+state.spiritActivation = "night_only"
+state.spiritCanSkipReveal = true
+
 state.sheriffJesterResult = "not_innocent"
 state.sheriffExecutionerResult = "not_innocent"
 
+localStorage.setItem("mafiaSpiritRevealType", JSON.stringify(state.spiritRevealType))
+localStorage.setItem("mafiaSpiritActivation", JSON.stringify(state.spiritActivation))
+localStorage.setItem("mafiaSpiritCanSkipReveal", JSON.stringify(state.spiritCanSkipReveal))
 localStorage.setItem("mafiaFramerKnowsSuccess", JSON.stringify(state.framerKnowsSuccess))
 localStorage.setItem("mafiaFramerKnowsMafia", JSON.stringify(state.framerKnowsMafia))
 localStorage.setItem("mafiaMafiaKnowsFramer", JSON.stringify(state.mafiaKnowsFramer))
@@ -199,6 +207,56 @@ localStorage.setItem("mafiaSheriffExecutionerResult", JSON.stringify(state.sheri
 localStorage.setItem("mafiaMayorVotePower", JSON.stringify(state.mayorVotePower))
 
 showSettings()
+
+}
+
+window.toggleSpiritExtras = function(){
+
+state.spiritExtraOpen = !state.spiritExtraOpen
+
+let panel = document.getElementById("spirit-extra-settings")
+let arrow = document.querySelector("#spirit-extra-wrap .additional-arrow")
+
+if(panel){
+panel.classList.toggle("show", state.spiritExtraOpen)
+}
+
+if(arrow){
+arrow.style.transform = state.spiritExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
+}
+
+}
+
+window.setSpiritRevealType = function(value){
+
+state.spiritRevealType = value
+
+localStorage.setItem(
+"mafiaSpiritRevealType",
+JSON.stringify(value)
+)
+
+}
+
+window.setSpiritActivation = function(value){
+
+state.spiritActivation = value
+
+localStorage.setItem(
+"mafiaSpiritActivation",
+JSON.stringify(value)
+)
+
+}
+
+window.toggleSpiritCanSkipReveal = function(enabled){
+
+state.spiritCanSkipReveal = enabled
+
+localStorage.setItem(
+"mafiaSpiritCanSkipReveal",
+JSON.stringify(enabled)
+)
 
 }
 
@@ -565,6 +623,62 @@ roleBlock += `
       </div>
     </div>
   `
+}
+
+if(role === "spirit" && enabled){
+roleBlock += `
+
+<div class="spirit-extra-wrap show" id="spirit-extra-wrap">
+
+  <div class="additional-settings-bar" onclick="toggleSpiritExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow" style="transform:${state.spiritExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+  </div>
+
+  <div class="spirit-extra-settings ${state.spiritExtraOpen ? "show" : ""}" id="spirit-extra-settings">
+
+    <div class="spirit-settings-card">
+
+      <div class="spirit-setting-row">
+        <span class="spirit-setting-label">Reveal type</span>
+
+        <select class="spirit-setting-select" onchange="setSpiritRevealType(this.value)">
+          <option value="exact" ${state.spiritRevealType === "exact" ? "selected" : ""}>Exact Role</option>
+          <option value="team" ${state.spiritRevealType === "team" ? "selected" : ""}>Team Only</option>
+        </select>
+      </div>
+
+      <div class="spirit-setting-divider"></div>
+
+      <div class="spirit-setting-row">
+        <span class="spirit-setting-label">Activates on</span>
+
+        <select class="spirit-setting-select" onchange="setSpiritActivation(this.value)">
+          <option value="night_only" ${state.spiritActivation === "night_only" ? "selected" : ""}>Night Death Only</option>
+          <option value="any_death" ${state.spiritActivation === "any_death" ? "selected" : ""}>Any Death</option>
+        </select>
+      </div>
+
+      <div class="spirit-setting-divider"></div>
+
+      <div class="spirit-setting-row">
+        <span class="spirit-setting-label">Can skip reveal</span>
+
+        <label class="switch">
+          <input type="checkbox"
+            ${state.spiritCanSkipReveal ? "checked" : ""}
+            onchange="toggleSpiritCanSkipReveal(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+`
 }
 
 if(role === "framer" && enabled){
@@ -1115,6 +1229,86 @@ if(role === "sheriff"){
   }
 }
 
+if(role === "spirit"){
+  let extraWrap = document.getElementById("spirit-extra-wrap")
+
+  if(!enabled){
+    state.spiritExtraOpen = false
+
+    if(extraWrap){
+      extraWrap.classList.remove("show")
+      setTimeout(() => {
+        extraWrap.remove()
+      }, 300)
+    }
+  }
+
+  if(enabled && !extraWrap){
+    let count = document.getElementById("spirit-count")
+
+    count.insertAdjacentHTML("afterend", `
+
+<div class="spirit-extra-wrap" id="spirit-extra-wrap">
+
+  <div class="additional-settings-bar" onclick="toggleSpiritExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow" style="transform:${state.spiritExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+  </div>
+
+  <div class="spirit-extra-settings ${state.spiritExtraOpen ? "show" : ""}" id="spirit-extra-settings">
+
+    <div class="spirit-settings-card">
+
+      <div class="spirit-setting-row">
+        <span class="spirit-setting-label">Reveal type</span>
+
+        <select class="spirit-setting-select" onchange="setSpiritRevealType(this.value)">
+          <option value="exact" ${state.spiritRevealType === "exact" ? "selected" : ""}>Exact Role</option>
+          <option value="team" ${state.spiritRevealType === "team" ? "selected" : ""}>Team Only</option>
+        </select>
+      </div>
+
+      <div class="spirit-setting-divider"></div>
+
+      <div class="spirit-setting-row">
+        <span class="spirit-setting-label">Activates on</span>
+
+        <select class="spirit-setting-select" onchange="setSpiritActivation(this.value)">
+          <option value="night_only" ${state.spiritActivation === "night_only" ? "selected" : ""}>Night Death Only</option>
+          <option value="any_death" ${state.spiritActivation === "any_death" ? "selected" : ""}>Any Death</option>
+        </select>
+      </div>
+
+      <div class="spirit-setting-divider"></div>
+
+      <div class="spirit-setting-row">
+        <span class="spirit-setting-label">Can skip reveal</span>
+
+        <label class="switch">
+          <input type="checkbox"
+            ${state.spiritCanSkipReveal ? "checked" : ""}
+            onchange="toggleSpiritCanSkipReveal(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+`)
+
+    requestAnimationFrame(() => {
+      let inserted = document.getElementById("spirit-extra-wrap")
+      if(inserted){
+        inserted.classList.add("show")
+      }
+    })
+  }
+}
+
 if(role === "framer"){
   let extraWrap = document.getElementById("framer-extra-wrap")
 
@@ -1322,6 +1516,7 @@ if(role === "executioner"){
   }
 }
 
+if(role === "spirit" && !enabled) state.spiritExtraOpen = false
 if(role === "framer" && !enabled) state.framerExtraOpen = false
 if(role === "doctor" && !enabled) state.doctorExtraOpen = false
 if(role === "jester" && !enabled) state.jesterExtraOpen = false
@@ -1426,6 +1621,24 @@ let savedFramerKnowsSuccess = localStorage.getItem("mafiaFramerKnowsSuccess")
 let savedFramerKnowsMafia = localStorage.getItem("mafiaFramerKnowsMafia")
 
 let savedMafiaKnowsFramer = localStorage.getItem("mafiaMafiaKnowsFramer")
+
+let savedSpiritRevealType = localStorage.getItem("mafiaSpiritRevealType")
+
+let savedSpiritActivation = localStorage.getItem("mafiaSpiritActivation")
+
+let savedSpiritCanSkipReveal = localStorage.getItem("mafiaSpiritCanSkipReveal")
+
+if(savedSpiritRevealType){
+state.spiritRevealType = JSON.parse(savedSpiritRevealType)
+}
+
+if(savedSpiritActivation){
+state.spiritActivation = JSON.parse(savedSpiritActivation)
+}
+
+if(savedSpiritCanSkipReveal){
+state.spiritCanSkipReveal = JSON.parse(savedSpiritCanSkipReveal)
+}
 
 if(savedFramerKnowsSuccess){
 state.framerKnowsSuccess = JSON.parse(savedFramerKnowsSuccess)
@@ -2216,86 +2429,131 @@ window.applyPreset = function(preset){
 state.doctorExtraOpen = false
 state.sheriffExtraOpen = false
 
+resetPresetRoles()
+
 if(preset === "classic"){
 state.rolesEnabled.doctor = true
 state.rolesEnabled.sheriff = true
 state.rolesEnabled.jester = false
+state.rolesEnabled.executioner = false
+state.rolesEnabled.mayor = false
+state.rolesEnabled.spirit = false
+state.rolesEnabled.framer = false
 
 state.roleWeights.doctor = 100
 state.roleWeights.sheriff = 100
 state.roleWeights.jester = 0
+state.roleWeights.executioner = 0
+state.roleWeights.mayor = 0
+state.roleWeights.spirit = 0
+state.roleWeights.framer = 0
 
 state.roleCounts.doctor = 1
 state.roleCounts.sheriff = 1
 state.roleCounts.jester = 1
-
-state.rolesEnabled.executioner = false
-state.roleWeights.executioner = 0
 state.roleCounts.executioner = 1
-
-state.rolesEnabled.mayor = false
-state.roleWeights.mayor = 0
 state.roleCounts.mayor = 1
+state.roleCounts.spirit = 1
+state.roleCounts.framer = 1
 
 state.doctorRevealSave = false
 state.sheriffExactReveal = false
 state.executionerTargetRule = "neither"
+state.executionerWinIfDead = false
+state.sheriffJesterResult = "not_innocent"
+state.sheriffExecutionerResult = "not_innocent"
+state.mayorVotePower = 2
+
+state.framerKnowsSuccess = true
+state.framerKnowsMafia = true
+state.mafiaKnowsFramer = true
+
 state.mafiaCountOverride = 0
 state.revealRolesOnElimination = "none"
 }
+
+resetPresetRoles()
 
 if(preset === "beginner"){
 state.rolesEnabled.doctor = true
 state.rolesEnabled.sheriff = false
 state.rolesEnabled.jester = false
+state.rolesEnabled.executioner = false
+state.rolesEnabled.mayor = false
+state.rolesEnabled.spirit = true
+state.rolesEnabled.framer = false
 
 state.roleWeights.doctor = 100
 state.roleWeights.sheriff = 0
 state.roleWeights.jester = 0
+state.roleWeights.executioner = 0
+state.roleWeights.mayor = 0
+state.roleWeights.spirit = 100
+state.roleWeights.framer = 0
 
 state.roleCounts.doctor = 1
 state.roleCounts.sheriff = 1
 state.roleCounts.jester = 1
-
-state.rolesEnabled.executioner = false
-state.roleWeights.executioner = 0
 state.roleCounts.executioner = 1
-
-state.rolesEnabled.mayor = false
-state.roleWeights.mayor = 0
 state.roleCounts.mayor = 1
+state.roleCounts.spirit = 1
+state.roleCounts.framer = 1
 
 state.doctorRevealSave = true
 state.sheriffExactReveal = false
 state.executionerTargetRule = "neither"
+state.executionerWinIfDead = false
+state.sheriffJesterResult = "not_innocent"
+state.sheriffExecutionerResult = "not_innocent"
+state.mayorVotePower = 2
+
+state.framerKnowsSuccess = true
+state.framerKnowsMafia = true
+state.mafiaKnowsFramer = true
+
 state.mafiaCountOverride = 0
 state.revealRolesOnElimination = "death_and_vote"
 }
+
+resetPresetRoles()
 
 if(preset === "chaotic"){
 state.rolesEnabled.doctor = true
 state.rolesEnabled.sheriff = true
 state.rolesEnabled.jester = true
+state.rolesEnabled.executioner = true
+state.rolesEnabled.mayor = true
+state.rolesEnabled.spirit = true
+state.rolesEnabled.framer = true
 
 state.roleWeights.doctor = 100
 state.roleWeights.sheriff = 100
 state.roleWeights.jester = 100
+state.roleWeights.executioner = 100
+state.roleWeights.mayor = 100
+state.roleWeights.spirit = 100
+state.roleWeights.framer = 100
 
 state.roleCounts.doctor = 1
 state.roleCounts.sheriff = 1
 state.roleCounts.jester = 1
-
-state.rolesEnabled.executioner = true
-state.roleWeights.executioner = 100
 state.roleCounts.executioner = 1
-
-state.rolesEnabled.mayor = true
-state.roleWeights.mayor = 100
 state.roleCounts.mayor = 1
+state.roleCounts.spirit = 1
+state.roleCounts.framer = 1
 
 state.doctorRevealSave = true
 state.sheriffExactReveal = true
 state.executionerTargetRule = "both"
+state.executionerWinIfDead = true
+state.sheriffJesterResult = "exact"
+state.sheriffExecutionerResult = "exact"
+state.mayorVotePower = 2.5
+
+state.framerKnowsSuccess = true
+state.framerKnowsMafia = true
+state.mafiaKnowsFramer = true
+
 state.mafiaCountOverride = 0
 state.revealRolesOnElimination = "death_and_vote"
 }
@@ -2307,6 +2565,9 @@ showSettings()
 
 function saveSettingsToStorage(){
 
+localStorage.setItem("mafiaSpiritRevealType", JSON.stringify(state.spiritRevealType))
+localStorage.setItem("mafiaSpiritActivation", JSON.stringify(state.spiritActivation))
+localStorage.setItem("mafiaSpiritCanSkipReveal", JSON.stringify(state.spiritCanSkipReveal))
 localStorage.setItem("mafiaFramerKnowsSuccess", JSON.stringify(state.framerKnowsSuccess))
 localStorage.setItem("mafiaFramerKnowsMafia", JSON.stringify(state.framerKnowsMafia))
 localStorage.setItem("mafiaMafiaKnowsFramer", JSON.stringify(state.mafiaKnowsFramer))

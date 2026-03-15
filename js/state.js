@@ -42,6 +42,11 @@ framerKnowsSuccess: true,
 framerKnowsMafia: true,
 mafiaKnowsFramer: true,
 
+spiritExtraOpen: false,
+spiritRevealType: "exact",
+spiritActivation: "night_only",
+spiritCanSkipReveal: true,
+
 mayorVotePower: 2,
 mayorExtraOpen: false,
 
