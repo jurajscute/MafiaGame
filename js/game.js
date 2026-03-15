@@ -446,30 +446,6 @@ content += `
 
     </div>
 
-    <div class="global-setting-card mafia-setting-card">
-
-  <div class="global-setting-top">
-    <span class="global-setting-title" style="color:${roleColors.mafia}">
-      Mafia Visibility
-    </span>
-    <span class="global-setting-badge">Global</span>
-  </div>
-
-  <div class="global-setting-row">
-    <label>Mafia know who the Framer is</label>
-
-    <label class="switch">
-      <input type="checkbox"
-        ${state.mafiaKnowsFramer ? "checked" : ""}
-        onchange="toggleMafiaKnowsFramer(this.checked)">
-      <span class="slider"></span>
-    </label>
-  </div>
-
-  </div>
-
-</div>
-
 <div class="global-setting-card mafia-setting-card">
 
   <div class="global-setting-top">
@@ -492,6 +468,30 @@ content += `
     Leader chooses: one mafia picks the kill, and the leader rotates each night.<br>
     Mafia vote: all mafia vote, and ties are broken randomly among tied targets.
   </p>
+
+</div>
+
+    <div class="global-setting-card mafia-setting-card">
+
+  <div class="global-setting-top">
+    <span class="global-setting-title" style="color:${roleColors.mafia}">
+      Mafia Visibility
+    </span>
+    <span class="global-setting-badge">Global</span>
+  </div>
+
+  <div class="global-setting-row">
+    <label>Mafia know who the Framer is</label>
+
+    <label class="switch">
+      <input type="checkbox"
+        ${state.mafiaKnowsFramer ? "checked" : ""}
+        onchange="toggleMafiaKnowsFramer(this.checked)">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  </div>
 
 </div>
 
