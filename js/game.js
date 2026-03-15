@@ -2416,8 +2416,8 @@ if(player.role === "mafia" && state.mafiaKnowsFramer){
 if(player.role === "mafia" && state.mafiaKillMethod === "leader" && player.name === state.currentMafiaLeader){
   extraInfo += `
     <div class="framer-target-box">
-      <div class="framer-target-label">You decide first.</div>
-      <div class="framer-target-name">Make the first move for the mafia!</div>
+      <div class="framer-target-label">Tonight the leader is</div>
+      <div class="framer-target-name">YOU!</div>
     </div>
   `
 }
