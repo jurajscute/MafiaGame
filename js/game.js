@@ -190,7 +190,9 @@ state.sheriffExecutionerResult = "not_innocent"
 state.mafiaKillMethod = "leader"
 state.currentMafiaLeader = null
 state.mafiaLeaderRotationIndex = 0
+state.mafiaKnowsFirstLeader = false
 
+localStorage.setItem("mafiaKnowsFirstLeader", JSON.stringify(state.mafiaKnowsFirstLeader))
 localStorage.setItem("mafiaSpiritRevealType", JSON.stringify(state.spiritRevealType))
 localStorage.setItem("mafiaSpiritActivation", JSON.stringify(state.spiritActivation))
 localStorage.setItem("mafiaSpiritCanSkipReveal", JSON.stringify(state.spiritCanSkipReveal))
@@ -438,6 +440,19 @@ content += `
           ${mafiaOptions}
         </select>
       </div>
+
+<div class="global-setting-divider"></div>
+
+<div class="global-setting-row mafia-setting-row">
+  <label>Mafia know the first leader</label>
+
+  <label class="switch">
+    <input type="checkbox"
+      ${state.mafiaKnowsFirstLeader ? "checked" : ""}
+      onchange="toggleMafiaKnowsFirstLeader(this.checked)">
+    <span class="slider"></span>
+  </label>
+</div>
 
       <div class="global-setting-divider"></div>
 
@@ -1660,6 +1675,12 @@ let savedSpiritCanSkipReveal = localStorage.getItem("mafiaSpiritCanSkipReveal")
 
 let savedMafiaKillMethod = localStorage.getItem("mafiaKillMethod")
 
+let savedMafiaKnowsFirstLeader = localStorage.getItem("mafiaKnowsFirstLeader")
+
+if(savedMafiaKnowsFirstLeader){
+state.mafiaKnowsFirstLeader = JSON.parse(savedMafiaKnowsFirstLeader)
+}
+
 if(savedMafiaKillMethod){
 state.mafiaKillMethod = JSON.parse(savedMafiaKillMethod)
 }
@@ -1741,6 +1762,17 @@ state.rolesEnabled = JSON.parse(savedRoles)
 }
 
 let revealIndex=0
+
+window.toggleMafiaKnowsFirstLeader = function(enabled){
+
+state.mafiaKnowsFirstLeader = enabled
+
+localStorage.setItem(
+"mafiaKnowsFirstLeader",
+JSON.stringify(enabled)
+)
+
+}
 
 window.toggleFramerKnowsSuccess = function(enabled){
 
@@ -2411,14 +2443,21 @@ if(player.role === "mafia" && state.mafiaKillMethod === "leader"){
   const leaderName = getInitialMafiaLeaderName()
 
   if(leaderName){
-    extraInfo += `
-      <div class="framer-target-box">
-        <div class="framer-target-label">Tonights killing will be done by</div>
-        <div class="framer-target-name">
-          ${leaderName === player.name ? "YOU!" : leaderName}
+    if(player.name === leaderName){
+      extraInfo += `
+        <div class="framer-target-box">
+          <div class="framer-target-label">Tonights killing is done by</div>
+          <div class="framer-target-name">YOU!</div>
         </div>
-      </div>
-    `
+      `
+    }else if(state.mafiaKnowsFirstLeader){
+      extraInfo += `
+        <div class="framer-target-box">
+          <div class="framer-target-label">Tonights killing is done by</div>
+          <div class="framer-target-name">${leaderName}</div>
+        </div>
+      `
+    }
   }
 }
 
@@ -2635,6 +2674,7 @@ showSettings()
 
 function saveSettingsToStorage(){
 
+localStorage.setItem("mafiaKnowsFirstLeader", JSON.stringify(state.mafiaKnowsFirstLeader))
 localStorage.setItem("mafiaKillMethod", JSON.stringify(state.mafiaKillMethod))
 localStorage.setItem("mafiaSpiritRevealType", JSON.stringify(state.spiritRevealType))
 localStorage.setItem("mafiaSpiritActivation", JSON.stringify(state.spiritActivation))

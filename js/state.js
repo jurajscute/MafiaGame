@@ -56,6 +56,8 @@ mafiaKillMethod: "leader",
 currentMafiaLeader: null,
 mafiaLeaderRotationIndex: 0,
 
+mafiaKnowsFirstLeader: false,
+
 gameLog: [],
 gameStats: {
 nights: 0,
