@@ -1603,6 +1603,11 @@ opacity:0.9;
 --end:#520505;
 }
 
+.vigilante-slider input[type="range"]{
+--start:#1f1cc4;
+--end:#0a0552;
+}
+
 .framer-extra-wrap{
 max-height:54px;
 opacity:0;
