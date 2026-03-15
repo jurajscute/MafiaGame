@@ -220,6 +220,16 @@ let player = state.players[state.nightTurnIndex]
 
 if(!player) return
 
+let leaderText = ""
+
+if(player.name === state.currentMafiaLeader){
+  leaderText = `Tonight <strong>you</strong> are in charge of killing.`
+}else if(state.mafiaKnowsFirstLeader){
+  leaderText = `Tonight <strong>${state.currentMafiaLeader}</strong> is in charge of killing.`
+}else{
+  leaderText = `One of your teammates is in charge of killing tonight.`
+}
+
 render(`
 
 <div class="card role-mafia">
@@ -231,7 +241,7 @@ Your partner is choosing someone to kill tonight.
 </p>
 
 <p style="opacity:0.8;">
-Tonight <strong>${state.currentMafiaLeader}</strong> is in charge of killing.
+${leaderText}
 </p>
 
 <button onclick="window.nextNightTurn()">Hide</button>
