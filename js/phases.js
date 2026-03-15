@@ -1098,6 +1098,15 @@ nextVoteTurn()
 
 }
 
+window.chooseSpiritVoteReveal = function(targetName){
+
+if(targetName === "__skip__"){
+  state.spiritReveal = null
+}else{
+  state.spiritReveal = targetName
+  addLogEntry(`Spirit chose to reveal ${targetName}'s role.`)
+}
+
 function resolveVotes(){
 
 let highest = 0
@@ -1215,15 +1224,6 @@ if(player.role === "spirit" && state.spiritActivation === "any_death"){
 }
 showSpiritVoteRevealPrompt(player)
 return
-
-window.chooseSpiritVoteReveal = function(targetName){
-
-if(targetName === "__skip__"){
-  state.spiritReveal = null
-}else{
-  state.spiritReveal = targetName
-  addLogEntry(`Spirit chose to reveal ${targetName}'s role.`)
-}
 
 continueResolveVotesAfterSpirit()
 }
