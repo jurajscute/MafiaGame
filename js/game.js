@@ -468,6 +468,8 @@ content += `
 
   </div>
 
+</div>
+
 <div class="global-setting-card mafia-setting-card">
 
   <div class="global-setting-top">
@@ -490,8 +492,6 @@ content += `
     Leader chooses: one mafia picks the kill, and the leader rotates each night.<br>
     Mafia vote: all mafia vote, and ties are broken randomly among tied targets.
   </p>
-
-</div>
 
 </div>
 
