@@ -1209,6 +1209,43 @@ if(state.executionerWinIfVigilanteKillsTarget){
 
 if(target.role === "jester" && state.jesterWinIfVigilanteKilled){
 
+  let executionerWinner = null
+
+  if(state.executionerWinIfVigilanteKillsTarget){
+    executionerWinner = state.players.find(p => {
+      if(p.role !== "executioner") return false
+      if(state.executionerTargets[p.name] !== target.name) return false
+      if(!state.executionerWinIfDead && !p.alive) return false
+      return true
+    })
+  }
+
+  if(executionerWinner){
+    addLogEntry(`${target.name} won as the Jester.`)
+    addLogEntry(`${executionerWinner.name} won as the Executioner because the Vigilante killed their target, ${target.name}.`)
+
+    document.body.className = "win-jester-executioner"
+
+    render(`
+
+<div class="card role-jester">
+
+<h1 class="role-title">JESTER & EXECUTIONER WIN</h1>
+
+<p>${target.name} was killed by the Vigilante and wins as the Jester!</p>
+<p>${executionerWinner.name} also wins because ${target.name} was their target.</p>
+
+<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
+<button onclick="location.reload()">Restart Game</button>
+
+</div>
+
+`)
+
+    instantNightWin = true
+    return
+  }
+
   addLogEntry(`${target.name} won as the Jester.`)
 
   document.body.className = "win-jester"
