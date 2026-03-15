@@ -867,30 +867,24 @@ if(modal.classList.contains("show")){
 
 function assignCurrentMafiaLeader(){
 
-let aliveMafia = state.players
-  .filter(p => p.alive && p.role === "mafia")
-  .map(p => p.name)
+  let aliveMafia = new Set(
+    state.players
+      .filter(p => p.alive && p.role === "mafia")
+      .map(p => p.name)
+  )
 
-if(!aliveMafia.length){
-  state.currentMafiaLeader = null
-  return
-}
+  // Keep only alive mafia, preserving the original shuffled order
+  let availableOrder = (state.mafiaLeaderOrder || []).filter(name => aliveMafia.has(name))
 
-// Remove dead mafia from the stored order
-state.mafiaLeaderOrder = state.mafiaLeaderOrder.filter(name =>
-  aliveMafia.includes(name)
-)
+  if(!availableOrder.length){
+    state.currentMafiaLeader = null
+    return
+  }
 
-// If somehow empty (edge case), rebuild it
-if(!state.mafiaLeaderOrder.length){
-  state.mafiaLeaderOrder = shuffle([...aliveMafia])
-  state.mafiaLeaderIndex = 0
-}
+  state.currentMafiaLeader =
+    availableOrder[state.mafiaLeaderIndex % availableOrder.length]
 
-state.currentMafiaLeader =
-  state.mafiaLeaderOrder[state.mafiaLeaderIndex % state.mafiaLeaderOrder.length]
-
-state.mafiaLeaderIndex++
+  state.mafiaLeaderIndex++
 }
 
 function openModal(content, onOpen){
@@ -2413,13 +2407,19 @@ if(player.role === "mafia" && state.mafiaKnowsFramer){
   }
 }
 
-if(player.role === "mafia" && state.mafiaKillMethod === "leader" && player.name === state.currentMafiaLeader){
-  extraInfo += `
-    <div class="framer-target-box">
-      <div class="framer-target-label">Tonight the leader is</div>
-      <div class="framer-target-name">YOU!</div>
-    </div>
-  `
+if(player.role === "mafia" && state.mafiaKillMethod === "leader"){
+  const leaderName = getInitialMafiaLeaderName()
+
+  if(leaderName){
+    extraInfo += `
+      <div class="framer-target-box">
+        <div class="framer-target-label">Tonights killing will be done by</div>
+        <div class="framer-target-name">
+          ${leaderName === player.name ? "YOU!" : leaderName}
+        </div>
+      </div>
+    `
+  }
 }
 
 render(`
@@ -2635,6 +2635,7 @@ showSettings()
 
 function saveSettingsToStorage(){
 
+localStorage.setItem("mafiaKillMethod", JSON.stringify(state.mafiaKillMethod))
 localStorage.setItem("mafiaSpiritRevealType", JSON.stringify(state.spiritRevealType))
 localStorage.setItem("mafiaSpiritActivation", JSON.stringify(state.spiritActivation))
 localStorage.setItem("mafiaSpiritCanSkipReveal", JSON.stringify(state.spiritCanSkipReveal))
