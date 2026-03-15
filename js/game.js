@@ -1272,21 +1272,34 @@ if(role === "jester"){
 
   <div class="additional-settings-bar" onclick="toggleJesterExtras()">
     <span>Additional Settings</span>
-    <span class="additional-arrow">▾</span>
+    <span class="additional-arrow" style="transform:${state.jesterExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
   </div>
 
-  <div class="jester-extra-settings" id="jester-extra-settings">
+  <div class="jester-extra-settings ${state.jesterExtraOpen ? "show" : ""}" id="jester-extra-settings">
 
     <div class="jester-settings-card">
 
       <div class="jester-setting-row">
-        <span class="jester-setting-label">Sheriff sees Jester as</span>
+        <span class="jester-setting-label">Sheriff sees Jester as...</span>
 
         <select class="jester-setting-select" onchange="setSheriffJesterResult(this.value)">
           <option value="innocent" ${state.sheriffJesterResult === "innocent" ? "selected" : ""}>Innocent</option>
           <option value="not_innocent" ${state.sheriffJesterResult === "not_innocent" ? "selected" : ""}>Not Innocent</option>
           <option value="exact" ${state.sheriffJesterResult === "exact" ? "selected" : ""}>Exact Role</option>
         </select>
+      </div>
+
+      <div class="jester-setting-divider"></div>
+
+      <div class="jester-setting-row">
+        <span class="jester-setting-label">Win if killed by Vigilante</span>
+
+        <label class="switch">
+          <input type="checkbox"
+            ${state.jesterWinIfVigilanteKilled ? "checked" : ""}
+            onchange="toggleJesterVigilanteWin(this.checked)">
+          <span class="slider"></span>
+        </label>
       </div>
 
     </div>
