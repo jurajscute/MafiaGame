@@ -400,6 +400,38 @@ ${renderHostControls()}
 return
 }
 
+if(item && item.type === "vigilante_blocked"){
+render(`
+
+<div class="card role-vigilante">
+
+<h2 class="role-mafia .role-title">ATTACK FAILED</h2>
+
+<p>Your attack on</p>
+
+<h1 style="
+color:${roleColors.vigilante};
+text-shadow:
+0 0 10px ${roleColors.vigilante},
+0 0 20px ${roleColors.vigilante};
+">
+${item.targetName.toUpperCase()}
+</h1>
+
+<p class="role-description">
+was stopped by the doctor!
+</p>
+
+<button onclick="window.nextNightResultTurn()">Hide</button>
+
+${renderHostControls()}
+
+</div>
+
+`)
+return
+}
+
 if(item && item.type === "vigilante_outcome"){
 render(`
 
@@ -407,16 +439,48 @@ render(`
 
 <h2 class="role-title">VIGILANTE OUTCOME</h2>
 
-<p>You decided to slash <strong>${item.targetName}</strong>.</p>
+<p>You headed to slash <strong>${item.targetName}</strong>.</p>
 
 <p class="role-description">
 ${
-  !item.targetDied
-    ? "But your target was already dead before you got there."
-    : item.vigilanteDies
-      ? `${item.targetName} was a ${item.targetRole?.toUpperCase() || "TOWN"}, how could this have happened... you can't bare to live with the guilt.`
-      : `${item.targetName} was a ${item.targetRole?.toUpperCase() || "MAFIA/NEUTRAL"}, you stand over their body proudly.`
+  item.blocked
+    ? "But the Doctor protected them. Your attack failed."
+    : !item.targetDied
+      ? "But your target was already dead before you got there."
+      : item.vigilanteDies
+        ? `${item.targetName} was a ${item.targetRole?.toUpperCase() || "TOWN"}, how could this have happened... you can't bare to live with the guilt.`
+        : `${item.targetName} was a ${item.targetRole?.toUpperCase() || "MAFIA/NEUTRAL"}, you stand over their body proudly.`
 }
+</p>
+
+<button onclick="window.nextNightResultTurn()">Hide</button>
+
+${renderHostControls()}
+
+</div>
+
+`)
+return
+}
+
+if(item && item.type === "vigilante_incoming_death"){
+render(`
+
+<div class="card">
+
+<h2>Night Results</h2>
+
+<p style="
+color:${roleColors[player.role] || "white"};
+font-weight:bold;
+text-shadow:
+0 0 10px ${roleColors[player.role] || "white"};
+">
+${player.role.toUpperCase()}
+</p>
+
+<p class="role-description">
+You have an eerie feeling that justice will be served tonight.
 </p>
 
 <button onclick="window.nextNightResultTurn()">Hide</button>
@@ -694,6 +758,11 @@ function assignCurrentMafiaLeader(){
 }
 
 function resolveMafiaKillTarget(kills){
+
+kills = kills.filter(kill => {
+  const actor = state.players.find(p => p.name === kill.actor)
+  return actor && actor.alive
+})
 
 if(!kills.length) return null
 
@@ -973,14 +1042,12 @@ let frames = state.nightActions.filter(a => a.action === "frame")
 let vigilanteShots = state.nightActions.filter(a => a.action === "vigilante_kill")
 
 state.vigilanteOutcomeToShow = null
-let killTarget = resolveMafiaKillTarget(kills)
+
 let protectedTargets = saves.map(a => a.target)
 let framedTargets = frames.map(a => a.target)
 
 let publicResults = []
 let privateResults = []
-
-const saveSucceeded = !!(killTarget && protectedTargets.includes(killTarget))
 
 // Sheriff private result
 investigations.forEach(investigation => {
@@ -1001,6 +1068,7 @@ investigations.forEach(investigation => {
   })
 })
 
+// Framer successful frame info
 if(state.framerKnowsSuccess){
   investigations.forEach(investigation => {
     if(!framedTargets.includes(investigation.target)) return
@@ -1017,7 +1085,105 @@ if(state.framerKnowsSuccess){
   })
 }
 
-// Doctor successful save result
+// Resolve Vigilante first
+vigilanteShots.forEach(shot => {
+  let shooter = state.players.find(p => p.name === shot.actor)
+  let target = state.players.find(p => p.name === shot.target)
+
+  if(!shooter || !shooter.alive) return
+
+  // Target already dead before resolution
+  if(!target || !target.alive){
+    state.vigilanteOutcomeToShow = {
+      shooter: shot.actor,
+      target: shot.target,
+      targetRole: null,
+      targetDied: false,
+      vigilanteDies: false,
+      blocked: false
+    }
+
+    state.vigilantePublicReveal = state.vigilanteOutcomeToShow
+    return
+  }
+
+  // Doctor blocks Vigilante
+  if(protectedTargets.includes(target.name)){
+    addLogEntry(`Vigilante's attack on ${target.name} was stopped by the Doctor.`)
+
+    state.vigilanteOutcomeToShow = {
+      shooter: shooter.name,
+      target: target.name,
+      targetRole: target.role,
+      targetDied: false,
+      vigilanteDies: false,
+      blocked: true
+    }
+
+    state.vigilantePublicReveal = state.vigilanteOutcomeToShow
+
+    privateResults.push({
+      type: "vigilante_blocked",
+      playerName: shooter.name,
+      targetName: target.name
+    })
+
+    return
+  }
+
+  const targetTeam = roles[target.role]?.team
+  const vigilanteDies = targetTeam !== "mafia" && targetTeam !== "neutral"
+
+  // Warn victim privately
+  privateResults.push({
+    type: "vigilante_incoming_death",
+    playerName: target.name
+  })
+
+  target.alive = false
+  state.nightDeaths.push(target.name)
+  addLogEntry(`${target.name} was slashed by the Vigilante.`)
+
+  // Spirit can trigger from Vigilante night death
+  if(target.role === "spirit" &&
+     (state.spiritActivation === "night_only" || state.spiritActivation === "any_death")){
+    privateResults.push({
+      type: "spirit_reveal_choice",
+      playerName: target.name
+    })
+  }
+
+  if(vigilanteDies && shooter.alive){
+    shooter.alive = false
+    state.nightDeaths.push(shooter.name)
+    addLogEntry(`${shooter.name} also died for killing a town player.`)
+
+    if(shooter.role === "spirit" &&
+       (state.spiritActivation === "night_only" || state.spiritActivation === "any_death")){
+      privateResults.push({
+        type: "spirit_reveal_choice",
+        playerName: shooter.name
+      })
+    }
+  }
+
+  state.vigilanteOutcomeToShow = {
+    shooter: shooter.name,
+    target: target.name,
+    targetRole: target.role,
+    targetDied: true,
+    vigilanteDies,
+    blocked: false
+  }
+
+  state.vigilantePublicReveal = state.vigilanteOutcomeToShow
+})
+
+// Resolve mafia kill AFTER Vigilante deaths
+let killTarget = resolveMafiaKillTarget(kills)
+const saveSucceeded = !!(killTarget && protectedTargets.includes(killTarget))
+
+// Doctor successful save result against mafia
 if(saveSucceeded){
   saves
     .filter(save => save.target === killTarget)
@@ -1032,10 +1198,20 @@ if(saveSucceeded){
   let mafiaKillerName = null
 
   if(state.mafiaKillMethod === "leader"){
-    mafiaKillerName = state.currentMafiaLeader
-  }else if(kills.length){
-    let killAction = kills.find(k => k.target === killTarget) || kills[0]
-    mafiaKillerName = killAction.actor
+    const leader = state.players.find(p => p.name === state.currentMafiaLeader)
+    if(leader && leader.alive){
+      mafiaKillerName = state.currentMafiaLeader
+    }
+  }else{
+    let aliveKills = kills.filter(k => {
+      let actor = state.players.find(p => p.name === k.actor)
+      return actor && actor.alive
+    })
+
+    if(aliveKills.length){
+      let killAction = aliveKills.find(k => k.target === killTarget) || aliveKills[0]
+      mafiaKillerName = killAction.actor
+    }
   }
 
   if(mafiaKillerName){
@@ -1047,53 +1223,14 @@ if(saveSucceeded){
   }
 }
 
-vigilanteShots.forEach(shot => {
-  let shooter = state.players.find(p => p.name === shot.actor)
-  let target = state.players.find(p => p.name === shot.target)
-
-  if(!shooter || !shooter.alive) return
-  if(!target || !target.alive) {
-    state.vigilanteOutcomeToShow = {
-      shooter: shot.actor,
-      target: shot.target,
-      targetRole: null,
-      targetDied: false,
-      vigilanteDies: false
-    }
-    state.vigilantePublicReveal = state.vigilanteOutcomeToShow
-    return
-  }
-
-  const targetTeam = roles[target.role]?.team
-  const vigilanteDies = targetTeam !== "mafia" && targetTeam !== "neutral"
-
-  target.alive = false
-  addLogEntry(`${target.name} was slashed by the Vigilante.`)
-
-  if(vigilanteDies && shooter.alive){
-    shooter.alive = false
-    addLogEntry(`${shooter.name} also died for killing a town player.`)
-  }
-
-  state.vigilanteOutcomeToShow = {
-    shooter: shooter.name,
-    target: target.name,
-    targetRole: target.role,
-    targetDied: true,
-    vigilanteDies
-  }
-
-  state.vigilantePublicReveal = state.vigilanteOutcomeToShow
-})
-
-// Public morning result
+// Public morning result for mafia kill
 if(killTarget && !saveSucceeded){
 
   addLogEntry(`${killTarget} was killed during the night.`)
 
   let victim = state.players.find(p => p.name === killTarget)
 
-  if(victim){
+  if(victim && victim.alive){
     victim.alive = false
     state.nightDeaths.push(victim.name)
 
@@ -1142,6 +1279,7 @@ if(killTarget && !saveSucceeded){
   })
 }
 
+// Vigilante private result
 if(state.vigilanteOutcomeToShow){
   privateResults.push({
     type: "vigilante_outcome",
@@ -1149,7 +1287,8 @@ if(state.vigilanteOutcomeToShow){
     targetName: state.vigilanteOutcomeToShow.target,
     targetRole: state.vigilanteOutcomeToShow.targetRole,
     targetDied: state.vigilanteOutcomeToShow.targetDied,
-    vigilanteDies: state.vigilanteOutcomeToShow.vigilanteDies
+    vigilanteDies: state.vigilanteOutcomeToShow.vigilanteDies,
+    blocked: state.vigilanteOutcomeToShow.blocked
   })
 }
 
@@ -1213,7 +1352,12 @@ if(state.vigilantePublicReveal){
   let text = ""
 
   if(!v.targetDied){
+  if(v.blocked){
+    text = `The Vigilante tried to slash <strong>${v.target}</strong>, but the Doctor protected them.`
+  }else{
     text = `The Vigilante tried to slash <strong>${v.target}</strong>, but nothing happened.`
+  }
+}
   }else if(v.vigilanteDies){
     text = `${v.target} was slashed by the Vigilante.<br>`
 
