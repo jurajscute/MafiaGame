@@ -499,8 +499,9 @@ function showSettings() {
         </div>
 
         ${enabled ? `
-          <div class="settings-role-panel show">
-            <div class="settings-field">
+  <div class="settings-role-panel show">
+    <div class="settings-role-panel-inner">
+      <div class="settings-field">
               <label class="settings-field-label">Role chance</label>
               <div class="settings-slider-row">
                 <input type="range"
@@ -528,6 +529,7 @@ function showSettings() {
               ${advancedHTML}
             ` : ""}
           </div>
+        </div>
         ` : ""}
       </div>
     `

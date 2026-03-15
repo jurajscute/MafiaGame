@@ -3144,10 +3144,12 @@ text-shadow:
 }
 
 .settings-role-subtitle{
-  margin:4px 0 0 0;
-  padding:0;
-  line-height:1.2;
-  text-align:left;
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+  opacity:0.4;
+  color:rgba(255,255,255,0.65);
 }
 
 .settings-role-actions{
@@ -3360,26 +3362,25 @@ text-shadow:
 }
 
 .settings-role-panel{
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  transform: translateY(-8px);
+  display:grid;
+  grid-template-rows:0fr;
+  opacity:0;
+  overflow:hidden;
   transition:
-    max-height 0.28s ease,
-    opacity 0.22s ease,
-    transform 0.28s ease,
-    margin-top 0.28s ease,
-    padding-top 0.28s ease;
-  margin-top: 0;
-  padding-top: 0;
+    grid-template-rows 0.22s ease,
+    opacity 0.18s ease,
+    margin-top 0.22s ease;
+  margin-top:0;
+}
+
+.settings-role-panel > *{
+  min-height:0;
 }
 
 .settings-role-panel.show{
-  max-height: 900px;
-  opacity: 1;
-  transform: translateY(0);
-  margin-top: 12px;
-  padding-top: 4px;
+  grid-template-rows:1fr;
+  opacity:1;
+  margin-top:12px;
 }
 
 .settings-role-card,
@@ -3397,6 +3398,10 @@ text-shadow:
   align-items:flex-start;
   justify-content:space-between;
   gap:14px;
+}
+
+.settings-role-panel-inner{
+  overflow:hidden;
 }
 
 .settings-role-meta{
@@ -3417,11 +3422,12 @@ text-shadow:
 }
 
 .settings-role-subtitle{
-  margin:4px 0 0 0;
-  padding:0;
-  line-height:1.2;
-  text-align:left;
-  display:block;
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+  opacity:0.4;
+  color:rgba(255,255,255,0.65);
 }
 
 .settings-role-actions{
@@ -3465,4 +3471,21 @@ text-shadow:
 
 .settings-role-card{
   overflow:hidden;
+}
+
+.settings-role-card,
+.settings-preset-row button,
+.settings-footer button,
+.settings-modern-select,
+.settings-modern-number{
+  transition-duration:0.16s !important;
+}
+
+@media (max-width:700px){
+  .settings-role-panel{
+    transition:
+      grid-template-rows 0.18s ease,
+      opacity 0.16s ease,
+      margin-top 0.18s ease;
+  }
 }
