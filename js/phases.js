@@ -400,6 +400,35 @@ ${renderHostControls()}
 return
 }
 
+if(item && item.type === "vigilante_outcome"){
+render(`
+
+<div class="card role-vigilante">
+
+<h2 class="role-title">VIGILANTE OUTCOME</h2>
+
+<p>You went to slash <strong>${item.targetName}</strong>.</p>
+
+<p class="role-description">
+${
+  !item.targetDied
+    ? "But your target was already dead before you got there."
+    : item.vigilanteDies
+      ? `${item.targetName} was ${item.targetRole?.toUpperCase() || "TOWN"}, how could this have happened... you can't bare to live with the guilt.`
+      : `${item.targetName} was ${item.targetRole?.toUpperCase() || "MAFIA/NEUTRAL"}, you stand over their body proudly.`
+}
+</p>
+
+<button onclick="window.nextNightResultTurn()">Hide</button>
+
+${renderHostControls()}
+
+</div>
+
+`)
+return
+}
+
 if(item && item.type === "spirit_reveal_choice"){
 
 let targets = state.players
@@ -1103,6 +1132,16 @@ if(killTarget && !saveSucceeded){
       : "Someone was attacked but survived the night."
   })
 
+}else{
+
+  addLogEntry(`The night was quiet.`)
+
+  publicResults.push({
+    type: "peace",
+    text: "The night was quiet."
+  })
+}
+
 if(state.vigilanteOutcomeToShow){
   privateResults.push({
     type: "vigilante_outcome",
@@ -1111,16 +1150,6 @@ if(state.vigilanteOutcomeToShow){
     targetRole: state.vigilanteOutcomeToShow.targetRole,
     targetDied: state.vigilanteOutcomeToShow.targetDied,
     vigilanteDies: state.vigilanteOutcomeToShow.vigilanteDies
-  })
-}
-
-}else{
-
-  addLogEntry(`The night was quiet.`)
-
-  publicResults.push({
-    type: "peace",
-    text: "The night was quiet."
   })
 }
 
@@ -1335,7 +1364,7 @@ state.votes[targetName]=0
 
 let voteWeight = 1
 
-if(voter.role === "mayor"){
+if(voter && voter.role === "mayor"){
 voteWeight = state.mayorVotePower
 }
 
@@ -1347,34 +1376,6 @@ nextVoteTurn()
 
 }
 
-if(item && item.type === "vigilante_outcome"){
-render(`
-
-<div class="card role-vigilante">
-
-<h2 class="role-title">VIGILANTE OUTCOME</h2>
-
-<p>You went to slash <strong>${item.targetName}</strong>.</p>
-
-<p class="role-description">
-${
-  !item.targetDied
-    ? "But your target was already dead before you got there."
-    : item.vigilanteDies
-      ? `${item.targetName} was ${item.targetRole?.toUpperCase() || "TOWN"}, how could this have happened... you can't bare to live with the guilt.`
-      : `${item.targetName} was ${item.targetRole?.toUpperCase() || "MAFIA/NEUTRAL"}, you stand over their body proudly.`
-}
-</p>
-
-<button onclick="window.nextNightResultTurn()">Hide</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-return
-}
 
 window.chooseSpiritVoteReveal = function(targetName){
 
