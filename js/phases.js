@@ -1388,34 +1388,51 @@ if(state.spiritReveal){
   }
 }
 
-if(!v.targetDied && !v.vigilanteDies){
-  if(v.blocked){
-    text = `The Vigilante tried to slash <strong>${v.target}</strong>, but the Doctor protected them.`
+if(state.vigilantePublicReveal){
+
+  const v = state.vigilantePublicReveal
+  const targetPlayer = state.players.find(p => p.name === v.target)
+  const shooterPlayer = state.players.find(p => p.name === v.shooter)
+
+  let text = ""
+
+  if(!v.targetDied){
+    if(v.blocked){
+      text = `The Vigilante tried to slash <strong>${v.target}</strong>, but the Doctor protected them.`
+    }else{
+      text = `The Vigilante tried to slash <strong>${v.target}</strong>, but nothing happened.`
+    }
+
+  }else if(v.vigilanteDies){
+
+    text = `${v.target} was slashed by the Vigilante.<br>`
+
+    if(targetPlayer && shouldRevealOnNightDeath()){
+      text += revealedRoleText(targetPlayer)
+    }
+
+    text += `<br>The Vigilante couldn't bear the guilt and stabbed his heart.`
+
+    if(shooterPlayer && shouldRevealOnNightDeath()){
+      text += `<br>${revealedRoleText(shooterPlayer)}`
+    }
+
   }else{
-    text = `The Vigilante tried to slash <strong>${v.target}</strong>, but someone got there sooner.`
-  }
-}else if(v.wrongTarget){
-  if(v.targetDied){
+
     text = `${v.target} was slashed by the Vigilante.`
 
     if(targetPlayer && shouldRevealOnNightDeath()){
       text += `<br>${revealedRoleText(targetPlayer)}`
     }
+
   }
 
-  if(v.vigilanteDies){
-    text += `${text ? "<br>" : ""}The Vigilante couldn't believe what they did, so they ended their own life.`
+  results.push({
+    type: "vigilante",
+    text
+  })
 
-    if(shooterPlayer && shouldRevealOnNightDeath()){
-      text += `<br>${revealedRoleText(shooterPlayer)}`
-    }
-  }
-}else{
-  text = `${v.target} was slashed by the Vigilante.`
-
-  if(targetPlayer && shouldRevealOnNightDeath()){
-    text += `<br>${revealedRoleText(targetPlayer)}`
-  }
+  state.vigilantePublicReveal = null
 }
 
 let resultsHTML = results.map(r => {
