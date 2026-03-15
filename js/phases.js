@@ -86,9 +86,14 @@ return `
 window.forceNextPhase = function(){
 
   if(state.phase === "night"){
-    resolveNightSelections()
-    return
-  }
+  const endedGame = resolveNightSelections()
+  if(endedGame) return
+
+  state.nightStep = "results"
+  state.nightResultIndex = 0
+  showNightTurn()
+  return
+}
 
   if(state.phase === "voting"){
     resolveVotes()
@@ -136,6 +141,176 @@ mayor: "#1d8161",
 spirit: "#e6aafd",
 framer: "#8b0000",
 vigilante: "#3b48ff"
+}
+
+function getPlayerByName(name){
+  return state.players.find(p => p.name === name)
+}
+
+function isPlayerAlive(name){
+  const player = getPlayerByName(name)
+  return !!(player && player.alive)
+}
+
+function getPlayerTeam(player){
+  if(!player) return null
+  return roles[player.role]?.team || null
+}
+
+function canExecutionerWin(executioner){
+  if(!executioner || executioner.role !== "executioner") return false
+  if(state.executionerWinIfDead) return true
+  return executioner.alive
+}
+
+function getExecutionerWinnerForTarget(targetName){
+  return state.players.find(player => {
+    if(player.role !== "executioner") return false
+    if(state.executionerTargets[player.name] !== targetName) return false
+    return canExecutionerWin(player)
+  }) || null
+}
+
+function addSpiritChoiceIfNeeded(playerName, privateResults){
+  const player = getPlayerByName(playerName)
+  if(!player) return
+
+  if(
+    player.role === "spirit" &&
+    (state.spiritActivation === "night_only" || state.spiritActivation === "any_death")
+  ){
+    privateResults.push({
+      type: "spirit_reveal_choice",
+      playerName: player.name
+    })
+  }
+}
+
+function killPlayer(playerName, reasonText, privateResults, options = {}){
+  const player = getPlayerByName(playerName)
+  if(!player || !player.alive) return false
+
+  player.alive = false
+
+  if(!state.nightDeaths.includes(player.name)){
+    state.nightDeaths.push(player.name)
+  }
+
+  if(reasonText){
+    addLogEntry(reasonText)
+  }
+
+  if(options.warnPrivately){
+    privateResults.push({
+      type: "vigilante_incoming_death",
+      playerName: player.name
+    })
+  }
+
+  addSpiritChoiceIfNeeded(player.name, privateResults)
+  return true
+}
+
+function renderSimpleWinScreen(bodyClass, cardClass, title, lines){
+  document.body.className = bodyClass
+
+  render(`
+    <div class="card ${cardClass}">
+      <h1 class="role-title">${title}</h1>
+
+      ${lines.map(line => `<p>${line}</p>`).join("")}
+
+      <button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
+      <button onclick="location.reload()">Restart Game</button>
+    </div>
+  `)
+}
+
+function renderTwistedJusticeWin(jesterName, executionerName){
+  document.body.className = "win-jester-executioner-vigilante"
+
+  render(`
+    <div class="card special-chaos-win">
+
+      <h1 class="role-title" style="
+        color:${roleColors.vigilante};
+        text-shadow:
+          0 0 10px ${roleColors.vigilante},
+          0 0 22px ${roleColors.vigilante},
+          0 0 36px rgba(59,72,255,0.45);
+        letter-spacing:2px;
+      ">
+        TWISTED JUSTICE
+      </h1>
+
+      <p style="
+        color:#d9dcff;
+        font-size:18px;
+        margin-top:8px;
+      ">
+        The Vigilante struck the wrong target...
+      </p>
+
+      <div style="
+        margin:24px 0 14px 0;
+        padding:18px;
+        border-radius:18px;
+        background:linear-gradient(
+          135deg,
+          rgba(255,62,165,0.16),
+          rgba(122,47,111,0.18),
+          rgba(59,72,255,0.16)
+        );
+        border:1px solid rgba(255,255,255,0.10);
+        box-shadow:
+          0 0 24px rgba(59,72,255,0.14),
+          0 0 22px rgba(255,62,165,0.10);
+      ">
+        <p style="
+          margin:0 0 10px 0;
+          color:${roleColors.jester};
+          font-weight:700;
+          text-shadow:0 0 10px ${roleColors.jester};
+        ">
+          ${jesterName} wins as the Jester
+        </p>
+
+        <p style="
+          margin:0;
+          color:${roleColors.executioner};
+          font-weight:700;
+          text-shadow:0 0 10px ${roleColors.executioner};
+        ">
+          ${executionerName} wins as the Executioner
+        </p>
+      </div>
+
+      <p class="role-description" style="
+        color:#e7e9ff;
+        max-width:520px;
+        margin:0 auto 8px auto;
+      ">
+        ${jesterName} was the Executioner’s target — and when the Vigilante killed the Jester,
+        fate handed victory to them both.
+      </p>
+
+      <p style="
+        color:${roleColors.vigilante};
+        opacity:0.95;
+        font-weight:600;
+        text-shadow:0 0 8px ${roleColors.vigilante};
+        margin-top:16px;
+      ">
+        A single blade. Two winners.
+      </p>
+
+      <div style="margin-top:24px;">
+        <button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
+        <button onclick="location.reload()">Restart Game</button>
+      </div>
+
+    </div>
+  `)
 }
 
 function showSpiritVoteRevealPrompt(player){
@@ -1031,476 +1206,323 @@ if(state.sheriffExactReveal){
 return { result, resultColor }
 }
 
-function showNightPrivateResultTurn(){
-
-  let item = state.nightPrivateResults[state.nightResultIndex]
-
-  if(!item){
-    showMorning()
-    return
-  }
-
-  passPhone(item.playerName, "window.revealNightPrivateResult()")
-}
-
-
 function resolveNightSelections(){
 
-let kills = state.nightActions.filter(a => a.action === "kill")
-let saves = state.nightActions.filter(a => a.action === "save")
-let investigations = state.nightActions.filter(a => a.action === "investigate")
-let frames = state.nightActions.filter(a => a.action === "frame")
-let vigilanteShots = state.nightActions.filter(a => a.action === "vigilante_kill")
+  const kills = state.nightActions.filter(a => a.action === "kill")
+  const saves = state.nightActions.filter(a => a.action === "save")
+  const investigations = state.nightActions.filter(a => a.action === "investigate")
+  const frames = state.nightActions.filter(a => a.action === "frame")
+  const vigilanteShots = state.nightActions.filter(a => a.action === "vigilante_kill")
 
-state.vigilanteOutcomeToShow = null
+  state.vigilanteOutcomeToShow = null
 
-let protectedTargets = saves.map(a => a.target)
-let framedTargets = frames.map(a => a.target)
-let instantNightWin = false
+  const protectedTargets = saves.map(a => a.target)
+  const framedTargets = frames.map(a => a.target)
 
-let publicResults = []
-let privateResults = []
+  const publicResults = []
+  const privateResults = []
 
-// Sheriff private result
-investigations.forEach(investigation => {
-  let sheriff = state.players.find(p => p.name === investigation.actor)
-  let target = state.players.find(p => p.name === investigation.target)
-
-  if(!sheriff || !target) return
-
-  let isFramed = framedTargets.includes(target.name)
-  let sheriffData = buildSheriffResult(target, isFramed)
-
-  privateResults.push({
-    type: "investigate",
-    playerName: sheriff.name,
-    targetName: target.name,
-    result: sheriffData.result,
-    resultColor: sheriffData.resultColor
-  })
-})
-
-// Framer successful frame info
-if(state.framerKnowsSuccess){
+  // Sheriff results
   investigations.forEach(investigation => {
-    if(!framedTargets.includes(investigation.target)) return
+    const sheriff = getPlayerByName(investigation.actor)
+    const target = getPlayerByName(investigation.target)
 
-    frames
-      .filter(frame => frame.target === investigation.target)
-      .forEach(frame => {
-        privateResults.push({
-          type: "framer_success",
-          playerName: frame.actor,
-          targetName: frame.target
-        })
-      })
+    if(!sheriff || !target) return
+
+    const isFramed = framedTargets.includes(target.name)
+    const sheriffData = buildSheriffResult(target, isFramed)
+
+    privateResults.push({
+      type: "investigate",
+      playerName: sheriff.name,
+      targetName: target.name,
+      result: sheriffData.result,
+      resultColor: sheriffData.resultColor
+    })
   })
-}
 
-// Resolve Vigilante first
-vigilanteShots.forEach(shot => {
-  let shooter = state.players.find(p => p.name === shot.actor)
-  let target = state.players.find(p => p.name === shot.target)
+  // Framer success feedback
+  if(state.framerKnowsSuccess){
+    investigations.forEach(investigation => {
+      if(!framedTargets.includes(investigation.target)) return
 
-  if(!shooter || !shooter.alive) return
-
-  // Target already dead before resolution
-  if(!target || !target.alive){
-    state.vigilanteOutcomeToShow = {
-      shooter: shot.actor,
-      target: shot.target,
-      targetRole: null,
-      targetDied: false,
-      vigilanteDies: false,
-      blocked: false
-    }
-
-    state.vigilantePublicReveal = state.vigilanteOutcomeToShow
-    return
+      frames
+        .filter(frame => frame.target === investigation.target)
+        .forEach(frame => {
+          privateResults.push({
+            type: "framer_success",
+            playerName: frame.actor,
+            targetName: frame.target
+          })
+        })
+    })
   }
 
-if(instantNightWin){
-  return
-}
-  
-  // Doctor blocks Vigilante
-  if(protectedTargets.includes(target.name)){
-    addLogEntry(`Vigilante's attack on ${target.name} was stopped by the Doctor.`)
+  // Resolve vigilante first
+  let instantNightWin = false
+
+  vigilanteShots.forEach(shot => {
+    if(instantNightWin) return
+
+    const shooter = getPlayerByName(shot.actor)
+    const target = getPlayerByName(shot.target)
+
+    if(!shooter || !shooter.alive) return
+
+    // target already dead
+    if(!target || !target.alive){
+      state.vigilanteOutcomeToShow = {
+        shooter: shot.actor,
+        target: shot.target,
+        targetRole: null,
+        targetDied: false,
+        vigilanteDies: false,
+        blocked: false,
+        wrongTarget: false
+      }
+
+      state.vigilantePublicReveal = state.vigilanteOutcomeToShow
+      return
+    }
+
+    // doctor blocks vigilante
+    if(protectedTargets.includes(target.name)){
+      addLogEntry(`Vigilante's attack on ${target.name} was stopped by the Doctor.`)
+
+      state.vigilanteOutcomeToShow = {
+        shooter: shooter.name,
+        target: target.name,
+        targetRole: target.role,
+        targetDied: false,
+        vigilanteDies: false,
+        blocked: true,
+        wrongTarget: false
+      }
+
+      state.vigilantePublicReveal = state.vigilanteOutcomeToShow
+
+      privateResults.push({
+        type: "vigilante_blocked",
+        playerName: shooter.name,
+        targetName: target.name
+      })
+
+      return
+    }
+
+    const targetTeam = getPlayerTeam(target)
+    const isWrongTarget =
+      targetTeam !== "mafia" &&
+      !(state.vigilanteCanKillNeutrals && targetTeam === "neutral")
+
+    let vigilanteDies = false
+    let targetDies = true
+
+    if(isWrongTarget){
+      if(state.vigilanteWrongKillOutcome === "both_die"){
+        vigilanteDies = true
+        targetDies = true
+      }else if(state.vigilanteWrongKillOutcome === "only_vigilante_dies"){
+        vigilanteDies = true
+        targetDies = false
+      }else if(state.vigilanteWrongKillOutcome === "only_target_dies"){
+        vigilanteDies = false
+        targetDies = true
+      }
+    }
+
+    if(targetDies){
+      killPlayer(
+        target.name,
+        `${target.name} was slashed by the Vigilante.`,
+        privateResults,
+        { warnPrivately: true }
+      )
+
+      // Jester special win from Vigilante
+      if(target.role === "jester" && state.jesterWinIfVigilanteKilled){
+        const executionerWinner = state.executionerWinIfVigilanteKillsTarget
+          ? getExecutionerWinnerForTarget(target.name)
+          : null
+
+        if(executionerWinner){
+          addLogEntry(`${target.name} won as the Jester.`)
+          addLogEntry(`${executionerWinner.name} won as the Executioner because the Vigilante killed their target, ${target.name}.`)
+          addLogEntry(`TWISTED JUSTICE: ${target.name} won as the Jester, and ${executionerWinner.name} won as the Executioner after the Vigilante killed the target.`)
+
+          renderTwistedJusticeWin(target.name, executionerWinner.name)
+          instantNightWin = true
+          return
+        }
+
+        addLogEntry(`${target.name} won as the Jester.`)
+
+        renderSimpleWinScreen(
+          "win-jester",
+          "role-jester",
+          "JESTER WINS",
+          [`${target.name} was killed by the Vigilante and wins as the Jester!`]
+        )
+
+        instantNightWin = true
+        return
+      }
+
+      // Executioner special win from Vigilante
+      if(state.executionerWinIfVigilanteKillsTarget){
+        const executionerWinner = getExecutionerWinnerForTarget(target.name)
+
+        if(executionerWinner){
+          addLogEntry(`${executionerWinner.name} won as the Executioner because the Vigilante killed ${target.name}.`)
+
+          renderSimpleWinScreen(
+            "win-executioner",
+            "role-executioner",
+            "EXECUTIONER WINS",
+            [`${executionerWinner.name} succeeded because the Vigilante killed their target, ${target.name}.`]
+          )
+
+          instantNightWin = true
+          return
+        }
+      }
+    }
+
+    if(vigilanteDies && shooter.alive){
+      killPlayer(
+        shooter.name,
+        `${shooter.name} died after attacking the wrong person.`,
+        privateResults
+      )
+    }
 
     state.vigilanteOutcomeToShow = {
       shooter: shooter.name,
       target: target.name,
       targetRole: target.role,
-      targetDied: false,
-      vigilanteDies: false,
-      blocked: true
+      targetDied: targetDies,
+      vigilanteDies,
+      blocked: false,
+      wrongTarget: isWrongTarget
     }
 
     state.vigilantePublicReveal = state.vigilanteOutcomeToShow
-
-    return
-  }
-
-const targetTeam = roles[target.role]?.team
-
-const isWrongTarget =
-  targetTeam !== "mafia" &&
-  !(state.vigilanteCanKillNeutrals && targetTeam === "neutral")
-
-let vigilanteDies = false
-let targetDies = true
-
-if(isWrongTarget){
-  if(state.vigilanteWrongKillOutcome === "both_die"){
-    vigilanteDies = true
-    targetDies = true
-  }else if(state.vigilanteWrongKillOutcome === "only_vigilante_dies"){
-    vigilanteDies = true
-    targetDies = false
-  }else if(state.vigilanteWrongKillOutcome === "only_target_dies"){
-    vigilanteDies = false
-    targetDies = true
-  }
-}
-
-  // Warn victim privately
-  if(targetDies){
-  privateResults.push({
-    type: "vigilante_incoming_death",
-    playerName: target.name
   })
 
-  target.alive = false
-  state.nightDeaths.push(target.name)
-  addLogEntry(`${target.name} was slashed by the Vigilante.`)
-
-if(target.role === "jester" && state.jesterWinIfVigilanteKilled){
-
-  let executionerWinner = null
-
-  if(state.executionerWinIfVigilanteKillsTarget){
-    executionerWinner = state.players.find(p => {
-      if(p.role !== "executioner") return false
-      if(state.executionerTargets[p.name] !== target.name) return false
-      if(!state.executionerWinIfDead && !p.alive) return false
-      return true
-    })
-  }
-
-  if(executionerWinner){
-    addLogEntry(`${target.name} won as the Jester.`)
-    addLogEntry(`${executionerWinner.name} won as the Executioner because the Vigilante killed their target, ${target.name}.`)
-    addLogEntry(`TWISTED JUSTICE: ${target.name} won as the Jester, and ${executionerWinner.name} won as the Executioner after the Vigilante killed the target.`)
-
-    document.body.className = "win-jester-executioner-vigilante"
-
-render(`
-
-<div class="card special-chaos-win">
-
-  <h1 class="role-title" style="
-    color:${roleColors.vigilante};
-    text-shadow:
-      0 0 10px ${roleColors.vigilante},
-      0 0 22px ${roleColors.vigilante},
-      0 0 36px rgba(59,72,255,0.45);
-    letter-spacing:2px;
-  ">
-    TWISTED JUSTICE
-  </h1>
-
-  <p style="
-    color:#d9dcff;
-    font-size:18px;
-    margin-top:8px;
-  ">
-    The Vigilante struck the wrong target...
-  </p>
-
-  <div style="
-    margin:24px 0 14px 0;
-    padding:18px;
-    border-radius:18px;
-    background:linear-gradient(
-      135deg,
-      rgba(255,62,165,0.16),
-      rgba(122,47,111,0.18),
-      rgba(59,72,255,0.16)
-    );
-    border:1px solid rgba(255,255,255,0.10);
-    box-shadow:
-      0 0 24px rgba(59,72,255,0.14),
-      0 0 22px rgba(255,62,165,0.10);
-  ">
-
-    <p style="
-      margin:0 0 10px 0;
-      color:${roleColors.jester};
-      font-weight:700;
-      text-shadow:0 0 10px ${roleColors.jester};
-    ">
-      ${target.name} wins as the Jester
-    </p>
-
-    <p style="
-      margin:0;
-      color:${roleColors.executioner};
-      font-weight:700;
-      text-shadow:0 0 10px ${roleColors.executioner};
-    ">
-      ${executionerWinner.name} wins as the Executioner
-    </p>
-
-  </div>
-
-  <p class="role-description" style="
-    color:#e7e9ff;
-    max-width:520px;
-    margin:0 auto 8px auto;
-  ">
-    ${target.name} was the Executioner’s target — and when the Vigilante killed the Jester,
-    fate handed victory to them both.
-  </p>
-
-  <p style="
-    color:${roleColors.vigilante};
-    opacity:0.95;
-    font-weight:600;
-    text-shadow:0 0 8px ${roleColors.vigilante};
-    margin-top:16px;
-  ">
-    A single blade. Two winners.
-  </p>
-
-  <div style="margin-top:24px;">
-    <button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
-    <button onclick="location.reload()">Restart Game</button>
-  </div>
-
-</div>
-
-`)
-
-    instantNightWin = true
-    return
-  }
-
-  addLogEntry(`${target.name} won as the Jester.`)
-
-  document.body.className = "win-jester"
-
-  render(`
-
-<div class="card role-jester">
-
-<h1 class="role-title">JESTER WINS</h1>
-
-<p>${target.name} was killed by the Vigilante and wins as the Jester!</p>
-
-<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
-<button onclick="location.reload()">Restart Game</button>
-
-</div>
-
-`)
-
-  instantNightWin = true
-  return
-}
-
-if(state.executionerWinIfVigilanteKillsTarget){
-  let executionerWinner = state.players.find(p => {
-    if(p.role !== "executioner") return false
-    if(state.executionerTargets[p.name] !== target.name) return false
-    if(!state.executionerWinIfDead && !p.alive) return false
+  if(instantNightWin){
     return true
-  })
-
-  if(executionerWinner){
-    addLogEntry(`${executionerWinner.name} won as the Executioner because the Vigilante killed ${target.name}.`)
-
-    document.body.className = "win-executioner"
-
-    render(`
-
-<div class="card role-executioner">
-
-<h1 class="role-title">EXECUTIONER WINS</h1>
-
-<p>${executionerWinner.name} succeeded because the Vigilante killed their target, ${target.name}.</p>
-
-<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
-<button onclick="location.reload()">Restart Game</button>
-
-</div>
-
-`)
-
-    instantNightWin = true
-    return
   }
-}
 
-  if(target.role === "spirit" &&
-     (state.spiritActivation === "night_only" || state.spiritActivation === "any_death")){
-    privateResults.push({
-      type: "spirit_reveal_choice",
-      playerName: target.name
-    })
-  }
-}
+  // Resolve mafia kill after vigilante
+  const killTarget = resolveMafiaKillTarget(kills)
+  const saveSucceeded = !!(killTarget && protectedTargets.includes(killTarget))
 
-if(vigilanteDies && shooter.alive){
-  shooter.alive = false
-  state.nightDeaths.push(shooter.name)
-  addLogEntry(`${shooter.name} died after attacking the wrong person.`)
-
-  if(shooter.role === "spirit" &&
-     (state.spiritActivation === "night_only" || state.spiritActivation === "any_death")){
-    privateResults.push({
-      type: "spirit_reveal_choice",
-      playerName: shooter.name
-    })
-  }
-}
-
-  state.vigilanteOutcomeToShow = {
-  shooter: shooter.name,
-  target: target.name,
-  targetRole: target.role,
-  targetDied: targetDies,
-  vigilanteDies,
-  blocked: false,
-  wrongTarget: isWrongTarget
-}
-
-  state.vigilantePublicReveal = state.vigilanteOutcomeToShow
-})
-
-if(instantNightWin){
-  return true
-}
-
-// Resolve mafia kill AFTER Vigilante deaths
-let killTarget = resolveMafiaKillTarget(kills)
-const saveSucceeded = !!(killTarget && protectedTargets.includes(killTarget))
-
-// Doctor successful save result against mafia
-if(saveSucceeded){
-  saves
-    .filter(save => save.target === killTarget)
-    .forEach(save => {
-      privateResults.push({
-        type: "doctor_save_success",
-        playerName: save.actor,
-        targetName: save.target
+  if(saveSucceeded){
+    saves
+      .filter(save => save.target === killTarget)
+      .forEach(save => {
+        privateResults.push({
+          type: "doctor_save_success",
+          playerName: save.actor,
+          targetName: save.target
+        })
       })
-    })
 
-  let mafiaKillerName = null
+    let mafiaKillerName = null
 
-  if(state.mafiaKillMethod === "leader"){
-    const leader = state.players.find(p => p.name === state.currentMafiaLeader)
-    if(leader && leader.alive){
-      mafiaKillerName = state.currentMafiaLeader
+    if(state.mafiaKillMethod === "leader"){
+      const leader = getPlayerByName(state.currentMafiaLeader)
+      if(leader && leader.alive){
+        mafiaKillerName = state.currentMafiaLeader
+      }
+    }else{
+      const aliveKills = kills.filter(k => isPlayerAlive(k.actor))
+      if(aliveKills.length){
+        const killAction = aliveKills.find(k => k.target === killTarget) || aliveKills[0]
+        mafiaKillerName = killAction.actor
+      }
     }
-  }else{
-    let aliveKills = kills.filter(k => {
-      let actor = state.players.find(p => p.name === k.actor)
-      return actor && actor.alive
-    })
 
-    if(aliveKills.length){
-      let killAction = aliveKills.find(k => k.target === killTarget) || aliveKills[0]
-      mafiaKillerName = killAction.actor
+    if(mafiaKillerName){
+      privateResults.push({
+        type: "mafia_kill_blocked",
+        playerName: mafiaKillerName,
+        targetName: killTarget
+      })
     }
   }
 
-  if(mafiaKillerName){
-    privateResults.push({
-      type: "mafia_kill_blocked",
-      playerName: mafiaKillerName,
-      targetName: killTarget
-    })
-  }
-}
+  // Morning result for mafia kill
+  if(killTarget && !saveSucceeded){
+    const victim = getPlayerByName(killTarget)
 
-// Public morning result for mafia kill
-if(killTarget && !saveSucceeded){
+    addLogEntry(`${killTarget} was killed during the night.`)
 
-  addLogEntry(`${killTarget} was killed during the night.`)
+    if(victim && victim.alive){
+      victim.alive = false
 
-  let victim = state.players.find(p => p.name === killTarget)
+      if(!state.nightDeaths.includes(victim.name)){
+        state.nightDeaths.push(victim.name)
+      }
 
-  if(victim && victim.alive){
-    victim.alive = false
-    state.nightDeaths.push(victim.name)
+      let deathText = `${killTarget} was killed during the night.`
 
-    let deathText = `${killTarget} was killed during the night.`
+      if(shouldRevealOnNightDeath()){
+        deathText += `<br>${revealedRoleText(victim)}`
+      }
 
-    if(shouldRevealOnNightDeath()){
-      deathText += `<br>${revealedRoleText(victim)}`
+      publicResults.push({
+        type: "death",
+        text: deathText
+      })
+
+      addSpiritChoiceIfNeeded(victim.name, privateResults)
+    }
+
+  }else if(saveSucceeded){
+
+    if(state.doctorRevealSave){
+      addLogEntry(`${killTarget} was saved by the Doctor.`)
+    }else{
+      addLogEntry(`Someone was attacked but survived the night.`)
     }
 
     publicResults.push({
-      type: "death",
-      text: deathText
+      type: "save",
+      text: state.doctorRevealSave
+        ? `${killTarget} was saved by the Doctor!`
+        : "Someone was attacked but survived the night."
     })
 
-    if(victim.role === "spirit" &&
-       (state.spiritActivation === "night_only" || state.spiritActivation === "any_death")){
-      privateResults.push({
-        type: "spirit_reveal_choice",
-        playerName: victim.name
-      })
-    }
-  }
-
-}else if(saveSucceeded){
-
-  if(state.doctorRevealSave){
-    addLogEntry(`${killTarget} was saved by the Doctor.`)
   }else{
-    addLogEntry(`Someone was attacked but survived the night.`)
+
+    addLogEntry(`The night was quiet.`)
+
+    publicResults.push({
+      type: "peace",
+      text: "The night was quiet."
+    })
   }
 
-  publicResults.push({
-    type: "save",
-    text: state.doctorRevealSave
-      ? `${killTarget} was saved by the Doctor!`
-      : "Someone was attacked but survived the night."
-  })
+  if(state.vigilanteOutcomeToShow){
+    privateResults.push({
+      type: "vigilante_outcome",
+      playerName: state.vigilanteOutcomeToShow.shooter,
+      targetName: state.vigilanteOutcomeToShow.target,
+      targetRole: state.vigilanteOutcomeToShow.targetRole,
+      targetDied: state.vigilanteOutcomeToShow.targetDied,
+      vigilanteDies: state.vigilanteOutcomeToShow.vigilanteDies,
+      blocked: state.vigilanteOutcomeToShow.blocked,
+      wrongTarget: state.vigilanteOutcomeToShow.wrongTarget
+    })
+  }
 
-}else{
+  state.nightPrivateResults = privateResults
+  state.nightResolved = {
+    publicResults
+  }
 
-  addLogEntry(`The night was quiet.`)
-
-  publicResults.push({
-    type: "peace",
-    text: "The night was quiet."
-  })
-}
-
-// Vigilante private result
-if(state.vigilanteOutcomeToShow){
-  privateResults.push({
-    type: "vigilante_outcome",
-    playerName: state.vigilanteOutcomeToShow.shooter,
-    targetName: state.vigilanteOutcomeToShow.target,
-    targetRole: state.vigilanteOutcomeToShow.targetRole,
-    targetDied: state.vigilanteOutcomeToShow.targetDied,
-    vigilanteDies: state.vigilanteOutcomeToShow.vigilanteDies,
-    blocked: state.vigilanteOutcomeToShow.blocked,
-    wrongTarget: state.vigilanteOutcomeToShow.wrongTarget
-  })
-}
-
-state.nightPrivateResults = privateResults
-state.nightResolved = {
-  publicResults
-}
-
-return false
+  return false
 }
 
 function showMorning(){
@@ -1698,6 +1720,89 @@ ${renderHostControls()}
 
 }
 
+function renderStandardVoteResult(resultsHTML, eliminated, player, includeSpiritReveal = false){
+  render(`
+    <div class="card">
+      <h2>Voting Results</h2>
+
+      ${resultsHTML}
+
+      <hr>
+
+      <h2 class="elimination-text">
+        ${eliminated} was voted out
+      </h2>
+
+      ${player && shouldRevealOnVoteDeath() ? revealedRoleText(player) : ""}
+      ${includeSpiritReveal ? renderSpiritPublicReveal() : ""}
+
+      <button onclick="window.nextNight()">Next Night</button>
+    </div>
+  `)
+}
+
+function handleExecutionerAndJesterVoteWins(player, eliminated, mafiaAliveAfterVote){
+  const executionerWinner = getExecutionerWinnerForTarget(eliminated)
+
+  if(player.role === "jester" && executionerWinner){
+    addLogEntry(`${player.name} won as the Jester.`)
+    addLogEntry(`${executionerWinner.name} won as the Executioner by getting ${eliminated} voted out.`)
+
+    renderSimpleWinScreen(
+      "win-jester-executioner",
+      "role-jester",
+      "JESTER & EXECUTIONER WIN",
+      [
+        `${player.name} was voted out and wins as the Jester.`,
+        `${executionerWinner.name} also wins because ${player.name} was their target.`
+      ]
+    )
+    return true
+  }
+
+  if(player.role === "jester"){
+    addLogEntry(`${player.name} won as the Jester.`)
+
+    renderSimpleWinScreen(
+      "win-jester",
+      "role-jester",
+      "JESTER WINS",
+      [`${player.name} tricked the town into voting them out!`]
+    )
+    return true
+  }
+
+  if(executionerWinner && player.role === "mafia" && mafiaAliveAfterVote === 0){
+    addLogEntry(`${executionerWinner.name} won as the Executioner by getting ${eliminated} voted out.`)
+    addLogEntry(`The village also won because ${eliminated} was the last mafia.`)
+
+    renderSimpleWinScreen(
+      "win-village-executioner",
+      "role-executioner",
+      "VILLAGE & EXECUTIONER WIN",
+      [
+        `${executionerWinner.name} succeeded in getting ${eliminated} voted out!`,
+        `The village also wins because ${eliminated} was a part of the mafia.`
+      ]
+    )
+    return true
+  }
+
+  if(executionerWinner){
+    addLogEntry(`${executionerWinner.name} won as the Executioner by getting ${eliminated} voted out.`)
+
+    renderSimpleWinScreen(
+      "win-executioner",
+      "role-executioner",
+      "EXECUTIONER WINS",
+      [`${executionerWinner.name} succeeded in getting ${eliminated} voted out!`]
+    )
+    return true
+  }
+
+  return false
+}
+
 export function castVote(targetName){
 
 let alivePlayers = state.players.filter(p=>p.alive)
@@ -1705,19 +1810,13 @@ let voter = alivePlayers[state.voteTurnIndex]
 
 if(voter){
 let voteText = voter.role === "mayor"
-  ? `${voter.name} voted for ${targetName} with 2 votes as Mayor.`
+  ? `${voter.name} voted for ${targetName} with ${state.mayorVotePower} votes as Mayor.`
   : `${voter.name} voted for ${targetName}.`
 
 addLogEntry(voteText)
 }
 
 state.gameStats.votesCast++
-
-let votePower = 1
-
-if(voter && voter.role === "mayor"){
-votePower = 2
-}
 
 if(!state.votes[targetName]){
 state.votes[targetName]=0
@@ -1753,438 +1852,126 @@ continueResolveVotesAfterSpirit()
 
 function continueResolveVotesAfterSpirit(){
 
-let eliminated = state.pendingVoteEliminated
-let resultsHTML = state.pendingVoteResultsHTML || ""
+  let eliminated = state.pendingVoteEliminated
+  let resultsHTML = state.pendingVoteResultsHTML || ""
 
-let player = state.players.find(p => p.name === eliminated)
-if(!player) return
+  let player = state.players.find(p => p.name === eliminated)
+  if(!player) return
 
-let executionerWinner = state.players.find(p => {
+  let mafiaAliveAfterVote = state.players.filter(p => p.alive && p.role === "mafia").length
 
-  if(p.role !== "executioner") return false
-  if(state.executionerTargets[p.name] !== eliminated) return false
-  if(!state.executionerWinIfDead && !p.alive) return false
+  if(handleExecutionerAndJesterVoteWins(player, eliminated, mafiaAliveAfterVote)) return
+  if(checkWin()) return
 
-  return true
-})
-
-let mafiaAliveAfterVote = state.players.filter(p => p.alive && p.role === "mafia").length
-
-if(player.role === "jester" && executionerWinner){
-
-  addLogEntry(`${player.name} won as the Jester.`)
-  addLogEntry(`${executionerWinner.name} won as the Executioner by getting ${eliminated} voted out.`)
-
-  document.body.className = "win-jester-executioner"
-
-  render(`
-
-<div class="card role-jester">
-
-<h1 class="role-title">JESTER & EXECUTIONER WIN</h1>
-
-<p>${player.name} was voted out and wins as the Jester.</p>
-<p>${executionerWinner.name} also wins because ${player.name} was their target.</p>
-
-<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
-<button onclick="location.reload()">Restart Game</button>
-
-</div>
-
-  `)
-
-  return
-}
-
-if(player.role === "jester"){
-
-addLogEntry(`${player.name} won as the Jester.`)
-
-document.body.className = "win-jester"
-
-render(`
-
-<div class="card role-jester">
-
-<h1 class="role-title">JESTER WINS</h1>
-
-<p>${player.name} tricked the town into voting them out!</p>
-
-<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
-<button onclick="location.reload()">Restart Game</button>
-
-</div>
-
-`)
-
-return
-}
-
-if(executionerWinner && player.role === "mafia" && mafiaAliveAfterVote === 0){
-
-  addLogEntry(`${executionerWinner.name} won as the Executioner by getting ${eliminated} voted out.`)
-  addLogEntry(`The village also won because ${eliminated} was the last mafia.`)
-
-  document.body.className = "win-village-executioner"
-
-  render(`
-
-<div class="card role-executioner">
-
-<h1 class="role-title">VILLAGE & EXECUTIONER WIN</h1>
-
-<p>${executionerWinner.name} succeeded in getting ${eliminated} voted out!</p>
-<p>The village also wins because ${eliminated} was a part of the mafia.</p>
-
-<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
-<button onclick="location.reload()">Restart Game</button>
-
-</div>
-
-  `)
-
-  return
-}
-
-if(executionerWinner){
-
-  addLogEntry(`${executionerWinner.name} won as the Executioner by getting ${eliminated} voted out.`)
-
-  document.body.className = "win-executioner"
-
-  render(`
-
-<div class="card role-executioner">
-
-<h1 class="role-title">EXECUTIONER WINS</h1>
-
-<p>${executionerWinner.name} succeeded in getting ${eliminated} voted out!</p>
-
-<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
-<button onclick="location.reload()">Restart Game</button>
-
-</div>
-
-  `)
-
-  return
-}
-
-if(checkWin()) return
-
-render(`
-
-<div class="card">
-
-<h2>Voting Results</h2>
-
-${resultsHTML}
-
-<hr>
-
-<h2 class="elimination-text">
-${eliminated} was voted out
-</h2>
-
-${player && shouldRevealOnVoteDeath() ? revealedRoleText(player) : ""}
-
-${renderSpiritPublicReveal()}
-
-<button onclick="window.nextNight()">Next Night</button>
-
-</div>
-
-`)
+  renderStandardVoteResult(resultsHTML, eliminated, player, true)
 }
 
 function resolveVotes(){
 
-let highest = 0
-let eliminated = null
-let tie = false
-let resultsHTML = ""
+  let highest = 0
+  let eliminated = null
+  let tie = false
+  let resultsHTML = ""
 
-let voteCounts = Object.values(state.votes)
-let maxVotes = voteCounts.length ? Math.max(...voteCounts) : 1
+  let voteCounts = Object.values(state.votes)
+  let maxVotes = voteCounts.length ? Math.max(...voteCounts) : 1
 
-for(let name in state.votes){
+  for(let name in state.votes){
 
-let count = state.votes[name]
-let label = name === "skip" ? "Skip Vote" : name
-let percent = (count / maxVotes) * 100
+    let count = state.votes[name]
+    let label = name === "skip" ? "Skip Vote" : name
+    let percent = (count / maxVotes) * 100
 
-resultsHTML += `
+    resultsHTML += `
+      <div class="vote-row">
+        <div class="vote-label">
+          ${label} — ${count}
+        </div>
+        <div class="vote-bar-bg">
+          <div class="vote-bar-fill" style="width:${percent}%"></div>
+        </div>
+      </div>
+    `
 
-<div class="vote-row">
+    if(count > highest){
+      highest = count
+      eliminated = name
+      tie = false
+    }else if(count === highest){
+      tie = true
+    }
+  }
 
-<div class="vote-label">
-${label} — ${count}
-</div>
-
-<div class="vote-bar-bg">
-<div class="vote-bar-fill" style="width:${percent}%"></div>
-</div>
-
-</div>
-
-`
-
-if(count > highest){
-highest = count
-eliminated = name
-tie = false
-}else if(count === highest){
-tie = true
-}
-
-}
-
-if(tie){
-
+  if(tie){
     addLogEntry(`Voting ended in a tie. Nobody was eliminated.`)
 
-render(`
-
-<div class="card">
-
-<h2>Voting Results</h2>
-
-${resultsHTML}
-
-<hr>
-
-<h2>It's a tie! Nobody was eliminated.</h2>
-
-${renderPlayerStatus()}
-
-<button onclick="window.nextNight()">Next Night</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-
-return
-
-}
-
-if(eliminated === "skip"){
-
-addLogEntry(`The town skipped the vote.`)
-
-render(`
-
-<div class="card">
-
-<h2>Voting Results</h2>
-
-${resultsHTML}
-
-<hr>
-
-<h2>The town skipped the vote.</h2>
-
-${renderPlayerStatus()}
-
-<button onclick="window.nextNight()">Next Night</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-
-return
-
-}
-
-if(eliminated){
-
-addLogEntry(`${eliminated} was voted out.`)
-state.gameStats.eliminations++
-
-let player = state.players.find(p => p.name === eliminated)
-
-if(player){
-
-player.alive = false
-
-if(player.role === "spirit" && state.spiritActivation === "any_death"){
-  state.pendingSpiritVoteReveal = player.name
-  state.pendingVoteEliminated = eliminated
-  state.pendingVoteResultsHTML = resultsHTML
-  showSpiritVoteRevealPrompt(player)
-  return
-}
-
-let executionerWinner = state.players.find(p => {
-
-if(p.role !== "executioner") return false
-
-if(state.executionerTargets[p.name] !== eliminated) return false
-
-if(!state.executionerWinIfDead && !p.alive) return false
-
-return true
-
-})
-
-let mafiaAliveAfterVote = state.players.filter(p => p.alive && p.role === "mafia").length
-
-// Jester + Executioner shared win
-if(player.role === "jester" && executionerWinner){
-
-addLogEntry(`${player.name} won as the Jester.`)
-addLogEntry(`${executionerWinner.name} won as the Executioner by getting ${eliminated} voted out.`)
-
-document.body.className = "win-jester-executioner"
-
-render(`
-
-<div class="card role-jester">
-
-<h1 class="role-title">JESTER & EXECUTIONER WIN</h1>
-
-<p>${player.name} was voted out and wins as the Jester.</p>
-<p>${executionerWinner.name} also wins because ${player.name} was their target.</p>
-
-<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
-<button onclick="location.reload()">Restart Game</button>
-
-</div>
-
-`)
-
-return
-}
-
-// Jester solo win
-if(player.role === "jester"){
-
-addLogEntry(`${player.name} won as the Jester.`)
-
-document.body.className = "win-jester"
-
-render(`
-
-<div class="card role-jester">
-
-<h1 class="role-title">JESTER WINS</h1>
-
-<p>${player.name} tricked the town into voting them out!</p>
-
-<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
-<button onclick="location.reload()">Restart Game</button>
-
-</div>
-
-`)
-
-return
-}
-
-// Village + Executioner shared win
-if(executionerWinner && player.role === "mafia" && mafiaAliveAfterVote === 0){
-
-addLogEntry(`${executionerWinner.name} won as the Executioner by getting ${eliminated} voted out.`)
-addLogEntry(`The village also won because ${eliminated} was the last mafia.`)
-
-document.body.className = "win-village-executioner"
-
-render(`
-
-<div class="card role-executioner">
-
-<h1 class="role-title">VILLAGE & EXECUTIONER WIN</h1>
-
-<p>${executionerWinner.name} succeeded in getting ${eliminated} voted out!</p>
-<p>The village also wins because ${eliminated} was a part of the mafia.</p>
-
-<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
-<button onclick="location.reload()">Restart Game</button>
-
-</div>
-
-`)
-
-return
-}
-
-// Executioner solo win
-if(executionerWinner){
-
-addLogEntry(`${executionerWinner.name} won as the Executioner by getting ${eliminated} voted out.`)
-
-document.body.className = "win-executioner"
-
-render(`
-
-<div class="card role-executioner">
-
-<h1 class="role-title">EXECUTIONER WINS</h1>
-
-<p>${executionerWinner.name} succeeded in getting ${eliminated} voted out!</p>
-
-<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
-<button onclick="location.reload()">Restart Game</button>
-
-</div>
-
-`)
-
-return
-
-}
-
-}
-
-if(checkWin()) return
-
-render(`
-
-<div class="card">
-
-<h2>Voting Results</h2>
-
-${resultsHTML}
-
-<hr>
-
-<h2 class="elimination-text">
-${eliminated} was voted out
-</h2>
-
-${player && shouldRevealOnVoteDeath() ? revealedRoleText(player) : ""}
-
-<button onclick="window.nextNight()">Next Night</button>
-
-</div>
-
-`)
-
-return
-
-}
-
-render(`
-
-<div class="card">
-
-<h2>Voting Results</h2>
-
-${resultsHTML}
-
-<hr>
-
-<h2>Nobody was eliminated.</h2>
-
-<button onclick="window.nextNight()">Next Night</button>
-
-</div>
-
-`)
-
+    render(`
+      <div class="card">
+        <h2>Voting Results</h2>
+        ${resultsHTML}
+        <hr>
+        <h2>It's a tie! Nobody was eliminated.</h2>
+        ${renderPlayerStatus()}
+        <button onclick="window.nextNight()">Next Night</button>
+        ${renderHostControls()}
+      </div>
+    `)
+    return
+  }
+
+  if(eliminated === "skip"){
+    addLogEntry(`The town skipped the vote.`)
+
+    render(`
+      <div class="card">
+        <h2>Voting Results</h2>
+        ${resultsHTML}
+        <hr>
+        <h2>The town skipped the vote.</h2>
+        ${renderPlayerStatus()}
+        <button onclick="window.nextNight()">Next Night</button>
+        ${renderHostControls()}
+      </div>
+    `)
+    return
+  }
+
+  if(eliminated){
+    addLogEntry(`${eliminated} was voted out.`)
+    state.gameStats.eliminations++
+
+    let player = state.players.find(p => p.name === eliminated)
+
+    if(player){
+      player.alive = false
+
+      if(player.role === "spirit" && state.spiritActivation === "any_death"){
+        state.pendingSpiritVoteReveal = player.name
+        state.pendingVoteEliminated = eliminated
+        state.pendingVoteResultsHTML = resultsHTML
+        showSpiritVoteRevealPrompt(player)
+        return
+      }
+
+      let mafiaAliveAfterVote = state.players.filter(p => p.alive && p.role === "mafia").length
+
+      if(handleExecutionerAndJesterVoteWins(player, eliminated, mafiaAliveAfterVote)) return
+      if(checkWin()) return
+
+      renderStandardVoteResult(resultsHTML, eliminated, player)
+      return
+    }
+  }
+
+  render(`
+    <div class="card">
+      <h2>Voting Results</h2>
+      ${resultsHTML}
+      <hr>
+      <h2>Nobody was eliminated.</h2>
+      <button onclick="window.nextNight()">Next Night</button>
+    </div>
+  `)
 }
 
 function renderSpiritPublicReveal(){
@@ -2295,11 +2082,9 @@ return `<p style="opacity:0.7;">None</p>`
 return list.map(p => {
 
 let color = roleColors[p.role] || "white"
-let isExecutioner = p.role === "executioner"
-let isOpen = state.openExecutionerReveal === p.name
 let target = state.executionerTargets?.[p.name]
 
-if(isExecutioner){
+if(p.role === "executioner"){
 return `
 
 <div class="role-row executioner-row"
