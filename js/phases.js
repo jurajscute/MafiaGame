@@ -666,7 +666,7 @@ if(role.nightAction === "frame"){
   addLogEntry(`Framer framed ${targetName}.`)
 }
 
-advanceNightTurn()
+nextNightTurn()
 }
 
 function checkWin(){
@@ -1169,7 +1169,153 @@ if(targetName === "__skip__"){
   addLogEntry(`Spirit chose to reveal ${targetName}'s role.`)
 }
 
-renderSpiritVoteOutcome()
+continueResolveVotesAfterSpirit()
+}
+
+function continueResolveVotesAfterSpirit(){
+
+let eliminated = state.pendingVoteEliminated
+let resultsHTML = state.pendingVoteResultsHTML || ""
+
+let player = state.players.find(p => p.name === eliminated)
+if(!player) return
+
+let executionerWinner = state.players.find(p => {
+
+  if(p.role !== "executioner") return false
+  if(state.executionerTargets[p.name] !== eliminated) return false
+  if(!state.executionerWinIfDead && !p.alive) return false
+
+  return true
+})
+
+let mafiaAliveAfterVote = state.players.filter(p => p.alive && p.role === "mafia").length
+
+if(player.role === "jester" && executionerWinner){
+
+  addLogEntry(`${player.name} won as the Jester.`)
+  addLogEntry(`${executionerWinner.name} won as the Executioner by getting ${eliminated} voted out.`)
+
+  document.body.className = "win-jester-executioner"
+
+  render(`
+
+<div class="card role-jester">
+
+<h1 class="role-title">JESTER & EXECUTIONER WIN</h1>
+
+<p>${player.name} was voted out and wins as the Jester.</p>
+<p>${executionerWinner.name} also wins because ${player.name} was their target.</p>
+
+<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
+<button onclick="location.reload()">Restart Game</button>
+
+</div>
+
+  `)
+
+  return
+}
+
+if(player.role === "jester"){
+
+  addLogEntry(`${player.name} won as the Jester.`)
+
+  document.body.className = "win-jester"
+
+  render(`
+
+<div class="card role-jester">
+
+<h1 class="role-title">JESTER WINS</h1>
+
+<p>${player.name} tricked the town into voting them out!</p>
+
+<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
+<button onclick="location.reload()">Restart Game</button>
+
+</div>
+
+  `)
+
+  return
+}
+
+if(executionerWinner && player.role === "mafia" && mafiaAliveAfterVote === 0){
+
+  addLogEntry(`${executionerWinner.name} won as the Executioner by getting ${eliminated} voted out.`)
+  addLogEntry(`The village also won because ${eliminated} was the last mafia.`)
+
+  document.body.className = "win-village-executioner"
+
+  render(`
+
+<div class="card role-executioner">
+
+<h1 class="role-title">VILLAGE & EXECUTIONER WIN</h1>
+
+<p>${executionerWinner.name} succeeded in getting ${eliminated} voted out!</p>
+<p>The village also wins because ${eliminated} was a part of the mafia.</p>
+
+<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
+<button onclick="location.reload()">Restart Game</button>
+
+</div>
+
+  `)
+
+  return
+}
+
+if(executionerWinner){
+
+  addLogEntry(`${executionerWinner.name} won as the Executioner by getting ${eliminated} voted out.`)
+
+  document.body.className = "win-executioner"
+
+  render(`
+
+<div class="card role-executioner">
+
+<h1 class="role-title">EXECUTIONER WINS</h1>
+
+<p>${executionerWinner.name} succeeded in getting ${eliminated} voted out!</p>
+
+<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
+<button onclick="location.reload()">Restart Game</button>
+
+</div>
+
+  `)
+
+  return
+}
+
+if(checkWin()) return
+
+render(`
+
+<div class="card">
+
+<h2>Voting Results</h2>
+
+${resultsHTML}
+
+<hr>
+
+<h2 class="elimination-text">
+${eliminated} was voted out
+</h2>
+
+${player && shouldRevealOnVoteDeath() ? revealedRoleText(player) : ""}
+
+${renderSpiritPublicReveal()}
+
+<button onclick="window.nextNight()">Next Night</button>
+
+</div>
+
+`)
 }
 
 function resolveVotes(){
@@ -1282,6 +1428,8 @@ state.gameStats.eliminations++
 let player = state.players.find(p => p.name === eliminated)
 
 if(player){
+
+player.alive = false
 
 if(player.role === "spirit" && state.spiritActivation === "any_death"){
   state.pendingSpiritVoteReveal = player.name
@@ -1458,38 +1606,6 @@ ${resultsHTML}
 
 `)
 
-}
-
-function renderSpiritVoteOutcome(){
-
-let eliminated = state.pendingVoteEliminated
-let resultsHTML = state.pendingVoteResultsHTML || ""
-
-let player = state.players.find(p => p.name === eliminated)
-
-render(`
-
-<div class="card">
-
-<h2>Voting Results</h2>
-
-${resultsHTML}
-
-<hr>
-
-<h2 class="elimination-text">
-${eliminated} was voted out
-</h2>
-
-${player && shouldRevealOnVoteDeath() ? revealedRoleText(player) : ""}
-
-${renderSpiritPublicReveal()}
-
-<button onclick="window.nextNight()">Next Night</button>
-
-</div>
-
-`)
 }
 
 function renderSpiritPublicReveal(){
