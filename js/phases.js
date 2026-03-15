@@ -464,30 +464,39 @@ ${renderHostControls()}
 }
 
 function getRandomNoResultText(roleName){
-  const role = roles[roleName]
 
-  if(!role) return "No results tonight."
+const role = roles[roleName]
+if(!role) return "No results tonight."
 
-  const texts = role.noResultTexts
+let texts = role.noResultTexts || []
 
-  if(!Array.isArray(texts) || !texts.length){
-    return role.noResultText || "No results tonight."
+// Mafia special case
+if(roleName === "mafia" && state.mafiaKillMethod === "leader"){
+  let player = state.players[state.nightResultIndex]
+
+  if(player && player.name !== state.currentMafiaLeader){
+    texts = role.teammateKillTexts || role.noResultTexts
   }
+}
 
-  if(!state.lastNoResultTexts){
-    state.lastNoResultTexts = {}
-  }
+if(!Array.isArray(texts) || !texts.length){
+  return role.noResultText || "No results tonight."
+}
 
-  let filtered = texts
+if(!state.lastNoResultTexts){
+  state.lastNoResultTexts = {}
+}
 
-  if(texts.length > 1 && state.lastNoResultTexts[roleName]){
-    filtered = texts.filter(t => t !== state.lastNoResultTexts[roleName])
-  }
+let filtered = texts
 
-  const choice = filtered[Math.floor(Math.random() * filtered.length)]
-  state.lastNoResultTexts[roleName] = choice
+if(texts.length > 1 && state.lastNoResultTexts[roleName]){
+  filtered = texts.filter(t => t !== state.lastNoResultTexts[roleName])
+}
 
-  return choice
+const choice = filtered[Math.floor(Math.random() * filtered.length)]
+state.lastNoResultTexts[roleName] = choice
+
+return choice
 }
 
 window.nextNightResultTurn = function(){

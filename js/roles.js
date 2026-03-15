@@ -72,6 +72,21 @@ noResultTexts:[
 "You've successfully killed them.",
 "Murder, sleep, eat, repeat.",
 "The mafia will be proud of you."],
+teammateKillTexts:[
+"They better do this right.",
+"I mean... how hard can it be?",
+"You are kind of annoyed you didn't get to kill instead.",
+"It feels almost silly having someone else do the killing.",
+"There is so many ways they could've killed, surely they didn't mess up.",
+"'My gang is the best' you think to yourself as you fall asleep.",
+"'Maybe the town isn't so bad?' you think to yourself...",
+"You wish all nights at the job could be this peaceful.",
+"Last time your partner had this job they messed up... BAD.",
+"You had a dream about a big knife and an easy prey.",
+"Being evil rules.",
+"#thuglife",
+"It feels nice not having to kill sometimes.",
+"Hopefully they didn't screw up."],
 description:"Work with the mafia to eliminate villagers each night."
 },
 
