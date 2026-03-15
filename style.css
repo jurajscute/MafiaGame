@@ -1009,6 +1009,43 @@ margin-top:8px;
 pointer-events:auto;
 }
 
+.win-jester-executioner-vigilante{
+  background:
+    radial-gradient(circle at top, rgba(59,72,255,0.18), transparent 40%),
+    radial-gradient(circle at left, rgba(255,62,165,0.12), transparent 35%),
+    radial-gradient(circle at right, rgba(122,47,111,0.14), transparent 35%),
+    #141428;
+}
+
+.special-chaos-win{
+  border:1px solid rgba(255,255,255,0.10);
+  box-shadow:
+    0 0 30px rgba(59,72,255,0.16),
+    0 0 30px rgba(255,62,165,0.10);
+}
+
+.special-chaos-panel{
+  margin:24px 0 14px 0;
+  padding:18px;
+  border-radius:18px;
+  background:linear-gradient(
+    135deg,
+    rgba(255,62,165,0.16),
+    rgba(122,47,111,0.18),
+    rgba(59,72,255,0.16)
+  );
+  border:1px solid rgba(255,255,255,0.10);
+}
+
+.special-chaos-title{
+  color:#3b48ff;
+  letter-spacing:2px;
+  text-shadow:
+    0 0 10px #3b48ff,
+    0 0 22px #3b48ff,
+    0 0 36px rgba(59,72,255,0.45);
+}
+
 .jester-settings-card{
 margin-left:14px;
 padding:12px 14px;

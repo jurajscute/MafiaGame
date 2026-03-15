@@ -1190,20 +1190,92 @@ if(target.role === "jester" && state.jesterWinIfVigilanteKilled){
   if(executionerWinner){
     addLogEntry(`${target.name} won as the Jester.`)
     addLogEntry(`${executionerWinner.name} won as the Executioner because the Vigilante killed their target, ${target.name}.`)
+    addLogEntry(`TWISTED JUSTICE: ${target.name} won as the Jester, and ${executionerWinner.name} won as the Executioner after the Vigilante killed the target.`)
 
-    document.body.className = "win-jester-executioner"
+    document.body.className = "win-jester-executioner-vigilante"
 
-    render(`
+render(`
 
-<div class="card role-jester">
+<div class="card special-chaos-win">
 
-<h1 class="role-title">JESTER & EXECUTIONER WIN</h1>
+  <h1 class="role-title" style="
+    color:${roleColors.vigilante};
+    text-shadow:
+      0 0 10px ${roleColors.vigilante},
+      0 0 22px ${roleColors.vigilante},
+      0 0 36px rgba(59,72,255,0.45);
+    letter-spacing:2px;
+  ">
+    TWISTED JUSTICE
+  </h1>
 
-<p>${target.name} was killed by the Vigilante and wins as the Jester!</p>
-<p>${executionerWinner.name} also wins because ${target.name} was their target.</p>
+  <p style="
+    color:#d9dcff;
+    font-size:18px;
+    margin-top:8px;
+  ">
+    The Vigilante struck the wrong target...
+  </p>
 
-<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
-<button onclick="location.reload()">Restart Game</button>
+  <div style="
+    margin:24px 0 14px 0;
+    padding:18px;
+    border-radius:18px;
+    background:linear-gradient(
+      135deg,
+      rgba(255,62,165,0.16),
+      rgba(122,47,111,0.18),
+      rgba(59,72,255,0.16)
+    );
+    border:1px solid rgba(255,255,255,0.10);
+    box-shadow:
+      0 0 24px rgba(59,72,255,0.14),
+      0 0 22px rgba(255,62,165,0.10);
+  ">
+
+    <p style="
+      margin:0 0 10px 0;
+      color:${roleColors.jester};
+      font-weight:700;
+      text-shadow:0 0 10px ${roleColors.jester};
+    ">
+      ${target.name} wins as the Jester
+    </p>
+
+    <p style="
+      margin:0;
+      color:${roleColors.executioner};
+      font-weight:700;
+      text-shadow:0 0 10px ${roleColors.executioner};
+    ">
+      ${executionerWinner.name} wins as the Executioner
+    </p>
+
+  </div>
+
+  <p class="role-description" style="
+    color:#e7e9ff;
+    max-width:520px;
+    margin:0 auto 8px auto;
+  ">
+    ${target.name} was the Executioner’s target — and when the Vigilante killed the Jester,
+    fate handed victory to them both.
+  </p>
+
+  <p style="
+    color:${roleColors.vigilante};
+    opacity:0.95;
+    font-weight:600;
+    text-shadow:0 0 8px ${roleColors.vigilante};
+    margin-top:16px;
+  ">
+    A single blade. Two winners.
+  </p>
+
+  <div style="margin-top:24px;">
+    <button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
+    <button onclick="location.reload()">Restart Game</button>
+  </div>
 
 </div>
 
