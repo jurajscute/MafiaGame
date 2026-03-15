@@ -1409,6 +1409,11 @@ opacity:0.9;
 --end:#c074ff;
 }
 
+.framer-slider input[type="range"]{
+--start:#c41c1c;
+--end:#520505;
+}
+
 /* mayor */
 
 .role-mayor{
