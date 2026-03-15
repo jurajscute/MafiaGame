@@ -2425,6 +2425,11 @@ font-weight:bold;
 background:rgba(255,255,255,0.05);
 }
 
+.night-result-vigilante{
+background:rgba(60, 63, 231, 0.14);
+border:1px solid rgba(63, 60, 231, 0.25);
+}
+
 .night-result-death{
 background:rgba(231,76,60,0.14);
 border:1px solid rgba(231,76,60,0.25);

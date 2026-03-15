@@ -407,15 +407,15 @@ render(`
 
 <h2 class="role-title">VIGILANTE OUTCOME</h2>
 
-<p>You went to slash <strong>${item.targetName}</strong>.</p>
+<p>You decided to slash <strong>${item.targetName}</strong>.</p>
 
 <p class="role-description">
 ${
   !item.targetDied
     ? "But your target was already dead before you got there."
     : item.vigilanteDies
-      ? `${item.targetName} was ${item.targetRole?.toUpperCase() || "TOWN"}, how could this have happened... you can't bare to live with the guilt.`
-      : `${item.targetName} was ${item.targetRole?.toUpperCase() || "MAFIA/NEUTRAL"}, you stand over their body proudly.`
+      ? `${item.targetName} was a ${item.targetRole?.toUpperCase() || "TOWN"}, how could this have happened... you can't bare to live with the guilt.`
+      : `${item.targetName} was a ${item.targetRole?.toUpperCase() || "MAFIA/NEUTRAL"}, you stand over their body proudly.`
 }
 </p>
 
@@ -1244,7 +1244,7 @@ if(state.vigilantePublicReveal){
 
 let resultsHTML = results.map(r => {
   let cls = ""
-  if(r.type === "vigilante") cls = "night-result-death"
+  if(r.type === "vigilante") cls = "night-result-vigilante"
   if(r.type === "death") cls = "night-result-death"
   if(r.type === "save") cls = "night-result-save"
   if(r.type === "peace") cls = "night-result-peace"
