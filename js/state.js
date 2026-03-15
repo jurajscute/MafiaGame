@@ -82,6 +82,9 @@ sheriff:true,
 jester:true
 },
 
+vigilanteCanKillNeutrals: true,
+vigilanteWrongKillOutcome: "both_die",
+
 executionerTargets: {},
 executionerTargetRule: "neither",
 executionerExtraOpen: false,

@@ -199,6 +199,12 @@ state.currentMafiaLeader = null
 state.mafiaLeaderRotationIndex = 0
 state.mafiaKnowsFirstLeader = false
 
+state.vigilanteCanKillNeutrals = true
+state.vigilanteWrongKillOutcome = "both_die"
+state.vigilanteExtraOpen = false
+
+localStorage.setItem("mafiaVigilanteCanKillNeutrals", JSON.stringify(state.vigilanteCanKillNeutrals))
+localStorage.setItem("mafiaVigilanteWrongKillOutcome", JSON.stringify(state.vigilanteWrongKillOutcome))
 localStorage.setItem("mafiaKnowsFirstLeader", JSON.stringify(state.mafiaKnowsFirstLeader))
 localStorage.setItem("mafiaSpiritRevealType", JSON.stringify(state.spiritRevealType))
 localStorage.setItem("mafiaSpiritActivation", JSON.stringify(state.spiritActivation))
@@ -814,6 +820,52 @@ function showSettings() {
       `
     }
 
+if(role === "vigilante" && enabled){
+  roleBlock += `
+
+<div class="vigilante-extra-wrap show" id="vigilante-extra-wrap">
+
+  <div class="additional-settings-bar" onclick="toggleVigilanteExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow" style="transform:${state.vigilanteExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+  </div>
+
+  <div class="vigilante-extra-settings ${state.vigilanteExtraOpen ? "show" : ""}" id="vigilante-extra-settings">
+
+    <div class="vigilante-settings-card">
+
+      <div class="vigilante-setting-row">
+        <span class="vigilante-setting-label">Can kill neutrals</span>
+
+        <label class="switch">
+          <input type="checkbox"
+            ${state.vigilanteCanKillNeutrals ? "checked" : ""}
+            onchange="toggleVigilanteCanKillNeutrals(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="vigilante-setting-divider"></div>
+
+      <div class="vigilante-setting-row">
+        <span class="vigilante-setting-label">If he attacks the wrong person</span>
+
+        <select class="vigilante-setting-select" onchange="setVigilanteWrongKillOutcome(this.value)">
+          <option value="both_die" ${state.vigilanteWrongKillOutcome === "both_die" ? "selected" : ""}>Both die</option>
+          <option value="only_vigilante_dies" ${state.vigilanteWrongKillOutcome === "only_vigilante_dies" ? "selected" : ""}>Only Vigilante dies</option>
+          <option value="only_target_dies" ${state.vigilanteWrongKillOutcome === "only_target_dies" ? "selected" : ""}>Only target dies</option>
+        </select>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+`
+}
+
     if(mafiaRoles.includes(role)){
       mafiaRolesContent += roleBlock
     }else if(townRoles.includes(role)){
@@ -888,6 +940,23 @@ Reset Settings
   }else{
     openModal(content, initSettingsModal)
   }
+}
+
+window.toggleVigilanteExtras = function(){
+
+state.vigilanteExtraOpen = !state.vigilanteExtraOpen
+
+let panel = document.getElementById("vigilante-extra-settings")
+let arrow = document.querySelector("#vigilante-extra-wrap .additional-arrow")
+
+if(panel){
+panel.classList.toggle("show", state.vigilanteExtraOpen)
+}
+
+if(arrow){
+arrow.style.transform = state.vigilanteExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
+}
+
 }
 
 function openModal(content, onOpen){
@@ -1549,6 +1618,7 @@ if(role === "executioner"){
   }
 }
 
+if(role === "vigilante" && !enabled) state.vigilanteExtraOpen = false
 if(role === "spirit" && !enabled) state.spiritExtraOpen = false
 if(role === "framer" && !enabled) state.framerExtraOpen = false
 if(role === "doctor" && !enabled) state.doctorExtraOpen = false
@@ -1664,6 +1734,18 @@ let savedSpiritCanSkipReveal = localStorage.getItem("mafiaSpiritCanSkipReveal")
 let savedMafiaKillMethod = localStorage.getItem("mafiaKillMethod")
 
 let savedMafiaKnowsFirstLeader = localStorage.getItem("mafiaKnowsFirstLeader")
+
+let savedVigilanteCanKillNeutrals = localStorage.getItem("mafiaVigilanteCanKillNeutrals")
+
+let savedVigilanteWrongKillOutcome = localStorage.getItem("mafiaVigilanteWrongKillOutcome")
+
+if(savedVigilanteCanKillNeutrals){
+  state.vigilanteCanKillNeutrals = JSON.parse(savedVigilanteCanKillNeutrals)
+}
+
+if(savedVigilanteWrongKillOutcome){
+  state.vigilanteWrongKillOutcome = JSON.parse(savedVigilanteWrongKillOutcome)
+}
 
 if(savedMafiaKnowsFirstLeader){
 state.mafiaKnowsFirstLeader = JSON.parse(savedMafiaKnowsFirstLeader)
@@ -2685,6 +2767,8 @@ showSettings()
 
 function saveSettingsToStorage(){
 
+localStorage.setItem("mafiaVigilanteCanKillNeutrals", JSON.stringify(state.vigilanteCanKillNeutrals))
+localStorage.setItem("mafiaVigilanteWrongKillOutcome", JSON.stringify(state.vigilanteWrongKillOutcome))
 localStorage.setItem("mafiaKnowsFirstLeader", JSON.stringify(state.mafiaKnowsFirstLeader))
 localStorage.setItem("mafiaKillMethod", JSON.stringify(state.mafiaKillMethod))
 localStorage.setItem("mafiaSpiritRevealType", JSON.stringify(state.spiritRevealType))
@@ -2705,6 +2789,24 @@ localStorage.setItem("mafiaSheriffExactReveal", JSON.stringify(state.sheriffExac
 localStorage.setItem("mafiaCountOverride", JSON.stringify(state.mafiaCountOverride))
 localStorage.setItem("mafiaRevealRolesOnElimination", JSON.stringify(state.revealRolesOnElimination))
 
+}
+
+window.toggleVigilanteCanKillNeutrals = function(enabled){
+  state.vigilanteCanKillNeutrals = enabled
+
+  localStorage.setItem(
+    "mafiaVigilanteCanKillNeutrals",
+    JSON.stringify(enabled)
+  )
+}
+
+window.setVigilanteWrongKillOutcome = function(value){
+  state.vigilanteWrongKillOutcome = value
+
+  localStorage.setItem(
+    "mafiaVigilanteWrongKillOutcome",
+    JSON.stringify(value)
+  )
 }
 
 window.showSetup=showSetup

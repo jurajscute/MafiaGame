@@ -445,11 +445,17 @@ render(`
 ${
   item.blocked
     ? "But the Doctor protected them. Your attack failed."
-    : !item.targetDied
-      ? "But your target was already dead before you got there."
-      : item.vigilanteDies
-        ? `${item.targetName} was a ${item.targetRole?.toUpperCase() || "TOWN"}, how could this have happened... you can't bare to live with the guilt.`
-        : `${item.targetName} was a ${item.targetRole?.toUpperCase() || "MAFIA/NEUTRAL"}, you stand over their body proudly.`
+    : !item.targetDied && !item.vigilanteDies
+      ? "But when you got there, they were already dead."
+      : item.wrongTarget
+        ? item.vigilanteDies && item.targetDied
+          ? `${item.targetName} was a ${item.targetRole?.toUpperCase() || "TOWN"}. How could have this happened, you slash yourself and both of you die.`
+          : item.vigilanteDies && !item.targetDied
+            ? `${item.targetName} was a ${item.targetRole?.toUpperCase() || "TOWN"}. You realise fast enough but cannot believe your decision, you end your own life.`
+            : !item.vigilanteDies && item.targetDied
+              ? `${item.targetName} was a ${item.targetRole?.toUpperCase() || "TOWN"}. You cannot believe your eyes, but you're determined to correct your mistakes...`
+              : "You attacked the wrong person."
+        : `${item.targetName} was a ${item.targetRole?.toUpperCase() || "MAFIA"}, you stand proudly over the body.`
 }
 </p>
 
@@ -1125,10 +1131,30 @@ vigilanteShots.forEach(shot => {
     return
   }
 
-  const targetTeam = roles[target.role]?.team
-  const vigilanteDies = targetTeam !== "mafia" && targetTeam !== "neutral"
+const targetTeam = roles[target.role]?.team
+
+const isWrongTarget =
+  targetTeam !== "mafia" &&
+  !(state.vigilanteCanKillNeutrals && targetTeam === "neutral")
+
+let vigilanteDies = false
+let targetDies = true
+
+if(isWrongTarget){
+  if(state.vigilanteWrongKillOutcome === "both_die"){
+    vigilanteDies = true
+    targetDies = true
+  }else if(state.vigilanteWrongKillOutcome === "only_vigilante_dies"){
+    vigilanteDies = true
+    targetDies = false
+  }else if(state.vigilanteWrongKillOutcome === "only_target_dies"){
+    vigilanteDies = false
+    targetDies = true
+  }
+}
 
   // Warn victim privately
+  if(targetDies){
   privateResults.push({
     type: "vigilante_incoming_death",
     playerName: target.name
@@ -1137,6 +1163,29 @@ vigilanteShots.forEach(shot => {
   target.alive = false
   state.nightDeaths.push(target.name)
   addLogEntry(`${target.name} was slashed by the Vigilante.`)
+
+  if(target.role === "spirit" &&
+     (state.spiritActivation === "night_only" || state.spiritActivation === "any_death")){
+    privateResults.push({
+      type: "spirit_reveal_choice",
+      playerName: target.name
+    })
+  }
+}
+
+if(vigilanteDies && shooter.alive){
+  shooter.alive = false
+  state.nightDeaths.push(shooter.name)
+  addLogEntry(`${shooter.name} died after attacking the wrong person.`)
+
+  if(shooter.role === "spirit" &&
+     (state.spiritActivation === "night_only" || state.spiritActivation === "any_death")){
+    privateResults.push({
+      type: "spirit_reveal_choice",
+      playerName: shooter.name
+    })
+  }
+}
 
   // Spirit can trigger from Vigilante night death
   if(target.role === "spirit" &&
@@ -1162,13 +1211,14 @@ vigilanteShots.forEach(shot => {
   }
 
   state.vigilanteOutcomeToShow = {
-    shooter: shooter.name,
-    target: target.name,
-    targetRole: target.role,
-    targetDied: true,
-    vigilanteDies,
-    blocked: false
-  }
+  shooter: shooter.name,
+  target: target.name,
+  targetRole: target.role,
+  targetDied: targetDies,
+  vigilanteDies,
+  blocked: false,
+  wrongTarget: isWrongTarget
+}
 
   state.vigilantePublicReveal = state.vigilanteOutcomeToShow
 })
@@ -1338,32 +1388,14 @@ if(state.spiritReveal){
   }
 }
 
-if(state.vigilantePublicReveal){
-  const v = state.vigilantePublicReveal
-  const targetPlayer = state.players.find(p => p.name === v.target)
-  const shooterPlayer = state.players.find(p => p.name === v.shooter)
-
-  let text = ""
-
-  if(!v.targetDied){
+if(!v.targetDied && !v.vigilanteDies){
   if(v.blocked){
     text = `The Vigilante tried to slash <strong>${v.target}</strong>, but the Doctor protected them.`
   }else{
-    text = `The Vigilante tried to slash <strong>${v.target}</strong>, but nothing happened.`
+    text = `The Vigilante tried to slash <strong>${v.target}</strong>, but someone got there sooner.`
   }
-}else if(v.vigilanteDies){
-    text = `${v.target} was slashed by the Vigilante.<br>`
-
-    if(targetPlayer && shouldRevealOnNightDeath()){
-      text += revealedRoleText(targetPlayer)
-    }
-
-    text += `<br>The Vigilante couldn't bare to live with the guilt of what he did, and slashed himself too.`
-
-    if(shooterPlayer && shouldRevealOnNightDeath()){
-      text += `<br>${revealedRoleText(shooterPlayer)}`
-    }
-  }else{
+}else if(v.wrongTarget){
+  if(v.targetDied){
     text = `${v.target} was slashed by the Vigilante.`
 
     if(targetPlayer && shouldRevealOnNightDeath()){
@@ -1371,12 +1403,19 @@ if(state.vigilantePublicReveal){
     }
   }
 
-  results.push({
-    type: "vigilante",
-    text
-  })
+  if(v.vigilanteDies){
+    text += `${text ? "<br>" : ""}The Vigilante couldn't believe what they did, so they ended their own life.`
 
-  state.vigilantePublicReveal = null
+    if(shooterPlayer && shouldRevealOnNightDeath()){
+      text += `<br>${revealedRoleText(shooterPlayer)}`
+    }
+  }
+}else{
+  text = `${v.target} was slashed by the Vigilante.`
+
+  if(targetPlayer && shouldRevealOnNightDeath()){
+    text += `<br>${revealedRoleText(targetPlayer)}`
+  }
 }
 
 let resultsHTML = results.map(r => {
