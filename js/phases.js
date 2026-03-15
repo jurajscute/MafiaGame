@@ -624,16 +624,25 @@ ${renderHostControls()}
 
 function assignCurrentMafiaLeader(){
 
-let aliveMafia = state.players.filter(p => p.alive && p.role === "mafia")
+  const aliveMafia = new Set(
+    state.players
+      .filter(p => p.alive && p.role === "mafia")
+      .map(p => p.name)
+  )
 
-if(!aliveMafia.length){
-  state.currentMafiaLeader = null
-  return
-}
+  const availableOrder = (state.mafiaLeaderOrder || []).filter(name =>
+    aliveMafia.has(name)
+  )
 
-let index = state.mafiaLeaderRotationIndex % aliveMafia.length
-state.currentMafiaLeader = aliveMafia[index].name
-state.mafiaLeaderRotationIndex++
+  if(!availableOrder.length){
+    state.currentMafiaLeader = null
+    return
+  }
+
+  state.currentMafiaLeader =
+    availableOrder[state.mafiaLeaderIndex % availableOrder.length]
+
+  state.mafiaLeaderIndex++
 }
 
 function resolveMafiaKillTarget(kills){

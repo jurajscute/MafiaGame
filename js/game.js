@@ -880,28 +880,6 @@ if(modal.classList.contains("show")){
 }
 }
 
-function assignCurrentMafiaLeader(){
-
-  let aliveMafia = new Set(
-    state.players
-      .filter(p => p.alive && p.role === "mafia")
-      .map(p => p.name)
-  )
-
-  // Keep only alive mafia, preserving the original shuffled order
-  let availableOrder = (state.mafiaLeaderOrder || []).filter(name => aliveMafia.has(name))
-
-  if(!availableOrder.length){
-    state.currentMafiaLeader = null
-    return
-  }
-
-  state.currentMafiaLeader =
-    availableOrder[state.mafiaLeaderIndex % availableOrder.length]
-
-  state.mafiaLeaderIndex++
-}
-
 function openModal(content, onOpen){
 
   const modal = document.getElementById("infoModal")
@@ -1821,6 +1799,17 @@ panel.classList.toggle("show", state.framerExtraOpen)
 if(arrow){
 arrow.style.transform = state.framerExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
 }
+
+}
+
+window.setMafiaKillMethod = function(value){
+
+state.mafiaKillMethod = value
+
+localStorage.setItem(
+"mafiaKillMethod",
+JSON.stringify(value)
+)
 
 }
 
