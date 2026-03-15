@@ -397,20 +397,6 @@ ${renderHostControls()}
 
 `)
 return
-
-window.chooseSpiritReveal = function(targetName){
-
-if(targetName === "__skip__"){
-  state.spiritReveal = null
-  addLogEntry("Spirit chose not to reveal anyone.")
-}else{
-  state.spiritReveal = targetName
-  addLogEntry(`Spirit chose to reveal ${targetName}'s role.`)
-}
-
-window.nextNightResultTurn()
-}
-
 }
 
 let roleColor = roleColors[player.role] || "white"
@@ -482,9 +468,13 @@ showNightTurn()
 
 window.chooseSpiritReveal = function(targetName){
 
-state.spiritReveal = targetName
-
-addLogEntry(`Spirit chose to reveal ${targetName}'s role.`)
+if(targetName === "__skip__"){
+  state.spiritReveal = null
+  addLogEntry("Spirit chose not to reveal anyone.")
+}else{
+  state.spiritReveal = targetName
+  addLogEntry(`Spirit chose to reveal ${targetName}'s role.`)
+}
 
 window.nextNightResultTurn()
 }
@@ -592,6 +582,20 @@ ${renderHostControls()}
 
 `)
 
+}
+
+function assignCurrentMafiaLeader(){
+
+let aliveMafia = state.players.filter(p => p.alive && p.role === "mafia")
+
+if(!aliveMafia.length){
+  state.currentMafiaLeader = null
+  return
+}
+
+let index = state.mafiaLeaderRotationIndex % aliveMafia.length
+state.currentMafiaLeader = aliveMafia[index].name
+state.mafiaLeaderRotationIndex++
 }
 
 function resolveMafiaKillTarget(kills){
@@ -917,15 +921,15 @@ if(saveSucceeded){
 // Public morning result
 if(killTarget && !saveSucceeded){
 
-  addLogEntry(`${kill} was killed during the night.`)
+  addLogEntry(`${killTarget} was killed during the night.`)
 
-  let victim = state.players.find(p => p.name === kill)
+  let victim = state.players.find(p => p.name === killTarget)
 
   if(victim){
     victim.alive = false
     state.nightDeaths.push(victim.name)
 
-    let deathText = `${kill} was killed during the night.`
+    let deathText = `${killTarget} was killed during the night.`
 
     if(shouldRevealOnNightDeath()){
       deathText += `<br>${revealedRoleText(victim)}`
@@ -936,20 +940,19 @@ if(killTarget && !saveSucceeded){
       text: deathText
     })
 
-    // Spirit special private result
     if(victim.role === "spirit" &&
-   (state.spiritActivation === "night_only" || state.spiritActivation === "any_death")){
-  privateResults.push({
-    type: "spirit_reveal_choice",
-    playerName: victim.name
-  })
-}
+       (state.spiritActivation === "night_only" || state.spiritActivation === "any_death")){
+      privateResults.push({
+        type: "spirit_reveal_choice",
+        playerName: victim.name
+      })
+    }
   }
 
 }else if(saveSucceeded){
 
   if(state.doctorRevealSave){
-    addLogEntry(`${save} was saved by the Doctor.`)
+    addLogEntry(`${killTarget} was saved by the Doctor.`)
   }else{
     addLogEntry(`Someone was attacked but survived the night.`)
   }
@@ -957,7 +960,7 @@ if(killTarget && !saveSucceeded){
   publicResults.push({
     type: "save",
     text: state.doctorRevealSave
-      ? `${save} was saved by the Doctor!`
+      ? `${killTarget} was saved by the Doctor!`
       : "Someone was attacked but survived the night."
   })
 
@@ -1280,7 +1283,6 @@ let player = state.players.find(p => p.name === eliminated)
 
 if(player){
 
-player.alive = false
 if(player.role === "spirit" && state.spiritActivation === "any_death"){
   state.pendingSpiritVoteReveal = player.name
   state.pendingVoteEliminated = eliminated
@@ -1288,8 +1290,6 @@ if(player.role === "spirit" && state.spiritActivation === "any_death"){
   showSpiritVoteRevealPrompt(player)
   return
 }
-showSpiritVoteRevealPrompt(player)
-return
 
 let executionerWinner = state.players.find(p => {
 
