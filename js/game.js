@@ -597,7 +597,7 @@ roleBlock += `
 }else{
   neutralRolesContent += roleBlock
 }
-
+})
 content += `
 
 <div class="settings-section-wrap" id="roles-section-wrap">
