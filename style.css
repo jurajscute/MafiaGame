@@ -3235,3 +3235,26 @@ text-shadow:
     flex-direction:column;
   }
 }
+
+.settings-role-panel{
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-8px);
+  transition:
+    max-height 0.28s ease,
+    opacity 0.22s ease,
+    transform 0.28s ease,
+    margin-top 0.28s ease,
+    padding-top 0.28s ease;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.settings-role-panel.show{
+  max-height: 900px;
+  opacity: 1;
+  transform: translateY(0);
+  margin-top: 12px;
+  padding-top: 4px;
+}

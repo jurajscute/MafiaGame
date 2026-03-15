@@ -481,7 +481,7 @@ function showSettings() {
     }
 
     return `
-      <div class="settings-role-card" style="--role-accent:${color}">
+  <div class="settings-role-card" data-role="${role}" style="--role-accent:${color}">
         <div class="settings-role-header">
           <div class="settings-role-meta">
             <div class="settings-role-name" style="color:${color}">${roleDisplayName(role)}</div>
@@ -797,7 +797,301 @@ window.toggleRole = function(role, enabled){
     JSON.stringify(state.rolesEnabled)
   )
 
-  showSettings()
+  const checkbox = document.querySelector(
+    `.settings-role-card[data-role="${role}"] .settings-role-actions input[type="checkbox"]`
+  )
+
+  const card = document.querySelector(`.settings-role-card[data-role="${role}"]`)
+  if(!card) return
+
+  const stateLabel = card.querySelector(".settings-role-state")
+  let panel = card.querySelector(".settings-role-panel")
+
+  if(stateLabel){
+    stateLabel.textContent = enabled ? "ON" : "OFF"
+  }
+
+  if(enabled){
+    card.classList.add("role-enabled")
+
+    if(!panel){
+      panel = document.createElement("div")
+      panel.className = "settings-role-panel"
+      panel.innerHTML = buildRolePanelHTML(role)
+      card.insertAdjacentElement("beforeend", panel)
+
+      requestAnimationFrame(() => {
+        panel.classList.add("show")
+        initRolePanel(card, role)
+      })
+    }else{
+      panel.classList.add("show")
+      initRolePanel(card, role)
+    }
+  }else{
+    card.classList.remove("role-enabled")
+
+    if(panel){
+      panel.classList.remove("show")
+
+      setTimeout(() => {
+        if(panel && !panel.classList.contains("show")){
+          panel.remove()
+        }
+      }, 280)
+    }
+  }
+
+  if(checkbox){
+    checkbox.checked = enabled
+  }
+}
+
+function buildRolePanelHTML(role){
+  const weight = state.roleWeights[role] || 0
+  const count = state.roleCounts[role] || 1
+
+  let advancedHTML = ""
+
+  if(role === "doctor"){
+    advancedHTML = `
+      <div class="settings-field">
+        <div class="settings-field-inline">
+          <span class="settings-field-label-inline">Reveal saved player</span>
+          <label class="switch">
+            <input type="checkbox"
+              ${state.doctorRevealSave ? "checked" : ""}
+              onchange="toggleDoctorReveal(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    `
+  }
+
+  if(role === "sheriff"){
+    advancedHTML = `
+      <div class="settings-field">
+        <div class="settings-field-inline">
+          <span class="settings-field-label-inline">Reveal exact role</span>
+          <label class="switch">
+            <input type="checkbox"
+              ${state.sheriffExactReveal ? "checked" : ""}
+              onchange="toggleSheriffExactReveal(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    `
+  }
+
+  if(role === "mayor"){
+    advancedHTML = `
+      <div class="settings-field">
+        <label class="settings-field-label">Vote power</label>
+        <select class="settings-modern-select" onchange="setMayorVotePower(this.value)">
+          <option value="1.5" ${state.mayorVotePower == 1.5 ? "selected" : ""}>1.5 votes</option>
+          <option value="2" ${state.mayorVotePower == 2 ? "selected" : ""}>2 votes</option>
+          <option value="2.5" ${state.mayorVotePower == 2.5 ? "selected" : ""}>2.5 votes</option>
+          <option value="3" ${state.mayorVotePower == 3 ? "selected" : ""}>3 votes</option>
+        </select>
+      </div>
+    `
+  }
+
+  if(role === "spirit"){
+    advancedHTML = `
+      <div class="settings-field">
+        <label class="settings-field-label">Reveal type</label>
+        <select class="settings-modern-select" onchange="setSpiritRevealType(this.value)">
+          <option value="exact" ${state.spiritRevealType === "exact" ? "selected" : ""}>Exact Role</option>
+          <option value="team" ${state.spiritRevealType === "team" ? "selected" : ""}>Team Only</option>
+        </select>
+      </div>
+
+      <div class="settings-field">
+        <label class="settings-field-label">Activates on</label>
+        <select class="settings-modern-select" onchange="setSpiritActivation(this.value)">
+          <option value="night_only" ${state.spiritActivation === "night_only" ? "selected" : ""}>Night Death Only</option>
+          <option value="any_death" ${state.spiritActivation === "any_death" ? "selected" : ""}>Any Death</option>
+        </select>
+      </div>
+
+      <div class="settings-field">
+        <div class="settings-field-inline">
+          <span class="settings-field-label-inline">Can skip reveal</span>
+          <label class="switch">
+            <input type="checkbox"
+              ${state.spiritCanSkipReveal ? "checked" : ""}
+              onchange="toggleSpiritCanSkipReveal(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    `
+  }
+
+  if(role === "framer"){
+    advancedHTML = `
+      <div class="settings-field">
+        <div class="settings-field-inline">
+          <span class="settings-field-label-inline">Knows if frame was successful</span>
+          <label class="switch">
+            <input type="checkbox"
+              ${state.framerKnowsSuccess ? "checked" : ""}
+              onchange="toggleFramerKnowsSuccess(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-field">
+        <div class="settings-field-inline">
+          <span class="settings-field-label-inline">Knows who the mafia are</span>
+          <label class="switch">
+            <input type="checkbox"
+              ${state.framerKnowsMafia ? "checked" : ""}
+              onchange="toggleFramerKnowsMafia(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    `
+  }
+
+  if(role === "jester"){
+    advancedHTML = `
+      <div class="settings-field">
+        <label class="settings-field-label">Sheriff sees Jester as...</label>
+        <select class="settings-modern-select" onchange="setSheriffJesterResult(this.value)">
+          <option value="innocent" ${state.sheriffJesterResult === "innocent" ? "selected" : ""}>Innocent</option>
+          <option value="not_innocent" ${state.sheriffJesterResult === "not_innocent" ? "selected" : ""}>Not Innocent</option>
+          <option value="exact" ${state.sheriffJesterResult === "exact" ? "selected" : ""}>Exact Role</option>
+        </select>
+      </div>
+
+      <div class="settings-field">
+        <div class="settings-field-inline">
+          <span class="settings-field-label-inline">Win if killed by Vigilante</span>
+          <label class="switch">
+            <input type="checkbox"
+              ${state.jesterWinIfVigilanteKilled ? "checked" : ""}
+              onchange="toggleJesterVigilanteWin(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    `
+  }
+
+  if(role === "executioner"){
+    advancedHTML = `
+      <div class="settings-field">
+        <label class="settings-field-label">Can target Jester or Mafia?</label>
+        <select class="settings-modern-select" onchange="setExecutionerTargetRule(this.value)">
+          <option value="neither" ${state.executionerTargetRule === "neither" ? "selected" : ""}>Neither</option>
+          <option value="mafia" ${state.executionerTargetRule === "mafia" ? "selected" : ""}>Mafia</option>
+          <option value="jester" ${state.executionerTargetRule === "jester" ? "selected" : ""}>Jester</option>
+          <option value="both" ${state.executionerTargetRule === "both" ? "selected" : ""}>Both</option>
+        </select>
+      </div>
+
+      <div class="settings-field">
+        <label class="settings-field-label">Sheriff sees Executioner as</label>
+        <select class="settings-modern-select" onchange="setSheriffExecutionerResult(this.value)">
+          <option value="innocent" ${state.sheriffExecutionerResult === "innocent" ? "selected" : ""}>Innocent</option>
+          <option value="not_innocent" ${state.sheriffExecutionerResult === "not_innocent" ? "selected" : ""}>Not Innocent</option>
+          <option value="exact" ${state.sheriffExecutionerResult === "exact" ? "selected" : ""}>Exact Role</option>
+        </select>
+      </div>
+
+      <div class="settings-field">
+        <div class="settings-field-inline">
+          <span class="settings-field-label-inline">Can win while dead</span>
+          <label class="switch">
+            <input type="checkbox"
+              ${state.executionerWinIfDead ? "checked" : ""}
+              onchange="toggleExecutionerWinIfDead(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-field">
+        <div class="settings-field-inline">
+          <span class="settings-field-label-inline">Wins if Vigilante kills target</span>
+          <label class="switch">
+            <input type="checkbox"
+              ${state.executionerWinIfVigilanteKillsTarget ? "checked" : ""}
+              onchange="toggleExecutionerVigilanteWin(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    `
+  }
+
+  if(role === "vigilante"){
+    advancedHTML = `
+      <div class="settings-field">
+        <div class="settings-field-inline">
+          <span class="settings-field-label-inline">Can kill neutrals</span>
+          <label class="switch">
+            <input type="checkbox"
+              ${state.vigilanteCanKillNeutrals ? "checked" : ""}
+              onchange="toggleVigilanteCanKillNeutrals(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-field">
+        <label class="settings-field-label">Wrong target result</label>
+        <select class="settings-modern-select" onchange="setVigilanteWrongKillOutcome(this.value)">
+          <option value="both_die" ${state.vigilanteWrongKillOutcome === "both_die" ? "selected" : ""}>Both die</option>
+          <option value="only_vigilante_dies" ${state.vigilanteWrongKillOutcome === "only_vigilante_dies" ? "selected" : ""}>Only Vigilante dies</option>
+          <option value="only_target_dies" ${state.vigilanteWrongKillOutcome === "only_target_dies" ? "selected" : ""}>Only target dies</option>
+        </select>
+      </div>
+    `
+  }
+
+  return `
+    <div class="settings-field">
+      <label class="settings-field-label">Role chance</label>
+      <div class="settings-slider-row">
+        <input type="range"
+          id="${role}Slider"
+          min="0"
+          max="100"
+          value="${weight}"
+          oninput="updateSlider(this,'${role}'); setRoleWeight('${role}', this.value)">
+        <span class="settings-slider-value">${weight}%</span>
+      </div>
+    </div>
+
+    <div class="settings-field">
+      <label class="settings-field-label">Maximum amount</label>
+      <input class="settings-modern-number"
+        type="number"
+        min="1"
+        max="10"
+        value="${count}"
+        onchange="window.updateRoleCount('${role}', this.value)">
+    </div>
+
+    ${advancedHTML ? `
+      <div class="settings-advanced-label">Additional Settings</div>
+      ${advancedHTML}
+    ` : ""}
+  `
+}
+
+function initRolePanel(card, role){
+  const slider = card.querySelector(`#${role}Slider`)
+  if(slider){
+    updateSlider(slider, role)
+  }
 }
 
 function closeInfo(){
