@@ -170,6 +170,7 @@ state.jesterExtraOpen = false
 
 state.rolesSectionOpen = false
 state.presetsSectionOpen = false
+state.mafiaRolesOpen = false
 state.townRolesOpen = false
 state.neutralRolesOpen = false
 
@@ -190,6 +191,23 @@ localStorage.setItem("mafiaSheriffExecutionerResult", JSON.stringify(state.sheri
 localStorage.setItem("mafiaMayorVotePower", JSON.stringify(state.mayorVotePower))
 
 showSettings()
+
+}
+
+window.toggleMafiaRolesGroup = function(){
+
+  state.mafiaRolesOpen = !state.mafiaRolesOpen
+
+  let panel = document.getElementById("mafia-roles-content")
+  let arrow = document.querySelector("#mafia-roles-wrap .section-arrow")
+
+  if(panel){
+    panel.classList.toggle("show", state.mafiaRolesOpen)
+  }
+
+  if(arrow){
+    arrow.style.transform = state.mafiaRolesOpen ? "rotate(180deg)" : "rotate(0deg)"
+  }
 
 }
 
@@ -237,11 +255,13 @@ showRoleReveal()
 
 function showSettings() {
   const modal = document.getElementById("infoModal");
+let mafiaRolesContent = ""
 let townRolesContent = ""
 let neutralRolesContent = ""
 
+const mafiaRoles = ["framer"]
 const townRoles = ["doctor", "sheriff", "mayor", "spirit"]
-const neutralRoles = ["jester", "executioner", "framer"]
+const neutralRoles = ["jester", "executioner"]
 
   let content = `
     <div class="modal-content">
@@ -362,7 +382,7 @@ content += `
 
 `
 
-  ;[...townRoles, ...neutralRoles].forEach(role => {
+   ;[...mafiaRoles, ...townRoles, ...neutralRoles].forEach(role => {
   const enabled = state.rolesEnabled[role];
   const weight = state.roleWeights[role] || 0;
   const color = roleColors[role] || "#fff";
@@ -570,12 +590,13 @@ roleBlock += `
     `
 }
 
-  if(townRoles.includes(role)){
-    townRolesContent += roleBlock
-  }else{
-    neutralRolesContent += roleBlock
-  }
-})
+  if(mafiaRoles.includes(role)){
+  mafiaRolesContent += roleBlock
+}else if(townRoles.includes(role)){
+  townRolesContent += roleBlock
+}else{
+  neutralRolesContent += roleBlock
+}
 
 content += `
 
@@ -587,6 +608,17 @@ content += `
   </div>
 
   <div class="settings-section-content ${state.rolesSectionOpen ? "show" : ""}" id="roles-section-content">
+
+    <div class="settings-section-wrap" id="mafia-roles-wrap">
+      <div class="settings-section-bar" onclick="toggleMafiaRolesGroup()">
+        <span>Mafia Roles</span>
+        <span class="section-arrow" style="transform:${state.mafiaRolesOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+      </div>
+
+      <div class="settings-section-content ${state.mafiaRolesOpen ? "show" : ""}" id="mafia-roles-content">
+        ${mafiaRolesContent || `<p style="opacity:0.7;">No mafia roles available.</p>`}
+      </div>
+    </div>
 
     <div class="settings-section-wrap" id="town-roles-wrap">
       <div class="settings-section-bar" onclick="toggleTownRolesGroup()">

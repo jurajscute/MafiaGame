@@ -35,6 +35,7 @@ sheriffExecutionerResult: "not_innocent",
 
 townRolesOpen: false,
 neutralRolesOpen: false,
+mafiaRolesOpen: false,
 
 mayorVotePower: 2,
 mayorExtraOpen: false,

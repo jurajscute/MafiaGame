@@ -280,6 +280,11 @@ body.night .card:not(.role-mafia):not(.role-framer):not(.role-doctor):not(.role-
 
 }
 
+#mafia-roles-wrap .settings-section-bar{
+background:rgba(126,14,14,0.12);
+border-color:rgba(231,76,60,0.14);
+}
+
 .card{
   transition: background 0.6s ease, box-shadow 0.6s ease;
 }
