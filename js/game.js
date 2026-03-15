@@ -424,27 +424,27 @@ content += `
 
     </div>
 
-    <div class="global-setting-card mafia-setting-card">
+<div class="global-setting-row mafia-setting-row">
 
-      <div class="global-setting-top">
-        <span class="global-setting-title" style="color:${roleColors.mafia}">
-          Mafia Settings
-        </span>
-        <span class="global-setting-badge">Global</span>
-      </div>
+<div class="setting-left">
 
-      <div class="global-setting-row mafia-setting-row">
-<label for="mafiaCountSelect">How many mafia?</label>
-
-<select id="mafiaCountSelect" onchange="window.updateMafiaCountOverride(this.value)">
-${mafiaOptions}
-</select>
-</div>
+<label for="mafiaCountSelect">
+How many mafia?
+</label>
 
 <p class="global-setting-note">
-Recommended in Auto mode: <strong>${autoMafia}</strong><br>
-Max allowed with ${playerCount} player${playerCount === 1 ? "" : "s"}: <strong>${mafiaMax}</strong>
+Auto recommended: <strong>${autoMafia}</strong><br>
+Max with ${playerCount} players: <strong>${mafiaMax}</strong>
 </p>
+
+</div>
+
+<select id="mafiaCountSelect"
+onchange="window.updateMafiaCountOverride(this.value)">
+${mafiaOptions}
+</select>
+
+</div>
 
 <div class="global-setting-divider"></div>
 
@@ -462,18 +462,29 @@ Max allowed with ${playerCount} player${playerCount === 1 ? "" : "s"}: <strong>$
       <div class="global-setting-divider"></div>
 
       <div class="global-setting-row mafia-setting-row">
-<label for="mafiaKillMethodSelect">How is the mafia target chosen?</label>
 
-<select id="mafiaKillMethodSelect" onchange="setMafiaKillMethod(this.value)">
-<option value="leader" ${state.mafiaKillMethod === "leader" ? "selected" : ""}>Leader chooses (rotating)</option>
-<option value="vote" ${state.mafiaKillMethod === "vote" ? "selected" : ""}>Mafia vote</option>
-</select>
-</div>
+<div class="setting-left">
+<label for="mafiaKillMethodSelect">
+How is the mafia target chosen?
+</label>
 
 <p class="global-setting-note">
-Leader chooses: one mafia picks the kill, and the leader rotates each night.<br>
-Mafia vote: all mafia vote, and ties are broken randomly among tied targets.
+Leader rotates each night.<br>
+Vote ties break randomly.
 </p>
+</div>
+
+<select id="mafiaKillMethodSelect" onchange="setMafiaKillMethod(this.value)">
+<option value="leader" ${state.mafiaKillMethod === "leader" ? "selected" : ""}>
+Leader chooses
+</option>
+
+<option value="vote" ${state.mafiaKillMethod === "vote" ? "selected" : ""}>
+Mafia vote
+</option>
+</select>
+
+</div>
 
       <div class="global-setting-divider"></div>
 
