@@ -619,6 +619,38 @@ ${renderHostControls()}
 return
 }
 
+if(item && item.type === "mafia_kill_blocked_priest"){
+render(`
+
+<div class="card role-priest">
+
+<h2 class="role-title">HOLY SHIELD HELD</h2>
+
+<p>The attack on</p>
+
+<h1 style="
+color:${roleColors.priest};
+text-shadow:
+0 0 10px ${roleColors.priest},
+0 0 20px ${roleColors.priest};
+">
+${item.targetName.toUpperCase()}
+</h1>
+
+<p class="role-description">
+was stopped by the Holy Spirit.
+</p>
+
+<button onclick="window.nextNightResultTurn()">Hide</button>
+
+${renderHostControls()}
+
+</div>
+
+`)
+return
+}
+
 if(item && item.type === "vigilante_blocked"){
 render(`
 
@@ -639,6 +671,38 @@ ${item.targetName.toUpperCase()}
 
 <p class="role-description">
 was stopped by the doctor!
+</p>
+
+<button onclick="window.nextNightResultTurn()">Hide</button>
+
+${renderHostControls()}
+
+</div>
+
+`)
+return
+}
+
+if(item && item.type === "vigilante_blocked_priest"){
+render(`
+
+<div class="card role-priest">
+
+<h2 class="role-title">HOLY SHIELD HELD</h2>
+
+<p>Your attack on</p>
+
+<h1 style="
+color:${roleColors.priest};
+text-shadow:
+0 0 10px ${roleColors.priest},
+0 0 20px ${roleColors.priest};
+">
+${item.targetName.toUpperCase()}
+</h1>
+
+<p class="role-description">
+was stopped by the Holy Spirit.
 </p>
 
 <button onclick="window.nextNightResultTurn()">Hide</button>
@@ -1377,6 +1441,12 @@ function resolveNightSelections(){
 
   state.priestBlockedAttacks.push("Vigilante")
 
+  privateResults.push({
+    type: "vigilante_blocked_priest",
+    playerName: shooter.name,
+    targetName: target.name
+  })
+
   state.vigilanteOutcomeToShow = {
     shooter: shooter.name,
     target: target.name,
@@ -1549,12 +1619,12 @@ function resolveNightSelections(){
     }
 
     if(mafiaKillerName){
-      privateResults.push({
-        type: "mafia_kill_blocked",
-        playerName: mafiaKillerName,
-        targetName: killTarget
-      })
-    }
+  privateResults.push({
+    type: "mafia_kill_blocked_priest",
+    playerName: mafiaKillerName,
+    targetName: killTarget
+  })
+}
 
     publicResults.push({
       type: "priest_shield",
