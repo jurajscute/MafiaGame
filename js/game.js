@@ -495,8 +495,6 @@ content += `
 
 </div>
 
-</div>
-
 `
 
    ;[...mafiaRoles, ...townRoles, ...neutralRoles].forEach(role => {
