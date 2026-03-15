@@ -186,13 +186,13 @@ if(!player){
 }
 
 if(!player.alive){
-  advanceNightTurn()
+  nextNightTurn()
   return
 }
 
 if(player.role === "mafia" && state.mafiaKillMethod === "leader"){
   if(player.name !== state.currentMafiaLeader){
-    advanceNightTurn()
+    nextNightTurn()
     return
   }
 }
