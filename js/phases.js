@@ -405,7 +405,7 @@ render(`
 
 <div class="card role-vigilante">
 
-<h2 class="role-mafia .role-title">ATTACK FAILED</h2>
+<h2 class="role-title">ATTACK FAILED</h2>
 
 <p>Your attack on</p>
 
@@ -1122,12 +1122,6 @@ vigilanteShots.forEach(shot => {
 
     state.vigilantePublicReveal = state.vigilanteOutcomeToShow
 
-    privateResults.push({
-      type: "vigilante_blocked",
-      playerName: shooter.name,
-      targetName: target.name
-    })
-
     return
   }
 
@@ -1357,8 +1351,7 @@ if(state.vigilantePublicReveal){
   }else{
     text = `The Vigilante tried to slash <strong>${v.target}</strong>, but nothing happened.`
   }
-}
-  }else if(v.vigilanteDies){
+}else if(v.vigilanteDies){
     text = `${v.target} was slashed by the Vigilante.<br>`
 
     if(targetPlayer && shouldRevealOnNightDeath()){
