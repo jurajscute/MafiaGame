@@ -161,6 +161,11 @@ state.mafiaCountOverride = 0
 state.revealRolesOnElimination = "none"
 state.executionerWinIfDead = false
 
+state.framerExtraOpen = false
+state.framerKnowsSuccess = true
+state.framerKnowsMafia = true
+state.mafiaKnowsFramer = true
+
 state.globalSettingsOpen = false
 state.executionerExtraOpen = false
 state.mayorExtraOpen = false
@@ -177,6 +182,9 @@ state.neutralRolesOpen = false
 state.sheriffJesterResult = "not_innocent"
 state.sheriffExecutionerResult = "not_innocent"
 
+localStorage.setItem("mafiaFramerKnowsSuccess", JSON.stringify(state.framerKnowsSuccess))
+localStorage.setItem("mafiaFramerKnowsMafia", JSON.stringify(state.framerKnowsMafia))
+localStorage.setItem("mafiaMafiaKnowsFramer", JSON.stringify(state.mafiaKnowsFramer))
 localStorage.setItem("mafiaRoles", JSON.stringify(state.rolesEnabled))
 localStorage.setItem("mafiaRoleWeights", JSON.stringify(state.roleWeights))
 localStorage.setItem("mafiaRoleCounts", JSON.stringify(state.roleCounts))
@@ -376,6 +384,28 @@ content += `
 
     </div>
 
+    <div class="global-setting-card mafia-setting-card">
+
+  <div class="global-setting-top">
+    <span class="global-setting-title" style="color:${roleColors.mafia}">
+      Mafia Visibility
+    </span>
+    <span class="global-setting-badge">Global</span>
+  </div>
+
+  <div class="global-setting-row">
+    <label>Mafia know who the Framer is</label>
+
+    <label class="switch">
+      <input type="checkbox"
+        ${state.mafiaKnowsFramer ? "checked" : ""}
+        onchange="toggleMafiaKnowsFramer(this.checked)">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+</div>
+
   </div>
 
 </div>
@@ -535,6 +565,53 @@ roleBlock += `
       </div>
     </div>
   `
+}
+
+if(role === "framer" && enabled){
+roleBlock += `
+
+<div class="framer-extra-wrap show" id="framer-extra-wrap">
+
+  <div class="additional-settings-bar" onclick="toggleFramerExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow" style="transform:${state.framerExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+  </div>
+
+  <div class="framer-extra-settings ${state.framerExtraOpen ? "show" : ""}" id="framer-extra-settings">
+
+    <div class="framer-settings-card">
+
+      <div class="framer-setting-row">
+        <span class="framer-setting-label">Knows if frame was successful</span>
+
+        <label class="switch">
+          <input type="checkbox"
+            ${state.framerKnowsSuccess ? "checked" : ""}
+            onchange="toggleFramerKnowsSuccess(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="framer-setting-divider"></div>
+
+      <div class="framer-setting-row">
+        <span class="framer-setting-label">Knows who the mafia are</span>
+
+        <label class="switch">
+          <input type="checkbox"
+            ${state.framerKnowsMafia ? "checked" : ""}
+            onchange="toggleFramerKnowsMafia(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+`
 }
 
   if(role === "executioner" && enabled){
@@ -1038,6 +1115,76 @@ if(role === "sheriff"){
   }
 }
 
+if(role === "framer"){
+  let extraWrap = document.getElementById("framer-extra-wrap")
+
+  if(!enabled){
+    state.framerExtraOpen = false
+
+    if(extraWrap){
+      extraWrap.classList.remove("show")
+      setTimeout(() => {
+        extraWrap.remove()
+      }, 300)
+    }
+  }
+
+  if(enabled && !extraWrap){
+    let count = document.getElementById("framer-count")
+
+    count.insertAdjacentHTML("afterend", `
+
+<div class="framer-extra-wrap" id="framer-extra-wrap">
+
+  <div class="additional-settings-bar" onclick="toggleFramerExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow" style="transform:${state.framerExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+  </div>
+
+  <div class="framer-extra-settings ${state.framerExtraOpen ? "show" : ""}" id="framer-extra-settings">
+
+    <div class="framer-settings-card">
+
+      <div class="framer-setting-row">
+        <span class="framer-setting-label">Knows if frame was successful</span>
+
+        <label class="switch">
+          <input type="checkbox"
+            ${state.framerKnowsSuccess ? "checked" : ""}
+            onchange="toggleFramerKnowsSuccess(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="framer-setting-divider"></div>
+
+      <div class="framer-setting-row">
+        <span class="framer-setting-label">Knows who the mafia are</span>
+
+        <label class="switch">
+          <input type="checkbox"
+            ${state.framerKnowsMafia ? "checked" : ""}
+            onchange="toggleFramerKnowsMafia(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+`)
+    requestAnimationFrame(() => {
+      let inserted = document.getElementById("framer-extra-wrap")
+      if(inserted){
+        inserted.classList.add("show")
+      }
+    })
+  }
+}
+
 if(role === "mayor"){
   let extraWrap = document.getElementById("mayor-extra-wrap")
 
@@ -1175,6 +1322,7 @@ if(role === "executioner"){
   }
 }
 
+if(role === "framer" && !enabled) state.framerExtraOpen = false
 if(role === "doctor" && !enabled) state.doctorExtraOpen = false
 if(role === "jester" && !enabled) state.jesterExtraOpen = false
 if(role === "sheriff" && !enabled) state.sheriffExtraOpen = false
@@ -1273,6 +1421,24 @@ let savedMayorVotePower = localStorage.getItem("mafiaMayorVotePower")
 
 let savedSheriffExecutionerResult = localStorage.getItem("mafiaSheriffExecutionerResult")
 
+let savedFramerKnowsSuccess = localStorage.getItem("mafiaFramerKnowsSuccess")
+
+let savedFramerKnowsMafia = localStorage.getItem("mafiaFramerKnowsMafia")
+
+let savedMafiaKnowsFramer = localStorage.getItem("mafiaMafiaKnowsFramer")
+
+if(savedFramerKnowsSuccess){
+state.framerKnowsSuccess = JSON.parse(savedFramerKnowsSuccess)
+}
+
+if(savedFramerKnowsMafia){
+state.framerKnowsMafia = JSON.parse(savedFramerKnowsMafia)
+}
+
+if(savedMafiaKnowsFramer){
+state.mafiaKnowsFramer = JSON.parse(savedMafiaKnowsFramer)
+}
+
 if(savedSheriffExecutionerResult){
 state.sheriffExecutionerResult = JSON.parse(savedSheriffExecutionerResult)
 }
@@ -1326,6 +1492,56 @@ state.rolesEnabled = JSON.parse(savedRoles)
 }
 
 let revealIndex=0
+
+window.toggleFramerKnowsSuccess = function(enabled){
+
+state.framerKnowsSuccess = enabled
+
+localStorage.setItem(
+"mafiaFramerKnowsSuccess",
+JSON.stringify(enabled)
+)
+
+}
+
+window.toggleFramerKnowsMafia = function(enabled){
+
+state.framerKnowsMafia = enabled
+
+localStorage.setItem(
+"mafiaFramerKnowsMafia",
+JSON.stringify(enabled)
+)
+
+}
+
+window.toggleMafiaKnowsFramer = function(enabled){
+
+state.mafiaKnowsFramer = enabled
+
+localStorage.setItem(
+"mafiaMafiaKnowsFramer",
+JSON.stringify(enabled)
+)
+
+}
+
+window.toggleFramerExtras = function(){
+
+state.framerExtraOpen = !state.framerExtraOpen
+
+let panel = document.getElementById("framer-extra-settings")
+let arrow = document.querySelector("#framer-extra-wrap .additional-arrow")
+
+if(panel){
+panel.classList.toggle("show", state.framerExtraOpen)
+}
+
+if(arrow){
+arrow.style.transform = state.framerExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
+}
+
+}
 
 window.setMayorVotePower = function(value){
 
@@ -1896,6 +2112,36 @@ if(player.role === "executioner"){
   }
 }
 
+if(player.role === "framer" && state.framerKnowsMafia){
+  let mafiaNames = state.players
+    .filter(p => p.role === "mafia")
+    .map(p => p.name)
+
+  if(mafiaNames.length){
+    extraInfo += `
+      <div class="executioner-target-box">
+        <div class="executioner-target-label">Mafia Members</div>
+        <div class="executioner-target-name">${mafiaNames.join("<br>")}</div>
+      </div>
+    `
+  }
+}
+
+if(player.role === "mafia" && state.mafiaKnowsFramer){
+  let framerNames = state.players
+    .filter(p => p.role === "framer")
+    .map(p => p.name)
+
+  if(framerNames.length){
+    extraInfo += `
+      <div class="executioner-target-box">
+        <div class="executioner-target-label">Framer</div>
+        <div class="executioner-target-name">${framerNames.join("<br>")}</div>
+      </div>
+    `
+  }
+}
+
 render(`
 
 <div class="card">
@@ -2061,7 +2307,10 @@ showSettings()
 
 function saveSettingsToStorage(){
 
-  localStorage.setItem("mafiaSheriffExecutionerResult", JSON.stringify(state.sheriffExecutionerResult))
+localStorage.setItem("mafiaFramerKnowsSuccess", JSON.stringify(state.framerKnowsSuccess))
+localStorage.setItem("mafiaFramerKnowsMafia", JSON.stringify(state.framerKnowsMafia))
+localStorage.setItem("mafiaMafiaKnowsFramer", JSON.stringify(state.mafiaKnowsFramer))
+localStorage.setItem("mafiaSheriffExecutionerResult", JSON.stringify(state.sheriffExecutionerResult))
 localStorage.setItem("mafiaMayorVotePower", JSON.stringify(state.mayorVotePower))
 localStorage.setItem("mafiaSheriffJesterResult", JSON.stringify(state.sheriffJesterResult))
 localStorage.setItem("mafiaExecutionerTargetRule", JSON.stringify(state.executionerTargetRule))

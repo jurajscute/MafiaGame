@@ -763,7 +763,7 @@ if(investigate){
   }
 }
 
-if(investigate && frame && investigate === frame){
+if(state.framerKnowsSuccess && investigate && frame && investigate === frame){
   let framer = state.players.find(p => p.alive && p.role === "framer")
 
   if(framer){

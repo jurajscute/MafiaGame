@@ -37,6 +37,11 @@ townRolesOpen: false,
 neutralRolesOpen: false,
 mafiaRolesOpen: false,
 
+framerExtraOpen: false,
+framerKnowsSuccess: true,
+framerKnowsMafia: true,
+mafiaKnowsFramer: true,
+
 mayorVotePower: 2,
 mayorExtraOpen: false,
 
