@@ -2327,11 +2327,10 @@ box-shadow:
 }
 
 .global-setting-note{
-margin:10px 2px 0 2px;
+opacity:0.7;
 font-size:13px;
-line-height:1.45;
-opacity:0.78;
-text-align:left;
+margin:6px 0 0 0;
+padding-left:6px;
 }
 
 .settings-locked-mode .global-setting-card{

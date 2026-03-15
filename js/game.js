@@ -434,12 +434,17 @@ content += `
       </div>
 
       <div class="global-setting-row mafia-setting-row">
-        <label for="mafiaCountSelect">How many mafia?</label>
+<label for="mafiaCountSelect">How many mafia?</label>
 
-        <select id="mafiaCountSelect" onchange="window.updateMafiaCountOverride(this.value)">
-          ${mafiaOptions}
-        </select>
-      </div>
+<select id="mafiaCountSelect" onchange="window.updateMafiaCountOverride(this.value)">
+${mafiaOptions}
+</select>
+</div>
+
+<p class="global-setting-note">
+Recommended in Auto mode: <strong>${autoMafia}</strong><br>
+Max allowed with ${playerCount} player${playerCount === 1 ? "" : "s"}: <strong>${mafiaMax}</strong>
+</p>
 
 <div class="global-setting-divider"></div>
 
@@ -457,13 +462,18 @@ content += `
       <div class="global-setting-divider"></div>
 
       <div class="global-setting-row mafia-setting-row">
-        <label for="mafiaKillMethodSelect">How is the mafia target chosen?</label>
+<label for="mafiaKillMethodSelect">How is the mafia target chosen?</label>
 
-        <select id="mafiaKillMethodSelect" onchange="setMafiaKillMethod(this.value)">
-          <option value="leader" ${state.mafiaKillMethod === "leader" ? "selected" : ""}>Leader chooses (rotating)</option>
-          <option value="vote" ${state.mafiaKillMethod === "vote" ? "selected" : ""}>Mafia vote</option>
-        </select>
-      </div>
+<select id="mafiaKillMethodSelect" onchange="setMafiaKillMethod(this.value)">
+<option value="leader" ${state.mafiaKillMethod === "leader" ? "selected" : ""}>Leader chooses (rotating)</option>
+<option value="vote" ${state.mafiaKillMethod === "vote" ? "selected" : ""}>Mafia vote</option>
+</select>
+</div>
+
+<p class="global-setting-note">
+Leader chooses: one mafia picks the kill, and the leader rotates each night.<br>
+Mafia vote: all mafia vote, and ties are broken randomly among tied targets.
+</p>
 
       <div class="global-setting-divider"></div>
 
@@ -477,13 +487,6 @@ content += `
           <span class="slider"></span>
         </label>
       </div>
-
-      <p class="global-setting-note">
-        Recommended in Auto mode: <strong>${autoMafia}</strong><br>
-        Max allowed with ${playerCount} player${playerCount === 1 ? "" : "s"}: <strong>${mafiaMax}</strong><br><br>
-        Leader chooses: one mafia picks the kill, and the leader rotates each night.<br>
-        Mafia vote: all mafia vote, and ties are broken randomly among tied targets.
-      </p>
 
     </div>
 
