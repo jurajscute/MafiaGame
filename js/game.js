@@ -1,5 +1,4 @@
-import {state} from "./state.js"
-import {addLogEntry} from "./state.js"
+import {state, addLogEntry, resetGameTracking} from "./state.js"
 import {roles} from "./roles.js"
 import {shuffle,mafiaCount} from "./utils.js"
 import {render} from "./ui.js"
@@ -68,55 +67,13 @@ openModal(`
 
 }
 
-window.toggleRolesSection = function(){
+window.toggleHostMode = function(enabled){
+  state.hostMode = enabled
 
-state.rolesSectionOpen = !state.rolesSectionOpen
-
-let panel = document.getElementById("roles-section-content")
-let arrow = document.querySelector("#roles-section-wrap .section-arrow")
-
-if(panel){
-panel.classList.toggle("show", state.rolesSectionOpen)
-}
-
-if(arrow){
-arrow.style.transform = state.rolesSectionOpen ? "rotate(180deg)" : "rotate(0deg)"
-}
-
-}
-
-window.toggleGlobalSettingsSection = function(){
-
-state.globalSettingsOpen = !state.globalSettingsOpen
-
-let panel = document.getElementById("global-settings-content")
-let arrow = document.querySelector("#global-settings-wrap .section-arrow")
-
-if(panel){
-panel.classList.toggle("show", state.globalSettingsOpen)
-}
-
-if(arrow){
-arrow.style.transform = state.globalSettingsOpen ? "rotate(180deg)" : "rotate(0deg)"
-}
-
-}
-
-window.togglePresetsSection = function(){
-
-state.presetsSectionOpen = !state.presetsSectionOpen
-
-let panel = document.getElementById("presets-section-content")
-let arrow = document.querySelector("#presets-section-wrap .section-arrow")
-
-if(panel){
-panel.classList.toggle("show", state.presetsSectionOpen)
-}
-
-if(arrow){
-arrow.style.transform = state.presetsSectionOpen ? "rotate(180deg)" : "rotate(0deg)"
-}
-
+  localStorage.setItem(
+    "mafiaHostMode",
+    JSON.stringify(enabled)
+  )
 }
 
 window.resetSettings = function(){
@@ -168,25 +125,10 @@ state.mafiaCountOverride = 0
 state.revealRolesOnElimination = "none"
 state.executionerWinIfDead = false
 
-state.framerExtraOpen = false
 state.framerKnowsSuccess = true
 state.framerKnowsMafia = true
 state.mafiaKnowsFramer = true
 
-state.globalSettingsOpen = false
-state.executionerExtraOpen = false
-state.mayorExtraOpen = false
-state.doctorExtraOpen = false
-state.sheriffExtraOpen = false
-state.jesterExtraOpen = false
-
-state.rolesSectionOpen = false
-state.presetsSectionOpen = false
-state.mafiaRolesOpen = false
-state.townRolesOpen = false
-state.neutralRolesOpen = false
-
-state.spiritExtraOpen = false
 state.spiritRevealType = "exact"
 state.spiritActivation = "night_only"
 state.spiritCanSkipReveal = true
@@ -196,12 +138,11 @@ state.sheriffExecutionerResult = "not_innocent"
 
 state.mafiaKillMethod = "leader"
 state.currentMafiaLeader = null
-state.mafiaLeaderRotationIndex = 0
+state.mafiaLeaderIndex = 0
 state.mafiaKnowsFirstLeader = false
 
 state.vigilanteCanKillNeutrals = true
 state.vigilanteWrongKillOutcome = "both_die"
-state.vigilanteExtraOpen = false
 
 state.jesterWinIfVigilanteKilled = false
 state.executionerWinIfVigilanteKillsTarget = false
@@ -231,23 +172,6 @@ localStorage.setItem("mafiaSheriffExecutionerResult", JSON.stringify(state.sheri
 localStorage.setItem("mafiaMayorVotePower", JSON.stringify(state.mayorVotePower))
 
 showSettings()
-
-}
-
-window.toggleSpiritExtras = function(){
-
-state.spiritExtraOpen = !state.spiritExtraOpen
-
-let panel = document.getElementById("spirit-extra-settings")
-let arrow = document.querySelector("#spirit-extra-wrap .additional-arrow")
-
-if(panel){
-panel.classList.toggle("show", state.spiritExtraOpen)
-}
-
-if(arrow){
-arrow.style.transform = state.spiritExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
-}
 
 }
 
@@ -284,23 +208,6 @@ JSON.stringify(enabled)
 
 }
 
-window.toggleMafiaRolesGroup = function(){
-
-  state.mafiaRolesOpen = !state.mafiaRolesOpen
-
-  let panel = document.getElementById("mafia-roles-content")
-  let arrow = document.querySelector("#mafia-roles-wrap .section-arrow")
-
-  if(panel){
-    panel.classList.toggle("show", state.mafiaRolesOpen)
-  }
-
-  if(arrow){
-    arrow.style.transform = state.mafiaRolesOpen ? "rotate(180deg)" : "rotate(0deg)"
-  }
-
-}
-
 function initSettingsModal(){
   const modal = document.getElementById("infoModal")
   const modalContent = modal.querySelector(".modal-content")
@@ -327,18 +234,12 @@ showRoleRevealEnd()
 }
 
 window.confirmStartGame = function(){
-
-state.openExecutionerReveal = null
-
-state.gameStarted = true
-resetGameTracking()
-
-assignRoles()
-
-revealIndex = 0
-
-showRoleReveal()
-
+  state.openExecutionerReveal = null
+  state.gameStarted = true
+  resetGameTracking()
+  assignRoles()
+  revealIndex = 0
+  showRoleReveal()
 }
 
 function showSettings() {
@@ -768,23 +669,6 @@ function showSettings() {
   }
 }
 
-window.toggleVigilanteExtras = function(){
-
-state.vigilanteExtraOpen = !state.vigilanteExtraOpen
-
-let panel = document.getElementById("vigilante-extra-settings")
-let arrow = document.querySelector("#vigilante-extra-wrap .additional-arrow")
-
-if(panel){
-panel.classList.toggle("show", state.vigilanteExtraOpen)
-}
-
-if(arrow){
-arrow.style.transform = state.vigilanteExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
-}
-
-}
-
 function openModal(content, onOpen){
 
   const modal = document.getElementById("infoModal")
@@ -800,40 +684,6 @@ function openModal(content, onOpen){
 
 }
 
-window.toggleJesterExtras = function(){
-
-state.jesterExtraOpen = !state.jesterExtraOpen
-
-let panel = document.getElementById("jester-extra-settings")
-let arrow = document.querySelector("#jester-extra-wrap .additional-arrow")
-
-if(panel){
-panel.classList.toggle("show", state.jesterExtraOpen)
-}
-
-if(arrow){
-arrow.style.transform = state.jesterExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
-}
-
-}
-
-window.toggleMayorExtras = function(){
-
-state.mayorExtraOpen = !state.mayorExtraOpen
-
-let panel = document.getElementById("mayor-extra-settings")
-let arrow = document.querySelector("#mayor-extra-wrap .additional-arrow")
-
-if(panel){
-panel.classList.toggle("show", state.mayorExtraOpen)
-}
-
-if(arrow){
-arrow.style.transform = state.mayorExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
-}
-
-}
-
 window.toggleJesterVigilanteWin = function(enabled){
 
 state.jesterWinIfVigilanteKilled = enabled
@@ -845,22 +695,6 @@ JSON.stringify(enabled)
 
 }
 
-window.toggleExecutionerExtras = function(){
-
-state.executionerExtraOpen = !state.executionerExtraOpen
-
-let panel = document.getElementById("executioner-extra-settings")
-let arrow = document.querySelector("#executioner-extra-wrap .additional-arrow")
-
-if(panel){
-panel.classList.toggle("show", state.executionerExtraOpen)
-}
-
-if(arrow){
-arrow.style.transform = state.executionerExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
-}
-
-}
 
 function swapModalContent(newContent, onSwapDone){
 
@@ -953,69 +787,10 @@ JSON.stringify(state.roleWeights)
 
 }
 
-window.toggleTownRolesGroup = function(){
-  state.townRolesOpen = !state.townRolesOpen
-
-  const panel = document.getElementById("town-roles-content")
-  const arrow = document.querySelector("#town-roles-wrap .section-arrow")
-
-  if(panel){
-    panel.classList.toggle("show", state.townRolesOpen)
-  }
-
-  if(arrow){
-    arrow.style.transform = state.townRolesOpen ? "rotate(180deg)" : "rotate(0deg)"
-  }
-}
-
-window.toggleNeutralRolesGroup = function(){
-  state.neutralRolesOpen = !state.neutralRolesOpen
-
-  const panel = document.getElementById("neutral-roles-content")
-  const arrow = document.querySelector("#neutral-roles-wrap .section-arrow")
-
-  if(panel){
-    panel.classList.toggle("show", state.neutralRolesOpen)
-  }
-
-  if(arrow){
-    arrow.style.transform = state.neutralRolesOpen ? "rotate(180deg)" : "rotate(0deg)"
-  }
-}
-
 window.showSettings = showSettings
 
-window.toggleDoctorExtras = function(){
-
-state.doctorExtraOpen = !state.doctorExtraOpen
-
-let panel = document.getElementById("doctor-extra-settings")
-let arrow = document.querySelector("#doctor-extra-wrap .additional-arrow")
-
-if(panel){
-panel.classList.toggle("show", state.doctorExtraOpen)
-}
-
-if(arrow){
-arrow.style.transform = state.doctorExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
-}
-
-}
-
 window.toggleRole = function(role, enabled){
-
   state.rolesEnabled[role] = enabled
-
-  if(!enabled){
-    if(role === "doctor") state.doctorExtraOpen = false
-    if(role === "jester") state.jesterExtraOpen = false
-    if(role === "sheriff") state.sheriffExtraOpen = false
-    if(role === "spirit") state.spiritExtraOpen = false
-    if(role === "framer") state.framerExtraOpen = false
-    if(role === "mayor") state.mayorExtraOpen = false
-    if(role === "executioner") state.executionerExtraOpen = false
-    if(role === "vigilante") state.vigilanteExtraOpen = false
-  }
 
   localStorage.setItem(
     "mafiaRoles",
@@ -1037,8 +812,6 @@ function closeInfo(){
 
 window.showInfo = showInfo
 window.closeInfo = closeInfo
-
-window.showInfo = showInfo
 
 function savePlayers(){
 localStorage.setItem("mafiaPlayers", JSON.stringify(state.players))
@@ -1268,23 +1041,6 @@ JSON.stringify(enabled)
 
 }
 
-window.toggleFramerExtras = function(){
-
-state.framerExtraOpen = !state.framerExtraOpen
-
-let panel = document.getElementById("framer-extra-settings")
-let arrow = document.querySelector("#framer-extra-wrap .additional-arrow")
-
-if(panel){
-panel.classList.toggle("show", state.framerExtraOpen)
-}
-
-if(arrow){
-arrow.style.transform = state.framerExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
-}
-
-}
-
 window.setMafiaKillMethod = function(value){
 
 state.mafiaKillMethod = value
@@ -1419,23 +1175,6 @@ JSON.stringify(enabled)
 
 }
 
-window.toggleSheriffExtras = function(){
-
-state.sheriffExtraOpen = !state.sheriffExtraOpen
-
-let panel = document.getElementById("sheriff-extra-settings")
-let arrow = document.querySelector("#sheriff-extra-wrap .additional-arrow")
-
-if(panel){
-panel.classList.toggle("show", state.sheriffExtraOpen)
-}
-
-if(arrow){
-arrow.style.transform = state.sheriffExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
-}
-
-}
-
 function showHome(){
 
 render(`
@@ -1526,19 +1265,6 @@ state.players = []
 
 renderPlayerSetup()
 clampMafiaOverride()
-}
-
-function maybeAddRole(role, pool){
-
-if(!state.rolesEnabled[role]) return
-
-let weight = state.roleWeights[role] || 0
-let roll = Math.random()*100
-
-if(roll < weight){
-pool.push(role)
-}
-
 }
 
 function assignRoles(){
@@ -1674,10 +1400,6 @@ if(role === "doctor" && state.doctorRevealSave){
 extras = ` <span style="opacity:0.7;">• reveals saved player</span>`
 }
 
-if(state.executionerWinIfVigilanteKillsTarget){
-  extras += ` <span style="opacity:0.7;">• wins if Vigilante kills target</span>`
-}
-
 if(role === "jester"){
 let jesterRuleText = {
   innocent: "innocent to Sheriff",
@@ -1686,6 +1408,22 @@ let jesterRuleText = {
 }
 
 extras = ` <span style="opacity:0.7;">• ${jesterRuleText[state.sheriffJesterResult]}</span>`
+
+if(state.jesterWinIfVigilanteKilled){
+  extras += ` <span style="opacity:0.7;">• wins if Vigilante kills them</span>`
+}
+}
+
+if(role === "vigilante"){
+  extras = ` <span style="opacity:0.7;">• ${state.vigilanteCanKillNeutrals ? "can kill neutrals" : "cannot kill neutrals"}</span>`
+
+  let wrongKillText = {
+    both_die: "wrong target: both die",
+    only_vigilante_dies: "wrong target: only Vigilante dies",
+    only_target_dies: "wrong target: only target dies"
+  }
+
+  extras += ` <span style="opacity:0.7;">• ${wrongKillText[state.vigilanteWrongKillOutcome]}</span>`
 }
 
 if(role === "mayor"){
@@ -1718,6 +1456,10 @@ extras += ` <span style="opacity:0.7;">• ${executionerSheriffText[state.sherif
 
 if(state.executionerWinIfDead){
   extras += ` <span style="opacity:0.7;">• wins even if dead</span>`
+}
+
+if(state.executionerWinIfVigilanteKillsTarget){
+  extras += ` <span style="opacity:0.7;">• wins if Vigilante kills target</span>`
 }
 
 }
@@ -1759,17 +1501,6 @@ ${warningsHTML}
 
 }
 
-window.confirmStartGame = function(){
-
-state.gameStarted = true
-
-assignRoles()
-
-revealIndex = 0
-
-showRoleReveal()
-
-}
 
 function getBalanceWarnings(){
 
@@ -2005,12 +1736,36 @@ showRoleReveal()
 
 }
 
+function resetPresetRoles(){
+  state.rolesEnabled.doctor = false
+  state.rolesEnabled.sheriff = false
+  state.rolesEnabled.jester = false
+  state.rolesEnabled.executioner = false
+  state.rolesEnabled.mayor = false
+  state.rolesEnabled.spirit = false
+  state.rolesEnabled.framer = false
+  state.rolesEnabled.vigilante = false
+
+  state.roleWeights.doctor = 100
+  state.roleWeights.sheriff = 100
+  state.roleWeights.jester = 100
+  state.roleWeights.executioner = 100
+  state.roleWeights.mayor = 100
+  state.roleWeights.spirit = 100
+  state.roleWeights.framer = 100
+  state.roleWeights.vigilante = 100
+
+  state.roleCounts.doctor = 1
+  state.roleCounts.sheriff = 1
+  state.roleCounts.jester = 1
+  state.roleCounts.executioner = 1
+  state.roleCounts.mayor = 1
+  state.roleCounts.spirit = 1
+  state.roleCounts.framer = 1
+  state.roleCounts.vigilante = 1
+}
 
 window.applyPreset = function(preset){
-
-state.doctorExtraOpen = false
-state.sheriffExtraOpen = false
-
 resetPresetRoles()
 
 if(preset === "classic"){
@@ -2055,11 +1810,14 @@ state.rolesEnabled.vigilante = false
 state.roleWeights.vigilante = 0
 state.roleCounts.vigilante = 1
 
+state.jesterWinIfVigilanteKilled = false
+state.executionerWinIfVigilanteKillsTarget = false
+state.vigilanteCanKillNeutrals = true
+state.vigilanteWrongKillOutcome = "both_die"
+
 state.mafiaCountOverride = 0
 state.revealRolesOnElimination = "none"
 }
-
-resetPresetRoles()
 
 if(preset === "beginner"){
 state.rolesEnabled.doctor = true
@@ -2103,11 +1861,14 @@ state.framerKnowsMafia = true
 state.mafiaKnowsFramer = true
 state.mafiaKillMethod = "leader"
 
+state.jesterWinIfVigilanteKilled = false
+state.executionerWinIfVigilanteKillsTarget = false
+state.vigilanteCanKillNeutrals = true
+state.vigilanteWrongKillOutcome = "both_die"
+
 state.mafiaCountOverride = 0
 state.revealRolesOnElimination = "death_and_vote"
 }
-
-resetPresetRoles()
 
 if(preset === "chaotic"){
 state.rolesEnabled.doctor = true
@@ -2150,6 +1911,11 @@ state.mafiaKillMethod = "vote"
 state.rolesEnabled.vigilante = true
 state.roleWeights.vigilante = 100
 state.roleCounts.vigilante = 1
+
+state.jesterWinIfVigilanteKilled = true
+state.executionerWinIfVigilanteKillsTarget = true
+state.vigilanteCanKillNeutrals = true
+state.vigilanteWrongKillOutcome = "both_die"
 
 state.mafiaCountOverride = 0
 state.revealRolesOnElimination = "death_and_vote"

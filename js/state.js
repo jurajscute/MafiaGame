@@ -10,20 +10,11 @@ openExecutionerReveal: null,
 
 doctorRevealSave: false,
 
-doctorExtraOpen: false,
-
 sheriffExactReveal: false,
-sheriffExtraOpen: false,
 
 mafiaCountOverride: 0,
 
-rolesSectionOpen: false,
-
 revealRolesOnElimination: "none",
-
-globalSettingsOpen: false,
-
-presetsSectionOpen: false,
 
 nightStep: "select",
 nightResultIndex: 0,
@@ -33,28 +24,21 @@ nightResolved: null,
 sheriffJesterResult: "not_innocent",
 sheriffExecutionerResult: "not_innocent",
 
-townRolesOpen: false,
-neutralRolesOpen: false,
-mafiaRolesOpen: false,
-
-framerExtraOpen: false,
 framerKnowsSuccess: true,
 framerKnowsMafia: true,
 mafiaKnowsFramer: true,
 
-spiritExtraOpen: false,
 spiritRevealType: "exact",
 spiritActivation: "night_only",
 spiritCanSkipReveal: true,
 
 mayorVotePower: 2,
-mayorExtraOpen: false,
 
 spiritReveal: null,
 
 mafiaKillMethod: "leader",
 currentMafiaLeader: null,
-mafiaLeaderRotationIndex: 0,
+mafiaLeaderIndex: 0,
 
 mafiaKnowsFirstLeader: false,
 
@@ -78,7 +62,6 @@ night:0,
 nightTurnIndex: 0,
 
 mafiaLeaderOrder: [],
-mafiaLeaderIndex: 0,
 
 rolesEnabled:{
 doctor:true,
@@ -91,7 +74,6 @@ vigilanteWrongKillOutcome: "both_die",
 
 executionerTargets: {},
 executionerTargetRule: "neither",
-executionerExtraOpen: false,
 executionerWinIfDead: false,
 
 votes:{},
@@ -132,12 +114,28 @@ export function resetNightActions(){
 }
 
 export function resetGameTracking(){
-state.gameLog = []
-state.gameStats = {
-nights: 0,
-votesCast: 0,
-eliminations: 0
-}
+  state.gameStats = {
+    nights: 0,
+    votesCast: 0,
+    eliminations: 0
+  }
+
+  state.gameLog = []
+  state.nightDeaths = []
+  state.nightActions = []
+  state.nightPrivateResults = []
+  state.nightResolved = null
+  state.votes = {}
+  state.spiritReveal = null
+  state.pendingSpiritVoteReveal = null
+  state.pendingVoteEliminated = null
+  state.pendingVoteResultsHTML = ""
+  state.vigilanteOutcomeToShow = null
+  state.vigilantePublicReveal = null
+
+  state.players.forEach(p => {
+    p.alive = true
+  })
 }
 
 export function addLogEntry(text){
