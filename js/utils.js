@@ -15,3 +15,4 @@ export function shuffle(array) {
 export function mafiaCount(playerCount) {
     return Math.max(1, Math.floor(playerCount / 5));
 }
+

@@ -68,6 +68,9 @@ night:0,
 
 nightTurnIndex: 0,
 
+mafiaLeaderOrder: [],
+mafiaLeaderIndex: 0,
+
 rolesEnabled:{
 doctor:true,
 sheriff:true,

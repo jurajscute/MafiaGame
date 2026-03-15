@@ -867,24 +867,30 @@ if(modal.classList.contains("show")){
 
 function assignCurrentMafiaLeader(){
 
-let aliveMafia = state.players.filter(p => p.alive && p.role === "mafia")
+let aliveMafia = state.players
+  .filter(p => p.alive && p.role === "mafia")
+  .map(p => p.name)
 
 if(!aliveMafia.length){
   state.currentMafiaLeader = null
   return
 }
 
-let mafiaPlayers = players.filter(p => p.role === "mafia")
+// Remove dead mafia from the stored order
+state.mafiaLeaderOrder = state.mafiaLeaderOrder.filter(name =>
+  aliveMafia.includes(name)
+)
 
-if(mafiaPlayers.length){
-  state.mafiaLeaderRotationIndex = Math.floor(Math.random() * mafiaPlayers.length)
-}else{
-  state.mafiaLeaderRotationIndex = 0
+// If somehow empty (edge case), rebuild it
+if(!state.mafiaLeaderOrder.length){
+  state.mafiaLeaderOrder = shuffle([...aliveMafia])
+  state.mafiaLeaderIndex = 0
 }
 
-state.currentMafiaLeader = null
-state.currentMafiaLeader = aliveMafia[index].name
-state.mafiaLeaderRotationIndex++
+state.currentMafiaLeader =
+  state.mafiaLeaderOrder[state.mafiaLeaderIndex % state.mafiaLeaderOrder.length]
+
+state.mafiaLeaderIndex++
 }
 
 function openModal(content, onOpen){
@@ -2077,6 +2083,14 @@ shuffle(pool)
 players.forEach((p,i)=>{
 p.role = pool[i]
 })
+
+let mafiaPlayers = players
+  .filter(p => p.role === "mafia")
+  .map(p => p.name)
+
+state.mafiaLeaderOrder = shuffle([...mafiaPlayers])
+state.mafiaLeaderIndex = 0
+state.currentMafiaLeader = state.mafiaLeaderOrder[0] || null
 
 state.executionerTargets = {}
 
