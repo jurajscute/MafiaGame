@@ -609,7 +609,7 @@ function showSettings() {
     }
 
     if(role === "jester" && enabled){
-      roleBlock += `
+  roleBlock += `
 
 <div class="jester-extra-wrap show" id="jester-extra-wrap">
 
@@ -632,27 +632,27 @@ function showSettings() {
         </select>
       </div>
 
+      <div class="jester-setting-divider"></div>
+
+      <div class="jester-setting-row">
+        <span class="jester-setting-label">Win if killed by Vigilante</span>
+
+        <label class="switch">
+          <input type="checkbox"
+            ${state.jesterWinIfVigilanteKilled ? "checked" : ""}
+            onchange="toggleJesterVigilanteWin(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
     </div>
 
   </div>
 
-<div class="jester-setting-divider"></div>
-
-<div class="jester-setting-row">
-  <span class="jester-setting-label">Win if killed by Vigilante</span>
-
-  <label class="switch">
-    <input type="checkbox"
-      ${state.jesterWinIfVigilanteKilled ? "checked" : ""}
-      onchange="toggleJesterVigilanteWin(this.checked)">
-    <span class="slider"></span>
-  </label>
-</div>
-
 </div>
 
 `
-    }
+}
 
     if(role === "sheriff" && enabled){
       roleBlock += `
@@ -1021,6 +1021,17 @@ panel.classList.toggle("show", state.mayorExtraOpen)
 if(arrow){
 arrow.style.transform = state.mayorExtraOpen ? "rotate(180deg)" : "rotate(0deg)"
 }
+
+}
+
+window.toggleJesterVigilanteWin = function(enabled){
+
+state.jesterWinIfVigilanteKilled = enabled
+
+localStorage.setItem(
+"mafiaJesterVigilanteWin",
+JSON.stringify(enabled)
+)
 
 }
 
