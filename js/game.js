@@ -2357,12 +2357,11 @@ render(`
 }
 
 function getInitialMafiaLeaderName(){
-  let mafiaPlayers = state.players.filter(p => p.role === "mafia")
+  if(!state.mafiaLeaderOrder || !state.mafiaLeaderOrder.length){
+    return null
+  }
 
-  if(!mafiaPlayers.length) return null
-
-  let index = state.mafiaLeaderRotationIndex % mafiaPlayers.length
-  return mafiaPlayers[index].name
+  return state.mafiaLeaderOrder[0]
 }
 
 function revealRole(){
@@ -2371,21 +2370,6 @@ let player = state.players[revealIndex]
 let color = roleColors[player.role] || "white"
 let role = roles[player.role]
 let extraInfo = ""
-
-if(player.role === "mafia" && state.mafiaKillMethod === "leader"){
-  let leaderName = state.players.find(p => p.role === "mafia") ? getInitialMafiaLeaderName() : null
-
-  if(leaderName){
-    extraInfo += `
-      <div class="framer-target-box">
-        <div class="framer-target-label">Night 1 Leader</div>
-        <div class="framer-target-name">
-          ${leaderName}${leaderName === player.name ? " (You)" : ""}
-        </div>
-      </div>
-    `
-  }
-}
 
 if(player.role === "executioner"){
   let target = state.executionerTargets[player.name]
@@ -2432,8 +2416,8 @@ if(player.role === "mafia" && state.mafiaKnowsFramer){
 if(player.role === "mafia" && state.mafiaKillMethod === "leader" && player.name === state.currentMafiaLeader){
   extraInfo += `
     <div class="framer-target-box">
-      <div class="framer-target-label">Tonight</div>
-      <div class="framer-target-name">You are the Mafia Leader</div>
+      <div class="framer-target-label">You decide first.</div>
+      <div class="framer-target-name">Make the first move for the mafia!</div>
     </div>
   `
 }
