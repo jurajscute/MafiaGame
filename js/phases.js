@@ -1388,7 +1388,7 @@ if(state.vigilantePublicReveal){
     }
 
     if(v.vigilanteDies){
-      text += `${text ? "<br>" : ""}After murdering an innocent, the Vigilante stabs their own heart in devastation.`
+      text += `${text ? "<br>" : ""}The Vigilante stabs their own heart in devastation.`
 
       if(shooterPlayer && shouldRevealOnNightDeath()){
         text += `<br>${revealedRoleText(shooterPlayer)}`

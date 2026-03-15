@@ -1676,6 +1676,51 @@ max-height 0.35s ease,
 margin-bottom 0.35s ease;
 }
 
+.vigilante-setting-select{
+  min-width: 190px;
+  padding: 10px 14px;
+  border: 1px solid rgba(87, 98, 255, 0.28);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(86, 74, 255, 0.95), rgba(91, 34, 166, 0.95));
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow:
+    0 0 12px rgba(123, 87, 255, 0.18),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  background-image:
+    linear-gradient(180deg, rgba(77, 74, 255, 0.95), rgba(63, 34, 166, 0.95)),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat, no-repeat;
+  background-position: 0 0, right 12px center;
+  background-size: auto, 16px;
+  padding-right: 40px;
+}
+
+.vigilante-setting-select:hover{
+  box-shadow:
+    0 0 18px rgba(123, 87, 255, 0.28),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.vigilante-setting-select:focus{
+  border-color: rgba(170, 130, 255, 0.65);
+  box-shadow:
+    0 0 0 3px rgba(123, 87, 255, 0.18),
+    0 0 18px rgba(123, 87, 255, 0.24);
+}
+
+.vigilante-setting-select option{
+  background: #2a2142;
+  color: #fff;
+}
+
 .framer-extra-wrap.show{
 max-height:220px;
 opacity:1;
