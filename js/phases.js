@@ -945,17 +945,23 @@ if(saveSucceeded){
       })
     })
 
-  let mafiaPlayers = state.players.filter(p => p.alive && p.role === "mafia")
+  let mafiaKillerName = null
 
-  mafiaPlayers.forEach(mafiaPlayer => {
+  if(state.mafiaKillMethod === "leader"){
+    mafiaKillerName = state.currentMafiaLeader
+  }else if(kills.length){
+    let killAction = kills.find(k => k.target === killTarget) || kills[0]
+    mafiaKillerName = killAction.actor
+  }
+
+  if(mafiaKillerName){
     privateResults.push({
       type: "mafia_kill_blocked",
-      playerName: mafiaPlayer.name,
+      playerName: mafiaKillerName,
       targetName: killTarget
     })
-  })
+  }
 }
-
 // Public morning result
 if(killTarget && !saveSucceeded){
 

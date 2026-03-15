@@ -874,7 +874,15 @@ if(!aliveMafia.length){
   return
 }
 
-let index = state.mafiaLeaderRotationIndex % aliveMafia.length
+let mafiaPlayers = players.filter(p => p.role === "mafia")
+
+if(mafiaPlayers.length){
+  state.mafiaLeaderRotationIndex = Math.floor(Math.random() * mafiaPlayers.length)
+}else{
+  state.mafiaLeaderRotationIndex = 0
+}
+
+state.currentMafiaLeader = null
 state.currentMafiaLeader = aliveMafia[index].name
 state.mafiaLeaderRotationIndex++
 }
@@ -2334,12 +2342,36 @@ render(`
 
 }
 
+function getInitialMafiaLeaderName(){
+  let mafiaPlayers = state.players.filter(p => p.role === "mafia")
+
+  if(!mafiaPlayers.length) return null
+
+  let index = state.mafiaLeaderRotationIndex % mafiaPlayers.length
+  return mafiaPlayers[index].name
+}
+
 function revealRole(){
 
 let player = state.players[revealIndex]
 let color = roleColors[player.role] || "white"
 let role = roles[player.role]
 let extraInfo = ""
+
+if(player.role === "mafia" && state.mafiaKillMethod === "leader"){
+  let leaderName = state.players.find(p => p.role === "mafia") ? getInitialMafiaLeaderName() : null
+
+  if(leaderName){
+    extraInfo += `
+      <div class="framer-target-box">
+        <div class="framer-target-label">Night 1 Leader</div>
+        <div class="framer-target-name">
+          ${leaderName}${leaderName === player.name ? " (You)" : ""}
+        </div>
+      </div>
+    `
+  }
+}
 
 if(player.role === "executioner"){
   let target = state.executionerTargets[player.name]
