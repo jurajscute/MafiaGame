@@ -469,6 +469,31 @@ content += `
     Mafia vote: all mafia vote, and ties are broken randomly among tied targets.
   </p>
 
+<div class="global-setting-card mafia-setting-card">
+
+  <div class="global-setting-top">
+    <span class="global-setting-title" style="color:${roleColors.mafia}">
+      Mafia Kill Method
+    </span>
+    <span class="global-setting-badge">Global</span>
+  </div>
+
+  <div class="global-setting-row mafia-setting-row">
+    <label for="mafiaKillMethodSelect">How is the mafia target chosen?</label>
+
+    <select id="mafiaKillMethodSelect" onchange="setMafiaKillMethod(this.value)">
+      <option value="leader" ${state.mafiaKillMethod === "leader" ? "selected" : ""}>Leader chooses (rotating)</option>
+      <option value="vote" ${state.mafiaKillMethod === "vote" ? "selected" : ""}>Mafia vote</option>
+    </select>
+  </div>
+
+  <p class="global-setting-note">
+    Leader chooses: one mafia picks the kill, and the leader rotates each night.<br>
+    Mafia vote: all mafia vote, and ties are broken randomly among tied targets.
+  </p>
+
+</div>
+
 </div>
 
     <div class="global-setting-card mafia-setting-card">
