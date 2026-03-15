@@ -127,7 +127,8 @@ villager: "#8dc2ff",
 jester: "#ff3ea5",
 executioner: "#7a2f6f",
 mayor: "#1d8161",
-spirit: "#e6aafd"
+spirit: "#e6aafd",
+framer: "#8b0000"
 }
 
 function showNightSelectionTurn(){
@@ -218,6 +219,34 @@ text-shadow:
 0 0 20px ${item.resultColor};
 ">
 ${item.result}
+</h1>
+
+<button onclick="window.nextNightResultTurn()">Hide</button>
+
+${renderHostControls()}
+
+</div>
+
+`)
+return
+}
+
+if(item && item.type === "framer_success"){
+render(`
+
+<div class="card role-framer">
+
+<h2 class="role-title">FRAMED SUCCESSFULLY</h2>
+
+<p>You successfully framed</p>
+
+<h1 style="
+color:${roleColors.framer};
+text-shadow:
+0 0 10px ${roleColors.framer},
+0 0 20px ${roleColors.framer};
+">
+${item.targetName.toUpperCase()}
 </h1>
 
 <button onclick="window.nextNightResultTurn()">Hide</button>
@@ -470,10 +499,12 @@ state.players
 .filter(p => {
     if(!p.alive) return false
 
-    // Doctor can target themselves
     if(player.role === "doctor") return true
 
-    // Other roles cannot target themselves
+    if(player.role === "framer"){
+      return p.name !== player.name && p.role !== "mafia" && p.role !== "framer"
+    }
+
     return p.name !== player.name
 })
 .forEach(p=>{
@@ -728,6 +759,18 @@ if(investigate){
       targetName: target.name,
       result: sheriffData.result,
       resultColor: sheriffData.resultColor
+    })
+  }
+}
+
+if(investigate && frame && investigate === frame){
+  let framer = state.players.find(p => p.alive && p.role === "framer")
+
+  if(framer){
+    privateResults.push({
+      type: "framer_success",
+      playerName: framer.name,
+      targetName: frame
     })
   }
 }

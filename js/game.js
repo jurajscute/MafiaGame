@@ -21,7 +21,8 @@ villager: "#8dc2ff",
 jester: "#ff3ea5",
 executioner: "#7a2f6f",
 mayor: "#1d8161",
-spirit: "#e6aafd"
+spirit: "#e6aafd",
+framer: "#8b0000"
 }
 
 window.updateRoleCount = function(role,value){
@@ -125,7 +126,8 @@ sheriff: false,
 jester: false,
 executioner: false,
 mayor: false,
-spirit: false
+spirit: false,
+framer: false
 }
 
 state.roleWeights = {
@@ -134,7 +136,8 @@ sheriff: 100,
 jester: 100,
 executioner: 100,
 mayor: 100,
-spirit: 100
+spirit: 100,
+framer: 100
 }
 
 state.roleCounts = {
@@ -143,7 +146,8 @@ sheriff: 1,
 jester: 1,
 executioner: 1,
 mayor: 1,
-spirit: 1
+spirit: 1,
+framer: 1
 }
 
 state.executionerTargetRule = "neither"
@@ -236,8 +240,8 @@ function showSettings() {
 let townRolesContent = ""
 let neutralRolesContent = ""
 
-const townRoles = ["doctor", "sheriff", "mayor","spirit"]
-const neutralRoles = ["jester", "executioner"]
+const townRoles = ["doctor", "sheriff", "mayor", "spirit"]
+const neutralRoles = ["jester", "executioner", "framer"]
 
   let content = `
     <div class="modal-content">
@@ -1548,7 +1552,7 @@ for(let i=0;i<mafia;i++){
 pool.push("mafia")
 }
 
-["doctor","sheriff","jester","executioner","mayor","spirit"].forEach(role=>{
+["doctor","sheriff","jester","executioner","mayor","spirit","framer"].forEach(role=>{
 
 if(!state.rolesEnabled[role]) return
 

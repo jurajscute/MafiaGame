@@ -172,4 +172,27 @@ noResultTexts:[
 description:"If you are killed at night and not saved, you may reveal one player's role to the town before morning."
 },
 
+framer:{
+team:"mafia",
+nightAction:"frame",
+receivesNightResult:false,
+noResultTexts:[
+"The shadows hid your work well.",
+"No one noticed your deception tonight.",
+"You planted doubt and slipped away.",
+"A false trail now lingers in the dark.",
+"You twisted the truth without being seen.",
+"The town will wake up one lie deeper.",
+"You left suspicion where there was none.",
+"Well, that was useless.",
+"Maybe gaslighting IS the way to go...",
+"'That'll get 'em'",
+"You are one hell of a liar.",
+"You know, at some point you'll have to stop lying...",
+"Stop manipulating people.",
+"There's only so many lies they can fall for.",
+],
+description:"Choose a player each night to make them appear not innocent to the Sheriff."
+},
+
 }
