@@ -134,7 +134,8 @@ jester: "#ff3ea5",
 executioner: "#7a2f6f",
 mayor: "#1d8161",
 spirit: "#e6aafd",
-framer: "#8b0000"
+framer: "#8b0000",
+vigilante: "#3b48ff"
 }
 
 function showSpiritVoteRevealPrompt(player){
@@ -593,7 +594,6 @@ showNightAction(player,role)
 function showNightAction(player){
 
 let targets=""
-
 let roleClass = player.role.toLowerCase()
 
 state.players
@@ -606,6 +606,10 @@ state.players
       return p.name !== player.name && p.role !== "mafia" && p.role !== "framer"
     }
 
+    if(player.role === "vigilante"){
+      return p.name !== player.name
+    }
+
     return p.name !== player.name
 })
 .forEach(p=>{
@@ -614,13 +618,19 @@ ${p.name === player.name ? p.name + ' <span style="opacity:0.6">(You)</span>' : 
 </button>`
 })
 
+if(player.role === "vigilante"){
+  targets += `<button class="skip-btn" onclick="window.performNightAction('__skip__')">Skip</button>`
+}
+
 render(`
 
 <div class="card role-${roleClass}">
 
 <h2 class="role-title">${player.role.toUpperCase()} ACTION</h2>
 
-<p>Select a target</p>
+<p>
+${player.role === "vigilante" ? "Serve justice, or abstain." : "Select a target"}
+</p>
 
 ${targets}
 
@@ -629,7 +639,6 @@ ${renderHostControls()}
 </div>
 
 `)
-
 }
 
 function assignCurrentMafiaLeader(){
@@ -699,6 +708,24 @@ export function performNightAction(targetName){
 
 let player = state.players[state.nightTurnIndex]
 let role = roles[player.role]
+
+if(role.nightAction === "vigilante_kill"){
+  if(targetName === "__skip__"){
+    addLogEntry(`Vigilante skipped.`)
+  }else{
+    state.nightActions.push({
+      actor: player.name,
+      role: player.role,
+      action: role.nightAction,
+      target: targetName
+    })
+
+    addLogEntry(`Vigilante targeted ${targetName}.`)
+  }
+
+  nextNightTurn()
+  return
+}
 
 state.nightActions.push({
   actor: player.name,
@@ -838,8 +865,15 @@ if(state.sheriffExactReveal){
       resultColor = roleColors.executioner
     }else if(target.role === "mayor"){
       resultColor = roleColors.mayor
+    }else if(target.role === "vigilante"){
+      resultColor = roleColors.vigilante
+    }else if(target.role === "framer"){
+      resultColor = roleColors.framer
+    }else if(target.role === "spirit"){
+      resultColor = roleColors.spirit
     }else{
       resultColor = roleColors.villager
+      
     }
   }
 
@@ -907,7 +941,9 @@ let kills = state.nightActions.filter(a => a.action === "kill")
 let saves = state.nightActions.filter(a => a.action === "save")
 let investigations = state.nightActions.filter(a => a.action === "investigate")
 let frames = state.nightActions.filter(a => a.action === "frame")
+let vigilanteShots = state.nightActions.filter(a => a.action === "vigilante_kill")
 
+state.vigilanteOutcomeToShow = null
 let killTarget = resolveMafiaKillTarget(kills)
 let protectedTargets = saves.map(a => a.target)
 let framedTargets = frames.map(a => a.target)
@@ -981,6 +1017,46 @@ if(saveSucceeded){
     })
   }
 }
+
+vigilanteShots.forEach(shot => {
+  let shooter = state.players.find(p => p.name === shot.actor)
+  let target = state.players.find(p => p.name === shot.target)
+
+  if(!shooter || !shooter.alive) return
+  if(!target || !target.alive) {
+    state.vigilanteOutcomeToShow = {
+      shooter: shot.actor,
+      target: shot.target,
+      targetRole: null,
+      targetDied: false,
+      vigilanteDies: false
+    }
+    state.vigilantePublicReveal = state.vigilanteOutcomeToShow
+    return
+  }
+
+  const targetTeam = roles[target.role]?.team
+  const vigilanteDies = targetTeam !== "mafia" && targetTeam !== "neutral"
+
+  target.alive = false
+  addLogEntry(`${target.name} was slashed by the Vigilante.`)
+
+  if(vigilanteDies && shooter.alive){
+    shooter.alive = false
+    addLogEntry(`${shooter.name} also died for killing a town player.`)
+  }
+
+  state.vigilanteOutcomeToShow = {
+    shooter: shooter.name,
+    target: target.name,
+    targetRole: target.role,
+    targetDied: true,
+    vigilanteDies
+  }
+
+  state.vigilantePublicReveal = state.vigilanteOutcomeToShow
+})
+
 // Public morning result
 if(killTarget && !saveSucceeded){
 
@@ -1026,6 +1102,17 @@ if(killTarget && !saveSucceeded){
       ? `${killTarget} was saved by the Doctor!`
       : "Someone was attacked but survived the night."
   })
+
+if(state.vigilanteOutcomeToShow){
+  privateResults.push({
+    type: "vigilante_outcome",
+    playerName: state.vigilanteOutcomeToShow.shooter,
+    targetName: state.vigilanteOutcomeToShow.target,
+    targetRole: state.vigilanteOutcomeToShow.targetRole,
+    targetDied: state.vigilanteOutcomeToShow.targetDied,
+    vigilanteDies: state.vigilanteOutcomeToShow.vigilanteDies
+  })
+}
 
 }else{
 
@@ -1089,8 +1176,46 @@ if(state.spiritReveal){
   }
 }
 
+if(state.vigilantePublicReveal){
+  const v = state.vigilantePublicReveal
+  const targetPlayer = state.players.find(p => p.name === v.target)
+  const shooterPlayer = state.players.find(p => p.name === v.shooter)
+
+  let text = ""
+
+  if(!v.targetDied){
+    text = `The Vigilante tried to slash <strong>${v.target}</strong>, but nothing happened.`
+  }else if(v.vigilanteDies){
+    text = `${v.target} was slashed by the Vigilante.<br>`
+
+    if(targetPlayer && shouldRevealOnNightDeath()){
+      text += revealedRoleText(targetPlayer)
+    }
+
+    text += `<br>The Vigilante couldn't bare to live with the guilt of what he did, and slashed himself too.`
+
+    if(shooterPlayer && shouldRevealOnNightDeath()){
+      text += `<br>${revealedRoleText(shooterPlayer)}`
+    }
+  }else{
+    text = `${v.target} was slashed by the Vigilante.`
+
+    if(targetPlayer && shouldRevealOnNightDeath()){
+      text += `<br>${revealedRoleText(targetPlayer)}`
+    }
+  }
+
+  results.push({
+    type: "vigilante",
+    text
+  })
+
+  state.vigilantePublicReveal = null
+}
+
 let resultsHTML = results.map(r => {
   let cls = ""
+  if(r.type === "vigilante") cls = "night-result-death"
   if(r.type === "death") cls = "night-result-death"
   if(r.type === "save") cls = "night-result-save"
   if(r.type === "peace") cls = "night-result-peace"
@@ -1220,6 +1345,35 @@ state.voteTurnIndex++
 
 nextVoteTurn()
 
+}
+
+if(item && item.type === "vigilante_outcome"){
+render(`
+
+<div class="card role-vigilante">
+
+<h2 class="role-title">VIGILANTE OUTCOME</h2>
+
+<p>You went to slash <strong>${item.targetName}</strong>.</p>
+
+<p class="role-description">
+${
+  !item.targetDied
+    ? "But your target was already dead before you got there."
+    : item.vigilanteDies
+      ? `${item.targetName} was ${item.targetRole?.toUpperCase() || "TOWN"}, how could this have happened... you can't bare to live with the guilt.`
+      : `${item.targetName} was ${item.targetRole?.toUpperCase() || "MAFIA/NEUTRAL"}, you stand over their body proudly.`
+}
+</p>
+
+<button onclick="window.nextNightResultTurn()">Hide</button>
+
+${renderHostControls()}
+
+</div>
+
+`)
+return
 }
 
 window.chooseSpiritVoteReveal = function(targetName){

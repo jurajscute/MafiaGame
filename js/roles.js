@@ -210,4 +210,27 @@ noResultTexts:[
 description:"Choose a player each night to make them appear not innocent to the Sheriff."
 },
 
+vigilante:{
+team:"village",
+nightAction:"vigilante_kill",
+receivesNightResult:true,
+noResultTexts:[
+"You don't sleep tonight, you just watch the town silently.",
+"You sleep with one hand on your sword.",
+"You wonder whether the town will praise you or hate your for this.",
+"Who are you to define justice?",
+"You wrap your hand in bandages after accidentally cutting it.",
+"Justice is a necessity, and if this town lacks it, you will enfore it.",
+"Are you really any better than the mafia?",
+"Being this familiar with killing isn't something you wanted.",
+"You had a dream about a big fluffy bunny, weird...",
+"You know, having a sword is pretty cool... until you have to sharpen it.",
+"This life chose you.",
+"Who else would've done it!?",
+"You're considering calling yourself 'Stain'... you're not sure why.",
+"You don't do this for fame, you do it for justice! Remember that.",
+],
+description:"At night, you may choose one player to shoot or skip. If your target is not Mafia or Neutral, you die with them."
+},
+
 }

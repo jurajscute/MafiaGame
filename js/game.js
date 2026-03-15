@@ -22,7 +22,8 @@ jester: "#ff3ea5",
 executioner: "#7a2f6f",
 mayor: "#1d8161",
 spirit: "#e6aafd",
-framer: "#8b0000"
+framer: "#8b0000",
+vigilante: "#3b48ff"
 }
 
 window.updateRoleCount = function(role,value){
@@ -127,7 +128,8 @@ jester: false,
 executioner: false,
 mayor: false,
 spirit: false,
-framer: false
+framer: false,
+vigilante: false
 }
 
 state.roleWeights = {
@@ -137,7 +139,8 @@ jester: 100,
 executioner: 100,
 mayor: 100,
 spirit: 100,
-framer: 100
+framer: 100,
+vigilante: 100
 }
 
 state.roleCounts = {
@@ -147,8 +150,12 @@ jester: 1,
 executioner: 1,
 mayor: 1,
 spirit: 1,
-framer: 1
+framer: 1,
+vigilante: 1
 }
+
+state.vigilanteOutcomeToShow = null
+state.vigilantePublicReveal = null
 
 state.executionerTargetRule = "neither"
 
@@ -332,7 +339,7 @@ function showSettings() {
   let neutralRolesContent = ""
 
   const mafiaRoles = ["framer"]
-  const townRoles = ["doctor", "sheriff", "mayor", "spirit"]
+  const townRoles = ["doctor", "sheriff", "mayor", "spirit", "vigilante"]
   const neutralRoles = ["jester", "executioner"]
 
   let content = `
@@ -2073,7 +2080,7 @@ for(let i=0;i<mafia;i++){
 pool.push("mafia")
 }
 
-["doctor","sheriff","jester","executioner","mayor","spirit","framer"].forEach(role=>{
+["doctor","sheriff","jester","executioner","mayor","spirit","framer","vigilante"].forEach(role=>{
 
 if(!state.rolesEnabled[role]) return
 
@@ -2567,6 +2574,10 @@ state.framerKnowsMafia = true
 state.mafiaKnowsFramer = true
 state.mafiaKillMethod = "leader"
 
+state.rolesEnabled.vigilante = false
+state.roleWeights.vigilante = 0
+state.roleCounts.vigilante = 1
+
 state.mafiaCountOverride = 0
 state.revealRolesOnElimination = "none"
 }
@@ -2597,6 +2608,10 @@ state.roleCounts.executioner = 1
 state.roleCounts.mayor = 1
 state.roleCounts.spirit = 1
 state.roleCounts.framer = 1
+
+state.rolesEnabled.vigilante = false
+state.roleWeights.vigilante = 0
+state.roleCounts.vigilante = 1
 
 state.doctorRevealSave = true
 state.sheriffExactReveal = false
@@ -2654,6 +2669,10 @@ state.framerKnowsSuccess = true
 state.framerKnowsMafia = true
 state.mafiaKnowsFramer = true
 state.mafiaKillMethod = "vote"
+
+state.rolesEnabled.vigilante = true
+state.roleWeights.vigilante = 100
+state.roleCounts.vigilante = 1
 
 state.mafiaCountOverride = 0
 state.revealRolesOnElimination = "death_and_vote"

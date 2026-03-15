@@ -58,6 +58,9 @@ mafiaLeaderRotationIndex: 0,
 
 mafiaKnowsFirstLeader: false,
 
+vigilanteOutcomeToShow: null,
+vigilantePublicReveal: null,
+
 gameLog: [],
 gameStats: {
 nights: 0,
