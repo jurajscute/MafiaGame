@@ -61,6 +61,8 @@ mafiaKnowsFirstLeader: false,
 vigilanteOutcomeToShow: null,
 vigilantePublicReveal: null,
 
+jesterWinIfVigilanteKilled: false,
+
 gameLog: [],
 gameStats: {
 nights: 0,

@@ -1164,6 +1164,30 @@ if(isWrongTarget){
   state.nightDeaths.push(target.name)
   addLogEntry(`${target.name} was slashed by the Vigilante.`)
 
+  if(target.role === "jester" && state.jesterWinIfVigilanteKilled){
+
+  addLogEntry(`${target.name} won as the Jester.`)
+
+  document.body.className = "win-jester"
+
+  render(`
+
+<div class="card role-jester">
+
+<h1 class="role-title">JESTER WINS</h1>
+
+<p>${target.name} was killed by the Vigilante and wins as the Jester!</p>
+
+<button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
+<button onclick="location.reload()">Restart Game</button>
+
+</div>
+
+`)
+
+  return
+}
+
   if(target.role === "spirit" &&
      (state.spiritActivation === "night_only" || state.spiritActivation === "any_death")){
     privateResults.push({

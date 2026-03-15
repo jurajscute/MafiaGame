@@ -203,6 +203,9 @@ state.vigilanteCanKillNeutrals = true
 state.vigilanteWrongKillOutcome = "both_die"
 state.vigilanteExtraOpen = false
 
+state.jesterWinIfVigilanteKilled = false
+
+localStorage.setItem("mafiaJesterVigilanteWin",JSON.stringify(state.jesterWinIfVigilanteKilled))
 localStorage.setItem("mafiaVigilanteCanKillNeutrals", JSON.stringify(state.vigilanteCanKillNeutrals))
 localStorage.setItem("mafiaVigilanteWrongKillOutcome", JSON.stringify(state.vigilanteWrongKillOutcome))
 localStorage.setItem("mafiaKnowsFirstLeader", JSON.stringify(state.mafiaKnowsFirstLeader))
@@ -632,6 +635,19 @@ function showSettings() {
     </div>
 
   </div>
+
+<div class="jester-setting-divider"></div>
+
+<div class="jester-setting-row">
+  <span class="jester-setting-label">Win if killed by Vigilante</span>
+
+  <label class="switch">
+    <input type="checkbox"
+      ${state.jesterWinIfVigilanteKilled ? "checked" : ""}
+      onchange="toggleJesterVigilanteWin(this.checked)">
+    <span class="slider"></span>
+  </label>
+</div>
 
 </div>
 
@@ -1809,6 +1825,12 @@ let savedVigilanteCanKillNeutrals = localStorage.getItem("mafiaVigilanteCanKillN
 
 let savedVigilanteWrongKillOutcome = localStorage.getItem("mafiaVigilanteWrongKillOutcome")
 
+let savedJesterVigWin = localStorage.getItem("mafiaJesterVigilanteWin")
+
+if(savedJesterVigWin){
+  state.jesterWinIfVigilanteKilled = JSON.parse(savedJesterVigWin)
+}
+
 if(savedVigilanteCanKillNeutrals){
   state.vigilanteCanKillNeutrals = JSON.parse(savedVigilanteCanKillNeutrals)
 }
@@ -2837,6 +2859,7 @@ showSettings()
 
 function saveSettingsToStorage(){
 
+localStorage.setItem("mafiaJesterVigilanteWin",JSON.stringify(state.jesterWinIfVigilanteKilled))
 localStorage.setItem("mafiaVigilanteCanKillNeutrals", JSON.stringify(state.vigilanteCanKillNeutrals))
 localStorage.setItem("mafiaVigilanteWrongKillOutcome", JSON.stringify(state.vigilanteWrongKillOutcome))
 localStorage.setItem("mafiaKnowsFirstLeader", JSON.stringify(state.mafiaKnowsFirstLeader))
