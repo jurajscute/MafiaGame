@@ -2119,9 +2119,9 @@ if(player.role === "framer" && state.framerKnowsMafia){
 
   if(mafiaNames.length){
     extraInfo += `
-      <div class="executioner-target-box">
-        <div class="executioner-target-label">Mafia Members</div>
-        <div class="executioner-target-name">${mafiaNames.join("<br>")}</div>
+      <div class="framer-target-box">
+        <div class="framer-target-label">Mafia Members</div>
+        <div class="framer-target-name">${mafiaNames.join("<br>")}</div>
       </div>
     `
   }
@@ -2134,9 +2134,9 @@ if(player.role === "mafia" && state.mafiaKnowsFramer){
 
   if(framerNames.length){
     extraInfo += `
-      <div class="executioner-target-box">
-        <div class="executioner-target-label">Framer</div>
-        <div class="executioner-target-name">${framerNames.join("<br>")}</div>
+      <div class="framer-target-box">
+        <div class="framer-target-label">Framer</div>
+        <div class="framer-target-name">${framerNames.join("<br>")}</div>
       </div>
     `
   }

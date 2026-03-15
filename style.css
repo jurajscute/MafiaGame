@@ -477,6 +477,54 @@ text-shadow:
 0 0 30px #4a1b43;
 }
 
+.framer-target-box{
+margin-top:16px;
+padding:14px 16px;
+border-radius:12px;
+background:linear-gradient(135deg, rgba(122, 47, 47, 0.16), rgba(58, 16, 16, 0.22));
+border:1px solid rgba(200, 107, 107, 0.28);
+box-shadow:
+0 0 12px rgba(122, 47, 47, 0.22),
+inset 0 0 10px rgba(255,255,255,0.03);
+animation:executionerTargetPulse 2s ease-in-out infinite;
+}
+
+.framer-target-label{
+font-size:13px;
+letter-spacing:1.5px;
+text-transform:uppercase;
+opacity:0.75;
+margin-bottom:6px;
+}
+
+.framer-target-name{
+font-size:26px;
+font-weight:bold;
+color:#c86b6b;
+text-shadow:
+0 0 10px #a64d4d,
+0 0 20px #7a2f2f,
+0 0 30px #4a1b1b;
+}
+
+@keyframes framerTargetPulse{
+0%{
+box-shadow:
+0 0 10px rgba(122, 47, 47, 0.18),
+inset 0 0 8px rgba(255, 255, 255, 0.02);
+}
+50%{
+box-shadow:
+0 0 18px rgba(200, 107, 107, 0.28),
+inset 0 0 12px rgba(255,255,255,0.04);
+}
+100%{
+box-shadow:
+0 0 10px rgba(122, 47, 47, 0.18),
+inset 0 0 8px rgba(255,255,255,0.02);
+}
+}
+
 @keyframes executionerTargetPulse{
 0%{
 box-shadow:
