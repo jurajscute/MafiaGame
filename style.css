@@ -3489,3 +3489,30 @@ text-shadow:
       margin-top 0.18s ease;
   }
 }
+
+.role-priest{
+background:linear-gradient(135deg,#4a3a08,#1f1803);
+}
+
+.role-priest button{
+background:linear-gradient(135deg,#f3d86b,#caa93a);
+color:#fffdf2;
+}
+
+.role-priest .role-title{
+color:#f6df8f;
+text-shadow:
+0 0 10px #f6df8f,
+0 0 20px #f3d86b,
+0 0 30px #caa93a;
+}
+
+.night-result-priest{
+background:rgba(243,216,107,0.14);
+border:1px solid rgba(243,216,107,0.28);
+}
+
+.priest-slider input[type="range"]{
+--start:#f6df8f;
+--end:#caa93a;
+}

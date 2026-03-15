@@ -32,6 +32,10 @@ spiritRevealType: "exact",
 spiritActivation: "night_only",
 spiritCanSkipReveal: true,
 
+priestShieldActive: false,
+priestBlockedAttacks: [],
+priestPublicShield: false,
+
 mayorVotePower: 2,
 
 spiritReveal: null,

@@ -205,7 +205,7 @@ noResultTexts:[
 "You are one hell of a liar.",
 "You know, at some point you'll have to stop lying...",
 "Stop manipulating people.",
-"There's only so many lies they can fall for.",],
+"There's only so many lies they can fall for."],
 description:"Choose a player each night to make them appear not innocent to the Sheriff."
 },
 
@@ -227,8 +227,30 @@ noResultTexts:[
 "This life chose you.",
 "Who else would've done it!?",
 "You're considering calling yourself 'Stain'... you're not sure why.",
-"You don't do this for fame, you do it for justice! Remember that.",],
+"You don't do this for fame, you do it for justice! Remember that."],
 description:"At night, you may choose one player to shoot or skip. If your target is not Mafia or Neutral, you die with them."
+},
+
+priest:{
+team:"village",
+nightAction:"holy_shield",
+receivesNightResult:true,
+noResultTexts:[
+"You feel evil presences all around you, this town damned!",
+"You drink some holy water to calm yourself... Much better!",
+"Let's see how they like the good ol' G-O-D!",
+"Bless these fools...",
+"Maybe this town needs a holy grenade thrown at it...",
+"You have power of God and anime on your side.",
+"Feels almost silly having to protect these fools.",
+"You dreamed about going to heaven, it was nice, but then you woke up here again.",
+"This is all devils work!",
+"In the name of God, the son, and holy spirit!",
+"You must let your peace reach out to them!",
+"You are the symbol of peace this town needs.",
+"One day you'll be up there with the big guy! Maybe even tomorrow...",
+"There's something nice about being so spiritually connected with God."],
+description:"Once per night, you may call upon the Holy Spirit to shield the town. If used, all kills fail that night."
 },
 
 }

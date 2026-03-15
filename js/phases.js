@@ -140,7 +140,8 @@ executioner: "#7a2f6f",
 mayor: "#1d8161",
 spirit: "#e6aafd",
 framer: "#8b0000",
-vigilante: "#3b48ff"
+vigilante: "#3b48ff",
+priest: "#f6df8f"
 }
 
 function getPlayerByName(name){
@@ -490,6 +491,44 @@ ${renderHostControls()}
 
 `)
 return
+}
+
+if(item && item.type === "priest_result"){
+  const blockedText = item.blockedRoles.length
+    ? item.blockedRoles.join(" and ")
+    : "No attacks"
+
+  render(`
+
+<div class="card role-priest">
+
+<h2 class="role-title">HOLY SPIRIT OUTCOME</h2>
+
+<p class="role-description">
+Your blessing protected the town tonight.
+</p>
+
+<h1 style="
+color:${roleColors.priest};
+text-shadow:
+0 0 10px ${roleColors.priest},
+0 0 20px ${roleColors.priest};
+">
+${blockedText.toUpperCase()}
+</h1>
+
+<p class="role-description">
+were blocked by the Holy Spirit.
+</p>
+
+<button onclick="window.nextNightResultTurn()">Hide</button>
+
+${renderHostControls()}
+
+</div>
+
+`)
+  return
 }
 
 if(item && item.type === "framer_success"){
@@ -872,8 +911,31 @@ showNightAction(player,role)
 
 function showNightAction(player){
 
-let targets=""
-let roleClass = player.role.toLowerCase()
+  let roleClass = player.role.toLowerCase()
+
+  if(player.role === "priest"){
+    render(`
+
+<div class="card role-priest">
+
+<h2 class="role-title">PRIEST ACTION</h2>
+
+<p>
+Call upon the Holy Spirit to shield the town tonight?
+</p>
+
+<button onclick="window.performNightAction('__use__')">Use Holy Spirit</button>
+<button class="skip-btn" onclick="window.performNightAction('__skip__')">Do Not Use</button>
+
+${renderHostControls()}
+
+</div>
+
+`)
+    return
+  }
+
+  let targets=""
 
 state.players
 .filter(p => {
@@ -992,6 +1054,24 @@ export function performNightAction(targetName){
 
 let player = state.players[state.nightTurnIndex]
 let role = roles[player.role]
+
+if(role.nightAction === "holy_shield"){
+  if(targetName === "__use__"){
+    state.nightActions.push({
+      actor: player.name,
+      role: player.role,
+      action: role.nightAction,
+      target: "__use__"
+    })
+
+    addLogEntry(`Priest used Holy Spirit.`)
+  }else{
+    addLogEntry(`Priest did not use Holy Spirit.`)
+  }
+
+  nextNightTurn()
+  return
+}
 
 if(role.nightAction === "vigilante_kill"){
   if(targetName === "__skip__"){
@@ -1213,6 +1293,12 @@ function resolveNightSelections(){
   const investigations = state.nightActions.filter(a => a.action === "investigate")
   const frames = state.nightActions.filter(a => a.action === "frame")
   const vigilanteShots = state.nightActions.filter(a => a.action === "vigilante_kill")
+  const priestShields = state.nightActions.filter(a => a.action === "holy_shield")
+
+  const holyShieldActive = priestShields.length > 0
+  state.priestShieldActive = holyShieldActive
+  state.priestBlockedAttacks = []
+  state.priestPublicShield = false
 
   state.vigilanteOutcomeToShow = null
 
@@ -1222,6 +1308,7 @@ function resolveNightSelections(){
   const publicResults = []
   const privateResults = []
 
+  
   // Sheriff results
   investigations.forEach(investigation => {
     const sheriff = getPlayerByName(investigation.actor)
@@ -1284,6 +1371,28 @@ function resolveNightSelections(){
       state.vigilantePublicReveal = state.vigilanteOutcomeToShow
       return
     }
+
+   if(holyShieldActive){
+  addLogEntry(`Holy Spirit blocked the Vigilante's attack on ${target.name}.`)
+
+  state.priestBlockedAttacks.push("Vigilante")
+
+  state.vigilanteOutcomeToShow = {
+    shooter: shooter.name,
+    target: target.name,
+    targetRole: target.role,
+    targetDied: false,
+    vigilanteDies: false,
+    blocked: true,
+    wrongTarget: false,
+    blockedByHolySpirit: true
+  }
+
+  state.vigilantePublicReveal = state.vigilanteOutcomeToShow
+  state.priestPublicShield = true
+
+  return
+}
 
     // doctor blocks vigilante
     if(protectedTargets.includes(target.name)){
@@ -1415,7 +1524,40 @@ function resolveNightSelections(){
 
   // Resolve mafia kill after vigilante
   const killTarget = resolveMafiaKillTarget(kills)
-  const saveSucceeded = !!(killTarget && protectedTargets.includes(killTarget))
+const holyShieldStoppedMafia = !!(holyShieldActive && killTarget)
+const saveSucceeded = !!(!holyShieldStoppedMafia && killTarget && protectedTargets.includes(killTarget))
+
+if(holyShieldStoppedMafia){
+
+  addLogEntry(`Holy Spirit blocked the Mafia's attack on ${killTarget}.`)
+  state.priestBlockedAttacks.push("Mafia")
+  state.priestPublicShield = true
+
+  let mafiaKillerName = null
+
+  if(state.mafiaKillMethod === "leader"){
+    const leader = getPlayerByName(state.currentMafiaLeader)
+    if(leader && leader.alive){
+      mafiaKillerName = state.currentMafiaLeader
+    }
+  }else{
+    const aliveKills = kills.filter(k => isPlayerAlive(k.actor))
+    if(aliveKills.length){
+      const killAction = aliveKills.find(k => k.target === killTarget) || aliveKills[0]
+      mafiaKillerName = killAction.actor
+    }
+  }
+
+  if(mafiaKillerName){
+    privateResults.push({
+      type: "mafia_kill_blocked",
+      playerName: mafiaKillerName,
+      targetName: killTarget
+    })
+  }
+
+}
+else if(saveSucceeded){
 
   if(saveSucceeded){
     saves
@@ -1517,6 +1659,16 @@ function resolveNightSelections(){
     })
   }
 
+if(holyShieldActive){
+  priestShields.forEach(action => {
+    privateResults.push({
+      type: "priest_result",
+      playerName: action.actor,
+      blockedRoles: [...new Set(state.priestBlockedAttacks)]
+    })
+  })
+}
+
   state.nightPrivateResults = privateResults
   state.nightResolved = {
     publicResults
@@ -1569,6 +1721,15 @@ if(state.spiritReveal){
       `
     })
   }
+}
+
+if(state.priestPublicShield){
+  results.push({
+    type: "priest_shield",
+    text: "A holy spirit shield protected the town last night."
+  })
+
+  state.priestPublicShield = false
 }
 
 if(state.vigilantePublicReveal){
@@ -1627,6 +1788,7 @@ if(state.vigilantePublicReveal){
 
 let resultsHTML = results.map(r => {
   let cls = ""
+  if(r.type === "priest_shield") cls = "night-result-priest"
   if(r.type === "vigilante") cls = "night-result-vigilante"
   if(r.type === "death") cls = "night-result-death"
   if(r.type === "save") cls = "night-result-save"

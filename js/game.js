@@ -22,7 +22,8 @@ executioner: "#7a2f6f",
 mayor: "#1d8161",
 spirit: "#e6aafd",
 framer: "#8b0000",
-vigilante: "#3b48ff"
+vigilante: "#3b48ff",
+priest: "#f6df8f"
 }
 
 window.updateRoleCount = function(role,value){
@@ -86,7 +87,8 @@ executioner: false,
 mayor: false,
 spirit: false,
 framer: false,
-vigilante: false
+vigilante: false,
+priest: false
 }
 
 state.roleWeights = {
@@ -97,7 +99,8 @@ executioner: 100,
 mayor: 100,
 spirit: 100,
 framer: 100,
-vigilante: 100
+vigilante: 100,
+priest: 100
 }
 
 state.roleCounts = {
@@ -108,7 +111,8 @@ executioner: 1,
 mayor: 1,
 spirit: 1,
 framer: 1,
-vigilante: 1
+vigilante: 1,
+priest: 1,
 }
 
 state.vigilanteOutcomeToShow = null
@@ -146,6 +150,9 @@ state.vigilanteWrongKillOutcome = "both_die"
 
 state.jesterWinIfVigilanteKilled = false
 state.executionerWinIfVigilanteKillsTarget = false
+state.priestShieldActive = false
+state.priestBlockedAttacks = []
+state.priestPublicShield = false
 
 localStorage.setItem("mafiaExecutionerVigilanteWin",JSON.stringify(state.executionerWinIfVigilanteKillsTarget))
 localStorage.setItem("mafiaJesterVigilanteWin",JSON.stringify(state.jesterWinIfVigilanteKilled))
@@ -250,7 +257,7 @@ function showSettings() {
   const autoMafia = playerCount > 0 ? mafiaCount(playerCount) : 1
 
   const mafiaRoles = ["framer"]
-  const townRoles = ["doctor", "sheriff", "mayor", "spirit", "vigilante"]
+  const townRoles = ["doctor", "sheriff", "mayor", "spirit", "vigilante", "priest"]
   const neutralRoles = ["jester", "executioner"]
 
   let mafiaOptions = `<option value="0" ${state.mafiaCountOverride === 0 ? "selected" : ""}>Auto (${autoMafia})</option>`
@@ -1581,7 +1588,7 @@ for(let i=0;i<mafia;i++){
 pool.push("mafia")
 }
 
-["doctor","sheriff","jester","executioner","mayor","spirit","framer","vigilante"].forEach(role=>{
+["doctor","sheriff","jester","executioner","mayor","spirit","framer","vigilante","priest"].forEach(role=>{
 
 if(!state.rolesEnabled[role]) return
 
@@ -1700,6 +1707,10 @@ let extras = ""
 
 if(role === "doctor" && state.doctorRevealSave){
 extras = ` <span style="opacity:0.7;">• reveals saved player</span>`
+}
+
+if(role === "priest"){
+  extras = ` <span style="opacity:0.7;">• blocks all kills for the night</span>`
 }
 
 if(role === "jester"){
@@ -2047,7 +2058,9 @@ function resetPresetRoles(){
   state.rolesEnabled.spirit = false
   state.rolesEnabled.framer = false
   state.rolesEnabled.vigilante = false
+  state.rolesEnabled.priest = false
 
+  state.roleWeights.priest = 100
   state.roleWeights.doctor = 100
   state.roleWeights.sheriff = 100
   state.roleWeights.jester = 100
@@ -2056,7 +2069,8 @@ function resetPresetRoles(){
   state.roleWeights.spirit = 100
   state.roleWeights.framer = 100
   state.roleWeights.vigilante = 100
-
+  
+  state.roleCounts.priest = 1
   state.roleCounts.doctor = 1
   state.roleCounts.sheriff = 1
   state.roleCounts.jester = 1
@@ -2180,7 +2194,9 @@ state.rolesEnabled.executioner = true
 state.rolesEnabled.mayor = true
 state.rolesEnabled.spirit = true
 state.rolesEnabled.framer = true
+state.rolesEnabled.priest = true
 
+state.roleWeights.priest = 100
 state.roleWeights.doctor = 100
 state.roleWeights.sheriff = 100
 state.roleWeights.jester = 100
@@ -2189,6 +2205,7 @@ state.roleWeights.mayor = 100
 state.roleWeights.spirit = 100
 state.roleWeights.framer = 100
 
+state.roleCounts.priest = 1
 state.roleCounts.doctor = 1
 state.roleCounts.sheriff = 1
 state.roleCounts.jester = 1
