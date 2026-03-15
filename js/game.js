@@ -848,7 +848,7 @@ if(role === "vigilante" && enabled){
       <div class="vigilante-setting-divider"></div>
 
       <div class="vigilante-setting-row">
-        <span class="vigilante-setting-label">If he attacks the wrong person</span>
+        <span class="vigilante-setting-label">Wrong target result</span>
 
         <select class="vigilante-setting-select" onchange="setVigilanteWrongKillOutcome(this.value)">
           <option value="both_die" ${state.vigilanteWrongKillOutcome === "both_die" ? "selected" : ""}>Both die</option>
@@ -1608,6 +1608,76 @@ if(role === "executioner"){
 </div>
 
 `)
+
+if(role === "vigilante"){
+  let extraWrap = document.getElementById("vigilante-extra-wrap")
+
+  if(!enabled){
+    state.vigilanteExtraOpen = false
+
+    if(extraWrap){
+      extraWrap.classList.remove("show")
+      setTimeout(() => {
+        extraWrap.remove()
+      }, 300)
+    }
+  }
+
+  if(enabled && !extraWrap){
+    let count = document.getElementById("vigilante-count")
+
+    count.insertAdjacentHTML("afterend", `
+
+<div class="vigilante-extra-wrap" id="vigilante-extra-wrap">
+
+  <div class="additional-settings-bar" onclick="toggleVigilanteExtras()">
+    <span>Additional Settings</span>
+    <span class="additional-arrow" style="transform:${state.vigilanteExtraOpen ? "rotate(180deg)" : "rotate(0deg)"}">▾</span>
+  </div>
+
+  <div class="vigilante-extra-settings ${state.vigilanteExtraOpen ? "show" : ""}" id="vigilante-extra-settings">
+
+    <div class="vigilante-settings-card">
+
+      <div class="vigilante-setting-row">
+        <span class="vigilante-setting-label">Can kill neutrals</span>
+
+        <label class="switch">
+          <input type="checkbox"
+            ${state.vigilanteCanKillNeutrals ? "checked" : ""}
+            onchange="toggleVigilanteCanKillNeutrals(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="vigilante-setting-divider"></div>
+
+      <div class="vigilante-setting-row">
+        <span class="vigilante-setting-label">Wrong target result</span>
+
+        <select class="vigilante-setting-select" onchange="setVigilanteWrongKillOutcome(this.value)">
+          <option value="both_die" ${state.vigilanteWrongKillOutcome === "both_die" ? "selected" : ""}>Both die</option>
+          <option value="only_vigilante_dies" ${state.vigilanteWrongKillOutcome === "only_vigilante_dies" ? "selected" : ""}>Only Vigilante dies</option>
+          <option value="only_target_dies" ${state.vigilanteWrongKillOutcome === "only_target_dies" ? "selected" : ""}>Only target dies</option>
+        </select>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+`)
+
+    requestAnimationFrame(() => {
+      let inserted = document.getElementById("vigilante-extra-wrap")
+      if(inserted){
+        inserted.classList.add("show")
+      }
+    })
+  }
+}
 
     requestAnimationFrame(() => {
       let inserted = document.getElementById("executioner-extra-wrap")
