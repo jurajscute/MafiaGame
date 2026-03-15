@@ -1737,7 +1737,7 @@ if(state.vigilantePublicReveal){
   }else{
     text = `The Vigilante tried to slash <strong>${v.target}</strong>, but the Doctor protected them.`
   }
-}
+
 
   }else if(v.wrongTarget){
 
