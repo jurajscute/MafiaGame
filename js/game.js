@@ -520,35 +520,38 @@ function showSettings() {
     const color = roleColors[role] || "#fff"
 
     let roleBlock = `
-      <div class="role-toggle">
-        <span style="color:${color}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
-        <label class="switch">
-          <input type="checkbox" ${enabled ? "checked" : ""}
-            onchange="toggleRole('${role}', this.checked)">
-          <span class="slider"></span>
-        </label>
-      </div>
+  <div class="role-toggle">
+    <span style="color:${color}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
+    <label class="switch">
+      <input type="checkbox" ${enabled ? "checked" : ""}
+        onchange="toggleRole('${role}', this.checked)">
+      <span class="slider"></span>
+    </label>
+  </div>
+`
 
-      <div id="${role}SliderContainer"
-        class="role-weight ${role}-slider ${enabled ? "show" : ""}">
-        <input type="range"
-          id="${role}Slider"
-          min="0"
-          max="100"
-          value="${weight}"
-          oninput="updateSlider(this,'${role}'); setRoleWeight('${role}', this.value)">
-        <span>${weight}%</span>
-      </div>
+if(enabled){
+  roleBlock += `
+    <div id="${role}SliderContainer" class="role-weight ${role}-slider show">
+      <input type="range"
+        id="${role}Slider"
+        min="0"
+        max="100"
+        value="${weight}"
+        oninput="updateSlider(this,'${role}'); setRoleWeight('${role}', this.value)">
+      <span>${weight}%</span>
+    </div>
 
-      <div class="role-count ${enabled ? "show" : ""}" id="${role}-count">
-        <label>Maximum amount:</label>
-        <input type="number"
-          min="1"
-          max="10"
-          value="${state.roleCounts[role] || 1}"
-          onchange="window.updateRoleCount('${role}', this.value)">
-      </div>
-    `
+    <div class="role-count show" id="${role}-count">
+      <label>Maximum amount:</label>
+      <input type="number"
+        min="1"
+        max="10"
+        value="${state.roleCounts[role] || 1}"
+        onchange="window.updateRoleCount('${role}', this.value)">
+    </div>
+  `
+}
 
     if(role === "doctor" && enabled){
       roleBlock += `

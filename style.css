@@ -980,7 +980,7 @@ margin-bottom 0.35s ease;
 }
 
 .jester-extra-wrap.show{
-max-height:180px;
+max-height:400px;
 opacity:1;
 transform:translateY(0) scaleY(1);
 margin-bottom:6px;

@@ -41,7 +41,7 @@ noResultTexts:[
 "Phew, having to prevent a murder would've been rough.",
 "Something looks off about your patients glass of water... oh well.",
 "Besides the fact your patient keeps repeating some weird phrases, all is well.",
-"You fell asleep at your patients house, the wake up was rather awkward.",
+"You fell asleep at your patients house, the wake up was kinda awkward.",
 "Your patient didn't need any help tonight.",
 "Nothing major with the patient tonight.",
 "All seems in order with your patient.",
@@ -77,7 +77,7 @@ teammateKillTexts:[
 "I mean... how hard can it be?",
 "You are kind of annoyed you didn't get to kill instead.",
 "It feels almost silly having someone else do the killing.",
-"There is so many ways they could've killed, surely they didn't mess up.",
+"There are so many ways they could've killed, surely they didn't mess up.",
 "'My gang is the best' you think to yourself as you fall asleep.",
 "'Maybe the town isn't so bad?' you think to yourself...",
 "You wish all nights at the job could be this peaceful.",
@@ -170,7 +170,7 @@ team:"village",
 nightAction:null,
 receivesNightResult:true,
 noResultTexts:[
-"While it's nice to talk to ghost, it can get rather nausiating.",
+"While it's nice to talk to ghosts, it can get rather nausiating.",
 "Let's all just talk it out! Please?",
 "There's too much war in the world for this.",
 "Whoever kills you is screwed.",
@@ -205,8 +205,7 @@ noResultTexts:[
 "You are one hell of a liar.",
 "You know, at some point you'll have to stop lying...",
 "Stop manipulating people.",
-"There's only so many lies they can fall for.",
-],
+"There's only so many lies they can fall for.",],
 description:"Choose a player each night to make them appear not innocent to the Sheriff."
 },
 
@@ -228,8 +227,7 @@ noResultTexts:[
 "This life chose you.",
 "Who else would've done it!?",
 "You're considering calling yourself 'Stain'... you're not sure why.",
-"You don't do this for fame, you do it for justice! Remember that.",
-],
+"You don't do this for fame, you do it for justice! Remember that.",],
 description:"At night, you may choose one player to shoot or skip. If your target is not Mafia or Neutral, you die with them."
 },
 
