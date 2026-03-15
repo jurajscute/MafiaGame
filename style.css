@@ -1020,6 +1020,12 @@ inset 0 0 10px rgba(255,255,255,0.02),
 0 6px 14px rgba(0,0,0,0.14);
 }
 
+.jester-setting-divider{
+  height:1px;
+  background:rgba(255,255,255,0.08);
+  margin:14px 0;
+}
+
 .jester-setting-row{
 display:flex;
 justify-content:space-between;
