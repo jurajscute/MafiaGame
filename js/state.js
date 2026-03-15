@@ -63,6 +63,8 @@ vigilantePublicReveal: null,
 
 jesterWinIfVigilanteKilled: false,
 
+executionerWinIfVigilanteKillsTarget: false,
+
 gameLog: [],
 gameStats: {
 nights: 0,

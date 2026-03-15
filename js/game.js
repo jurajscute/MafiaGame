@@ -204,7 +204,9 @@ state.vigilanteWrongKillOutcome = "both_die"
 state.vigilanteExtraOpen = false
 
 state.jesterWinIfVigilanteKilled = false
+state.executionerWinIfVigilanteKillsTarget = false
 
+localStorage.setItem("mafiaExecutionerVigilanteWin",JSON.stringify(state.executionerWinIfVigilanteKillsTarget))
 localStorage.setItem("mafiaJesterVigilanteWin",JSON.stringify(state.jesterWinIfVigilanteKilled))
 localStorage.setItem("mafiaVigilanteCanKillNeutrals", JSON.stringify(state.vigilanteCanKillNeutrals))
 localStorage.setItem("mafiaVigilanteWrongKillOutcome", JSON.stringify(state.vigilanteWrongKillOutcome))
@@ -829,6 +831,19 @@ function showSettings() {
                   <span class="slider"></span>
                 </label>
               </div>
+
+              <div class="executioner-setting-divider"></div>
+
+<div class="executioner-setting-row">
+  <span class="executioner-setting-label">Wins if Vigilante kills target</span>
+
+  <label class="switch">
+    <input type="checkbox"
+      ${state.executionerWinIfVigilanteKillsTarget ? "checked" : ""}
+      onchange="toggleExecutionerVigilanteWin(this.checked)">
+    <span class="slider"></span>
+  </label>
+</div>
 
             </div>
           </div>
@@ -1851,6 +1866,12 @@ let savedVigilanteWrongKillOutcome = localStorage.getItem("mafiaVigilanteWrongKi
 
 let savedJesterVigWin = localStorage.getItem("mafiaJesterVigilanteWin")
 
+let savedExecutionerVigilanteWin = localStorage.getItem("mafiaExecutionerVigilanteWin")
+
+if(savedExecutionerVigilanteWin){
+state.executionerWinIfVigilanteKillsTarget = JSON.parse(savedExecutionerVigilanteWin)
+}
+
 if(savedJesterVigWin){
   state.jesterWinIfVigilanteKilled = JSON.parse(savedJesterVigWin)
 }
@@ -2399,6 +2420,10 @@ if(role === "doctor" && state.doctorRevealSave){
 extras = ` <span style="opacity:0.7;">• reveals saved player</span>`
 }
 
+if(state.executionerWinIfVigilanteKillsTarget){
+  extras += ` <span style="opacity:0.7;">• wins if Vigilante kills target</span>`
+}
+
 if(role === "jester"){
 let jesterRuleText = {
   innocent: "innocent to Sheriff",
@@ -2881,8 +2906,20 @@ showSettings()
 
 }
 
+window.toggleExecutionerVigilanteWin = function(enabled){
+
+state.executionerWinIfVigilanteKillsTarget = enabled
+
+localStorage.setItem(
+"mafiaExecutionerVigilanteWin",
+JSON.stringify(enabled)
+)
+
+}
+
 function saveSettingsToStorage(){
 
+localStorage.setItem("mafiaExecutionerVigilanteWin",JSON.stringify(state.executionerWinIfVigilanteKillsTarget))
 localStorage.setItem("mafiaJesterVigilanteWin",JSON.stringify(state.jesterWinIfVigilanteKilled))
 localStorage.setItem("mafiaVigilanteCanKillNeutrals", JSON.stringify(state.vigilanteCanKillNeutrals))
 localStorage.setItem("mafiaVigilanteWrongKillOutcome", JSON.stringify(state.vigilanteWrongKillOutcome))
