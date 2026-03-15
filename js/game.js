@@ -466,6 +466,8 @@ content += `
     </label>
   </div>
 
+  </div>
+
 <div class="global-setting-card mafia-setting-card">
 
   <div class="global-setting-top">
@@ -492,8 +494,6 @@ content += `
 </div>
 
 </div>
-
-  </div>
 
 </div>
 
