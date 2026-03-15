@@ -272,7 +272,7 @@ body.night{
 background:linear-gradient(135deg,#0b0f2a,#000);
 color:white;
 }
-body.night .card:not(.role-mafia):not(.role-vigilante):not(.role-framer):not(.role-doctor):not(.role-sheriff):not(.role-jester):not(.role-executioner):not(.role-mayor):not(.role-spirit){
+body.night .card:not(.role-mafia):not(.role-priest):not(.role-vigilante):not(.role-framer):not(.role-doctor):not(.role-sheriff):not(.role-jester):not(.role-executioner):not(.role-mayor):not(.role-spirit){
   background:#1f2436;
   box-shadow:0 15px 35px rgba(14, 14, 14, 0.6),
              0 0 15px rgba(115, 140, 252, 0.05); /* subtle moonlit glow */
