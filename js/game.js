@@ -481,7 +481,7 @@ function showSettings() {
     }
 
     return `
-  <div class="settings-role-card" data-role="${role}" style="--role-accent:${color}">
+  <div class="settings-role-card ${enabled ? "role-enabled" : ""}" data-role="${role}" style="--role-accent:${color}">
         <div class="settings-role-header">
           <div class="settings-role-meta">
             <div class="settings-role-name" style="color:${color}">${roleDisplayName(role)}</div>
@@ -803,6 +803,12 @@ window.toggleRole = function(role, enabled){
 
   const card = document.querySelector(`.settings-role-card[data-role="${role}"]`)
   if(!card) return
+
+if(enabled){
+  card.classList.add("role-enabled")
+}else{
+  card.classList.remove("role-enabled")
+}
 
   const stateLabel = card.querySelector(".settings-role-state")
   let panel = card.querySelector(".settings-role-panel")
