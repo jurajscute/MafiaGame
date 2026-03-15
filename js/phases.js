@@ -1107,6 +1107,9 @@ if(targetName === "__skip__"){
   addLogEntry(`Spirit chose to reveal ${targetName}'s role.`)
 }
 
+continueResolveVotesAfterSpirit()
+}
+
 function resolveVotes(){
 
 let highest = 0
@@ -1224,9 +1227,6 @@ if(player.role === "spirit" && state.spiritActivation === "any_death"){
 }
 showSpiritVoteRevealPrompt(player)
 return
-
-continueResolveVotesAfterSpirit()
-}
 
 let executionerWinner = state.players.find(p => {
 
