@@ -187,6 +187,10 @@ state.spiritCanSkipReveal = true
 state.sheriffJesterResult = "not_innocent"
 state.sheriffExecutionerResult = "not_innocent"
 
+state.mafiaKillMethod = "leader"
+state.currentMafiaLeader = null
+state.mafiaLeaderRotationIndex = 0
+
 localStorage.setItem("mafiaSpiritRevealType", JSON.stringify(state.spiritRevealType))
 localStorage.setItem("mafiaSpiritActivation", JSON.stringify(state.spiritActivation))
 localStorage.setItem("mafiaSpiritCanSkipReveal", JSON.stringify(state.spiritCanSkipReveal))
@@ -461,6 +465,31 @@ content += `
       <span class="slider"></span>
     </label>
   </div>
+
+<div class="global-setting-card mafia-setting-card">
+
+  <div class="global-setting-top">
+    <span class="global-setting-title" style="color:${roleColors.mafia}">
+      Mafia Kill Method
+    </span>
+    <span class="global-setting-badge">Global</span>
+  </div>
+
+  <div class="global-setting-row mafia-setting-row">
+    <label for="mafiaKillMethodSelect">How is the mafia target chosen?</label>
+
+    <select id="mafiaKillMethodSelect" onchange="setMafiaKillMethod(this.value)">
+      <option value="leader" ${state.mafiaKillMethod === "leader" ? "selected" : ""}>Leader chooses (rotating)</option>
+      <option value="vote" ${state.mafiaKillMethod === "vote" ? "selected" : ""}>Mafia vote</option>
+    </select>
+  </div>
+
+  <p class="global-setting-note">
+    Leader chooses: one mafia picks the kill, and the leader rotates each night.<br>
+    Mafia vote: all mafia vote, and ties are broken randomly among tied targets.
+  </p>
+
+</div>
 
 </div>
 
@@ -855,6 +884,20 @@ if(modal.classList.contains("show")){
 }else{
   openModal(content, initSettingsModal)
 }
+}
+
+function assignCurrentMafiaLeader(){
+
+let aliveMafia = state.players.filter(p => p.alive && p.role === "mafia")
+
+if(!aliveMafia.length){
+  state.currentMafiaLeader = null
+  return
+}
+
+let index = state.mafiaLeaderRotationIndex % aliveMafia.length
+state.currentMafiaLeader = aliveMafia[index].name
+state.mafiaLeaderRotationIndex++
 }
 
 function openModal(content, onOpen){
@@ -1628,6 +1671,12 @@ let savedSpiritActivation = localStorage.getItem("mafiaSpiritActivation")
 
 let savedSpiritCanSkipReveal = localStorage.getItem("mafiaSpiritCanSkipReveal")
 
+let savedMafiaKillMethod = localStorage.getItem("mafiaKillMethod")
+
+if(savedMafiaKillMethod){
+state.mafiaKillMethod = JSON.parse(savedMafiaKillMethod)
+}
+
 if(savedSpiritRevealType){
 state.spiritRevealType = JSON.parse(savedSpiritRevealType)
 }
@@ -2355,6 +2404,15 @@ if(player.role === "mafia" && state.mafiaKnowsFramer){
   }
 }
 
+if(player.role === "mafia" && state.mafiaKillMethod === "leader" && player.name === state.currentMafiaLeader){
+  extraInfo += `
+    <div class="framer-target-box">
+      <div class="framer-target-label">Tonight</div>
+      <div class="framer-target-name">You are the Mafia Leader</div>
+    </div>
+  `
+}
+
 render(`
 
 <div class="card">
@@ -2467,6 +2525,7 @@ state.mayorVotePower = 2
 state.framerKnowsSuccess = true
 state.framerKnowsMafia = true
 state.mafiaKnowsFramer = true
+state.mafiaKillMethod = "leader"
 
 state.mafiaCountOverride = 0
 state.revealRolesOnElimination = "none"
@@ -2510,6 +2569,7 @@ state.mayorVotePower = 2
 state.framerKnowsSuccess = true
 state.framerKnowsMafia = true
 state.mafiaKnowsFramer = true
+state.mafiaKillMethod = "leader"
 
 state.mafiaCountOverride = 0
 state.revealRolesOnElimination = "death_and_vote"
@@ -2553,6 +2613,7 @@ state.mayorVotePower = 2.5
 state.framerKnowsSuccess = true
 state.framerKnowsMafia = true
 state.mafiaKnowsFramer = true
+state.mafiaKillMethod = "vote"
 
 state.mafiaCountOverride = 0
 state.revealRolesOnElimination = "death_and_vote"

@@ -114,6 +114,12 @@ state.nightResultOrder = state.players
   .filter(p => p.alive)
   .map(p => p.name)
 
+if(state.mafiaKillMethod === "leader"){
+  assignCurrentMafiaLeader()
+}else{
+  state.currentMafiaLeader = null
+}
+
 resetNightActions()
 
 showNightTurn()
@@ -184,15 +190,14 @@ if(!player.alive){
   return
 }
 
-passPhone(player.name, "window.revealNightRole()")
+if(player.role === "mafia" && state.mafiaKillMethod === "leader"){
+  if(player.name !== state.currentMafiaLeader){
+    advanceNightTurn()
+    return
+  }
 }
 
-function advanceNightTurn(){
-
-state.nightTurnIndex++
-
-showNightTurn()
-
+passPhone(player.name, "window.revealNightRole()")
 }
 
 function showNightTurn(){
@@ -589,12 +594,57 @@ ${renderHostControls()}
 
 }
 
+function resolveMafiaKillTarget(kills){
+
+if(!kills.length) return null
+
+if(state.mafiaKillMethod === "leader"){
+  return kills[0].target
+}
+
+let voteCounts = {}
+
+kills.forEach(kill => {
+  if(!voteCounts[kill.target]){
+    voteCounts[kill.target] = 0
+  }
+  voteCounts[kill.target]++
+})
+
+let highest = 0
+let tiedTargets = []
+
+for(let target in voteCounts){
+  let count = voteCounts[target]
+
+  if(count > highest){
+    highest = count
+    tiedTargets = [target]
+  }else if(count === highest){
+    tiedTargets.push(target)
+  }
+}
+
+if(tiedTargets.length === 1){
+  return tiedTargets[0]
+}
+
+let chosen = tiedTargets[Math.floor(Math.random() * tiedTargets.length)]
+addLogEntry(`Mafia vote tied between ${tiedTargets.join(", ")}. Randomly chosen target: ${chosen}.`)
+return chosen
+}
+
 export function performNightAction(targetName){
 
 let player = state.players[state.nightTurnIndex]
 let role = roles[player.role]
 
-state.nightActions[role.nightAction] = targetName
+state.nightActions.push({
+  actor: player.name,
+  role: player.role,
+  action: role.nightAction,
+  target: targetName
+})
 
 if(role.nightAction === "kill"){
   addLogEntry(`Mafia targeted ${targetName}.`)
@@ -792,58 +842,66 @@ function showNightPrivateResultTurn(){
 
 function resolveNightSelections(){
 
-let kill = state.nightActions.kill
-let save = state.nightActions.save
-let investigate = state.nightActions.investigate
-let frame = state.nightActions.frame
+let kills = state.nightActions.filter(a => a.action === "kill")
+let saves = state.nightActions.filter(a => a.action === "save")
+let investigations = state.nightActions.filter(a => a.action === "investigate")
+let frames = state.nightActions.filter(a => a.action === "frame")
+
+let killTarget = resolveMafiaKillTarget(kills)
+let protectedTargets = saves.map(a => a.target)
+let framedTargets = frames.map(a => a.target)
 
 let publicResults = []
 let privateResults = []
 
-const saveSucceeded = !!(kill && save && kill === save)
+const saveSucceeded = !!(killTarget && protectedTargets.includes(killTarget))
 
 // Sheriff private result
-if(investigate){
-  let sheriff = state.players.find(p => p.alive && p.role === "sheriff")
-  let target = state.players.find(p => p.name === investigate)
+investigations.forEach(investigation => {
+  let sheriff = state.players.find(p => p.name === investigation.actor)
+  let target = state.players.find(p => p.name === investigation.target)
 
-  if(sheriff && target){
-    let isFramed = frame === target.name
-    let sheriffData = buildSheriffResult(target, isFramed)
+  if(!sheriff || !target) return
 
-    privateResults.push({
-      type: "investigate",
-      playerName: sheriff.name,
-      targetName: target.name,
-      result: sheriffData.result,
-      resultColor: sheriffData.resultColor
-    })
-  }
-}
+  let isFramed = framedTargets.includes(target.name)
+  let sheriffData = buildSheriffResult(target, isFramed)
 
-if(state.framerKnowsSuccess && investigate && frame && investigate === frame){
-  let framer = state.players.find(p => p.alive && p.role === "framer")
+  privateResults.push({
+    type: "investigate",
+    playerName: sheriff.name,
+    targetName: target.name,
+    result: sheriffData.result,
+    resultColor: sheriffData.resultColor
+  })
+})
 
-  if(framer){
-    privateResults.push({
-      type: "framer_success",
-      playerName: framer.name,
-      targetName: frame
-    })
-  }
+if(state.framerKnowsSuccess){
+  investigations.forEach(investigation => {
+    if(!framedTargets.includes(investigation.target)) return
+
+    frames
+      .filter(frame => frame.target === investigation.target)
+      .forEach(frame => {
+        privateResults.push({
+          type: "framer_success",
+          playerName: frame.actor,
+          targetName: frame.target
+        })
+      })
+  })
 }
 
 // Doctor successful save result
 if(saveSucceeded){
-  let doctor = state.players.find(p => p.alive && p.role === "doctor")
-
-  if(doctor){
-    privateResults.push({
-      type: "doctor_save_success",
-      playerName: doctor.name,
-      targetName: save
+  saves
+    .filter(save => save.target === killTarget)
+    .forEach(save => {
+      privateResults.push({
+        type: "doctor_save_success",
+        playerName: save.actor,
+        targetName: save.target
+      })
     })
-  }
 
   let mafiaPlayers = state.players.filter(p => p.alive && p.role === "mafia")
 
@@ -851,13 +909,13 @@ if(saveSucceeded){
     privateResults.push({
       type: "mafia_kill_blocked",
       playerName: mafiaPlayer.name,
-      targetName: kill
+      targetName: killTarget
     })
   })
 }
 
 // Public morning result
-if(kill && kill !== save){
+if(killTarget && !saveSucceeded){
 
   addLogEntry(`${kill} was killed during the night.`)
 

@@ -52,6 +52,10 @@ mayorExtraOpen: false,
 
 spiritReveal: null,
 
+mafiaKillMethod: "leader",
+currentMafiaLeader: null,
+mafiaLeaderRotationIndex: 0,
+
 gameLog: [],
 gameStats: {
 nights: 0,
@@ -104,18 +108,12 @@ state.votes={}
 }
 
 export function resetNightActions(){
-  state.nightActions = {
-    kill: null,
-    save: null,
-    investigate: null,
-    frame: null
-  }
-
-  state.nightDeaths = []
-  state.spiritReveal = null
+  state.nightActions = []
   state.nightPrivateResults = []
   state.nightResolved = null
   state.nightResultIndex = 0
+  state.nightDeaths = []
+  state.spiritReveal = null
 }
 
 export function resetGameTracking(){
