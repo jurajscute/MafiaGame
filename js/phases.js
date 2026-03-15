@@ -1051,6 +1051,7 @@ state.vigilanteOutcomeToShow = null
 
 let protectedTargets = saves.map(a => a.target)
 let framedTargets = frames.map(a => a.target)
+let instantNightWin = false
 
 let publicResults = []
 let privateResults = []
@@ -1113,6 +1114,10 @@ vigilanteShots.forEach(shot => {
     return
   }
 
+if(instantNightWin){
+  return
+}
+  
   // Doctor blocks Vigilante
   if(protectedTargets.includes(target.name)){
     addLogEntry(`Vigilante's attack on ${target.name} was stopped by the Doctor.`)
@@ -1164,7 +1169,7 @@ if(isWrongTarget){
   state.nightDeaths.push(target.name)
   addLogEntry(`${target.name} was slashed by the Vigilante.`)
 
-  if(target.role === "jester" && state.jesterWinIfVigilanteKilled){
+if(target.role === "jester" && state.jesterWinIfVigilanteKilled){
 
   addLogEntry(`${target.name} won as the Jester.`)
 
@@ -1185,6 +1190,7 @@ if(isWrongTarget){
 
 `)
 
+  instantNightWin = true
   return
 }
 
@@ -1639,11 +1645,11 @@ if(player.role === "jester" && executionerWinner){
 
 if(player.role === "jester"){
 
-  addLogEntry(`${player.name} won as the Jester.`)
+addLogEntry(`${player.name} won as the Jester.`)
 
-  document.body.className = "win-jester"
+document.body.className = "win-jester"
 
-  render(`
+render(`
 
 <div class="card role-jester">
 
@@ -1656,9 +1662,9 @@ if(player.role === "jester"){
 
 </div>
 
-  `)
+`)
 
-  return
+return
 }
 
 if(executionerWinner && player.role === "mafia" && mafiaAliveAfterVote === 0){
