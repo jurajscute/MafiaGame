@@ -1523,43 +1523,46 @@ function resolveNightSelections(){
   }
 
   // Resolve mafia kill after vigilante
+  // Resolve mafia kill after vigilante
   const killTarget = resolveMafiaKillTarget(kills)
-const holyShieldStoppedMafia = !!(holyShieldActive && killTarget)
-const saveSucceeded = !!(!holyShieldStoppedMafia && killTarget && protectedTargets.includes(killTarget))
+  const holyShieldStoppedMafia = !!(holyShieldActive && killTarget)
+  const saveSucceeded = !!(!holyShieldStoppedMafia && killTarget && protectedTargets.includes(killTarget))
 
-if(holyShieldStoppedMafia){
+  if(holyShieldStoppedMafia){
+    addLogEntry(`Holy Spirit blocked the Mafia's attack on ${killTarget}.`)
+    state.priestBlockedAttacks.push("Mafia")
+    state.priestPublicShield = true
 
-  addLogEntry(`Holy Spirit blocked the Mafia's attack on ${killTarget}.`)
-  state.priestBlockedAttacks.push("Mafia")
-  state.priestPublicShield = true
+    let mafiaKillerName = null
 
-  let mafiaKillerName = null
-
-  if(state.mafiaKillMethod === "leader"){
-    const leader = getPlayerByName(state.currentMafiaLeader)
-    if(leader && leader.alive){
-      mafiaKillerName = state.currentMafiaLeader
+    if(state.mafiaKillMethod === "leader"){
+      const leader = getPlayerByName(state.currentMafiaLeader)
+      if(leader && leader.alive){
+        mafiaKillerName = state.currentMafiaLeader
+      }
+    }else{
+      const aliveKills = kills.filter(k => isPlayerAlive(k.actor))
+      if(aliveKills.length){
+        const killAction = aliveKills.find(k => k.target === killTarget) || aliveKills[0]
+        mafiaKillerName = killAction.actor
+      }
     }
-  }else{
-    const aliveKills = kills.filter(k => isPlayerAlive(k.actor))
-    if(aliveKills.length){
-      const killAction = aliveKills.find(k => k.target === killTarget) || aliveKills[0]
-      mafiaKillerName = killAction.actor
-    }
-  }
 
-  if(mafiaKillerName){
-    privateResults.push({
-      type: "mafia_kill_blocked",
-      playerName: mafiaKillerName,
-      targetName: killTarget
+    if(mafiaKillerName){
+      privateResults.push({
+        type: "mafia_kill_blocked",
+        playerName: mafiaKillerName,
+        targetName: killTarget
+      })
+    }
+
+    publicResults.push({
+      type: "priest_shield",
+      text: "A holy spirit shield protected the town last night."
     })
-  }
 
-}
-else if(saveSucceeded){
+  }else if(killTarget && saveSucceeded){
 
-  if(saveSucceeded){
     saves
       .filter(save => save.target === killTarget)
       .forEach(save => {
@@ -1592,10 +1595,22 @@ else if(saveSucceeded){
         targetName: killTarget
       })
     }
-  }
 
-  // Morning result for mafia kill
-  if(killTarget && !saveSucceeded){
+    if(state.doctorRevealSave){
+      addLogEntry(`${killTarget} was saved by the Doctor.`)
+    }else{
+      addLogEntry(`Someone was attacked but survived the night.`)
+    }
+
+    publicResults.push({
+      type: "save",
+      text: state.doctorRevealSave
+        ? `${killTarget} was saved by the Doctor!`
+        : "Someone was attacked but survived the night."
+    })
+
+  }else if(killTarget){
+
     const victim = getPlayerByName(killTarget)
 
     addLogEntry(`${killTarget} was killed during the night.`)
@@ -1621,21 +1636,6 @@ else if(saveSucceeded){
       addSpiritChoiceIfNeeded(victim.name, privateResults)
     }
 
-  }else if(saveSucceeded){
-
-    if(state.doctorRevealSave){
-      addLogEntry(`${killTarget} was saved by the Doctor.`)
-    }else{
-      addLogEntry(`Someone was attacked but survived the night.`)
-    }
-
-    publicResults.push({
-      type: "save",
-      text: state.doctorRevealSave
-        ? `${killTarget} was saved by the Doctor!`
-        : "Someone was attacked but survived the night."
-    })
-
   }else{
 
     addLogEntry(`The night was quiet.`)
@@ -1659,15 +1659,15 @@ else if(saveSucceeded){
     })
   }
 
-if(holyShieldActive){
-  priestShields.forEach(action => {
-    privateResults.push({
-      type: "priest_result",
-      playerName: action.actor,
-      blockedRoles: [...new Set(state.priestBlockedAttacks)]
+  if(holyShieldActive){
+    priestShields.forEach(action => {
+      privateResults.push({
+        type: "priest_result",
+        playerName: action.actor,
+        blockedRoles: [...new Set(state.priestBlockedAttacks)]
+      })
     })
-  })
-}
+  }
 
   state.nightPrivateResults = privateResults
   state.nightResolved = {
@@ -1723,15 +1723,6 @@ if(state.spiritReveal){
   }
 }
 
-if(state.priestPublicShield){
-  results.push({
-    type: "priest_shield",
-    text: "A holy spirit shield protected the town last night."
-  })
-
-  state.priestPublicShield = false
-}
-
 if(state.vigilantePublicReveal){
 
   const v = state.vigilantePublicReveal
@@ -1741,7 +1732,12 @@ if(state.vigilantePublicReveal){
   let text = ""
 
   if(v.blocked){
+  if(v.blockedByHolySpirit){
+    text = `The Vigilante tried to slash <strong>${v.target}</strong>, but a holy spirit shield protected the town.`
+  }else{
     text = `The Vigilante tried to slash <strong>${v.target}</strong>, but the Doctor protected them.`
+  }
+}
 
   }else if(v.wrongTarget){
 
