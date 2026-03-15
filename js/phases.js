@@ -1102,12 +1102,13 @@ window.chooseSpiritVoteReveal = function(targetName){
 
 if(targetName === "__skip__"){
   state.spiritReveal = null
+  addLogEntry("Spirit chose not to reveal anyone.")
 }else{
   state.spiritReveal = targetName
   addLogEntry(`Spirit chose to reveal ${targetName}'s role.`)
 }
 
-continueResolveVotesAfterSpirit()
+renderSpiritVoteOutcome()
 }
 
 function resolveVotes(){
@@ -1224,6 +1225,10 @@ if(player){
 player.alive = false
 if(player.role === "spirit" && state.spiritActivation === "any_death"){
   state.pendingSpiritVoteReveal = player.name
+  state.pendingVoteEliminated = eliminated
+  state.pendingVoteResultsHTML = resultsHTML
+  showSpiritVoteRevealPrompt(player)
+  return
 }
 showSpiritVoteRevealPrompt(player)
 return
@@ -1395,6 +1400,78 @@ ${resultsHTML}
 
 `)
 
+}
+
+function renderSpiritVoteOutcome(){
+
+let eliminated = state.pendingVoteEliminated
+let resultsHTML = state.pendingVoteResultsHTML || ""
+
+let player = state.players.find(p => p.name === eliminated)
+
+render(`
+
+<div class="card">
+
+<h2>Voting Results</h2>
+
+${resultsHTML}
+
+<hr>
+
+<h2 class="elimination-text">
+${eliminated} was voted out
+</h2>
+
+${player && shouldRevealOnVoteDeath() ? revealedRoleText(player) : ""}
+
+${renderSpiritPublicReveal()}
+
+<button onclick="window.nextNight()">Next Night</button>
+
+</div>
+
+`)
+}
+
+function renderSpiritPublicReveal(){
+
+if(!state.spiritReveal) return ""
+
+let revealedPlayer = state.players.find(p => p.name === state.spiritReveal)
+if(!revealedPlayer) return ""
+
+let revealLabel = ""
+let revealColor = "white"
+
+if(state.spiritRevealType === "team"){
+  if(roles[revealedPlayer.role]?.team === "mafia"){
+    revealLabel = "MAFIA"
+    revealColor = roleColors.mafia
+  }else if(roles[revealedPlayer.role]?.team === "neutral"){
+    revealLabel = "NEUTRAL"
+    revealColor = roleColors.executioner
+  }else{
+    revealLabel = "TOWN"
+    revealColor = roleColors.villager
+  }
+}else{
+  revealLabel = revealedPlayer.role.toUpperCase()
+  revealColor = roleColors[revealedPlayer.role] || "white"
+}
+
+return `
+<div class="night-result night-result-spirit">
+  The Spirit reveals that <strong>${revealedPlayer.name}</strong> is
+  <span style="
+    color:${revealColor};
+    font-weight:bold;
+    text-shadow:0 0 8px ${revealColor};
+  ">
+    ${revealLabel}
+  </span>
+</div>
+`
 }
 
 window.toggleExecutionerReveal = function(playerName){
