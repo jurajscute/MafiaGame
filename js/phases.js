@@ -192,7 +192,7 @@ if(!player.alive){
 
 if(player.role === "mafia" && state.mafiaKillMethod === "leader"){
   if(player.name !== state.currentMafiaLeader){
-    nextNightTurn()
+    passPhone(player.name, "window.showMafiaWaitingScreen()")
     return
   }
 }
@@ -212,6 +212,35 @@ if(state.nightStep === "results"){
   return
 }
 
+}
+
+window.showMafiaWaitingScreen = function(){
+
+let player = state.players[state.nightTurnIndex]
+
+if(!player) return
+
+render(`
+
+<div class="card role-mafia">
+
+<h2 class="role-title">MAFIA</h2>
+
+<p class="role-description">
+Your partner is choosing someone to kill tonight.
+</p>
+
+<p style="opacity:0.8;">
+Tonight <strong>${state.currentMafiaLeader}</strong> is in charge of killing.
+</p>
+
+<button onclick="window.nextNightTurn()">Hide</button>
+
+${renderHostControls()}
+
+</div>
+
+`)
 }
 
 function showNightResultsTurn(){
