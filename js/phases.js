@@ -1187,29 +1187,6 @@ if(vigilanteDies && shooter.alive){
   }
 }
 
-  // Spirit can trigger from Vigilante night death
-  if(target.role === "spirit" &&
-     (state.spiritActivation === "night_only" || state.spiritActivation === "any_death")){
-    privateResults.push({
-      type: "spirit_reveal_choice",
-      playerName: target.name
-    })
-  }
-
-  if(vigilanteDies && shooter.alive){
-    shooter.alive = false
-    state.nightDeaths.push(shooter.name)
-    addLogEntry(`${shooter.name} also died for killing a town player.`)
-
-    if(shooter.role === "spirit" &&
-       (state.spiritActivation === "night_only" || state.spiritActivation === "any_death")){
-      privateResults.push({
-        type: "spirit_reveal_choice",
-        playerName: shooter.name
-      })
-    }
-  }
-
   state.vigilanteOutcomeToShow = {
   shooter: shooter.name,
   target: target.name,
@@ -1332,7 +1309,8 @@ if(state.vigilanteOutcomeToShow){
     targetRole: state.vigilanteOutcomeToShow.targetRole,
     targetDied: state.vigilanteOutcomeToShow.targetDied,
     vigilanteDies: state.vigilanteOutcomeToShow.vigilanteDies,
-    blocked: state.vigilanteOutcomeToShow.blocked
+    blocked: state.vigilanteOutcomeToShow.blocked,
+    wrongTarget: state.vigilanteOutcomeToShow.wrongTarget
   })
 }
 
@@ -1396,26 +1374,34 @@ if(state.vigilantePublicReveal){
 
   let text = ""
 
-  if(!v.targetDied){
-    if(v.blocked){
-      text = `The Vigilante tried to slash <strong>${v.target}</strong>, but the Doctor protected them.`
-    }else{
-      text = `The Vigilante tried to slash <strong>${v.target}</strong>, but nothing happened.`
+  if(v.blocked){
+    text = `The Vigilante tried to slash <strong>${v.target}</strong>, but the Doctor protected them.`
+
+  }else if(v.wrongTarget){
+
+    if(v.targetDied){
+      text = `${v.target} was slashed by the Vigilante.`
+
+      if(targetPlayer && shouldRevealOnNightDeath()){
+        text += `<br>${revealedRoleText(targetPlayer)}`
+      }
     }
 
-  }else if(v.vigilanteDies){
+    if(v.vigilanteDies){
+      text += `${text ? "<br>" : ""}After murdering an innocent, the Vigilante stabs their own heart in devastation.`
 
-    text = `${v.target} was slashed by the Vigilante.<br>`
-
-    if(targetPlayer && shouldRevealOnNightDeath()){
-      text += revealedRoleText(targetPlayer)
+      if(shooterPlayer && shouldRevealOnNightDeath()){
+        text += `<br>${revealedRoleText(shooterPlayer)}`
+      }
     }
 
-    text += `<br>The Vigilante couldn't bear the guilt and stabbed his heart.`
-
-    if(shooterPlayer && shouldRevealOnNightDeath()){
-      text += `<br>${revealedRoleText(shooterPlayer)}`
+    if(!v.targetDied && !v.vigilanteDies){
+      text = `The Vigilante killed an innocent, they need to get their head straight.`
     }
+
+  }else if(!v.targetDied){
+
+    text = `The Vigilante tried to slash <strong>${v.target}</strong>, but nothing happened.`
 
   }else{
 
@@ -1424,7 +1410,6 @@ if(state.vigilantePublicReveal){
     if(targetPlayer && shouldRevealOnNightDeath()){
       text += `<br>${revealedRoleText(targetPlayer)}`
     }
-
   }
 
   results.push({
