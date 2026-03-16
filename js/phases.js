@@ -590,631 +590,539 @@ export function nextNightTurn(){
 
 window.revealNightPrivateResult = function(){
 
-let resultPlayers = getNightResultPlayers()
-let player = resultPlayers[state.nightResultIndex]
-
-if(!player){
-  showMorning()
-  return
-}
-
-let item = state.nightPrivateResults.find(r => r.playerName === player.name)
-
-if(item && item.type === "investigate"){
-render(`
-
-<div class="card role-sheriff">
-
-<h2 class="role-title">INVESTIGATION RESULT</h2>
-
-<p>${item.targetName} is</p>
-
-<h1 style="
-color:${item.resultColor};
-text-shadow:
-0 0 10px ${item.resultColor},
-0 0 20px ${item.resultColor};
-">
-${item.result}
-</h1>
-
-<button onclick="window.nextNightResultTurn()">Hide</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-return
-}
-
-if(item && item.type === "executioner_converted"){
-  const newColor = roleColors[item.newRole] || "white"
-
-  render(`
-
-<div class="card role-${item.newRole}">
-
-<h2 class="role-title">OH WELL...</h2>
-
-<p class="role-description">
-Your target died!
-</p>
-
-<p class="role-description">
-You are no longer the Executioner.
-</p>
-
-<h1 style="
-color:${newColor};
-text-shadow:
-0 0 10px ${newColor},
-0 0 20px ${newColor};
-">
-${roleDisplayName(item.newRole).toUpperCase()}
-</h1>
-
-<p class="role-description">
-Play as your new role from now on.
-</p>
-
-<button onclick="window.nextNightResultTurn()">Continue</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-  return
-}
-
-if(item && item.type === "cat_converted"){
-  const joinedColor = item.joinedTeam === "mafia"
-    ? roleColors.mafia
-    : roleColors.villager
-
-  const joinedLabel = item.joinedTeam === "mafia"
-    ? "MAFIA"
-    : "TOWN"
-
-  const mafiaNamesHTML = item.mafiaNames?.length
-    ? `
-      <p class="role-description">
-        Your new allies are:
-      </p>
-      <h3 style="color:${roleColors.mafia}; line-height:1.5;">
-        ${item.mafiaNames.join("<br>")}
-      </h3>
-    `
-    : ""
-
-  render(`
-
-<div class="card role-schrodingers-cat special-cat-card">
-
-<h2 class="role-title" style="
-color:${roleColors.schrodingers_cat};
-text-shadow:
-0 0 8px rgba(200,200,200,0.45),
-0 0 20px rgba(200,200,200,0.15);
-letter-spacing:3px;
-">
-SCHRÖDINGER'S CAT
-</h2>
-
-<p class="role-description" style="font-size:18px;margin-top:10px;">
-You were attacked... but you were just too cute.
-</p>
-
-<div style="
-margin:22px 0;
-padding:18px;
-border-radius:16px;
-background:linear-gradient(
-135deg,
-rgba(255,255,255,0.07),
-rgba(255,255,255,0.02)
-);
-border:1px solid rgba(255,255,255,0.12);
-box-shadow:0 0 16px rgba(255,255,255,0.05);
-">
-
-<p class="role-description" style="margin:0 0 8px 0;">
-Because you were attacked by the <strong>${item.killerRoleLabel}</strong>,
-you have secretly joined the
-</p>
-
-<div style="
-font-size:30px;
-font-weight:800;
-letter-spacing:2px;
-color:${joinedColor};
-text-shadow:0 0 8px ${joinedColor};
-">
-${joinedLabel}
-</div>
-
-</div>
-
-${
-item.mafiaNames?.length
-? `
-<div style="
-margin-top:16px;
-padding:14px;
-border-radius:14px;
-background:rgba(231,76,60,0.08);
-border:1px solid rgba(231,76,60,0.18);
-">
-
-<p class="role-description" style="margin-bottom:8px;">
-Your new ally:
-</p>
-
-<div style="
-color:${roleColors.mafia};
-font-size:26px;
-font-weight:800;
-text-shadow:0 0 8px ${roleColors.mafia};
-">
-${item.mafiaNames.join("<br>")}
-</div>
-
-</div>
-`
-: `
-<p class="role-description" style="opacity:0.9;">
-Your fate has changed. Play your new role wisely.
-</p>
-`
-}
-
-<button onclick="window.nextNightResultTurn()">Continue</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-  return
-}
-
-if(item && item.type === "cat_conversion_killer"){
-  const joinedColor = item.joinedTeam === "mafia"
-    ? roleColors.mafia
-    : roleColors.villager
-
-  const joinedLabel = item.joinedTeam === "mafia"
-    ? "MAFIA"
-    : "TOWN"
-
-  render(`
-
-<div class="card role-schrodingers-cat special-cat-card">
-
-<h2 class="role-title" style="
-color:${roleColors.schrodingers_cat};
-text-shadow:
-0 0 8px rgba(200,200,200,0.45),
-0 0 20px rgba(200,200,200,0.15);
-letter-spacing:3px;
-">
-A CAT JOINS YOU!
-</h2>
-
-<p class="role-description" style="font-size:18px;margin-top:10px;">
-Your target, <strong>${item.targetName}</strong>, was Schrödinger's Cat.
-</p>
-
-<div style="
-margin:20px 0;
-padding:18px;
-border-radius:16px;
-background:linear-gradient(
-135deg,
-rgba(255,255,255,0.07),
-rgba(255,255,255,0.02)
-);
-border:1px solid rgba(255,255,255,0.12);
-box-shadow:0 0 16px rgba(255,255,255,0.05);
-">
-
-<p class="role-description" style="margin:0 0 8px 0;">
-They did not die publicly.
-</p>
-
-<p class="role-description" style="margin:0;">
-They have secretly joined the
-</p>
-
-<div style="
-font-size:30px;
-font-weight:800;
-letter-spacing:2px;
-color:${joinedColor};
-text-shadow:0 0 8px ${joinedColor};
-margin-top:8px;
-">
-${joinedLabel}
-</div>
-
-</div>
-
-<p class="role-description" style="opacity:0.85;">
-Keep this information secret.
-</p>
-
-<button onclick="window.nextNightResultTurn()">Continue</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-  return
-}
-
-if(item && item.type === "priest_result"){
-  const blockedText = item.blockedRoles.length
-    ? item.blockedRoles.join(" and ")
-    : "No attacks"
-
-  render(`
-
-<div class="card role-priest">
-
-<h2 class="role-title">HOLY SPIRIT OUTCOME</h2>
-
-<p class="role-description">
-Your blessing protected the town tonight.
-</p>
-
-<h1 style="
-color:${roleColors.priest};
-text-shadow:
-0 0 10px ${roleColors.priest},
-0 0 20px ${roleColors.priest};
-">
-${blockedText.toUpperCase()}
-</h1>
-
-<p class="role-description">
-were blocked by the Holy Spirit.
-</p>
-
-<button onclick="window.nextNightResultTurn()">Hide</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-  return
-}
-
-if(item && item.type === "framer_success"){
-render(`
-
-<div class="card role-framer">
-
-<h2 class="role-title">FRAMED SUCCESSFULLY</h2>
-
-<p>You successfully framed</p>
-
-<h1 style="
-color:${roleColors.framer};
-text-shadow:
-0 0 10px ${roleColors.framer},
-0 0 20px ${roleColors.framer};
-">
-${item.targetName.toUpperCase()}
-</h1>
-
-<button onclick="window.nextNightResultTurn()">Hide</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-return
-}
-
-if(item && item.type === "doctor_save_success"){
-render(`
-
-<div class="card role-doctor">
-
-<h2 class="role-title">SAVE SUCCESSFUL</h2>
-
-<p>You successfully saved your patient!</p>
-
-<h1 style="
-color:${roleColors.doctor};
-text-shadow:
-0 0 10px ${roleColors.doctor},
-0 0 20px ${roleColors.doctor};
-">
-${item.targetName.toUpperCase()}
-</h1>
-
-<button onclick="window.nextNightResultTurn()">Hide</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-return
-}
-
-if(item && item.type === "mafia_kill_blocked"){
-render(`
-
-<div class="card role-mafia">
-
-<h2 class="role-title">ATTACK FAILED</h2>
-
-<p>Your attack on</p>
-
-<h1 style="
-color:${roleColors.mafia};
-text-shadow:
-0 0 10px ${roleColors.mafia},
-0 0 20px ${roleColors.mafia};
-">
-${item.targetName.toUpperCase()}
-</h1>
-
-<p class="role-description">
-was stopped by the doctor!
-</p>
-
-<button onclick="window.nextNightResultTurn()">Hide</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-return
-}
-
-if(item && item.type === "mafia_kill_blocked_priest"){
-render(`
-
-<div class="card role-priest">
-
-<h2 class="role-title">HOLY SHIELD HELD</h2>
-
-<p>The attack on</p>
-
-<h1 style="
-color:${roleColors.priest};
-text-shadow:
-0 0 10px ${roleColors.priest},
-0 0 20px ${roleColors.priest};
-">
-${item.targetName.toUpperCase()}
-</h1>
-
-<p class="role-description">
-was stopped by the Holy Spirit.
-</p>
-
-<button onclick="window.nextNightResultTurn()">Hide</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-return
-}
-
-if(item && item.type === "vigilante_blocked"){
-render(`
-
-<div class="card role-vigilante">
-
-<h2 class="role-title">ATTACK FAILED</h2>
-
-<p>Your attack on</p>
-
-<h1 style="
-color:${roleColors.vigilante};
-text-shadow:
-0 0 10px ${roleColors.vigilante},
-0 0 20px ${roleColors.vigilante};
-">
-${item.targetName.toUpperCase()}
-</h1>
-
-<p class="role-description">
-was stopped by the doctor!
-</p>
-
-<button onclick="window.nextNightResultTurn()">Hide</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-return
-}
-
-if(item && item.type === "vigilante_blocked_priest"){
-render(`
-
-<div class="card role-priest">
-
-<h2 class="role-title">HOLY SHIELD HELD</h2>
-
-<p>Your attack on</p>
-
-<h1 style="
-color:${roleColors.priest};
-text-shadow:
-0 0 10px ${roleColors.priest},
-0 0 20px ${roleColors.priest};
-">
-${item.targetName.toUpperCase()}
-</h1>
-
-<p class="role-description">
-was stopped by the Holy Spirit.
-</p>
-
-<button onclick="window.nextNightResultTurn()">Hide</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-return
-}
-
-if(item && item.type === "vigilante_outcome"){
-render(`
-
-<div class="card role-vigilante">
-
-<h2 class="role-title">VIGILANTE OUTCOME</h2>
-
-<p>You headed to slash <strong>${item.targetName}</strong>.</p>
-
-<p class="role-description">
-${
-  item.blocked
-    ? "But the Doctor protected them. Your attack failed."
-    : !item.targetDied && !item.vigilanteDies
-      ? "But when you got there, they were already dead."
-      : item.wrongTarget
-        ? item.vigilanteDies && item.targetDied
-          ? `${item.targetName} was a ${item.targetRole?.toUpperCase() || "TOWN"}. How could have this happened, you slash yourself and both of you die.`
-          : item.vigilanteDies && !item.targetDied
-            ? `${item.targetName} was a ${item.targetRole?.toUpperCase() || "TOWN"}. You realise fast enough but cannot believe your decision, you end your own life.`
-            : !item.vigilanteDies && item.targetDied
-              ? `${item.targetName} was a ${item.targetRole?.toUpperCase() || "TOWN"}. You cannot believe your eyes, but you're determined to correct your mistakes...`
-              : "You attacked the wrong person."
-        : `${item.targetName} was a ${item.targetRole?.toUpperCase() || "MAFIA"}, you stand proudly over the body.`
-}
-</p>
-
-<button onclick="window.nextNightResultTurn()">Hide</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-return
-}
-
-if(item && item.type === "vigilante_incoming_death"){
-render(`
-
-<div class="card">
-
-<h2>Night Results</h2>
-
-<p style="
-color:${roleColors[player.role] || "white"};
-font-weight:bold;
-text-shadow:
-0 0 10px ${roleColors[player.role] || "white"};
-">
-${roleDisplayName(player.role)}
-</p>
-
-<p class="role-description">
-You have an eerie feeling that justice will be served tonight.
-</p>
-
-<button onclick="window.nextNightResultTurn()">Hide</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
-return
-}
-
-if(item && item.type === "spirit_reveal_choice"){
-
-let targets = state.players
-  .filter(p => p.alive && p.name !== player.name)
-  .map(p => `
-    <button onclick="window.chooseSpiritReveal('${p.name}')">
-      ${p.name}
-    </button>
-  `)
-  .join("")
-
-if(state.spiritCanSkipReveal){
-  targets += `
-    <button class="skip-btn" onclick="window.chooseSpiritReveal('__skip__')">
-      Skip Reveal
-    </button>
-  `
-}
-
-render(`
-
-<div class="card role-spirit">
-
-<h2 class="role-title">YOU WERE KILLED</h2>
-
-<p class="role-description">
-Before morning, expose a player and show the world who they truly are.
-</p>
-
-${targets}
-
-${renderHostControls()}
-
-</div>
-
-`)
-return
-}
-
-let roleColor = roleColors[player.role] || "white"
-let noResultText = getRandomNoResultText(player.role)
-
-if(state.nightDeaths?.includes(player.name)){
-  noResultText = "You had a terrifying nightmare, you have a bad feeling about tonight..."
-}
-
-render(`
-
-<div class="card">
-
-<h2>Night Results</h2>
-
-<p style="
-color:${roleColor};
-font-weight:bold;
-text-shadow:
-0 0 10px ${roleColor};
-">
-${roleDisplayName(player.role)}
-</p>
-
-<p class="role-description">
-${noResultText}
-</p>
-
-<button onclick="window.nextNightResultTurn()">Hide</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
+  let resultPlayers = getNightResultPlayers()
+  let player = resultPlayers[state.nightResultIndex]
+
+  if(!player){
+    showMorning()
+    return
+  }
+
+  let item = state.nightPrivateResults.find(r => r.playerName === player.name)
+  let progress = `${state.nightResultIndex + 1} / ${resultPlayers.length}`
+
+  function renderNightResultCard({
+    roleClass = "",
+    kicker = "Night Results",
+    title = player.name,
+    subtitle = "What happened to you tonight",
+    bodyHTML = "",
+    buttonText = "Continue"
+  }){
+    render(`
+      <div class="card reveal-role-card ${roleClass ? `role-${roleClass}` : ""}">
+
+        <div class="reveal-role-topbar">
+          <div class="reveal-role-kicker">${kicker}</div>
+          <div class="reveal-role-progress">${progress}</div>
+        </div>
+
+        <div class="reveal-role-header">
+          <div class="reveal-role-player">${title}</div>
+          <div class="reveal-role-hint">${subtitle}</div>
+        </div>
+
+        ${bodyHTML}
+
+        <div class="reveal-role-actions">
+          <button onclick="window.nextNightResultTurn()">${buttonText}</button>
+        </div>
+
+        ${renderHostControls()}
+
+      </div>
+    `)
+  }
+
+  if(item && item.type === "investigate"){
+    renderNightResultCard({
+      roleClass: "sheriff",
+      kicker: "Night Results",
+      title: player.name,
+      subtitle: "Your investigation is complete",
+      bodyHTML: `
+        <div class="night-action-role-box sheriff-result-box">
+          <div class="night-action-role-kicker">Investigation Result</div>
+          <div class="night-result-line">${item.targetName} is</div>
+          <div class="night-action-role-name" style="
+            color:${item.resultColor};
+            text-shadow:
+              0 0 10px ${item.resultColor},
+              0 0 20px ${item.resultColor};
+          ">
+            ${item.result}
+          </div>
+        </div>
+      `,
+      buttonText: "Hide"
+    })
+    return
+  }
+
+  if(item && item.type === "executioner_converted"){
+    const newColor = roleColors[item.newRole] || "white"
+
+    renderNightResultCard({
+      roleClass: item.newRole,
+      kicker: "Role Changed",
+      title: player.name,
+      subtitle: "Your purpose has ended",
+      bodyHTML: `
+        <div class="night-action-role-box executioner-convert-box">
+          <div class="night-action-role-kicker">New Role</div>
+          <p class="role-description">Your target died.</p>
+          <p class="role-description">You are no longer the Executioner.</p>
+
+          <div class="night-action-role-name" style="
+            color:${newColor};
+            text-shadow:
+              0 0 10px ${newColor},
+              0 0 20px ${newColor};
+          ">
+            ${roleDisplayName(item.newRole).toUpperCase()}
+          </div>
+
+          <p class="role-description">Play as your new role from now on.</p>
+        </div>
+      `
+    })
+    return
+  }
+
+  if(item && item.type === "cat_converted"){
+    const joinedColor = item.joinedTeam === "mafia"
+      ? roleColors.mafia
+      : roleColors.villager
+
+    const joinedLabel = item.joinedTeam === "mafia"
+      ? "MAFIA"
+      : "TOWN"
+
+    renderNightResultCard({
+      roleClass: "schrodingers_cat",
+      kicker: "Secret Fate",
+      title: player.name,
+      subtitle: "You did not die tonight",
+      bodyHTML: `
+        <div class="night-action-role-box cat-result-box">
+          <div class="night-action-role-kicker">Schrödinger's Cat</div>
+          <p class="role-description">You were attacked... but you were just too cute.</p>
+
+          <div class="night-result-panel">
+            <p class="role-description" style="margin:0 0 8px 0;">
+              Because you were attacked by the <strong>${item.killerRoleLabel}</strong>,
+              you secretly joined the
+            </p>
+
+            <div class="night-action-role-name" style="
+              color:${joinedColor};
+              text-shadow:0 0 8px ${joinedColor};
+            ">
+              ${joinedLabel}
+            </div>
+          </div>
+
+          ${
+            item.mafiaNames?.length
+              ? `
+                <div class="night-result-panel mafia-ally-panel">
+                  <div class="night-action-role-kicker">Your New Ally</div>
+                  <div class="night-result-big-list" style="
+                    color:${roleColors.mafia};
+                    text-shadow:0 0 8px ${roleColors.mafia};
+                  ">
+                    ${item.mafiaNames.join("<br>")}
+                  </div>
+                </div>
+              `
+              : `
+                <p class="role-description">Your fate has changed. Play your new role wisely.</p>
+              `
+          }
+        </div>
+      `
+    })
+    return
+  }
+
+  if(item && item.type === "cat_conversion_killer"){
+    const joinedColor = item.joinedTeam === "mafia"
+      ? roleColors.mafia
+      : roleColors.villager
+
+    const joinedLabel = item.joinedTeam === "mafia"
+      ? "MAFIA"
+      : "TOWN"
+
+    renderNightResultCard({
+      roleClass: "schrodingers_cat",
+      kicker: "Secret Outcome",
+      title: player.name,
+      subtitle: "Your target did not die publicly",
+      bodyHTML: `
+        <div class="night-action-role-box cat-result-box">
+          <div class="night-action-role-kicker">A Cat Joins You</div>
+          <p class="role-description">
+            Your target, <strong>${item.targetName}</strong>, was Schrödinger's Cat.
+          </p>
+
+          <div class="night-result-panel">
+            <p class="role-description" style="margin:0 0 8px 0;">They did not die publicly.</p>
+            <p class="role-description" style="margin:0;">They have secretly joined the</p>
+
+            <div class="night-action-role-name" style="
+              color:${joinedColor};
+              text-shadow:0 0 8px ${joinedColor};
+            ">
+              ${joinedLabel}
+            </div>
+          </div>
+
+          <p class="role-description">Keep this information secret.</p>
+        </div>
+      `
+    })
+    return
+  }
+
+  if(item && item.type === "priest_result"){
+    const blockedText = item.blockedRoles.length
+      ? item.blockedRoles.join(" and ")
+      : "No attacks"
+
+    renderNightResultCard({
+      roleClass: "priest",
+      kicker: "Holy Result",
+      title: player.name,
+      subtitle: "Your blessing protected the town",
+      bodyHTML: `
+        <div class="night-action-role-box priest-result-box">
+          <div class="night-action-role-kicker">Holy Spirit Outcome</div>
+
+          <div class="night-action-role-name" style="
+            color:${roleColors.priest};
+            text-shadow:
+              0 0 10px ${roleColors.priest},
+              0 0 20px ${roleColors.priest};
+          ">
+            ${blockedText.toUpperCase()}
+          </div>
+
+          <p class="role-description">were blocked by the Holy Spirit.</p>
+        </div>
+      `,
+      buttonText: "Hide"
+    })
+    return
+  }
+
+  if(item && item.type === "framer_success"){
+    renderNightResultCard({
+      roleClass: "framer",
+      kicker: "Night Results",
+      title: player.name,
+      subtitle: "Your deception worked",
+      bodyHTML: `
+        <div class="night-action-role-box framer-result-box">
+          <div class="night-action-role-kicker">Framed Successfully</div>
+          <p class="role-description">You successfully framed</p>
+
+          <div class="night-action-role-name" style="
+            color:${roleColors.framer};
+            text-shadow:
+              0 0 10px ${roleColors.framer},
+              0 0 20px ${roleColors.framer};
+          ">
+            ${item.targetName.toUpperCase()}
+          </div>
+        </div>
+      `,
+      buttonText: "Hide"
+    })
+    return
+  }
+
+  if(item && item.type === "doctor_save_success"){
+    renderNightResultCard({
+      roleClass: "doctor",
+      kicker: "Night Results",
+      title: player.name,
+      subtitle: "You saved someone tonight",
+      bodyHTML: `
+        <div class="night-action-role-box doctor-result-box">
+          <div class="night-action-role-kicker">Save Successful</div>
+          <p class="role-description">You successfully saved your patient!</p>
+
+          <div class="night-action-role-name" style="
+            color:${roleColors.doctor};
+            text-shadow:
+              0 0 10px ${roleColors.doctor},
+              0 0 20px ${roleColors.doctor};
+          ">
+            ${item.targetName.toUpperCase()}
+          </div>
+        </div>
+      `,
+      buttonText: "Hide"
+    })
+    return
+  }
+
+  if(item && item.type === "mafia_kill_blocked"){
+    renderNightResultCard({
+      roleClass: "mafia",
+      kicker: "Night Results",
+      title: player.name,
+      subtitle: "Your attack failed",
+      bodyHTML: `
+        <div class="night-action-role-box mafia-result-box">
+          <div class="night-action-role-kicker">Attack Failed</div>
+          <p class="role-description">Your attack on</p>
+
+          <div class="night-action-role-name" style="
+            color:${roleColors.mafia};
+            text-shadow:
+              0 0 10px ${roleColors.mafia},
+              0 0 20px ${roleColors.mafia};
+          ">
+            ${item.targetName.toUpperCase()}
+          </div>
+
+          <p class="role-description">was stopped by the Doctor!</p>
+        </div>
+      `,
+      buttonText: "Hide"
+    })
+    return
+  }
+
+  if(item && item.type === "mafia_kill_blocked_priest"){
+    renderNightResultCard({
+      roleClass: "priest",
+      kicker: "Night Results",
+      title: player.name,
+      subtitle: "Holy power stopped the attack",
+      bodyHTML: `
+        <div class="night-action-role-box priest-result-box">
+          <div class="night-action-role-kicker">Holy Shield Held</div>
+          <p class="role-description">The attack on</p>
+
+          <div class="night-action-role-name" style="
+            color:${roleColors.priest};
+            text-shadow:
+              0 0 10px ${roleColors.priest},
+              0 0 20px ${roleColors.priest};
+          ">
+            ${item.targetName.toUpperCase()}
+          </div>
+
+          <p class="role-description">was stopped by the Holy Spirit.</p>
+        </div>
+      `,
+      buttonText: "Hide"
+    })
+    return
+  }
+
+  if(item && item.type === "vigilante_blocked"){
+    renderNightResultCard({
+      roleClass: "vigilante",
+      kicker: "Night Results",
+      title: player.name,
+      subtitle: "Your attack failed",
+      bodyHTML: `
+        <div class="night-action-role-box vigilante-result-box">
+          <div class="night-action-role-kicker">Attack Failed</div>
+          <p class="role-description">Your attack on</p>
+
+          <div class="night-action-role-name" style="
+            color:${roleColors.vigilante};
+            text-shadow:
+              0 0 10px ${roleColors.vigilante},
+              0 0 20px ${roleColors.vigilante};
+          ">
+            ${item.targetName.toUpperCase()}
+          </div>
+
+          <p class="role-description">was stopped by the Doctor!</p>
+        </div>
+      `,
+      buttonText: "Hide"
+    })
+    return
+  }
+
+  if(item && item.type === "vigilante_blocked_priest"){
+    renderNightResultCard({
+      roleClass: "priest",
+      kicker: "Night Results",
+      title: player.name,
+      subtitle: "Holy power stopped the attack",
+      bodyHTML: `
+        <div class="night-action-role-box priest-result-box">
+          <div class="night-action-role-kicker">Holy Shield Held</div>
+          <p class="role-description">Your attack on</p>
+
+          <div class="night-action-role-name" style="
+            color:${roleColors.priest};
+            text-shadow:
+              0 0 10px ${roleColors.priest},
+              0 0 20px ${roleColors.priest};
+          ">
+            ${item.targetName.toUpperCase()}
+          </div>
+
+          <p class="role-description">was stopped by the Holy Spirit.</p>
+        </div>
+      `,
+      buttonText: "Hide"
+    })
+    return
+  }
+
+  if(item && item.type === "vigilante_outcome"){
+    renderNightResultCard({
+      roleClass: "vigilante",
+      kicker: "Night Results",
+      title: player.name,
+      subtitle: "You carried out your attack",
+      bodyHTML: `
+        <div class="night-action-role-box vigilante-result-box">
+          <div class="night-action-role-kicker">Vigilante Outcome</div>
+
+          <p class="role-description">You headed to slash <strong>${item.targetName}</strong>.</p>
+
+          <div class="night-result-panel">
+            <p class="role-description">
+              ${
+                item.blocked
+                  ? "But the Doctor protected them. Your attack failed."
+                  : !item.targetDied && !item.vigilanteDies
+                    ? "But when you got there, they were already dead."
+                    : item.wrongTarget
+                      ? item.vigilanteDies && item.targetDied
+                        ? `${item.targetName} was a ${item.targetRole?.toUpperCase() || "TOWN"}. How could this have happened? You slash yourself and both of you die.`
+                        : item.vigilanteDies && !item.targetDied
+                          ? `${item.targetName} was a ${item.targetRole?.toUpperCase() || "TOWN"}. You realise fast enough but cannot believe your decision, and end your own life.`
+                          : !item.vigilanteDies && item.targetDied
+                            ? `${item.targetName} was a ${item.targetRole?.toUpperCase() || "TOWN"}. You cannot believe your eyes, but you're determined to correct your mistakes...`
+                            : "You attacked the wrong person."
+                      : `${item.targetName} was a ${item.targetRole?.toUpperCase() || "MAFIA"}, and you stand proudly over the body.`
+              }
+            </p>
+          </div>
+        </div>
+      `,
+      buttonText: "Hide"
+    })
+    return
+  }
+
+  if(item && item.type === "vigilante_incoming_death"){
+    renderNightResultCard({
+      roleClass: player.role,
+      kicker: "Night Results",
+      title: player.name,
+      subtitle: "Something feels wrong tonight",
+      bodyHTML: `
+        <div class="night-action-role-box">
+          <div class="night-action-role-kicker">A Bad Feeling</div>
+          <div class="night-action-role-name" style="
+            color:${roleColors[player.role] || "white"};
+            text-shadow:0 0 10px ${roleColors[player.role] || "white"};
+          ">
+            ${roleDisplayName(player.role)}
+          </div>
+
+          <p class="role-description">
+            You have an eerie feeling that justice will be served tonight.
+          </p>
+        </div>
+      `,
+      buttonText: "Hide"
+    })
+    return
+  }
+
+  if(item && item.type === "spirit_reveal_choice"){
+
+    let targets = state.players
+      .filter(p => p.alive && p.name !== player.name)
+      .map(p => `
+        <button onclick="window.chooseSpiritReveal('${p.name}')">
+          ${p.name}
+        </button>
+      `)
+      .join("")
+
+    if(state.spiritCanSkipReveal){
+      targets += `
+        <button class="skip-btn" onclick="window.chooseSpiritReveal('__skip__')">
+          Skip Reveal
+        </button>
+      `
+    }
+
+    render(`
+      <div class="card reveal-role-card role-spirit">
+
+        <div class="reveal-role-topbar">
+          <div class="reveal-role-kicker">Night Results</div>
+          <div class="reveal-role-progress">${progress}</div>
+        </div>
+
+        <div class="reveal-role-header">
+          <div class="reveal-role-player">${player.name}</div>
+          <div class="reveal-role-hint">You may reveal one player before morning</div>
+        </div>
+
+        <div class="night-action-role-box spirit-result-box">
+          <div class="night-action-role-kicker">You Were Killed</div>
+          <p class="role-description">
+            Before morning, expose a player and show the world who they truly are.
+          </p>
+        </div>
+
+        <div class="night-action-buttons">
+          ${targets}
+        </div>
+
+        ${renderHostControls()}
+
+      </div>
+    `)
+    return
+  }
+
+  let roleColor = roleColors[player.role] || "white"
+  let noResultText = getRandomNoResultText(player.role)
+
+  if(state.nightDeaths?.includes(player.name)){
+    noResultText = "You had a terrifying nightmare, you have a bad feeling about tonight..."
+  }
+
+  renderNightResultCard({
+    roleClass: player.role,
+    kicker: "Night Results",
+    title: player.name,
+    subtitle: "Nothing special reached you tonight",
+    bodyHTML: `
+      <div class="night-action-role-box">
+        <div class="night-action-role-kicker">Your Role</div>
+        <div class="night-action-role-name" style="
+          color:${roleColor};
+          text-shadow:0 0 10px ${roleColor};
+        ">
+          ${roleDisplayName(player.role)}
+        </div>
+
+        <p class="role-description">
+          ${noResultText}
+        </p>
+      </div>
+    `,
+    buttonText: "Hide"
+  })
 }
 
 function convertSchrodingersCat(target, joinedTeam, killerRoleLabel, killerName, privateResults){
