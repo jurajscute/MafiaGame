@@ -1551,11 +1551,37 @@ function showHome(){
 
 render(`
 
-<div class="card">
+<div class="card home-screen-card">
 
-<h1>Juraj's Mafia</h1>
+  <div class="home-hero">
 
-<button onclick="window.showSetup()">Start Game</button>
+    <div class="home-kicker">Party Game</div>
+
+    <h1 class="home-title">
+      Juraj's Mafia
+    </h1>
+
+    <div class="home-subtitle">
+      A social deduction game of deception, accusations, and late-night betrayals.
+    </div>
+
+  </div>
+
+  <div class="home-actions">
+
+    <button onclick="window.showSetup()">
+      Start Game
+    </button>
+
+    <button class="skip-btn" onclick="window.showInfo()">
+      Game Rules
+    </button>
+
+    <button class="skip-btn" onclick="window.showSettings()">
+      Settings
+    </button>
+
+  </div>
 
 </div>
 
