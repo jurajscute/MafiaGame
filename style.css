@@ -209,6 +209,30 @@ li{
     min-width:200px;
   }
 }
+
+.top-ui button{
+  width:44px !important;
+  min-width:44px !important;
+  height:44px !important;
+  padding:0 !important;
+  margin:0 !important;
+  border-radius:50% !important;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:18px;
+  flex:none;
+}
+
+@media (max-width:520px){
+  .top-ui button{
+    width:40px !important;
+    min-width:40px !important;
+    height:40px !important;
+  }
+}
 /* =========================
    NORMAL CARD SIZING
 ========================= */
