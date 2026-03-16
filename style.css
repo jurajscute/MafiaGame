@@ -54,13 +54,6 @@ h2{
   margin-bottom:20px;
 }
 
-.button-row{
-  display:flex;
-  justify-content:center;
-  gap:16px;
-  margin-top:20px;
-}
-
 button{
   appearance:none;
   border:none;
@@ -93,6 +86,24 @@ button{
     background .15s ease;
 
   cursor:pointer;
+}
+
+button{
+  width:220px;
+  min-width:220px;
+  height:48px;
+  margin:12px auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+}
+
+.button-row{
+  display:flex;
+  justify-content:center;
+  gap:16px;
+  flex-wrap:wrap;
 }
 
 @media (max-width:600px){
