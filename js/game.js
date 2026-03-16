@@ -1742,54 +1742,11 @@ showPreGameSummary()
 }
 
 function showPreGameSummary(){
-
   let playerCount = state.players.length
   let mafia = state.mafiaCountOverride || mafiaCount(playerCount)
   mafia = Math.min(mafia, maxAllowedMafia(playerCount))
 
   let warnings = getBalanceWarnings()
-
-  const revealModeText = {
-    none: "No role reveals",
-    death: "Night kill reveals",
-    vote_only: "Vote reveals",
-    death_and_vote: "Night + vote reveals"
-  }
-
-  const mafiaKillText = {
-    leader: "Leader chooses",
-    vote: "Mafia vote"
-  }
-
-  let warningsHTML = warnings.length
-    ? `
-      <div class="final-log-card" style="margin-top:18px;">
-        <div class="final-log-header">
-          <div>
-            <div class="final-team-kicker">Balance</div>
-            <h3 class="final-log-title">Setup Warnings</h3>
-          </div>
-        </div>
-
-        <div class="game-log-box final-log-box">
-          ${warnings.map(w => `<p class="log-entry">• ${w}</p>`).join("")}
-        </div>
-      </div>
-    `
-    : `
-      <div class="final-log-card" style="margin-top:18px; border-color:rgba(46,204,113,0.24);">
-        <div class="final-log-header">
-          <div>
-            <div class="final-team-kicker">Balance</div>
-            <h3 class="final-log-title" style="color:#7ee2a8;">Setup Looks Balanced</h3>
-          </div>
-        </div>
-
-        <div class="game-log-box final-log-box">
-          <p class="log-entry">Everything looks good to start.</p>
-        </div>
-      </div>
-    `
 
   let enabledRoles = []
 
@@ -1805,23 +1762,13 @@ function showPreGameSummary(){
         let count = state.roleCounts[role] || 1
         let extras = []
 
-        if(role === "doctor"){
-          if(state.doctorRevealSave){
-            extras.push("reveals saved player")
-          }
-        }
-
-        if(role === "sheriff"){
-          extras.push(
-            state.sheriffExactReveal
-              ? "exact role reveal"
-              : "innocent / not innocent"
-          )
+        if(role === "doctor" && state.doctorRevealSave){
+          extras.push("reveals saved player")
         }
 
         if(role === "priest"){
           extras.push("blocks all kills for the night")
-          extras.push(`${state.priestUsesPerGame} use${state.priestUsesPerGame === 1 ? "" : "s"} per game`)
+          extras.push(`${state.priestUsesPerGame} use${state.priestUsesPerGame === 1 ? "" : "s"}`)
         }
 
         if(role === "jester"){
@@ -1838,12 +1785,58 @@ function showPreGameSummary(){
           }
         }
 
+        if(role === "vigilante"){
+          extras.push(
+            state.vigilanteCanKillNeutrals
+              ? "can kill neutrals"
+              : "cannot kill neutrals"
+          )
+
+          let wrongKillText = {
+            both_die: "wrong target: both die",
+            only_vigilante_dies: "wrong target: only Vigilante dies",
+            only_target_dies: "wrong target: only target dies"
+          }
+
+          extras.push(wrongKillText[state.vigilanteWrongKillOutcome])
+        }
+
+        if(role === "mayor"){
+          extras.push(`${state.mayorVotePower} vote power`)
+        }
+
+        if(role === "sheriff"){
+          extras.push(
+            state.sheriffExactReveal
+              ? "exact role reveal"
+              : "innocent / not innocent"
+          )
+        }
+
+        if(role === "spirit"){
+          extras.push(
+            state.spiritRevealType === "exact" ? "exact reveal" : "team reveal"
+          )
+          extras.push(
+            state.spiritActivation === "night_only" ? "night deaths only" : "any death"
+          )
+
+          if(state.spiritCanSkipReveal){
+            extras.push("can skip reveal")
+          }
+        }
+
+        if(role === "framer"){
+          if(state.framerKnowsSuccess) extras.push("knows if frame worked")
+          if(state.framerKnowsMafia) extras.push("knows mafia")
+        }
+
         if(role === "executioner"){
           let executionerRuleText = {
             neither: "targets only town",
-            mafia: "targets mafia",
-            jester: "targets jester",
-            both: "targets mafia or jester"
+            mafia: "can target mafia",
+            jester: "can target jester",
+            both: "can target mafia or jester"
           }
 
           let executionerSheriffText = {
@@ -1864,226 +1857,117 @@ function showPreGameSummary(){
           }
         }
 
-        if(role === "mayor"){
-          extras.push(`${state.mayorVotePower} vote power`)
-        }
-
-        if(role === "spirit"){
-          extras.push(
-            state.spiritRevealType === "exact"
-              ? "reveals exact role"
-              : "reveals team only"
-          )
-
-          extras.push(
-            state.spiritActivation === "night_only"
-              ? "night deaths only"
-              : "activates on any death"
-          )
-
-          if(state.spiritCanSkipReveal){
-            extras.push("can skip reveal")
-          }
-        }
-
-        if(role === "framer"){
-          extras.push(
-            state.framerKnowsSuccess
-              ? "knows if frame worked"
-              : "does not know if frame worked"
-          )
-
-          extras.push(
-            state.framerKnowsMafia
-              ? "knows mafia members"
-              : "does not know mafia members"
-          )
-
-          extras.push(
-            state.mafiaKnowsFramer
-              ? "mafia knows framer"
-              : "mafia does not know framer"
-          )
-        }
-
-        if(role === "vigilante"){
-          extras.push(
-            state.vigilanteCanKillNeutrals
-              ? "can kill neutrals"
-              : "cannot kill neutrals"
-          )
-
-          let wrongKillText = {
-            both_die: "wrong target: both die",
-            only_vigilante_dies: "wrong target: only Vigilante dies",
-            only_target_dies: "wrong target: only target dies"
-          }
-
-          extras.push(wrongKillText[state.vigilanteWrongKillOutcome])
-        }
-
-        if(role === "schrodingers_cat"){
-          extras.push("joins side based on who kills it")
-        }
-
         return `
-          <div class="final-player-card" style="--final-role-color:${color};">
-            <div class="final-player-main" style="align-items:flex-start;">
+          <div class="pregame-role-card" style="--pregame-role-color:${color};">
+            <div class="pregame-role-top">
               <div>
-                <div class="final-player-name">${getRoleDisplayName(role)}</div>
-                <div class="final-player-role" style="color:${color}; text-align:left;">
-                  Up to ${count}
+                <div class="pregame-role-name" style="color:${color};">
+                  ${getRoleDisplayName(role)}
                 </div>
+                <div class="pregame-role-count">Up to ${count}</div>
               </div>
-
-              ${
-                extras.length
-                  ? `
-                    <div style="
-                      display:flex;
-                      flex-wrap:wrap;
-                      justify-content:flex-end;
-                      gap:6px;
-                    ">
-                      ${extras.map(extra => `
-                        <span class="final-role-tag" style="
-                          color:${color};
-                          border-color:${color}33;
-                          background:${color}14;
-                        ">
-                          ${extra}
-                        </span>
-                      `).join("")}
-                    </div>
-                  `
-                  : ``
-              }
             </div>
+
+            ${
+              extras.length
+                ? `
+                  <div class="pregame-role-tags">
+                    ${extras.map(extra => `
+                      <span class="pregame-role-tag" style="
+                        color:${color};
+                        border-color:${color}33;
+                        background:${color}14;
+                      ">
+                        ${extra}
+                      </span>
+                    `).join("")}
+                  </div>
+                `
+                : ""
+            }
           </div>
         `
       }).join("")
     : `
-      <div class="final-empty-state">
+      <div class="pregame-empty">
         No special roles enabled
       </div>
     `
 
+  let warningsHTML = warnings.length
+    ? `
+      <div class="pregame-panel pregame-warning-panel">
+        <div class="pregame-section-kicker">Balance Check</div>
+        <h3 class="pregame-section-title">Setup Warnings</h3>
+
+        <div class="pregame-warning-list">
+          ${warnings.map(w => `
+            <div class="pregame-warning-item">
+              <span class="pregame-warning-dot">!</span>
+              <span>${w}</span>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `
+    : `
+      <div class="pregame-panel pregame-success-panel">
+        <div class="pregame-section-kicker">Balance Check</div>
+        <h3 class="pregame-section-title">Setup Looks Balanced</h3>
+        <p class="pregame-note">Everything looks good to start.</p>
+      </div>
+    `
+
   render(`
+    <div class="card pregame-summary-card">
 
-    <div class="card final-log-card" style="max-width:920px; width:min(920px, calc(100vw - 32px)); padding:22px;">
-
-      <div class="final-results-hero final-banner-default">
-        <div class="final-results-kicker">Game Setup</div>
-        <h2 class="final-results-title">Pre-Game Summary</h2>
-        <div class="final-results-subtitle">
-          Review the player count, mafia count, roles, and special rules before starting.
+      <div class="pregame-hero">
+        <div class="pregame-kicker">Game Setup</div>
+        <h2 class="pregame-title">Pre-Game Summary</h2>
+        <div class="pregame-subtitle">
+          Review your setup before roles are assigned.
         </div>
       </div>
 
-      <div class="final-summary-grid">
-        <div class="final-summary-stat">
-          <div class="final-summary-value">${playerCount}</div>
-          <div class="final-summary-label">Players</div>
+      <div class="pregame-stat-grid">
+        <div class="pregame-stat">
+          <div class="pregame-stat-value">${playerCount}</div>
+          <div class="pregame-stat-label">Players</div>
         </div>
 
-        <div class="final-summary-stat">
-          <div class="final-summary-value">${mafia}</div>
-          <div class="final-summary-label">Mafia</div>
+        <div class="pregame-stat">
+          <div class="pregame-stat-value">${mafia}</div>
+          <div class="pregame-stat-label">Mafia</div>
         </div>
 
-        <div class="final-summary-stat">
-          <div class="final-summary-value">${enabledRoles.length}</div>
-          <div class="final-summary-label">Special Roles</div>
+        <div class="pregame-stat">
+          <div class="pregame-stat-value">${enabledRoles.length}</div>
+          <div class="pregame-stat-label">Special Roles</div>
         </div>
 
-        <div class="final-summary-stat">
-          <div class="final-summary-value">${warnings.length}</div>
-          <div class="final-summary-label">Warnings</div>
-        </div>
-      </div>
-
-      <div class="final-team-card" style="margin-bottom:18px;">
-        <div class="final-team-header">
-          <div>
-            <div class="final-team-kicker">Rules</div>
-            <h3 class="final-team-title">Global Settings</h3>
-          </div>
-        </div>
-
-        <div class="final-team-list">
-          <div class="final-player-card" style="--final-role-color:#ffaa49;">
-            <div class="final-player-main">
-              <div class="final-player-name">Mafia Kill Method</div>
-              <div class="final-player-role">${mafiaKillText[state.mafiaKillMethod]}</div>
-            </div>
-          </div>
-
-          <div class="final-player-card" style="--final-role-color:#8dc2ff;">
-            <div class="final-player-main">
-              <div class="final-player-name">Role Reveal Rule</div>
-              <div class="final-player-role">${revealModeText[state.revealRolesOnElimination]}</div>
-            </div>
-          </div>
-
-          ${
-            state.mafiaKillMethod === "leader"
-              ? `
-                <div class="final-player-card" style="--final-role-color:#e74c3c;">
-                  <div class="final-player-main">
-                    <div class="final-player-name">First Leader Visibility</div>
-                    <div class="final-player-role">
-                      ${state.mafiaKnowsFirstLeader ? "Mafia knows first leader" : "First leader hidden"}
-                    </div>
-                  </div>
-                </div>
-              `
-              : ``
-          }
-
-          ${
-            state.mafiaCountOverride
-              ? `
-                <div class="final-player-card" style="--final-role-color:#f6df8f;">
-                  <div class="final-player-main">
-                    <div class="final-player-name">Mafia Count</div>
-                    <div class="final-player-role">Manual override</div>
-                  </div>
-                </div>
-              `
-              : `
-                <div class="final-player-card" style="--final-role-color:#7ee2a8;">
-                  <div class="final-player-main">
-                    <div class="final-player-name">Mafia Count</div>
-                    <div class="final-player-role">Auto</div>
-                  </div>
-                </div>
-              `
-          }
+        <div class="pregame-stat">
+          <div class="pregame-stat-value">${warnings.length}</div>
+          <div class="pregame-stat-label">Warnings</div>
         </div>
       </div>
 
-      <div class="final-team-card" style="margin-bottom:18px;">
-        <div class="final-team-header">
-          <div>
-            <div class="final-team-kicker">Setup</div>
-            <h3 class="final-team-title">Special Roles</h3>
-          </div>
-        </div>
+      <div class="pregame-panel">
+        <div class="pregame-section-kicker">Roles</div>
+        <h3 class="pregame-section-title">Enabled Special Roles</h3>
 
-        <div class="final-team-list">
+        <div class="pregame-role-grid">
           ${rolesHTML}
         </div>
       </div>
 
       ${warningsHTML}
 
-      <div style="margin-top:20px;">
+      <div class="pregame-actions">
         <button onclick="window.confirmStartGame()">Start Game</button>
         <button class="skip-btn" onclick="window.showSetup()">Back</button>
       </div>
 
     </div>
-
   `)
 }
 

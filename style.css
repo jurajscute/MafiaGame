@@ -3178,3 +3178,294 @@ body{
     max-width:420px !important;
   }
 }
+
+/* =========================
+   PRE-GAME SUMMARY
+========================= */
+
+.pregame-summary-card{
+  width:min(920px, calc(100vw - 32px));
+  max-width:920px;
+  padding:22px;
+  border-radius:24px;
+  text-align:left;
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.05), transparent 35%),
+    linear-gradient(180deg, rgba(20,20,30,0.98), rgba(10,10,16,0.98));
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.pregame-hero{
+  margin-bottom:18px;
+  padding:22px;
+  border-radius:22px;
+  text-align:center;
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.06), transparent 45%),
+    linear-gradient(135deg, rgba(70,70,90,0.35), rgba(25,25,35,0.55));
+  border:1px solid rgba(255,255,255,0.10);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 16px 34px rgba(0,0,0,0.22);
+}
+
+.pregame-kicker,
+.pregame-section-kicker{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  opacity:0.68;
+}
+
+.pregame-kicker{
+  margin-bottom:8px;
+}
+
+.pregame-title{
+  margin:0;
+  font-size:34px;
+  line-height:1.05;
+  text-align:center;
+}
+
+.pregame-subtitle{
+  margin-top:10px;
+  font-size:14px;
+  line-height:1.5;
+  opacity:0.8;
+  text-align:center;
+}
+
+.pregame-stat-grid{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.pregame-stat{
+  padding:16px 14px;
+  border-radius:18px;
+  text-align:center;
+  background:linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
+  border:1px solid rgba(255,255,255,0.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 10px 22px rgba(0,0,0,0.14);
+}
+
+.pregame-stat-value{
+  font-size:28px;
+  font-weight:800;
+  line-height:1;
+  margin-bottom:6px;
+}
+
+.pregame-stat-label{
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  opacity:0.68;
+}
+
+.pregame-panel{
+  margin-bottom:18px;
+  padding:18px;
+  border-radius:22px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.018));
+  border:1px solid rgba(255,255,255,0.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 14px 28px rgba(0,0,0,0.14);
+}
+
+.pregame-section-title{
+  margin:4px 0 14px 0;
+  font-size:22px;
+  line-height:1.1;
+}
+
+.pregame-role-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:12px;
+}
+
+.pregame-role-card{
+  position:relative;
+  padding:14px;
+  border-radius:16px;
+  background:rgba(255,255,255,0.035);
+  border:1px solid rgba(255,255,255,0.06);
+  overflow:hidden;
+}
+
+.pregame-role-card::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:4px;
+  background:linear-gradient(180deg, var(--pregame-role-color), transparent 85%);
+  opacity:0.95;
+}
+
+.pregame-role-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+}
+
+.pregame-role-name{
+  font-size:16px;
+  font-weight:800;
+  line-height:1.15;
+}
+
+.pregame-role-count{
+  margin-top:4px;
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  opacity:0.66;
+}
+
+.pregame-role-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:12px;
+}
+
+.pregame-role-tag{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 8px;
+  border-radius:999px;
+  border:1px solid;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+}
+
+.pregame-warning-panel{
+  border-color:rgba(255,170,73,0.24);
+  background:
+    radial-gradient(circle at top, rgba(255,170,73,0.08), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.018));
+}
+
+.pregame-success-panel{
+  border-color:rgba(46,204,113,0.22);
+  background:
+    radial-gradient(circle at top, rgba(46,204,113,0.08), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.018));
+}
+
+.pregame-warning-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.pregame-warning-item{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:12px 14px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.035);
+  border:1px solid rgba(255,255,255,0.06);
+  text-align:left;
+}
+
+.pregame-warning-dot{
+  min-width:22px;
+  height:22px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  background:rgba(255,170,73,0.18);
+  color:#ffaa49;
+  font-weight:900;
+  font-size:12px;
+}
+
+.pregame-note{
+  margin:0;
+  opacity:0.82;
+  line-height:1.5;
+}
+
+.pregame-empty{
+  padding:18px;
+  border-radius:14px;
+  text-align:center;
+  background:rgba(255,255,255,0.03);
+  border:1px dashed rgba(255,255,255,0.08);
+  opacity:0.7;
+}
+
+.pregame-actions{
+  margin-top:20px;
+}
+
+.pregame-actions button + button{
+  margin-top:12px;
+}
+
+@media (max-width: 700px){
+  .pregame-summary-card{
+    width:min(100%, calc(100vw - 24px));
+    padding:16px;
+    border-radius:20px;
+  }
+
+  .pregame-title{
+    font-size:28px;
+  }
+
+  .pregame-stat-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+
+  .pregame-role-grid{
+    grid-template-columns:1fr;
+  }
+
+  .pregame-panel{
+    padding:14px;
+    border-radius:18px;
+  }
+}
+
+@media (max-width: 520px){
+  .pregame-hero{
+    padding:18px 16px;
+    border-radius:18px;
+  }
+
+  .pregame-title{
+    font-size:24px;
+  }
+
+  .pregame-subtitle{
+    font-size:13px;
+  }
+
+  .pregame-stat{
+    padding:14px 10px;
+    border-radius:14px;
+  }
+
+  .pregame-stat-value{
+    font-size:24px;
+  }
+}
