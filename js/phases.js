@@ -2609,150 +2609,188 @@ if(!isOpen){
 
 function showRoleRevealEnd(){
 
-   let logHTML = state.gameLog.length
-? state.gameLog.map(entry => {
-    let isHeader = entry.startsWith("Night ") || entry.startsWith("Day ")
-    return `<p class="log-entry ${isHeader ? "log-header" : ""}">${entry}</p>`
-  }).join("")
-: `<p style="opacity:0.7;">No log entries recorded.</p>`
+  let logHTML = state.gameLog.length
+    ? state.gameLog.map(entry => {
+        let isHeader = entry.startsWith("Night ") || entry.startsWith("Day ")
+        return `<p class="log-entry ${isHeader ? "log-header" : ""}">${entry}</p>`
+      }).join("")
+    : `<p style="opacity:0.7;">No log entries recorded.</p>`
 
-let mafia = state.players.filter(p => getEffectiveTeam(p) === "mafia")
-let town = state.players.filter(p => getEffectiveTeam(p) === "village")
-let neutral = state.players.filter(p => getEffectiveTeam(p) === "neutral")
-let statsHTML = `
+  let mafia = state.players.filter(p => getEffectiveTeam(p) === "mafia")
+  let town = state.players.filter(p => getEffectiveTeam(p) === "village")
+  let neutral = state.players.filter(p => getEffectiveTeam(p) === "neutral")
 
-<hr style="opacity:0.3;margin:20px 0;">
+  function getRoleDisplayName(role){
+    const names = {
+      schrodingers_cat: "Schrödinger's Cat"
+    }
+    return names[role] || role.toUpperCase()
+  }
 
-<h2 class="role-title">GAME STATISTICS</h2>
+  function renderRoleList(list){
+    if(!list.length){
+      return `<div class="final-empty-state">None</div>`
+    }
 
-<div class="role-row">
-  <span class="role-player">Nights Played</span>
-  <span class="role-name">${state.gameStats.nights}</span>
-</div>
+    return list.map(p => {
+      let color = roleColors[p.role] || "white"
+      let target = state.executionerTargets?.[p.name]
 
-<div class="role-row">
-  <span class="role-player">Votes Cast</span>
-  <span class="role-name">${state.gameStats.votesCast}</span>
-</div>
+      if(p.role === "executioner"){
+        return `
+          <div class="final-player-card executioner-row"
+               style="--final-role-color:${color};"
+               onclick="window.toggleExecutionerReveal('${p.name}')">
 
-<div class="role-row">
-  <span class="role-player">Eliminations</span>
-  <span class="role-name">${state.gameStats.eliminations}</span>
-</div>
+            <div class="final-player-main">
+              <div class="final-player-name">${p.name}</div>
+              <div class="final-player-role" style="color:${color}">
+                <span class="executioner-arrow" id="executioner-arrow-${p.name}">▸</span>
+                ${getRoleDisplayName(p.role)}
+              </div>
+            </div>
 
-`
+          </div>
 
-function renderRoleList(list){
+          ${target ? `
+            <div class="executioner-target-reveal final-target-reveal" id="executioner-target-${p.name}">
+              <span class="executioner-target-reveal-label">Target:</span>
+              <span class="executioner-target-reveal-name">${target}</span>
+            </div>
+          ` : ""}
+        `
+      }
 
-if(!list.length){
-return `<p style="opacity:0.7;">None</p>`
-}
+      if(p.role === "schrodingers_cat" && p.catAlignment){
+        const alignColor = p.catAlignment === "mafia" ? roleColors.mafia : roleColors.villager
+        const alignLabel = p.catAlignment === "mafia" ? "Joined Mafia" : "Joined Town"
 
-return list.map(p => {
+        return `
+          <div class="final-player-card" style="--final-role-color:${roleColors.schrodingers_cat};">
+            <div class="final-player-main">
+              <div class="final-player-name">${p.name}</div>
+              <div class="final-player-role" style="color:${roleColors.schrodingers_cat}">
+                Schrödinger's Cat
+                <span class="final-role-tag" style="color:${alignColor}; border-color:${alignColor}33; background:${alignColor}14;">
+                  ${alignLabel}
+                </span>
+              </div>
+            </div>
+          </div>
+        `
+      }
 
-let color = roleColors[p.role] || "white"
-let target = state.executionerTargets?.[p.name]
+      return `
+        <div class="final-player-card" style="--final-role-color:${color};">
+          <div class="final-player-main">
+            <div class="final-player-name">${p.name}</div>
+            <div class="final-player-role" style="color:${color}">
+              ${getRoleDisplayName(p.role)}
+            </div>
+          </div>
+        </div>
+      `
+    }).join("")
+  }
 
-if(p.role === "executioner"){
-return `
+  render(`
 
-<div class="role-row executioner-row"
-     style="border-left:4px solid ${color};"
-     onclick="window.toggleExecutionerReveal('${p.name}')">
+<div class="card final-results-card final-results-shell">
 
-  <span class="role-player">${p.name}</span>
-
-  <span class="role-name" style="color:${color}">
-    <span class="executioner-arrow" id="executioner-arrow-${p.name}">▸</span>
-    EXECUTIONER
-  </span>
-
-</div>
-
-${target ? `
-<div class="executioner-target-reveal" id="executioner-target-${p.name}">
-  <span class="executioner-target-reveal-label">Target:</span>
-  <span class="executioner-target-reveal-name">${target}</span>
-</div>
-` : ""}
-
-`
-}
-
-if(p.role === "schrodingers_cat" && p.catAlignment){
-  const alignColor = p.catAlignment === "mafia" ? roleColors.mafia : roleColors.villager
-  const alignLabel = p.catAlignment === "mafia" ? "JOINED MAFIA" : "JOINED TOWN"
-
-  return `
-    <div class="role-row" style="border-left:4px solid ${roleColors.schrodingers_cat};">
-      <span class="role-player">${p.name}</span>
-      <span class="role-name" style="color:${roleColors.schrodingers_cat}">
-        SCHRÖDINGER'S CAT
-        <span style="color:${alignColor}; opacity:0.9;"> • ${alignLabel}</span>
-      </span>
+  <div class="final-results-hero">
+    <div class="final-results-kicker">Game Complete</div>
+    <h2 class="final-results-title">Final Roles</h2>
+    <div class="final-results-subtitle">
+      Review every team, special role, and the full game log.
     </div>
-  `
-}
+  </div>
 
-return `
+  <div class="final-summary-grid">
+    <div class="final-summary-stat">
+      <div class="final-summary-value">${state.gameStats.nights}</div>
+      <div class="final-summary-label">Nights</div>
+    </div>
 
-<div class="role-row" style="border-left:4px solid ${color};">
+    <div class="final-summary-stat">
+      <div class="final-summary-value">${state.gameStats.votesCast}</div>
+      <div class="final-summary-label">Votes Cast</div>
+    </div>
 
-<span class="role-player">${p.name}</span>
+    <div class="final-summary-stat">
+      <div class="final-summary-value">${state.gameStats.eliminations}</div>
+      <div class="final-summary-label">Eliminations</div>
+    </div>
 
-<span class="role-name" style="color:${color}">
-${p.role.toUpperCase()}
-</span>
+    <div class="final-summary-stat">
+      <div class="final-summary-value">${state.players.length}</div>
+      <div class="final-summary-label">Players</div>
+    </div>
+  </div>
 
-</div>
+  <div class="final-team-sections">
 
-`
+    <div class="final-team-card final-team-mafia">
+      <div class="final-team-header">
+        <div>
+          <div class="final-team-kicker">Team</div>
+          <h3 class="final-team-title mafia-win">Mafia</h3>
+        </div>
+        <div class="final-team-count">${mafia.length}</div>
+      </div>
 
-}).join("")
+      <div class="final-team-list">
+        ${renderRoleList(mafia)}
+      </div>
+    </div>
 
-}
+    <div class="final-team-card final-team-town">
+      <div class="final-team-header">
+        <div>
+          <div class="final-team-kicker">Team</div>
+          <h3 class="final-team-title village-win">Town</h3>
+        </div>
+        <div class="final-team-count">${town.length}</div>
+      </div>
 
-render(`
+      <div class="final-team-list">
+        ${renderRoleList(town)}
+      </div>
+    </div>
 
-<div class="card final-results-card">
+    <div class="final-team-card final-team-neutral">
+      <div class="final-team-header">
+        <div>
+          <div class="final-team-kicker">Team</div>
+          <h3 class="final-team-title neutral-team">Neutral</h3>
+        </div>
+        <div class="final-team-count">${neutral.length}</div>
+      </div>
 
-<h2 class="role-title">FINAL ROLES</h2>
+      <div class="final-team-list">
+        ${renderRoleList(neutral)}
+      </div>
+    </div>
 
-<h3 class="mafia-win">Mafia</h3>
-${renderRoleList(mafia)}
+  </div>
 
-<hr style="opacity:0.3;margin:20px 0;">
+  <div class="final-log-card">
+    <div class="final-log-header">
+      <div>
+        <div class="final-team-kicker">Timeline</div>
+        <h3 class="final-log-title">Game Log</h3>
+      </div>
+    </div>
 
-<h3 class="village-win">Town</h3>
-${renderRoleList(town)}
+    <div class="game-log-box final-log-box">
+      ${logHTML}
+    </div>
+  </div>
 
-<hr style="opacity:0.3;margin:20px 0;">
-
-<h3 class="neutral-win">Neutral</h3>
-${renderRoleList(neutral)}
-
-<br>
-
-${statsHTML}
-
-<br>
-
-<hr style="opacity:0.3;margin:20px 0;">
-
-<h2 class="role-title">LOG</h2>
-
-<div class="game-log-box">
-${logHTML}
-</div>
-
-<br>
-
-<button onclick="location.reload()">Restart Game</button>
+  <button onclick="location.reload()">Restart Game</button>
 
 </div>
 
 `)
-
 }
 
 export { showRoleRevealEnd }
