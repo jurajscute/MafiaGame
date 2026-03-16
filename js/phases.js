@@ -1164,6 +1164,17 @@ if(role.nightAction === "holy_shield"){
     })
 
     addLogEntry(`Priest used Holy Spirit. (${player.priestUsesLeft} uses left)`)
+    document.body.classList.add("holy-night-flash")
+setTimeout(() => {
+  document.body.classList.remove("holy-night-flash")
+}, 700)
+
+if(!document.querySelector(".holy-pulse")){
+  const pulse = document.createElement("div")
+  pulse.className = "holy-pulse"
+  document.body.appendChild(pulse)
+}
+
   }else{
     addLogEntry(`Priest did not use Holy Spirit.`)
   }

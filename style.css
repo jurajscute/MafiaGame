@@ -3520,87 +3520,110 @@ border:1px solid rgba(243,216,107,0.28);
 /* Holy night background */
 
 /* Holy night base */
-body.holy-night {
-  background:
-    radial-gradient(circle at 50% 18%, rgba(255, 226, 140, 0.12), transparent 30%),
-    radial-gradient(circle at 50% 0%, rgba(255, 244, 200, 0.08), transparent 45%),
-    linear-gradient(180deg, #08101f 0%, #0a1224 45%, #050814 100%);
-  position: relative;
-  overflow-x: hidden;
+body.holy-night{
+position:relative;
+overflow:hidden;
 }
 
-/* soft sky shimmer behind everything */
-body.holy-night::before{
-content:"";
-position:fixed;
-inset:0;
-pointer-events:none;
-z-index:0;
-opacity:0.25;
-
-background-image:
-radial-gradient(circle, rgba(255,230,150,0.6) 1px, transparent 2px);
-
-background-size:300px 300px;
-
-animation: holyDustSlow 90s linear infinite;
-}
-
-@keyframes holyDustSlow{
-
-0%{
-background-position:0 0;
-}
-
-100%{
-background-position:0 -300px;
-}
-
-}
-
-/* subtle floating dust behind cards */
+body.holy-night::before,
 body.holy-night::after{
 content:"";
 position:fixed;
 inset:0;
 pointer-events:none;
 z-index:0;
-opacity:0.55;
+}
 
+/* soft sky shimmer behind everything */
+body.holy-night::before{
+opacity:0.18;
 background-image:
-radial-gradient(circle, rgba(255,241,190,0.85) 0.8px, transparent 1.8px),
-radial-gradient(circle, rgba(255,226,140,0.45) 1px, transparent 2.2px),
-radial-gradient(circle, rgba(255,248,220,0.35) 0.7px, transparent 1.6px);
+radial-gradient(circle at 12% 34%, rgba(255,226,140,0.75) 0 2px, transparent 6px),
+radial-gradient(circle at 78% 18%, rgba(255,241,190,0.55) 0 2.4px, transparent 7px),
+radial-gradient(circle at 54% 72%, rgba(255,232,150,0.45) 0 1.8px, transparent 6px);
 
 background-size:
-140px 140px,
-220px 220px,
-180px 180px;
+340px 280px,
+430px 390px,
+380px 320px;
 
 background-position:
 0 0,
-40px 60px,
-90px 20px;
+80px 120px,
+140px 60px;
 
-animation: holyDustDrift 40s linear infinite;
+filter:blur(1.2px);
+animation: holyDustSlow 85s linear infinite;
+}
+
+/* subtle floating dust behind cards */
+body.holy-night::after{
+opacity:0.42;
+background-image:
+radial-gradient(circle at 17% 23%, rgba(255,245,210,0.95) 0 1px, transparent 2.2px),
+radial-gradient(circle at 61% 11%, rgba(255,226,150,0.70) 0 1.3px, transparent 2.8px),
+radial-gradient(circle at 83% 67%, rgba(255,239,190,0.55) 0 0.9px, transparent 2px),
+radial-gradient(circle at 29% 81%, rgba(255,232,160,0.65) 0 1.1px, transparent 2.6px);
+
+background-size:
+187px 163px,
+263px 229px,
+211px 251px,
+307px 197px;
+
+background-position:
+0 0,
+37px 71px,
+113px 29px,
+151px 97px;
+
+filter:blur(0.2px);
+animation: holyDustDrift 42s linear infinite;
 }
 
 @keyframes holyDustDrift{
-
 0%{
 background-position:
-0px 0px,
-40px 60px,
-90px 20px;
+0 0,
+37px 71px,
+113px 29px,
+151px 97px;
 }
-
 100%{
 background-position:
-0px -140px,
-40px -160px,
-90px -160px;
+0 -163px,
+37px -158px,
+113px -222px,
+151px -100px;
+}
 }
 
+@keyframes holyDustSlow{
+0%{
+background-position:
+0 0,
+80px 120px,
+140px 60px;
+}
+100%{
+background-position:
+0 -280px,
+80px -270px,
+140px -260px;
+}
+}
+
+body.holy-night{
+background:
+radial-gradient(circle at top, rgba(255,224,140,0.08), transparent 35%),
+linear-gradient(180deg, #08111f 0%, #0b1322 45%, #101728 100%);
+}
+
+body.holy-night .card{
+backdrop-filter:blur(6px);
+box-shadow:
+0 12px 40px rgba(0,0,0,0.35),
+0 0 0 1px rgba(255,245,210,0.04);
 }
 
 .card,
@@ -3609,4 +3632,62 @@ background-position:
 .modal-content {
   position: relative;
   z-index: 2;
+}
+
+body.holy-night-flash .card{
+position:relative;
+z-index:2;
+}
+
+body.holy-night-flash::selection{
+background:transparent;
+}
+
+body.holy-night .holy-pulse{
+position:fixed;
+inset:0;
+pointer-events:none;
+z-index:1;
+opacity:0;
+background:
+radial-gradient(circle at 50% 38%,
+rgba(255,232,150,0.22) 0%,
+rgba(255,220,120,0.12) 18%,
+rgba(255,210,100,0.06) 32%,
+rgba(255,190,80,0.00) 56%);
+}
+
+body.holy-night .holy-pulse{
+position:fixed;
+inset:0;
+pointer-events:none;
+z-index:1;
+opacity:0;
+background:
+radial-gradient(circle at 50% 38%,
+rgba(255,232,150,0.22) 0%,
+rgba(255,220,120,0.12) 18%,
+rgba(255,210,100,0.06) 32%,
+rgba(255,190,80,0.00) 56%);
+}
+body.holy-night-flash .holy-pulse{
+animation: holyPulseBloom 700ms ease-out forwards;
+}
+
+@keyframes holyPulseBloom{
+0%{
+opacity:0;
+transform:scale(0.95);
+filter:blur(8px);
+}
+18%{
+opacity:1;
+transform:scale(1.02);
+filter:blur(2px);
+}
+100%{
+opacity:0;
+transform:scale(1.08);
+filter:blur(10px);
+}
 }
