@@ -1981,64 +1981,18 @@ function resolveNightSelections(){
     }
 
     if(targetDies){
-  killPlayer(
-    target.name,
-    `${target.name} was slashed by the Vigilante.`,
-    privateResults,
-    { warnPrivately: true }
-  )
-
-  // Jester special win from Vigilante
-  if(target.role === "jester" && state.jesterWinIfVigilanteKilled){
-    const executionerWinner = state.executionerWinIfVigilanteKillsTarget
-      ? getExecutionerWinnerForTarget(target.name)
-      : null
-
-    if(executionerWinner){
-      addLogEntry(`${target.name} won as the Jester.`)
-      addLogEntry(`${executionerWinner.name} won as the Executioner because the Vigilante killed their target, ${target.name}.`)
-      addLogEntry(`TWISTED JUSTICE: ${target.name} won as the Jester, and ${executionerWinner.name} won as the Executioner after the Vigilante killed the target.`)
-
-      renderTwistedJusticeWin(target.name, executionerWinner.name)
-      instantNightWin = true
-      return
-    }
-
-    addLogEntry(`${target.name} won as the Jester.`)
-
-    renderSimpleWinScreen(
-      "win-jester",
-      "role-jester",
-      "JESTER WINS",
-      [`${target.name} was killed by the Vigilante and wins as the Jester!`]
-    )
-
-    instantNightWin = true
-    return
-  }
-
-  // Executioner special win from Vigilante
-  if(state.executionerWinIfVigilanteKillsTarget){
-    const executionerWinner = getExecutionerWinnerForTarget(target.name)
-
-    if(executionerWinner){
-      addLogEntry(`${executionerWinner.name} won as the Executioner because the Vigilante killed ${target.name}.`)
-
-      renderSimpleWinScreen(
-        "win-executioner",
-        "role-executioner",
-        "EXECUTIONER WINS",
-        [`${executionerWinner.name} succeeded because the Vigilante killed their target, ${target.name}.`]
+      killPlayer(
+        target.name,
+        `${target.name} was slashed by the Vigilante.`,
+        privateResults,
+        { warnPrivately: true }
       )
 
-      instantNightWin = true
-      return
-    }
-  }
-
-  // Only convert if no special Vigilante-based win happened
-  convertExecutionerAfterTargetDeath(target.name, privateResults)
-}
+      // Jester special win from Vigilante
+      if(target.role === "jester" && state.jesterWinIfVigilanteKilled){
+        const executionerWinner = state.executionerWinIfVigilanteKillsTarget
+          ? getExecutionerWinnerForTarget(target.name)
+          : null
 
         if(executionerWinner){
           addLogEntry(`${target.name} won as the Jester.`)
@@ -2081,6 +2035,8 @@ function resolveNightSelections(){
           return
         }
       }
+
+      convertExecutionerAfterTargetDeath(target.name, privateResults)
     }
 
     if(vigilanteDies && shooter.alive){
