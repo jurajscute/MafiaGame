@@ -75,7 +75,7 @@ return `
           color:${color};
           text-shadow:0 0 8px ${color};
           ">
-      ${player.role.toUpperCase()}
+      ${roleDisplayName(role)}
     </span>
 
   </div>
@@ -556,7 +556,7 @@ box-shadow:0 0 16px rgba(255,255,255,0.05);
 ">
 
 <p class="role-description" style="margin:0 0 8px 0;">
-Because you were attacked by <strong>${item.killerRoleLabel}</strong>,
+Because you were attacked by the <strong>${item.killerRoleLabel}</strong>,
 you have secretly joined the
 </p>
 
@@ -962,7 +962,7 @@ font-weight:bold;
 text-shadow:
 0 0 10px ${roleColors[player.role] || "white"};
 ">
-${player.role.toUpperCase()}
+${roleDisplayName(role)}
 </p>
 
 <p class="role-description">
@@ -1037,7 +1037,7 @@ font-weight:bold;
 text-shadow:
 0 0 10px ${roleColor};
 ">
-${player.role.toUpperCase()}
+${roleDisplayName(role)}
 </p>
 
 <p class="role-description">
@@ -1280,7 +1280,7 @@ render(`
 
 <div class="card role-${roleClass}">
 
-<h2 class="role-title">${player.role.toUpperCase()} ACTION</h2>
+<h2 class="role-title">${roleDisplayName(role)} ACTION</h2>
 
 <p>
 ${player.role === "vigilante" ? "Serve justice, or abstain." : "Select a target"}
