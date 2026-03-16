@@ -2768,8 +2768,8 @@ const winnerBanner = getFinalWinnerBanner()
   }
 
   render(`
-
-<div class="card final-results-card final-results-shell">
+<div class="final-results-centered">
+  <div class="card final-results-card final-results-shell">
 
     <div class="final-results-hero ${winnerBanner.className}">
     <div class="final-results-kicker">${winnerBanner.label}</div>
