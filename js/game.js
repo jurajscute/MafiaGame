@@ -2089,21 +2089,11 @@ function showPreGameSummary(){
 
 
 function getBalanceWarnings(){
-
   let playerCount = state.players.length
   let mafia = state.mafiaCountOverride || mafiaCount(playerCount)
   mafia = Math.min(mafia, maxAllowedMafia(playerCount))
 
   const warnings = []
-
-  const enabledCount = role => state.rolesEnabled[role] ? (state.roleCounts[role] || 1) : 0
-
-  let specialRoles = 0
-  Object.keys(state.rolesEnabled).forEach(role => {
-    if(state.rolesEnabled[role]){
-      specialRoles += state.roleCounts[role] || 1
-    }
-  })
 
   const hasDoctor = state.rolesEnabled.doctor
   const hasSheriff = state.rolesEnabled.sheriff
@@ -2115,6 +2105,13 @@ function getBalanceWarnings(){
   const hasPriest = state.rolesEnabled.priest
   const hasSpirit = state.rolesEnabled.spirit
   const hasFramer = state.rolesEnabled.framer
+
+  let specialRoles = 0
+  Object.keys(state.rolesEnabled).forEach(role => {
+    if(state.rolesEnabled[role]){
+      specialRoles += state.roleCounts[role] || 1
+    }
+  })
 
   const infoRoles =
     (hasSheriff ? 1 : 0) +
@@ -2128,6 +2125,23 @@ function getBalanceWarnings(){
     (hasVigilante ? 1 : 0) +
     (hasCat ? 1 : 0) +
     (hasPriest ? 1 : 0)
+
+  // track which specific warnings already cover broader ones
+  const covered = {
+    mayor: false,
+    doctor: false,
+    sheriff: false,
+    jester: false,
+    executioner: false,
+    cat: false,
+    vigilante: false,
+    priest: false,
+    spirit: false
+  }
+
+  // =========================
+  // CORE SETUP WARNINGS
+  // =========================
 
   if(playerCount < 4){
     warnings.push("Minimum 4 players is recommended.")
@@ -2150,94 +2164,156 @@ function getBalanceWarnings(){
   }
 
   if(playerCount <= 7 && infoRoles >= 3){
-    warnings.push("Too many information-heavy roles may make mafia very weak.")
+    warnings.push("This setup has a lot of information power, which may make mafia weaker.")
   }
 
   if(playerCount <= 7 && swingRoles >= 3){
     warnings.push("This setup has several swingy roles and may feel chaotic.")
   }
 
+  // =========================
+  // SPECIFIC COMBO WARNINGS
+  // =========================
+
   if(hasMayor && hasSheriff && hasDoctor && playerCount < 7){
-    warnings.push("Mayor + Sheriff + Doctor may be too strong in a medium lobby.")
+    warnings.push("Mayor + Sheriff + Doctor can be very powerful together.")
+    covered.mayor = true
+    covered.sheriff = true
+    covered.doctor = true
+  } else {
+    if(hasMayor && hasSheriff && playerCount < 6){
+      warnings.push("Mayor + Sheriff can be very powerful in a smaller lobby.")
+      covered.mayor = true
+      covered.sheriff = true
+    }
+
+    if(hasMayor && hasDoctor && playerCount < 6){
+      warnings.push("Mayor + Doctor can be very powerful in a smaller lobby.")
+      covered.mayor = true
+      covered.doctor = true
+    }
+
+    if(hasDoctor && hasSheriff && playerCount < 6){
+      warnings.push("Doctor + Sheriff can be very powerful in a smaller lobby.")
+      covered.doctor = true
+      covered.sheriff = true
+    }
   }
 
-  if(hasMayor && hasSheriff && playerCount < 6){
-    warnings.push("Mayor + Sheriff may be too strong in a smaller lobby.")
+  if(hasSpirit && state.spiritActivation === "any_death" && state.spiritRevealType === "exact"){
+    warnings.push("Spirit revealing exact roles on any death can create a very high-information game.")
+    covered.spirit = true
   }
 
-  if(hasDoctor && hasMayor && playerCount < 6){
-    warnings.push("Doctor + Mayor together may be too strong in a very small lobby.")
+  if(hasJester && state.jesterWinIfVigilanteKilled && hasVigilante){
+    warnings.push("Jester winning from a Vigilante kill makes Vigilante shots much riskier.")
+    covered.jester = true
+    covered.vigilante = true
   }
 
-  if(hasDoctor && hasSheriff && playerCount < 6){
-    warnings.push("Doctor + Sheriff together may be too strong in a very small lobby.")
-  }
-
-  if(hasMayor && playerCount < 5){
-    warnings.push("Mayor can be very strong in smaller games.")
-  }
-
-  if(hasExecutioner && playerCount < 6){
-    warnings.push("Executioner can be very strong in smaller games.")
-  }
-
-  if(hasJester && playerCount < 6){
-    warnings.push("Jester can feel very swingy in smaller games.")
-  }
-
-  if(hasCat && playerCount < 6){
-    warnings.push("Schrödinger's Cat can be very swingy in smaller games.")
-  }
-
-  if(hasVigilante && playerCount < 6){
-    warnings.push("Vigilante is extremely swingy in smaller lobbies.")
-  }
-
-  if(hasPriest && playerCount < 6){
-    warnings.push("Priest can hard-stop mafia momentum in smaller games.")
-  }
-
-  if(hasPriest && state.priestUsesPerGame >= 2 && playerCount <= 7){
-    warnings.push("Multiple Priest uses can heavily suppress mafia kills.")
-  }
-
-  if(hasSpirit && state.spiritActivation === "any_death" && playerCount <= 7){
-    warnings.push("Spirit activating on any death gives town a lot of extra information.")
-  }
-
-  if(hasSpirit && state.spiritRevealType === "exact" && state.spiritActivation === "any_death"){
-    warnings.push("Exact Spirit reveals on any death may reveal too much information.")
+  if(hasExecutioner && state.executionerWinIfVigilanteKillsTarget && hasVigilante){
+    warnings.push("Executioner winning from a Vigilante kill can create surprise neutral wins.")
+    covered.executioner = true
+    covered.vigilante = true
   }
 
   if(hasFramer && !hasSheriff){
     warnings.push("Framer is much weaker if Sheriff is not in the game.")
   }
 
-  if(hasExecutioner && state.executionerTargetRule === "both" && playerCount <= 7){
-    warnings.push("Executioner targeting both Mafia and Jester increases chaos in smaller games.")
+  // =========================
+  // SINGLE-ROLE WARNINGS
+  // only show if not already covered
+  // =========================
+
+  if(hasMayor && playerCount < 5 && !covered.mayor){
+    warnings.push("Mayor can be very strong in smaller games.")
   }
 
-  if(hasExecutioner && state.executionerWinIfDead){
-    warnings.push("Executioner winning while dead makes them significantly easier to satisfy.")
+  if(hasDoctor && playerCount < 5 && !covered.doctor){
+    warnings.push("Doctor can be very strong in very small games.")
   }
 
-  if(hasVigilante && state.vigilanteWrongKillOutcome === "only_target_dies"){
-    warnings.push("This Vigilante setting is very forgiving and makes random shots stronger.")
+  if(hasSheriff && playerCount < 5 && !covered.sheriff){
+    warnings.push("Sheriff can be very strong in very small games.")
   }
 
-  if(hasVigilante && !state.vigilanteCanKillNeutrals && (hasJester || hasExecutioner || hasCat)){
+  if(hasExecutioner && playerCount < 6 && !covered.executioner){
+    warnings.push("Executioner can be very strong in smaller games.")
+  }
+
+  if(hasJester && playerCount < 6 && !covered.jester){
+    warnings.push("Jester can feel very swingy in smaller games.")
+  }
+
+  if(hasCat && playerCount < 6 && !covered.cat){
+    warnings.push("Schrödinger's Cat can be very swingy in smaller games.")
+  }
+
+  if(hasVigilante && playerCount < 6 && !covered.vigilante){
+    warnings.push("Vigilante is extremely swingy in smaller lobbies.")
+  }
+
+  if(hasPriest && playerCount < 6 && !covered.priest){
+    warnings.push("Priest can be very strong in smaller games.")
+  }
+
+  if(
+    hasPriest &&
+    state.priestUsesPerGame >= 2 &&
+    playerCount <= 7 &&
+    !covered.priest
+  ){
+    warnings.push("Multiple Priest uses can heavily reduce mafia pressure.")
+  }
+
+  if(
+    hasSpirit &&
+    state.spiritActivation === "any_death" &&
+    playerCount <= 7 &&
+    !covered.spirit
+  ){
+    warnings.push("Spirit activating on any death gives town a lot of extra information.")
+  }
+
+  // =========================
+  // RULE INTERACTION WARNINGS
+  // =========================
+
+  if(
+    hasVigilante &&
+    state.vigilanteWrongKillOutcome === "only_target_dies"
+  ){
+    warnings.push("This Vigilante setting is forgiving and makes risky shots stronger.")
+  }
+
+  if(
+    hasVigilante &&
+    !state.vigilanteCanKillNeutrals &&
+    (hasJester || hasExecutioner || hasCat)
+  ){
     warnings.push("Vigilante cannot kill neutrals, which gives neutral roles more room to survive.")
   }
 
-  if(state.revealRolesOnElimination === "death_and_vote" && playerCount <= 6){
+  if(
+    state.revealRolesOnElimination === "death_and_vote" &&
+    playerCount <= 6
+  ){
     warnings.push("Revealing roles on all eliminations gives a lot of public information in smaller games.")
   }
 
-  if(state.revealRolesOnElimination === "death_and_vote" && hasSpirit){
-    warnings.push("Public role reveals plus Spirit can create a very high-information game.")
+  if(
+    state.revealRolesOnElimination === "death_and_vote" &&
+    hasSpirit
+  ){
+    warnings.push("Public role reveals combined with Spirit can create a very high-information game.")
   }
 
-  if(state.mafiaKillMethod === "leader" && !state.mafiaKnowsFirstLeader && mafia >= 3){
+  if(
+    state.mafiaKillMethod === "leader" &&
+    !state.mafiaKnowsFirstLeader &&
+    mafia >= 3
+  ){
     warnings.push("Hidden first mafia leader may slow down the first night for newer groups.")
   }
 
