@@ -1569,7 +1569,7 @@ render(`
 
   <div class="home-actions">
 
-    <button onclick="window.showSetup()">
+    <button class="primary-btn" onclick="window.showSetup()">
       Start Game
     </button>
 
@@ -1663,7 +1663,7 @@ function renderPlayerSetup(){
       <div class="setup-actions">
         <button onclick="window.addPlayer()">Add Player</button>
         <button class="skip-btn" onclick="window.clearPlayers()">Reset Players</button>
-        <button onclick="window.startGame()" ${playerCount < 4 ? "disabled" : ""}>
+        <button class="primary-btn" onclick="window.startGame()" ${playerCount < 4 ? "disabled" : ""}>
           Start Game
         </button>
       </div>
