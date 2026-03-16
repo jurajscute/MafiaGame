@@ -2330,12 +2330,11 @@ render(`
     <div class="role-pass-kicker">Pass the Phone</div>
 
     <div class="role-pass-progress">
-      Player ${revealIndex + 1} of ${state.players.length}
-    </div>
+  <span class="role-pass-progress-dot"></span>
+  Player ${revealIndex + 1} of ${state.players.length}
+</div>
 
-    <h2 class="role-pass-title">
-      ${player.name}
-    </h2>
+    <h2 class="role-pass-title">${player.name}</h2>
 
     <div class="role-pass-subtitle">
       Make sure nobody else is looking.
@@ -2434,7 +2433,7 @@ if(player.role === "mafia" && state.mafiaKillMethod === "leader"){
 
 render(`
 
-<div class="card reveal-role-card role-${player.role}">
+<div class="card reveal-role-card role-${player.role}" style="--reveal-role-color:${color};">
 
   <div class="reveal-role-topbar">
     <div class="reveal-role-kicker">Private Role Reveal</div>
@@ -2452,7 +2451,10 @@ render(`
     <div class="role-inner">
 
       <div class="role-front reveal-role-front">
+        <div class="reveal-role-front-shimmer"></div>
+
         <div class="reveal-role-front-inner">
+          <div class="reveal-role-front-icon">✦</div>
           <div class="reveal-role-front-label">Hidden Role</div>
           <div class="reveal-role-front-text">Tap to reveal</div>
         </div>

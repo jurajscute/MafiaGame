@@ -4355,3 +4355,467 @@ body{
     font-size:14px;
   }
 }
+
+/* =========================
+   PASS ROLE SCREEN
+========================= */
+
+.role-pass-card{
+  width:min(520px, calc(100vw - 32px));
+  max-width:520px;
+  padding:26px;
+  border-radius:24px;
+  text-align:center;
+
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.05), transparent 40%),
+    linear-gradient(180deg, rgba(20,20,30,0.98), rgba(10,10,16,0.98));
+
+  border:1px solid rgba(255,255,255,0.08);
+
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.role-pass-hero{
+  padding:24px 20px;
+  border-radius:20px;
+  margin-bottom:24px;
+
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 45%),
+    linear-gradient(135deg, rgba(70,70,90,0.35), rgba(25,25,35,0.55));
+
+  border:1px solid rgba(255,255,255,0.10);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 16px 34px rgba(0,0,0,0.22);
+}
+
+.role-pass-kicker{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  opacity:0.68;
+  margin-bottom:10px;
+}
+
+.role-pass-progress{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:14px;
+  padding:6px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.10);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0.05em;
+  opacity:0.9;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.role-pass-title{
+  margin:0;
+  font-size:36px;
+  line-height:1.02;
+}
+
+.role-pass-subtitle{
+  margin-top:12px;
+  font-size:14px;
+  opacity:0.8;
+}
+
+.role-pass-actions{
+  max-width:260px;
+  margin:0 auto;
+}
+
+/* =========================
+   REVEAL ROLE SCREEN
+========================= */
+
+.reveal-role-card{
+  width:min(560px, calc(100vw - 32px));
+  max-width:560px;
+  padding:24px;
+  border-radius:24px;
+  text-align:center;
+  box-sizing:border-box;
+
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.05), transparent 40%),
+    linear-gradient(180deg, rgba(20,20,30,0.98), rgba(10,10,16,0.98));
+
+  border:1px solid rgba(255,255,255,0.08);
+
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.reveal-role-topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.reveal-role-kicker{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  opacity:0.68;
+  text-align:left;
+}
+
+.reveal-role-progress{
+  padding:6px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.10);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0.05em;
+  opacity:0.9;
+  white-space:nowrap;
+}
+
+.reveal-role-header{
+  margin-bottom:18px;
+}
+
+.reveal-role-player{
+  font-size:30px;
+  font-weight:800;
+  line-height:1.05;
+  margin-bottom:8px;
+}
+
+.reveal-role-hint{
+  font-size:14px;
+  opacity:0.72;
+}
+
+.reveal-role-flip{
+  margin-top:0;
+  margin-bottom:18px;
+}
+
+.reveal-role-flip .role-inner{
+  height:170px;
+}
+
+.reveal-role-front,
+.reveal-role-back{
+  border-radius:18px;
+  overflow:hidden;
+}
+
+.reveal-role-front{
+  position:relative;
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 42%),
+    linear-gradient(135deg, rgba(75,75,95,0.34), rgba(30,30,40,0.60));
+  border:1px solid rgba(255,255,255,0.10);
+}
+
+.reveal-role-front-shimmer{
+  position:absolute;
+  inset:-20% auto auto -30%;
+  width:50%;
+  height:160%;
+  background:linear-gradient(
+    90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.10) 50%,
+    rgba(255,255,255,0) 100%
+  );
+  transform:rotate(18deg);
+  animation:revealCardShimmer 2.8s ease-in-out infinite;
+  pointer-events:none;
+}
+
+@keyframes revealCardShimmer{
+  0%{
+    transform:translateX(-120%) rotate(18deg);
+    opacity:0;
+  }
+  20%{
+    opacity:1;
+  }
+  60%{
+    opacity:1;
+  }
+  100%{
+    transform:translateX(280%) rotate(18deg);
+    opacity:0;
+  }
+}
+
+.reveal-role-front-inner,
+.reveal-role-back-inner{
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:18px;
+  box-sizing:border-box;
+}
+
+.reveal-role-front-icon{
+  width:46px;
+  height:46px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:12px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.12);
+  font-size:20px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 8px 20px rgba(0,0,0,0.18);
+}
+
+.reveal-role-front-label{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  opacity:0.65;
+  margin-bottom:10px;
+}
+
+.reveal-role-front-text{
+  font-size:28px;
+  font-weight:800;
+  line-height:1.05;
+}
+
+.reveal-role-back{
+  border:1px solid rgba(255,255,255,0.10);
+}
+
+.reveal-role-back-kicker{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  opacity:0.7;
+  margin-bottom:12px;
+}
+
+.reveal-role-name{
+  font-size:32px;
+  font-weight:900;
+  line-height:1.04;
+  text-align:center;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+}
+
+.reveal-role-description-wrap{
+  margin-bottom:14px;
+}
+
+.reveal-role-description{
+  margin:0;
+  padding:16px 18px;
+  border-radius:16px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.07);
+  line-height:1.55;
+}
+
+.reveal-role-extra{
+  margin-top:14px;
+  margin-bottom:14px;
+}
+
+.reveal-role-actions{
+  margin-top:18px;
+}
+
+/* =========================
+   OPTIONAL ROLE-FRONT ACCENTS
+========================= */
+
+.reveal-role-card.role-mafia .reveal-role-front{
+  background:
+    radial-gradient(circle at top, rgba(255,107,107,0.12), transparent 42%),
+    linear-gradient(135deg, rgba(90,18,18,0.52), rgba(28,6,6,0.72));
+}
+
+.reveal-role-card.role-doctor .reveal-role-front{
+  background:
+    radial-gradient(circle at top, rgba(46,141,204,0.12), transparent 42%),
+    linear-gradient(135deg, rgba(10,52,80,0.52), rgba(4,16,28,0.72));
+}
+
+.reveal-role-card.role-sheriff .reveal-role-front{
+  background:
+    radial-gradient(circle at top, rgba(228,194,0,0.12), transparent 42%),
+    linear-gradient(135deg, rgba(90,70,10,0.52), rgba(32,22,4,0.72));
+}
+
+.reveal-role-card.role-jester .reveal-role-front{
+  background:
+    radial-gradient(circle at top, rgba(255,62,165,0.12), transparent 42%),
+    linear-gradient(135deg, rgba(96,10,58,0.52), rgba(28,4,18,0.72));
+}
+
+.reveal-role-card.role-executioner .reveal-role-front{
+  background:
+    radial-gradient(circle at top, rgba(200,107,184,0.12), transparent 42%),
+    linear-gradient(135deg, rgba(68,22,63,0.52), rgba(22,8,21,0.72));
+}
+
+.reveal-role-card.role-mayor .reveal-role-front{
+  background:
+    radial-gradient(circle at top, rgba(46,204,154,0.12), transparent 42%),
+    linear-gradient(135deg, rgba(12,74,56,0.52), rgba(4,24,18,0.72));
+}
+
+.reveal-role-card.role-spirit .reveal-role-front{
+  background:
+    radial-gradient(circle at top, rgba(230,170,253,0.12), transparent 42%),
+    linear-gradient(135deg, rgba(72,34,94,0.52), rgba(18,8,30,0.72));
+}
+
+.reveal-role-card.role-framer .reveal-role-front{
+  background:
+    radial-gradient(circle at top, rgba(255,107,107,0.10), transparent 42%),
+    linear-gradient(135deg, rgba(74,12,12,0.52), rgba(22,4,4,0.72));
+}
+
+.reveal-role-card.role-vigilante .reveal-role-front{
+  background:
+    radial-gradient(circle at top, rgba(77,89,255,0.12), transparent 42%),
+    linear-gradient(135deg, rgba(18,24,90,0.52), rgba(6,8,28,0.72));
+}
+
+.reveal-role-card.role-priest .reveal-role-front{
+  background:
+    radial-gradient(circle at top, rgba(246,223,143,0.14), transparent 42%),
+    linear-gradient(135deg, rgba(96,76,18,0.52), rgba(28,20,4,0.72));
+}
+
+.reveal-role-card.role-schrodingers_cat .reveal-role-front{
+  background:
+    radial-gradient(circle at top, rgba(220,220,220,0.12), transparent 42%),
+    linear-gradient(135deg, rgba(66,66,66,0.52), rgba(20,20,20,0.72));
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width:700px){
+
+  .role-pass-card,
+  .reveal-role-card{
+    width:min(100%, calc(100vw - 24px));
+    padding:20px;
+    border-radius:20px;
+  }
+
+  .role-pass-hero{
+    padding:20px 16px;
+    border-radius:16px;
+  }
+
+  .role-pass-title{
+    font-size:30px;
+  }
+
+  .reveal-role-topbar{
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+  }
+
+  .reveal-role-player{
+    font-size:26px;
+  }
+
+  .reveal-role-flip .role-inner{
+    height:150px;
+  }
+
+  .reveal-role-front-text{
+    font-size:24px;
+  }
+
+  .reveal-role-name{
+    font-size:28px;
+  }
+}
+
+@media (max-width:520px){
+
+  .role-pass-card,
+  .reveal-role-card{
+    padding:18px;
+  }
+
+  .role-pass-title{
+    font-size:26px;
+  }
+
+  .role-pass-subtitle{
+    font-size:13px;
+  }
+
+  .reveal-role-player{
+    font-size:22px;
+  }
+
+  .reveal-role-flip .role-inner{
+    height:140px;
+  }
+
+  .reveal-role-front-text{
+    font-size:22px;
+  }
+
+  .reveal-role-name{
+    font-size:24px;
+  }
+
+  .reveal-role-description{
+    padding:14px;
+    font-size:14px;
+  }
+}
+
+.role-pass-progress-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#ffaa49;
+  margin-right:8px;
+  box-shadow:0 0 10px rgba(255,170,73,0.7);
+  animation:rolePassDotPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes rolePassDotPulse{
+  0%,100%{
+    transform:scale(1);
+    opacity:0.9;
+  }
+  50%{
+    transform:scale(1.25);
+    opacity:1;
+  }
+}
