@@ -398,7 +398,7 @@ body.night{
   color:white;
 }
 
-body.night .card:not(.role-mafia):not(.role-schrodingers-cat):not(.role-priest):not(.role-vigilante):not(.role-framer):not(.role-doctor):not(.role-sheriff):not(.role-jester):not(.role-executioner):not(.role-mayor):not(.role-spirit){
+body.night .card:not(.role-mafia):not(.special-chaos-win):not(.special-exejes-win):not(.role-schrodingers-cat):not(.role-priest):not(.role-vigilante):not(.role-framer):not(.role-doctor):not(.role-sheriff):not(.role-jester):not(.role-executioner):not(.role-mayor):not(.role-spirit){
   background:#1f2436;
   box-shadow:
     0 15px 35px rgba(14, 14, 14, 0.6),
@@ -638,6 +638,13 @@ body.night .card:not(.role-mafia):not(.role-schrodingers-cat):not(.role-priest):
   border:1px solid rgba(255,255,255,0.10);
   box-shadow:
     0 0 30px rgba(59,72,255,0.16),
+    0 0 30px rgba(255,62,165,0.10);
+}
+
+.special-exejes-win{
+  border:1px solid rgba(255,255,255,0.10);
+  box-shadow:
+    0 0 30px rgba(110, 0, 52, 0.16),
     0 0 30px rgba(255,62,165,0.10);
 }
 

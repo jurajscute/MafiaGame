@@ -286,7 +286,7 @@ function renderVengefulLunaticWin(playerName){
 
   render(`
 
-    <div class="card special-chaos-win">
+    <div class="card special-exejes-win">
 
       <h1 class="role-title" style="
         color:${roleColors.jester};
