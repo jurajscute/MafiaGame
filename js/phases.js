@@ -2720,7 +2720,7 @@ const winnerBanner = getFinalWinnerBanner()
               <div class="final-player-name">${p.name}</div>
               <div class="final-player-role" style="color:${color}">
                 <span class="executioner-arrow" id="executioner-arrow-${p.name}">▸</span>
-                ${getRoleDisplayName(p.role)}
+                ${roleDisplayName(p.role)}
               </div>
             </div>
 
@@ -2759,7 +2759,7 @@ const winnerBanner = getFinalWinnerBanner()
           <div class="final-player-main">
             <div class="final-player-name">${p.name}</div>
             <div class="final-player-role" style="color:${color}">
-              ${getRoleDisplayName(p.role)}
+              ${roleDisplayName(p.role)}
             </div>
           </div>
         </div>
