@@ -225,7 +225,7 @@ JSON.stringify(enabled)
 
 }
 
-  function roleDisplayName(role){
+  export function roleDisplayName(role){
   const customNames = {
     schrodingers_cat: "Schrödinger's Cat"
   }

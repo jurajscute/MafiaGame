@@ -2,6 +2,7 @@ import {state, resetNightActions} from "./state.js"
 import {render, passPhone} from "./ui.js"
 import {roles} from "./roles.js"
 import {addLogEntry} from "./state.js"
+import {roleDisplayName} from "./game.js"
 
 function setDay() {
     document.body.classList.remove("night", "holy-night", "holy-night-flash");
