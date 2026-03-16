@@ -189,18 +189,22 @@ li{
 .pass-screen{
   background:#25211a;
   color:white;
-  height:200px;
+  min-height:100vh;
+
   display:flex;
   flex-direction:column;
   justify-content:center;
   align-items:center;
-  border-radius:12px;
-  font-size:22px;
+  gap:18px;
+
+  text-align:center;
 }
 
 .pass-card{
-  text-align:center;
+  width:min(420px, calc(100vw - 40px));
   padding:40px 30px;
+  border-radius:20px;
+  text-align:center;
 }
 
 .pass-label{
@@ -208,7 +212,7 @@ li{
   font-size:14px;
   letter-spacing:3px;
   opacity:0.7;
-  margin-bottom:15px;
+  margin:0;
 }
 
 .pass-player{
