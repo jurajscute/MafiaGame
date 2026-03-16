@@ -487,6 +487,20 @@ function showSettings() {
       `
     }
 
+    if(role === "priest"){
+  advancedHTML = `
+    <div class="settings-field">
+      <label class="settings-field-label">Holy Spirit uses per game</label>
+      <select class="settings-modern-select"
+        onchange="setPriestUsesPerGame(this.value)">
+        <option value="1" ${state.priestUsesPerGame == 1 ? "selected" : ""}>1 use</option>
+        <option value="2" ${state.priestUsesPerGame == 2 ? "selected" : ""}>2 uses</option>
+        <option value="3" ${state.priestUsesPerGame == 3 ? "selected" : ""}>3 uses</option>
+      </select>
+    </div>
+  `
+}
+
     return `
   <div class="settings-role-card ${enabled ? "role-enabled" : ""}" data-role="${role}" style="--role-accent:${color}">
         <div class="settings-role-header">
