@@ -2323,11 +2323,33 @@ let player = state.players[revealIndex]
 
 render(`
 
-<div class="card">
+<div class="card role-pass-card">
 
-<h2>Pass device to ${player.name}</h2>
+  <div class="role-pass-hero">
 
-<button onclick="window.revealRole()">Reveal Role</button>
+<div class="role-pass-progress">
+Player ${revealIndex + 1} of ${state.players.length}
+</div>
+
+    <div class="role-pass-kicker">Pass the Phone</div>
+
+    <h2 class="role-pass-title">
+      ${player.name}
+    </h2>
+
+    <div class="role-pass-subtitle">
+      Make sure nobody else is looking.
+    </div>
+
+  </div>
+
+  <div class="role-pass-actions">
+
+    <button onclick="window.revealRole()">
+      Reveal Role
+    </button>
+
+  </div>
 
 </div>
 
