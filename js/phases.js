@@ -1084,7 +1084,7 @@ text-shadow:
 0 0 20px ${color},
 0 0 30px ${color};
 ">
-${player.role.toUpperCase()}
+${roleDisplayName(player.role)}
 </span>
 </h2>
 
