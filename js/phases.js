@@ -977,8 +977,11 @@ function showNightAction(player){
 
   let roleClass = player.role.toLowerCase()
 
-  if(player.role === "priest"){
-    render(`
+if(player.role === "priest"){
+  const usesLeft = player.priestUsesLeft ?? state.priestUsesPerGame
+  const canUse = usesLeft > 0
+
+  render(`
 
 <div class="card role-priest">
 
@@ -988,7 +991,16 @@ function showNightAction(player){
 Call upon the Holy Spirit to shield the town tonight?
 </p>
 
-<button onclick="window.performNightAction('__use__')">Use Holy Spirit</button>
+<p class="role-description">
+Holy Spirit uses left: <strong>${usesLeft}</strong>
+</p>
+
+${
+  canUse
+    ? `<button onclick="window.performNightAction('__use__')">Use Holy Spirit</button>`
+    : `<button disabled>No Uses Left</button>`
+}
+
 <button class="skip-btn" onclick="window.performNightAction('__skip__')">Do Not Use</button>
 
 ${renderHostControls()}
@@ -996,8 +1008,8 @@ ${renderHostControls()}
 </div>
 
 `)
-    return
-  }
+  return
+}
 
   let targets=""
 
@@ -1119,21 +1131,31 @@ export function performNightAction(targetName){
 let player = state.players[state.nightTurnIndex]
 let role = roles[player.role]
 
-if(player.role === "priest" && action.target === "__use__"){
-
-  if(player.priestUsesLeft <= 0){
-    addLogEntry(`${player.name} tried to use Holy Spirit but had no uses left.`)
-    return
-  }
-
-  player.priestUsesLeft--
-
-  state.priestShieldActive = true
-
-}
-
 if(role.nightAction === "holy_shield"){
+
   if(targetName === "__use__"){
+
+    if((player.priestUsesLeft ?? 0) <= 0){
+      addLogEntry(`${player.name} tried to use Holy Spirit but had no uses left.`)
+
+      render(`
+        <div class="card role-priest">
+          <h2 class="role-title">NO HOLY SPIRIT LEFT</h2>
+
+          <p class="role-description">
+            You have already used all of your Holy Spirit charges this game.
+          </p>
+
+          <button onclick="window.nextNightTurn()">Continue</button>
+
+          ${renderHostControls()}
+        </div>
+      `)
+      return
+    }
+
+    player.priestUsesLeft--
+
     state.nightActions.push({
       actor: player.name,
       role: player.role,
@@ -1141,7 +1163,7 @@ if(role.nightAction === "holy_shield"){
       target: "__use__"
     })
 
-    addLogEntry(`Priest used Holy Spirit.`)
+    addLogEntry(`Priest used Holy Spirit. (${player.priestUsesLeft} uses left)`)
   }else{
     addLogEntry(`Priest did not use Holy Spirit.`)
   }

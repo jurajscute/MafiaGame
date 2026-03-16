@@ -2296,6 +2296,7 @@ JSON.stringify(enabled)
 
 function saveSettingsToStorage(){
 
+localStorage.setItem("mafiaPriestUsesPerGame", JSON.stringify(state.priestUsesPerGame))
 localStorage.setItem("mafiaExecutionerVigilanteWin",JSON.stringify(state.executionerWinIfVigilanteKillsTarget))
 localStorage.setItem("mafiaJesterVigilanteWin",JSON.stringify(state.jesterWinIfVigilanteKilled))
 localStorage.setItem("mafiaVigilanteCanKillNeutrals", JSON.stringify(state.vigilanteCanKillNeutrals))
