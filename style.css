@@ -14,20 +14,26 @@ body{
   background:linear-gradient(135deg,#2f221e,#1d1402);
   color:white;
   transition:background 0.6s ease,color 0.6s ease;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
 }
 
 #app{
   width:100%;
   max-width:420px;
   padding:20px;
-  margin:0 auto;
   box-sizing:border-box;
-  position:relative;
-  z-index:2;
-  transition:background 0.8s ease;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
 .card{
+  width:100%;
   background:#332d23;
   padding:35px 25px;
   border-radius:16px;
@@ -2588,18 +2594,28 @@ body.holy-night-flash .holy-pulse{
    FINAL RESULTS
 ========================= */
 
-.final-results-centered{
+.final-results-card{
   width:min(980px, calc(100vw - 40px));
   max-width:980px;
-  margin:24px auto;
-}
+  max-height:min(88vh, 820px);
+  margin:0 auto;
 
-.final-results-card{
-  max-height:min(85vh, 700px);
   overflow-y:auto;
   overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
-  padding-right:14px;
+
+  padding:22px;
+  text-align:left;
+  border-radius:24px;
+
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.05), transparent 35%),
+    linear-gradient(180deg, rgba(20,20,30,0.98), rgba(10,10,16,0.98));
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+
   scrollbar-width:thin;
   scrollbar-color:#7e0e0e rgba(255,255,255,0.04);
 }
@@ -2618,9 +2634,99 @@ body.holy-night-flash .holy-pulse{
   border-radius:10px;
 }
 
-.final-results-shell{
-  width:100%;
-  text-align:left;
+.final-results-hero{
+  position:relative;
+  overflow:hidden;
+  margin-bottom:18px;
+  padding:22px 22px 20px;
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,0.10);
+  text-align:center;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 16px 34px rgba(0,0,0,0.22);
+}
+
+.final-results-kicker{
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  opacity:0.72;
+  margin-bottom:8px;
+}
+
+.final-results-title{
+  margin:0;
+  font-size:34px;
+  line-height:1.02;
+  letter-spacing:0.02em;
+}
+
+.final-results-subtitle{
+  margin-top:10px;
+  font-size:14px;
+  line-height:1.5;
+  opacity:0.82;
+}
+
+.final-banner-default{
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.06), transparent 40%),
+    linear-gradient(135deg, rgba(70,70,90,0.35), rgba(25,25,35,0.55));
+}
+
+.final-banner-mafia{
+  background:
+    radial-gradient(circle at top, rgba(231,76,60,0.20), transparent 40%),
+    linear-gradient(135deg, rgba(126,14,14,0.42), rgba(35,0,0,0.65));
+  border-color:rgba(231,76,60,0.24);
+}
+
+.final-banner-village{
+  background:
+    radial-gradient(circle at top, rgba(46,141,204,0.20), transparent 40%),
+    linear-gradient(135deg, rgba(24,85,140,0.40), rgba(5,18,40,0.65));
+  border-color:rgba(46,141,204,0.24);
+}
+
+.final-banner-jester{
+  background:
+    radial-gradient(circle at top, rgba(255,62,165,0.20), transparent 40%),
+    linear-gradient(135deg, rgba(125,10,79,0.44), rgba(36,0,22,0.66));
+  border-color:rgba(255,62,165,0.24);
+}
+
+.final-banner-executioner{
+  background:
+    radial-gradient(circle at top, rgba(122,47,111,0.22), transparent 40%),
+    linear-gradient(135deg, rgba(90,30,84,0.45), rgba(24,8,23,0.68));
+  border-color:rgba(122,47,111,0.24);
+}
+
+.final-banner-jester-executioner{
+  background:
+    radial-gradient(circle at left top, rgba(255,62,165,0.18), transparent 30%),
+    radial-gradient(circle at right top, rgba(122,47,111,0.18), transparent 30%),
+    linear-gradient(135deg, rgba(88,12,59,0.42), rgba(35,10,39,0.68));
+  border-color:rgba(200,107,184,0.24);
+}
+
+.final-banner-village-executioner{
+  background:
+    radial-gradient(circle at left top, rgba(46,141,204,0.18), transparent 30%),
+    radial-gradient(circle at right top, rgba(122,47,111,0.18), transparent 30%),
+    linear-gradient(135deg, rgba(27,74,110,0.42), rgba(31,14,36,0.65));
+  border-color:rgba(160,180,255,0.22);
+}
+
+.final-banner-chaos{
+  background:
+    radial-gradient(circle at left top, rgba(59,72,255,0.18), transparent 28%),
+    radial-gradient(circle at center top, rgba(255,62,165,0.14), transparent 26%),
+    radial-gradient(circle at right top, rgba(122,47,111,0.16), transparent 28%),
+    linear-gradient(135deg, rgba(34,36,90,0.46), rgba(35,10,39,0.68));
+  border-color:rgba(255,255,255,0.12);
 }
 
 .final-summary-grid{
@@ -2630,11 +2736,121 @@ body.holy-night-flash .holy-pulse{
   margin-bottom:18px;
 }
 
+.final-summary-stat{
+  padding:16px 14px;
+  border-radius:18px;
+  text-align:center;
+  background:linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
+  border:1px solid rgba(255,255,255,0.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 10px 22px rgba(0,0,0,0.14);
+}
+
+.final-summary-value{
+  font-size:28px;
+  font-weight:800;
+  line-height:1;
+  margin-bottom:6px;
+}
+
+.final-summary-label{
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  opacity:0.68;
+}
+
 .final-team-sections{
   display:grid;
   grid-template-columns:repeat(3, minmax(0, 1fr));
   gap:14px;
   margin-bottom:18px;
+}
+
+.final-team-card,
+.final-log-card{
+  min-width:0;
+  padding:16px;
+  border-radius:22px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.018));
+  border:1px solid rgba(255,255,255,0.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 14px 28px rgba(0,0,0,0.14);
+}
+
+.final-team-mafia{
+  border-color:rgba(231,76,60,0.16);
+}
+
+.final-team-town{
+  border-color:rgba(46,141,204,0.16);
+}
+
+.final-team-neutral{
+  border-color:rgba(186,116,204,0.16);
+}
+
+.final-team-header,
+.final-log-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.final-team-kicker{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:0.12em;
+  opacity:0.62;
+  margin-bottom:4px;
+}
+
+.final-team-title,
+.final-log-title{
+  margin:0;
+  font-size:22px;
+  line-height:1.05;
+}
+
+.final-team-count{
+  min-width:38px;
+  height:38px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  font-weight:800;
+}
+
+.final-team-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.final-player-card{
+  position:relative;
+  overflow:hidden;
+  padding:12px 13px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.035);
+  border:1px solid rgba(255,255,255,0.06);
+}
+
+.final-player-card::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:4px;
+  background:linear-gradient(180deg, var(--final-role-color), transparent 85%);
+  opacity:0.95;
 }
 
 .final-player-main{
@@ -2645,104 +2861,58 @@ body.holy-night-flash .holy-pulse{
   min-width:0;
 }
 
+.final-player-name{
+  font-size:15px;
+  font-weight:700;
+  min-width:0;
+  word-break:break-word;
+}
+
+.final-player-role{
+  font-size:13px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:0.05em;
+  text-align:right;
+}
+
+.final-role-tag{
+  display:inline-flex;
+  align-items:center;
+  margin-left:8px;
+  padding:5px 8px;
+  border-radius:999px;
+  border:1px solid;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+}
+
+.final-empty-state{
+  padding:14px 12px;
+  border-radius:14px;
+  text-align:center;
+  background:rgba(255,255,255,0.03);
+  border:1px dashed rgba(255,255,255,0.08);
+  opacity:0.68;
+}
+
+.final-target-reveal{
+  margin-left:10px !important;
+  margin-top:6px !important;
+  margin-bottom:8px !important;
+}
+
 .final-log-box{
   max-height:260px;
 }
 
-.final-target-reveal{
-  margin:6px 0 2px 14px !important;
-}
-
-/* winner banner styles you already added */
-.final-results-hero{
-  margin-bottom:18px;
-  padding:18px;
-  border-radius:20px;
-  background:rgba(255,255,255,0.03);
-  border:1px solid rgba(255,255,255,0.06);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);
-  text-align:center;
-}
-
-.final-results-kicker{
-  font-size:12px;
-  font-weight:800;
-  letter-spacing:0.12em;
-  text-transform:uppercase;
-  opacity:0.7;
-  margin-bottom:8px;
-}
-
-.final-results-title{
-  margin:0;
-  font-size:30px;
-  letter-spacing:0.04em;
-}
-
-.final-results-subtitle{
-  margin-top:8px;
-  font-size:13px;
-  opacity:0.72;
-  line-height:1.45;
-}
-
-.final-banner-default{
-  background:
-    radial-gradient(circle at top, rgba(255,255,255,0.06), transparent 45%),
-    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-}
-
-.final-banner-mafia{
-  background:
-    radial-gradient(circle at top, rgba(231,76,60,0.20), transparent 45%),
-    linear-gradient(180deg, rgba(120,15,15,0.22), rgba(40,8,8,0.16));
-  border-color:rgba(231,76,60,0.22);
-}
-
-.final-banner-village{
-  background:
-    radial-gradient(circle at top, rgba(46,141,204,0.18), transparent 45%),
-    linear-gradient(180deg, rgba(20,60,110,0.22), rgba(8,20,40,0.16));
-  border-color:rgba(46,141,204,0.22);
-}
-
-.final-banner-jester{
-  background:
-    radial-gradient(circle at top, rgba(255,62,165,0.18), transparent 45%),
-    linear-gradient(180deg, rgba(90,10,55,0.22), rgba(35,5,20,0.16));
-  border-color:rgba(255,62,165,0.22);
-}
-
-.final-banner-executioner{
-  background:
-    radial-gradient(circle at top, rgba(122,47,111,0.20), transparent 45%),
-    linear-gradient(180deg, rgba(70,25,60,0.22), rgba(25,10,20,0.16));
-  border-color:rgba(122,47,111,0.22);
-}
-
-.final-banner-jester-executioner{
-  background:
-    radial-gradient(circle at top, rgba(255,62,165,0.14), transparent 40%),
-    radial-gradient(circle at bottom right, rgba(122,47,111,0.16), transparent 35%),
-    linear-gradient(180deg, rgba(65,20,48,0.24), rgba(22,8,16,0.18));
-  border-color:rgba(200,107,184,0.24);
-}
-
-.final-banner-village-executioner{
-  background:
-    radial-gradient(circle at top left, rgba(46,141,204,0.14), transparent 40%),
-    radial-gradient(circle at bottom right, rgba(122,47,111,0.16), transparent 35%),
-    linear-gradient(180deg, rgba(30,40,70,0.24), rgba(18,8,16,0.18));
-  border-color:rgba(160,180,255,0.22);
-}
-
-.final-banner-chaos{
-  background:
-    radial-gradient(circle at top, rgba(59,72,255,0.16), transparent 40%),
-    radial-gradient(circle at left, rgba(255,62,165,0.12), transparent 35%),
-    radial-gradient(circle at right, rgba(122,47,111,0.14), transparent 35%),
-    linear-gradient(180deg, rgba(30,24,50,0.28), rgba(16,14,28,0.18));
-  border-color:rgba(255,255,255,0.12);
+.final-results-card > button{
+  display:block;
+  width:100%;
+  max-width:280px;
+  margin:0 auto;
 }
 
 /* =========================
@@ -2874,5 +3044,62 @@ body.holy-night-flash .holy-pulse{
   .top-ui button{
     width:40px;
     height:40px;
+  }
+}
+
+@media (max-width: 900px){
+  .final-team-sections{
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width: 700px){
+  body{
+    align-items:stretch;
+  }
+
+  #app{
+    max-width:none;
+    padding:0;
+    align-items:stretch;
+  }
+
+  .card{
+    width:100%;
+  }
+
+  .final-results-card{
+    width:100%;
+    max-width:none;
+    max-height:100vh;
+    min-height:100vh;
+    margin:0;
+    border-radius:0;
+    padding:16px;
+  }
+
+  .final-summary-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+
+  .final-results-title{
+    font-size:28px;
+  }
+}
+
+@media (max-width: 520px){
+  .final-player-main{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:4px;
+  }
+
+  .final-player-role{
+    text-align:left;
+  }
+
+  .final-results-card > button{
+    max-width:none;
+    width:100%;
   }
 }
