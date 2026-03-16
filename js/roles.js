@@ -186,7 +186,7 @@ noResultTexts:[
 "You curl your tail around yourself and nap.",
 "You had a dream about a big fish, yum.",
 "Good kitty."],
-description:"You are join the team of whoever tries to kill you! If you aren't in a team by the end of the game, you lose!"
+description:"You join the team of whoever tries to kill you! If you aren't in a team by the end of the game, you lose!"
 },
 
 spirit:{

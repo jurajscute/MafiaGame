@@ -225,6 +225,21 @@ JSON.stringify(enabled)
 
 }
 
+  function roleDisplayName(role){
+  const customNames = {
+    schrodingers_cat: "Schrödinger's Cat"
+  }
+  return customNames[role] || (role.charAt(0).toUpperCase() + role.slice(1))
+}
+
+function getRoleDisplayName(role){
+  const names = {
+    schrodingers_cat: "Schrödinger's Cat"
+  }
+
+  return names[role] || role.charAt(0).toUpperCase() + role.slice(1)
+}
+
 function initSettingsModal(){
   const modal = document.getElementById("infoModal")
   const modalContent = modal.querySelector(".modal-content")
@@ -281,14 +296,6 @@ function showSettings() {
     if(neutralRoles.includes(role)) return "Neutral role"
     return "Town role"
   }
-
-  function roleDisplayName(role){
-  const customNames = {
-    schrodingers_cat: "Schrödinger's Cat"
-  }
-
-  return customNames[role] || (role.charAt(0).toUpperCase() + role.slice(1))
-}
 
   function renderRoleCard(role){
     const enabled = state.rolesEnabled[role]
@@ -1670,7 +1677,9 @@ pool.push("villager")
 shuffle(pool)
 
 players.forEach((p,i)=>{
-p.role = pool[i]
+  p.role = pool[i]
+  p.catAlignment = null
+  p.alive = true
 })
 
 players.forEach(p => {
@@ -1841,7 +1850,7 @@ if(state.executionerWinIfVigilanteKillsTarget){
 
 return `
 <div class="role-row" style="border-left:4px solid ${color};">
-  <span class="role-player">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
+  <span class="role-player">${getRoleDisplayName(role)}</span>
   <span class="role-name" style="color:${color}">
     up to ${count}${extras}
   </span>
@@ -1896,10 +1905,15 @@ const hasSheriff = state.rolesEnabled.sheriff
 const hasMayor = state.rolesEnabled.mayor
 const hasJester = state.rolesEnabled.jester
 const hasExecutioner = state.rolesEnabled.executioner
+const hasCat = state.rolesEnabled.schrodingers_cat
 
 // Most specific combo warnings first
 if(hasMayor && hasSheriff && hasDoctor && playerCount < 7){
 return ["Mayor + Sheriff + Doctor may be too strong in a medium lobby."]
+}
+
+if(hasCat && playerCount < 6){
+  return ["Schrödinger's Cat can be very swingy in smaller games."]
 }
 
 if(hasMayor && hasSheriff && playerCount < 6){
@@ -2058,7 +2072,7 @@ Tap to reveal
 </div>
 
 <div class="role-back" style="color:${color}">
-${player.role.toUpperCase()}
+${getRoleDisplayName(player.role)}
 </div>
 
 </div>
@@ -2196,6 +2210,10 @@ state.executionerWinIfVigilanteKillsTarget = false
 state.vigilanteCanKillNeutrals = true
 state.vigilanteWrongKillOutcome = "both_die"
 
+state.rolesEnabled.schrodingers_cat = false
+state.roleWeights.schrodingers_cat = 0
+state.roleCounts.schrodingers_cat = 1
+
 state.mafiaCountOverride = 0
 state.revealRolesOnElimination = "none"
 }
@@ -2241,6 +2259,10 @@ state.framerKnowsSuccess = true
 state.framerKnowsMafia = true
 state.mafiaKnowsFramer = true
 state.mafiaKillMethod = "leader"
+
+state.rolesEnabled.schrodingers_cat = false
+state.roleWeights.schrodingers_cat = 0
+state.roleCounts.schrodingers_cat = 1
 
 state.jesterWinIfVigilanteKilled = false
 state.executionerWinIfVigilanteKillsTarget = false
@@ -2291,6 +2313,10 @@ state.framerKnowsSuccess = true
 state.framerKnowsMafia = true
 state.mafiaKnowsFramer = true
 state.mafiaKillMethod = "vote"
+
+state.rolesEnabled.schrodingers_cat = true
+state.roleWeights.schrodingers_cat = 100
+state.roleCounts.schrodingers_cat = 1
 
 state.rolesEnabled.vigilante = true
 state.roleWeights.vigilante = 100
