@@ -4830,13 +4830,16 @@ body.holy-night-flash .holy-pulse{
   padding:22px;
   border-radius:24px;
   text-align:left;
+
   background:
-    radial-gradient(circle at top, rgba(255,244,210,0.06), transparent 30%),
-    linear-gradient(180deg, rgba(44,58,66,0.96), rgba(28,40,48,0.98));
-  color:#eef4f7;
+    radial-gradient(circle at top, rgba(255,228,160,0.08), transparent 35%),
+    linear-gradient(180deg, rgba(38,40,44,0.96), rgba(24,26,30,0.98));
+
+  color:#eef0f2;
   border:1px solid rgba(255,255,255,0.08);
+
   box-shadow:
-    0 25px 70px rgba(0,0,0,0.24),
+    0 25px 70px rgba(0,0,0,0.28),
     inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
@@ -4845,13 +4848,16 @@ body.holy-night-flash .holy-pulse{
   padding:22px 20px 20px;
   border-radius:22px;
   text-align:center;
+
   background:
-    radial-gradient(circle at top, rgba(255,223,140,0.10), transparent 40%),
-    linear-gradient(135deg, rgba(72,92,102,0.72), rgba(34,48,58,0.88));
+    radial-gradient(circle at top, rgba(255,210,120,0.14), transparent 45%),
+    linear-gradient(135deg, rgba(70,70,75,0.7), rgba(30,30,34,0.85));
+
   border:1px solid rgba(255,255,255,0.08);
+
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.05),
-    0 14px 30px rgba(0,0,0,0.14);
+    0 14px 30px rgba(0,0,0,0.18);
 }
 
 .morning-kicker{
@@ -4859,42 +4865,44 @@ body.holy-night-flash .holy-pulse{
   font-weight:800;
   letter-spacing:0.14em;
   text-transform:uppercase;
-  opacity:0.66;
   margin-bottom:8px;
-  color:#f3d98a;
+
+  color:#f2d48a; /* soft warm sunlight */
+  opacity:0.85;
 }
 
 .morning-title{
   margin:0;
   font-size:34px;
   line-height:1.05;
-  color:#f5f8fb;
-  text-shadow:0 0 18px rgba(255,223,140,0.10);
+
+  color:#f5f6f7;
+
+  text-shadow:
+    0 0 12px rgba(255,210,120,0.12);
 }
 
 .morning-subtitle{
   margin-top:10px;
   font-size:14px;
   line-height:1.5;
-  opacity:0.78;
-  color:#dbe5ea;
-}
 
-.morning-results-wrap{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  margin-bottom:18px;
+  color:#d6d9dc;
+  opacity:0.85;
 }
 
 .morning-result-card{
   padding:16px 18px;
   border-radius:18px;
-  background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025));
-  border:1px solid rgba(255,255,255,0.07);
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
+
+  border:1px solid rgba(255,255,255,0.08);
+
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.03),
-    0 10px 20px rgba(0,0,0,0.08);
+    0 10px 20px rgba(0,0,0,0.12);
 }
 
 .morning-result-kicker{
@@ -4902,101 +4910,51 @@ body.holy-night-flash .holy-pulse{
   font-weight:800;
   letter-spacing:0.12em;
   text-transform:uppercase;
-  opacity:0.60;
+
   margin-bottom:8px;
-  color:#d8e2e8;
+
+  color:#cfd4d8;
+  opacity:0.75;
 }
 
 .morning-result-text{
   font-size:15px;
   line-height:1.55;
-  color:#f0f5f7;
-}
-
-.morning-result-card .revealed-role-sequence{
-  margin-top:12px;
-}
-
-.morning-status-wrap{
-  margin-top:6px;
-  margin-bottom:18px;
+  color:#f1f3f5;
 }
 
 .morning-card .player-status-box{
-  background:linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
-  border:1px solid rgba(255,255,255,0.07);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+
+  border:1px solid rgba(255,255,255,0.08);
+
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.03),
-    0 10px 20px rgba(0,0,0,0.06);
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 10px 20px rgba(0,0,0,0.10);
 }
 
-.morning-card .player-status-box h3{
-  color:#f3f6f8;
-}
-
-.morning-card .status-row{
-  background:rgba(255,255,255,0.035);
-}
-
-.morning-actions{
-  display:flex;
-  justify-content:center;
-  margin-top:4px;
-}
-
-.morning-card .host-panel{
-  border-top:1px solid rgba(255,255,255,0.08);
-}
-
-/* result variants */
 .morning-result-card.night-result-death{
-  background:linear-gradient(180deg, rgba(231,76,60,0.12), rgba(255,255,255,0.03));
-  border-color:rgba(231,76,60,0.22);
+  background:linear-gradient(180deg, rgba(231,76,60,0.14), rgba(255,255,255,0.03));
+  border-color:rgba(231,76,60,0.25);
 }
 
 .morning-result-card.night-result-save{
   background:linear-gradient(180deg, rgba(46,141,204,0.12), rgba(255,255,255,0.03));
-  border-color:rgba(46,141,204,0.20);
+  border-color:rgba(46,141,204,0.22);
 }
 
 .morning-result-card.night-result-priest{
-  background:linear-gradient(180deg, rgba(243,216,107,0.14), rgba(255,255,255,0.03));
-  border-color:rgba(243,216,107,0.24);
+  background:linear-gradient(180deg, rgba(243,216,107,0.18), rgba(255,255,255,0.03));
+  border-color:rgba(243,216,107,0.28);
 }
 
 .morning-result-card.night-result-vigilante{
-  background:linear-gradient(180deg, rgba(77,89,255,0.12), rgba(255,255,255,0.03));
-  border-color:rgba(77,89,255,0.20);
+  background:linear-gradient(180deg, rgba(90,100,255,0.14), rgba(255,255,255,0.03));
+  border-color:rgba(90,100,255,0.24);
 }
 
 .morning-result-card.night-result-spirit{
-  background:linear-gradient(180deg, rgba(192,132,252,0.12), rgba(255,255,255,0.03));
-  border-color:rgba(192,132,252,0.22);
-}
-
-.morning-result-card.night-result-peace{
-  background:linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
-  border-color:rgba(255,255,255,0.08);
-}
-
-@media (max-width:700px){
-  .morning-card{
-    width:min(100%, calc(100vw - 24px));
-    padding:18px;
-    border-radius:20px;
-  }
-
-  .morning-hero{
-    padding:18px 16px;
-    border-radius:18px;
-  }
-
-  .morning-title{
-    font-size:28px;
-  }
-
-  .morning-result-card{
-    padding:14px 14px;
-    border-radius:16px;
-  }
+  background:linear-gradient(180deg, rgba(200,150,255,0.14), rgba(255,255,255,0.03));
+  border-color:rgba(200,150,255,0.24);
 }
