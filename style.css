@@ -3530,53 +3530,77 @@ body.holy-night {
 }
 
 /* soft sky shimmer behind everything */
-body.holy-night::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
+body.holy-night::before{
+content:"";
+position:fixed;
+inset:0;
+pointer-events:none;
+z-index:0;
+opacity:0.25;
 
-  background:
-    radial-gradient(circle at 20% 30%, rgba(255, 240, 180, 0.05), transparent 18%),
-    radial-gradient(circle at 75% 22%, rgba(255, 228, 150, 0.04), transparent 20%),
-    radial-gradient(circle at 50% 12%, rgba(255, 245, 210, 0.08), transparent 28%);
+background-image:
+radial-gradient(circle, rgba(255,230,150,0.6) 1px, transparent 2px);
+
+background-size:300px 300px;
+
+animation: holyDustSlow 90s linear infinite;
+}
+
+@keyframes holyDustSlow{
+
+0%{
+background-position:0 0;
+}
+
+100%{
+background-position:0 -300px;
+}
+
 }
 
 /* subtle floating dust behind cards */
-body.holy-night::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.55;
+body.holy-night::after{
+content:"";
+position:fixed;
+inset:0;
+pointer-events:none;
+z-index:0;
+opacity:0.55;
 
-  background-image:
-    radial-gradient(circle, rgba(255, 241, 190, 0.85) 0.8px, transparent 1.8px),
-    radial-gradient(circle, rgba(255, 226, 140, 0.45) 1px, transparent 2.2px),
-    radial-gradient(circle, rgba(255, 248, 220, 0.35) 0.7px, transparent 1.6px);
+background-image:
+radial-gradient(circle, rgba(255,241,190,0.85) 0.8px, transparent 1.8px),
+radial-gradient(circle, rgba(255,226,140,0.45) 1px, transparent 2.2px),
+radial-gradient(circle, rgba(255,248,220,0.35) 0.7px, transparent 1.6px);
 
-  background-size:
-    140px 140px,
-    220px 220px,
-    180px 180px;
+background-size:
+140px 140px,
+220px 220px,
+180px 180px;
 
-  background-position:
-    0 0,
-    40px 60px,
-    90px 20px;
+background-position:
+0 0,
+40px 60px,
+90px 20px;
 
-  animation: holyDustDrift 18s linear infinite;
+animation: holyDustDrift 40s linear infinite;
 }
 
-@keyframes holyDustDrift {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-80px);
-  }
+@keyframes holyDustDrift{
+
+0%{
+background-position:
+0px 0px,
+40px 60px,
+90px 20px;
+}
+
+100%{
+background-position:
+0px -140px,
+40px -160px,
+90px -160px;
+}
+
 }
 
 .card,
