@@ -4682,3 +4682,43 @@ body.holy-night-flash .holy-pulse{
 .skip-btn{
   margin-top:4px;
 }
+
+.role-mafia .skip-btn,
+.role-framer .skip-btn,
+.role-doctor .skip-btn,
+.role-sheriff .skip-btn,
+.role-jester .skip-btn,
+.role-executioner .skip-btn,
+.role-mayor .skip-btn,
+.role-vigilante .skip-btn,
+.role-spirit .skip-btn,
+.role-priest .skip-btn,
+.role-schrodingers-cat .skip-btn,
+.card .skip-btn{
+  background:rgba(20,20,30,0.72) !important;
+  border:1px solid rgba(255,255,255,0.18) !important;
+  color:rgba(255,255,255,0.78) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 6px 14px rgba(0,0,0,0.24) !important;
+
+  text-shadow:none !important;
+}
+
+.role-mafia .skip-btn:hover,
+.role-framer .skip-btn:hover,
+.role-doctor .skip-btn:hover,
+.role-sheriff .skip-btn:hover,
+.role-jester .skip-btn:hover,
+.role-executioner .skip-btn:hover,
+.role-mayor .skip-btn:hover,
+.role-vigilante .skip-btn:hover,
+.role-spirit .skip-btn:hover,
+.role-priest .skip-btn:hover,
+.role-schrodingers-cat .skip-btn:hover,
+.card .skip-btn:hover{
+  background:rgba(30,30,45,0.9) !important;
+  border-color:rgba(255,255,255,0.28) !important;
+  color:#ffffff !important;
+}
