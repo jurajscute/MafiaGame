@@ -56,18 +56,20 @@ h2{
 
 .button-row{
   display:flex;
-  flex-wrap:wrap;
   justify-content:center;
-  gap:12px;
-  margin-top:18px;
+  gap:16px;
+  margin-top:20px;
 }
 
 button{
   appearance:none;
   border:none;
   border-radius:14px;
-
   padding:12px 18px;
+  display:block;
+  margin:14px auto;
+  width:220px;
+  height:48px;
   font-size:15px;
   font-weight:700;
   letter-spacing:.03em;
@@ -91,6 +93,14 @@ button{
     background .15s ease;
 
   cursor:pointer;
+}
+
+@media (max-width:600px){
+
+  button{
+    width:200px;
+  }
+
 }
 
 button:hover{
