@@ -1572,7 +1572,7 @@ render(`
     <button class="primary-btn" onclick="window.showSetup()">
       Start Game
     </button>
-
+<div class="button-row">
     <button class="skip-btn" onclick="window.showInfo()">
       Game Rules
     </button>
@@ -1580,7 +1580,7 @@ render(`
     <button class="skip-btn" onclick="window.showSettings()">
       Settings
     </button>
-
+</div>
   </div>
 
 </div>
@@ -1661,8 +1661,10 @@ function renderPlayerSetup(){
       </div>
 
       <div class="setup-actions">
+      <div class="button-row">
         <button onclick="window.addPlayer()">Add Player</button>
         <button class="skip-btn" onclick="window.clearPlayers()">Reset Players</button>
+        </div>
         <button class="primary-btn" onclick="window.startGame()" ${playerCount < 4 ? "disabled" : ""}>
           Start Game
         </button>
@@ -2073,7 +2075,7 @@ function showPreGameSummary(){
 
       <div class="pregame-actions-wrap">
         <div class="pregame-actions">
-          <button onclick="window.confirmStartGame()">Start Game</button>
+          <button class="primary-btn" onclick="window.confirmStartGame()">Start Game</button>
           <button class="skip-btn" onclick="window.showSetup()">Back</button>
         </div>
       </div>

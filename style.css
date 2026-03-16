@@ -54,13 +54,22 @@ h2{
   margin-bottom:20px;
 }
 
+.button-row{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:12px;
+  margin-top:18px;
+}
+
 button{
   appearance:none;
   border:none;
   border-radius:14px;
 
   padding:12px 18px;
-
+  display:block;
+  margin:14px auto;
   font-size:15px;
   font-weight:700;
   letter-spacing:.03em;
