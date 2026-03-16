@@ -282,7 +282,7 @@ function renderSimpleWinScreen(bodyClass, cardClass, title, lines){
 }
 
 function renderVengefulLunaticWin(playerName){
-  document.body.className = "win-executioner-turned-jester"
+  document.body.className = "win-executioner-to-jester"
 
   render(`
 
@@ -2830,7 +2830,7 @@ function getFinalWinnerBanner(){
     }
   }
 
-  if(bodyClass.includes("win-executioner-turned-jester")){
+  if(bodyClass.includes("win-executioner-to-jester")){
   return {
     label: "Special Ending",
     title: "Vengeful Lunatic",
