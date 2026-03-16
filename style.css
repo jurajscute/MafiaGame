@@ -4536,3 +4536,21 @@ body.holy-night-flash .holy-pulse{
     transform:translateY(0);
   }
 }
+
+.reveal-role-actions{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  margin-top:18px;
+}
+
+.reveal-role-actions button{
+  margin:0;
+}
+
+.reveal-role-actions{
+  max-height:280px;
+  overflow-y:auto;
+  padding-right:4px;
+}
