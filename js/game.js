@@ -1743,146 +1743,231 @@ showPreGameSummary()
 
 function showPreGameSummary(){
 
-let playerCount = state.players.length
-let mafia = state.mafiaCountOverride || mafiaCount(playerCount)
-mafia = Math.min(mafia, maxAllowedMafia(playerCount))
+  let playerCount = state.players.length
+  let mafia = state.mafiaCountOverride || mafiaCount(playerCount)
+  mafia = Math.min(mafia, maxAllowedMafia(playerCount))
 
-let warnings = getBalanceWarnings()
+  let warnings = getBalanceWarnings()
 
-let warningsHTML = warnings.length
-? `
-<div class="settings-locked" style="text-align:left;">
-  <strong>Setup Warnings</strong>
-  ${warnings.map(w => `<p style="margin:8px 0 0 0;">• ${w}</p>`).join("")}
-</div>
-`
-: `
-<div class="settings-locked" style="text-align:left; border-color:rgba(46,204,113,0.25);">
-  <strong>Setup looks balanced</strong>
-</div>
-`
+  let warningsHTML = warnings.length
+    ? `
+      <div class="final-log-card" style="margin-top:18px;">
+        <div class="final-log-header">
+          <div>
+            <div class="final-team-kicker">Balance</div>
+            <h3 class="final-log-title">Setup Warnings</h3>
+          </div>
+        </div>
 
-let enabledRoles = []
+        <div class="game-log-box final-log-box">
+          ${warnings.map(w => `<p class="log-entry">• ${w}</p>`).join("")}
+        </div>
+      </div>
+    `
+    : `
+      <div class="final-log-card" style="margin-top:18px; border-color:rgba(46,204,113,0.24);">
+        <div class="final-log-header">
+          <div>
+            <div class="final-team-kicker">Balance</div>
+            <h3 class="final-log-title" style="color:#7ee2a8;">Setup Looks Balanced</h3>
+          </div>
+        </div>
 
-Object.keys(state.rolesEnabled).forEach(role => {
-if(state.rolesEnabled[role]){
-enabledRoles.push(role)
-}
-})
+        <div class="game-log-box final-log-box">
+          <p class="log-entry">Everything looks good to start.</p>
+        </div>
+      </div>
+    `
 
-let rolesHTML = enabledRoles.length
-? enabledRoles.map(role => {
-let color = roleColors[role] || "white"
-let count = state.roleCounts[role] || 1
-let extras = ""
+  let enabledRoles = []
 
-if(role === "doctor" && state.doctorRevealSave){
-extras = ` <span style="opacity:0.7;">• reveals saved player</span>`
-}
+  Object.keys(state.rolesEnabled).forEach(role => {
+    if(state.rolesEnabled[role]){
+      enabledRoles.push(role)
+    }
+  })
 
-if(role === "priest"){
-  extras = ` <span style="opacity:0.7;">• blocks all kills for the night</span>`
-}
+  let rolesHTML = enabledRoles.length
+    ? enabledRoles.map(role => {
+        let color = roleColors[role] || "white"
+        let count = state.roleCounts[role] || 1
+        let extras = []
 
-if(role === "jester"){
-let jesterRuleText = {
-  innocent: "innocent to Sheriff",
-  not_innocent: "not innocent to Sheriff",
-  exact: "revealed exactly by Sheriff"
-}
+        if(role === "doctor" && state.doctorRevealSave){
+          extras.push("reveals saved player")
+        }
 
-extras = ` <span style="opacity:0.7;">• ${jesterRuleText[state.sheriffJesterResult]}</span>`
+        if(role === "priest"){
+          extras.push("blocks all kills for the night")
+        }
 
-if(state.jesterWinIfVigilanteKilled){
-  extras += ` <span style="opacity:0.7;">• wins if Vigilante kills them</span>`
-}
-}
+        if(role === "jester"){
+          let jesterRuleText = {
+            innocent: "innocent to Sheriff",
+            not_innocent: "not innocent to Sheriff",
+            exact: "revealed exactly by Sheriff"
+          }
 
-if(role === "vigilante"){
-  extras = ` <span style="opacity:0.7;">• ${state.vigilanteCanKillNeutrals ? "can kill neutrals" : "cannot kill neutrals"}</span>`
+          extras.push(jesterRuleText[state.sheriffJesterResult])
 
-  let wrongKillText = {
-    both_die: "wrong target: both die",
-    only_vigilante_dies: "wrong target: only Vigilante dies",
-    only_target_dies: "wrong target: only target dies"
-  }
+          if(state.jesterWinIfVigilanteKilled){
+            extras.push("wins if Vigilante kills them")
+          }
+        }
 
-  extras += ` <span style="opacity:0.7;">• ${wrongKillText[state.vigilanteWrongKillOutcome]}</span>`
-}
+        if(role === "vigilante"){
+          extras.push(
+            state.vigilanteCanKillNeutrals
+              ? "can kill neutrals"
+              : "cannot kill neutrals"
+          )
 
-if(role === "mayor"){
-extras = ` <span style="opacity:0.7;">• ${state.mayorVotePower} vote power</span>`
-}
+          let wrongKillText = {
+            both_die: "wrong target: both die",
+            only_vigilante_dies: "wrong target: only Vigilante dies",
+            only_target_dies: "wrong target: only target dies"
+          }
 
-if(role === "sheriff"){
-extras = state.sheriffExactReveal
-? ` <span style="opacity:0.7;">• exact role</span>`
-: ` <span style="opacity:0.7;">• innocent / not innocent</span>`
-}
+          extras.push(wrongKillText[state.vigilanteWrongKillOutcome])
+        }
 
-if(role === "executioner"){
+        if(role === "mayor"){
+          extras.push(`${state.mayorVotePower} vote power`)
+        }
 
-let executionerRuleText = {
-  neither: "targets only town",
-  mafia: "targets mafia",
-  jester: "targets jester",
-  both: "targets mafia or jester"
-}
+        if(role === "sheriff"){
+          extras.push(
+            state.sheriffExactReveal
+              ? "exact role reveal"
+              : "innocent / not innocent"
+          )
+        }
 
-let executionerSheriffText = {
-  innocent: "innocent to Sheriff",
-  not_innocent: "not innocent to Sheriff",
-  exact: "revealed exactly by Sheriff"
-}
+        if(role === "executioner"){
+          let executionerRuleText = {
+            neither: "targets only town",
+            mafia: "targets mafia",
+            jester: "targets jester",
+            both: "targets mafia or jester"
+          }
 
-extras = ` <span style="opacity:0.7;">• ${executionerRuleText[state.executionerTargetRule]}</span>`
-extras += ` <span style="opacity:0.7;">• ${executionerSheriffText[state.sheriffExecutionerResult]}</span>`
+          let executionerSheriffText = {
+            innocent: "innocent to Sheriff",
+            not_innocent: "not innocent to Sheriff",
+            exact: "revealed exactly by Sheriff"
+          }
 
-if(state.executionerWinIfDead){
-  extras += ` <span style="opacity:0.7;">• wins even if dead</span>`
-}
+          extras.push(executionerRuleText[state.executionerTargetRule])
+          extras.push(executionerSheriffText[state.sheriffExecutionerResult])
 
-if(state.executionerWinIfVigilanteKillsTarget){
-  extras += ` <span style="opacity:0.7;">• wins if Vigilante kills target</span>`
-}
+          if(state.executionerWinIfDead){
+            extras.push("wins even if dead")
+          }
 
-}
+          if(state.executionerWinIfVigilanteKillsTarget){
+            extras.push("wins if Vigilante kills target")
+          }
+        }
 
-return `
-<div class="role-row" style="border-left:4px solid ${color};">
-  <span class="role-player">${getRoleDisplayName(role)}</span>
-  <span class="role-name" style="color:${color}">
-    up to ${count}${extras}
-  </span>
-</div>
-`
-}).join("")
-: `<p style="opacity:0.75;">No special roles enabled</p>`
+        return `
+          <div class="final-player-card" style="--final-role-color:${color};">
+            <div class="final-player-main" style="align-items:flex-start;">
+              <div>
+                <div class="final-player-name">${getRoleDisplayName(role)}</div>
+                <div class="final-player-role" style="color:${color}; text-align:left;">
+                  Up to ${count}
+                </div>
+              </div>
 
-render(`
+              ${
+                extras.length
+                  ? `
+                    <div style="
+                      display:flex;
+                      flex-wrap:wrap;
+                      justify-content:flex-end;
+                      gap:6px;
+                    ">
+                      ${extras.map(extra => `
+                        <span class="final-role-tag" style="
+                          color:${color};
+                          border-color:${color}33;
+                          background:${color}14;
+                        ">
+                          ${extra}
+                        </span>
+                      `).join("")}
+                    </div>
+                  `
+                  : ``
+              }
+            </div>
+          </div>
+        `
+      }).join("")
+    : `
+      <div class="final-empty-state">
+        No special roles enabled
+      </div>
+    `
 
-<div class="card">
+  render(`
 
-<h2>Game Summary</h2>
+    <div class="card final-log-card" style="max-width:920px; width:min(920px, calc(100vw - 32px)); padding:22px;">
 
-<p><strong>Players:</strong> ${playerCount}</p>
-<p><strong>Mafia:</strong> ${mafia}</p>
+      <div class="final-results-hero final-banner-default">
+        <div class="final-results-kicker">Game Setup</div>
+        <h2 class="final-results-title">Pre-Game Summary</h2>
+        <div class="final-results-subtitle">
+          Review the player count, mafia count, and enabled special roles before starting.
+        </div>
+      </div>
 
-<hr style="opacity:0.3;margin:20px 0;">
+      <div class="final-summary-grid">
+        <div class="final-summary-stat">
+          <div class="final-summary-value">${playerCount}</div>
+          <div class="final-summary-label">Players</div>
+        </div>
 
-<h3>Special Roles</h3>
+        <div class="final-summary-stat">
+          <div class="final-summary-value">${mafia}</div>
+          <div class="final-summary-label">Mafia</div>
+        </div>
 
-${rolesHTML}
+        <div class="final-summary-stat">
+          <div class="final-summary-value">${enabledRoles.length}</div>
+          <div class="final-summary-label">Special Roles</div>
+        </div>
 
-${warningsHTML}
+        <div class="final-summary-stat">
+          <div class="final-summary-value">${warnings.length}</div>
+          <div class="final-summary-label">Warnings</div>
+        </div>
+      </div>
 
-<button onclick="window.confirmStartGame()">Start Game</button>
-<button onclick="window.showSetup()">Back</button>
+      <div class="final-team-card" style="margin-bottom:18px;">
+        <div class="final-team-header">
+          <div>
+            <div class="final-team-kicker">Setup</div>
+            <h3 class="final-team-title">Special Roles</h3>
+          </div>
+        </div>
 
-</div>
+        <div class="final-team-list">
+          ${rolesHTML}
+        </div>
+      </div>
 
-`)
+      ${warningsHTML}
 
+      <div style="margin-top:20px;">
+        <button onclick="window.confirmStartGame()">Start Game</button>
+        <button class="skip-btn" onclick="window.showSetup()">Back</button>
+      </div>
+
+    </div>
+
+  `)
 }
 
 
