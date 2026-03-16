@@ -1859,7 +1859,7 @@ function showPreGameSummary(){
 
   const townRoles = ["doctor", "sheriff", "mayor", "spirit", "vigilante", "priest"]
   const neutralRoles = ["jester", "executioner", "schrodingers_cat"]
-  const mafiaRoles = ["framer"]
+  const mafiaRoles = ["framer", "traitor"]
 
   function isRoleEnabled(role){
     return !!state.rolesEnabled[role]
@@ -2150,6 +2150,7 @@ function getBalanceWarnings(){
   const hasPriest = state.rolesEnabled.priest
   const hasSpirit = state.rolesEnabled.spirit
   const hasFramer = state.rolesEnabled.framer
+  const hasTraitor = state.rolesEnabled.traitor
 
   let specialRoles = 0
   Object.keys(state.rolesEnabled).forEach(role => {
@@ -2581,7 +2582,9 @@ function resetPresetRoles(){
   state.rolesEnabled.vigilante = false
   state.rolesEnabled.priest = false
   state.rolesEnabled.schrodingers_cat = false
+  state.rolesEnabled.traitor = false
 
+  state.roleWeights.traitor = 100
   state.roleWeights.schrodingers_cat = 100
   state.roleWeights.priest = 100
   state.roleWeights.doctor = 100
@@ -2593,6 +2596,7 @@ function resetPresetRoles(){
   state.roleWeights.framer = 100
   state.roleWeights.vigilante = 100
   
+  state.roleCounts.traitor = 1
   state.roleCounts.schrodingers_cat = 1
   state.roleCounts.priest = 1
   state.roleCounts.doctor = 1
@@ -2660,6 +2664,10 @@ state.rolesEnabled.schrodingers_cat = false
 state.roleWeights.schrodingers_cat = 0
 state.roleCounts.schrodingers_cat = 1
 
+state.rolesEnabled.traitor = false
+state.roleWeights.traitor = 0
+state.roleCounts.traitor = 1
+
 state.mafiaCountOverride = 0
 state.revealRolesOnElimination = "none"
 }
@@ -2710,6 +2718,10 @@ state.mafiaKillMethod = "leader"
 state.rolesEnabled.schrodingers_cat = false
 state.roleWeights.schrodingers_cat = 0
 state.roleCounts.schrodingers_cat = 1
+
+state.rolesEnabled.traitor = false
+state.roleWeights.traitor = 0
+state.roleCounts.traitor = 1
 
 state.jesterWinIfVigilanteKilled = false
 state.executionerWinIfVigilanteKillsTarget = false
@@ -2765,6 +2777,10 @@ state.mafiaKillMethod = "vote"
 state.rolesEnabled.schrodingers_cat = true
 state.roleWeights.schrodingers_cat = 100
 state.roleCounts.schrodingers_cat = 1
+
+state.rolesEnabled.traitor = true
+state.roleWeights.traitor = 100
+state.roleCounts.traitor = 1
 
 state.rolesEnabled.vigilante = true
 state.roleWeights.vigilante = 100
