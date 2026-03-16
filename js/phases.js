@@ -2,7 +2,14 @@ import {state, resetNightActions} from "./state.js"
 import {render, passPhone} from "./ui.js"
 import {roles} from "./roles.js"
 import {addLogEntry} from "./state.js"
-import {roleDisplayName(role)} from "./game.js"
+
+function roleDisplayName(role){
+  const names = {
+    schrodingers_cat: "Schrödinger's Cat"
+  }
+
+  return names[role] || (role.charAt(0).toUpperCase() + role.slice(1))
+}
 
 function setDay() {
     document.body.classList.remove("night", "holy-night", "holy-night-flash");
@@ -75,7 +82,7 @@ return `
           color:${color};
           text-shadow:0 0 8px ${color};
           ">
-      ${roleDisplayName(role)}
+      ${roleDisplayName(player.role)}
     </span>
 
   </div>
@@ -962,7 +969,7 @@ font-weight:bold;
 text-shadow:
 0 0 10px ${roleColors[player.role] || "white"};
 ">
-${roleDisplayName(role)}
+${roleDisplayName(player.role)}
 </p>
 
 <p class="role-description">
@@ -1037,7 +1044,7 @@ font-weight:bold;
 text-shadow:
 0 0 10px ${roleColor};
 ">
-${roleDisplayName(role)}
+${roleDisplayName(player.role)}
 </p>
 
 <p class="role-description">
@@ -1280,7 +1287,7 @@ render(`
 
 <div class="card role-${roleClass}">
 
-<h2 class="role-title">${roleDisplayName(role)} ACTION</h2>
+<h2 class="role-title">${roleDisplayName(player.role)} ACTION</h2>
 
 <p>
 ${player.role === "vigilante" ? "Serve justice, or abstain." : "Select a target"}
@@ -2607,6 +2614,80 @@ if(!isOpen){
 
 }
 
+function getFinalWinnerBanner(){
+  const bodyClass = document.body.className || ""
+
+  if(bodyClass.includes("win-jester-executioner-vigilante")){
+    return {
+      label: "Special Ending",
+      title: "Twisted Justice",
+      subtitle: "The Vigilante’s mistake gave victory to both the Jester and the Executioner.",
+      className: "final-banner-chaos"
+    }
+  }
+
+  if(bodyClass.includes("win-jester-executioner")){
+    return {
+      label: "Dual Victory",
+      title: "Jester & Executioner Win",
+      subtitle: "The town’s vote fulfilled two win conditions at once.",
+      className: "final-banner-jester-executioner"
+    }
+  }
+
+  if(bodyClass.includes("win-village-executioner")){
+    return {
+      label: "Split Victory",
+      title: "Village & Executioner Win",
+      subtitle: "The town eliminated the final mafia, while the Executioner also succeeded.",
+      className: "final-banner-village-executioner"
+    }
+  }
+
+  if(bodyClass.includes("win-mafia")){
+    return {
+      label: "Winning Team",
+      title: "Mafia Victory",
+      subtitle: "The mafia took control of the town.",
+      className: "final-banner-mafia"
+    }
+  }
+
+  if(bodyClass.includes("win-village")){
+    return {
+      label: "Winning Team",
+      title: "Village Victory",
+      subtitle: "The town eliminated every mafia member.",
+      className: "final-banner-village"
+    }
+  }
+
+  if(bodyClass.includes("win-jester")){
+    return {
+      label: "Winning Role",
+      title: "Jester Victory",
+      subtitle: "The town was manipulated into voting out the Jester.",
+      className: "final-banner-jester"
+    }
+  }
+
+  if(bodyClass.includes("win-executioner")){
+    return {
+      label: "Winning Role",
+      title: "Executioner Victory",
+      subtitle: "The Executioner succeeded in getting their target eliminated.",
+      className: "final-banner-executioner"
+    }
+  }
+
+  return {
+    label: "Game Complete",
+    title: "Final Roles",
+    subtitle: "Review every team, special role, and the full game log.",
+    className: "final-banner-default"
+  }
+}
+
 function showRoleRevealEnd(){
 
   let logHTML = state.gameLog.length
@@ -2619,14 +2700,7 @@ function showRoleRevealEnd(){
   let mafia = state.players.filter(p => getEffectiveTeam(p) === "mafia")
   let town = state.players.filter(p => getEffectiveTeam(p) === "village")
   let neutral = state.players.filter(p => getEffectiveTeam(p) === "neutral")
-
-  function getRoleDisplayName(role){
-    const names = {
-      schrodingers_cat: "Schrödinger's Cat"
-    }
-    return names[role] || role.toUpperCase()
-  }
-
+const winnerBanner = getFinalWinnerBanner()
   function renderRoleList(list){
     if(!list.length){
       return `<div class="final-empty-state">None</div>`
@@ -2697,11 +2771,11 @@ function showRoleRevealEnd(){
 
 <div class="card final-results-card final-results-shell">
 
-  <div class="final-results-hero">
-    <div class="final-results-kicker">Game Complete</div>
-    <h2 class="final-results-title">Final Roles</h2>
+    <div class="final-results-hero ${winnerBanner.className}">
+    <div class="final-results-kicker">${winnerBanner.label}</div>
+    <h2 class="final-results-title">${winnerBanner.title}</h2>
     <div class="final-results-subtitle">
-      Review every team, special role, and the full game log.
+      ${winnerBanner.subtitle}
     </div>
   </div>
 

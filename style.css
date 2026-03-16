@@ -3946,3 +3946,72 @@ filter:drop-shadow(0 0 6px rgba(255,255,255,0.3));
     font-size:26px;
   }
 }
+
+.final-results-hero{
+  margin-bottom:18px;
+  padding:18px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.06);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);
+  text-align:center;
+}
+
+.final-banner-default{
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.06), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+}
+
+.final-banner-mafia{
+  background:
+    radial-gradient(circle at top, rgba(231,76,60,0.20), transparent 45%),
+    linear-gradient(180deg, rgba(120,15,15,0.22), rgba(40,8,8,0.16));
+  border-color:rgba(231,76,60,0.22);
+}
+
+.final-banner-village{
+  background:
+    radial-gradient(circle at top, rgba(46,141,204,0.18), transparent 45%),
+    linear-gradient(180deg, rgba(20,60,110,0.22), rgba(8,20,40,0.16));
+  border-color:rgba(46,141,204,0.22);
+}
+
+.final-banner-jester{
+  background:
+    radial-gradient(circle at top, rgba(255,62,165,0.18), transparent 45%),
+    linear-gradient(180deg, rgba(90,10,55,0.22), rgba(35,5,20,0.16));
+  border-color:rgba(255,62,165,0.22);
+}
+
+.final-banner-executioner{
+  background:
+    radial-gradient(circle at top, rgba(122,47,111,0.20), transparent 45%),
+    linear-gradient(180deg, rgba(70,25,60,0.22), rgba(25,10,20,0.16));
+  border-color:rgba(122,47,111,0.22);
+}
+
+.final-banner-jester-executioner{
+  background:
+    radial-gradient(circle at top, rgba(255,62,165,0.14), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(122,47,111,0.16), transparent 35%),
+    linear-gradient(180deg, rgba(65,20,48,0.24), rgba(22,8,16,0.18));
+  border-color:rgba(200,107,184,0.24);
+}
+
+.final-banner-village-executioner{
+  background:
+    radial-gradient(circle at top left, rgba(46,141,204,0.14), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(122,47,111,0.16), transparent 35%),
+    linear-gradient(180deg, rgba(30,40,70,0.24), rgba(18,8,16,0.18));
+  border-color:rgba(160,180,255,0.22);
+}
+
+.final-banner-chaos{
+  background:
+    radial-gradient(circle at top, rgba(59,72,255,0.16), transparent 40%),
+    radial-gradient(circle at left, rgba(255,62,165,0.12), transparent 35%),
+    radial-gradient(circle at right, rgba(122,47,111,0.14), transparent 35%),
+    linear-gradient(180deg, rgba(30,24,50,0.28), rgba(16,14,28,0.18));
+  border-color:rgba(255,255,255,0.12);
+}
