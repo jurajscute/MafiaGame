@@ -1765,6 +1765,7 @@ function resolveNightSelections(){
   }
 
   if(holyShieldActive){
+    document.body.classList.add("holy-night")
     priestShields.forEach(action => {
       privateResults.push({
         type: "priest_result",

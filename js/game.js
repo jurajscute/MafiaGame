@@ -1462,6 +1462,7 @@ JSON.stringify(value)
 export function setDay(){
 
 document.body.classList.remove("night")
+document.body.classList.remove("holy-night")
 document.body.classList.add("day")
 
 }
