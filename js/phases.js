@@ -1397,91 +1397,163 @@ export function revealNightRole(){
 function showNightAction(player){
 
   let roleClass = player.role.toLowerCase()
+  const alivePlayers = state.players.filter(p => p.alive)
+  const currentNightPlayerNumber =
+    alivePlayers.findIndex(p => p.name === player.name) + 1
 
-if(player.role === "priest"){
-  const usesLeft = player.priestUsesLeft ?? state.priestUsesPerGame
-  const canUse = usesLeft > 0
+  if(player.role === "priest"){
+    const usesLeft = player.priestUsesLeft ?? state.priestUsesPerGame
+    const canUse = usesLeft > 0
+
+    render(`
+
+      <div class="card reveal-role-card role-priest" style="--reveal-role-color:${roleColors.priest};">
+
+        <div class="reveal-role-topbar">
+          <div class="reveal-role-kicker">Night Action</div>
+          <div class="reveal-role-progress">
+            ${currentNightPlayerNumber} / ${alivePlayers.length}
+          </div>
+        </div>
+
+        <div class="reveal-role-header">
+          <div class="reveal-role-player">${player.name}</div>
+          <div class="reveal-role-hint">Choose whether to protect the town</div>
+        </div>
+
+        <div class="reveal-role-description-wrap">
+          <p class="role-description reveal-role-description">
+            Call upon the Holy Spirit to shield the town tonight?
+          </p>
+        </div>
+
+        <div class="executioner-target-box" style="
+          margin-top:0;
+          margin-bottom:14px;
+          background:linear-gradient(135deg, rgba(243,216,107,0.14), rgba(74,58,8,0.18));
+          border:1px solid rgba(243,216,107,0.24);
+          box-shadow:0 0 14px rgba(243,216,107,0.10);
+          animation:none;
+        ">
+          <div class="executioner-target-label" style="color:${roleColors.priest};">
+            Holy Spirit Uses Left
+          </div>
+          <div class="executioner-target-name" style="
+            color:${roleColors.priest};
+            text-shadow:0 0 10px ${roleColors.priest};
+          ">
+            ${usesLeft}
+          </div>
+        </div>
+
+        <div class="reveal-role-actions">
+          ${
+            canUse
+              ? `<button onclick="window.performNightAction('__use__')">Use Holy Spirit</button>`
+              : `<button disabled>No Uses Left</button>`
+          }
+
+          <button class="skip-btn" onclick="window.performNightAction('__skip__')">Do Not Use</button>
+        </div>
+
+        ${renderHostControls()}
+
+      </div>
+
+    `)
+    return
+  }
+
+  let targets = ""
+
+  state.players
+    .filter(p => {
+      if(!p.alive) return false
+
+      if(player.role === "doctor") return true
+
+      if(player.role === "framer"){
+        return p.name !== player.name && p.role !== "mafia" && p.role !== "framer"
+      }
+
+      if(player.role === "vigilante"){
+        return p.name !== player.name
+      }
+
+      if(player.role === "mafia"){
+        return p.name !== player.name && getEffectiveTeam(p) !== "mafia"
+      }
+
+      return p.name !== player.name
+    })
+    .forEach(p => {
+      targets += `
+        <button onclick="window.performNightAction('${p.name}')">
+          ${p.name === player.name ? `${p.name} <span style="opacity:0.6">(You)</span>` : p.name}
+        </button>
+      `
+    })
+
+  if(player.role === "vigilante"){
+    targets += `<button class="skip-btn" onclick="window.performNightAction('__skip__')">Skip</button>`
+  }
 
   render(`
 
-<div class="card role-priest">
+    <div class="card reveal-role-card role-${roleClass}" style="--reveal-role-color:${roleColors[player.role] || "white"};">
 
-<h2 class="role-title">PRIEST ACTION</h2>
+      <div class="reveal-role-topbar">
+        <div class="reveal-role-kicker">Night Action</div>
+        <div class="reveal-role-progress">
+          ${currentNightPlayerNumber} / ${alivePlayers.length}
+        </div>
+      </div>
 
-<p>
-Call upon the Holy Spirit to shield the town tonight?
-</p>
+      <div class="reveal-role-header">
+        <div class="reveal-role-player">${player.name}</div>
+        <div class="reveal-role-hint">
+          ${player.role === "vigilante" ? "Choose carefully" : "Select your target"}
+        </div>
+      </div>
 
-<p class="role-description">
-Holy Spirit uses left: <strong>${usesLeft}</strong>
-</p>
+      <div class="role-card reveal-role-flip revealed">
+        <div class="role-inner">
 
-${
-  canUse
-    ? `<button onclick="window.performNightAction('__use__')">Use Holy Spirit</button>`
-    : `<button disabled>No Uses Left</button>`
-}
+          <div class="role-front reveal-role-front">
+            <div class="reveal-role-front-shimmer"></div>
 
-<button class="skip-btn" onclick="window.performNightAction('__skip__')">Do Not Use</button>
+            <div class="reveal-role-front-inner">
+              <div class="reveal-role-front-icon">✦</div>
+              <div class="reveal-role-front-label">Your Role</div>
+              <div class="reveal-role-front-text">${roleDisplayName(player.role)}</div>
+            </div>
+          </div>
 
-${renderHostControls()}
+          <div class="role-back reveal-role-back" style="color:${roleColors[player.role] || "white"}">
+            <div class="reveal-role-back-inner">
+              <div class="reveal-role-back-kicker">Your Role</div>
+              <div class="reveal-role-name">${roleDisplayName(player.role)}</div>
+            </div>
+          </div>
 
-</div>
+        </div>
+      </div>
 
-`)
-  return
-}
+      <div class="reveal-role-description-wrap">
+        <p class="role-description reveal-role-description">
+          ${player.role === "vigilante" ? "Serve justice, or abstain." : "Select a target."}
+        </p>
+      </div>
 
-  let targets=""
+      <div class="reveal-role-actions">
+        ${targets}
+      </div>
 
-state.players
-.filter(p => {
-    if(!p.alive) return false
+      ${renderHostControls()}
 
-    if(player.role === "doctor") return true
+    </div>
 
-    if(player.role === "framer"){
-      return p.name !== player.name && p.role !== "mafia" && p.role !== "framer"
-    }
-
-    if(player.role === "vigilante"){
-      return p.name !== player.name
-    }
-
-    if(player.role === "mafia"){
-  return p.name !== player.name && getEffectiveTeam(p) !== "mafia"
-}
-
-return p.name !== player.name
-
-})
-.forEach(p=>{
-targets+=`<button onclick="window.performNightAction('${p.name}')">
-${p.name === player.name ? p.name + ' <span style="opacity:0.6">(You)</span>' : p.name}
-</button>`
-})
-
-if(player.role === "vigilante"){
-  targets += `<button class="skip-btn" onclick="window.performNightAction('__skip__')">Skip</button>`
-}
-
-render(`
-
-<div class="card role-${roleClass}">
-
-<h2 class="role-title">${roleDisplayName(player.role)} ACTION</h2>
-
-<p>
-${player.role === "vigilante" ? "Serve justice, or abstain." : "Select a target"}
-</p>
-
-${targets}
-
-${renderHostControls()}
-
-</div>
-
-`)
+  `)
 }
 
 function assignCurrentMafiaLeader(){
