@@ -23,7 +23,8 @@ mayor: "#1d8161",
 spirit: "#e6aafd",
 framer: "#8b0000",
 vigilante: "#3b48ff",
-priest: "#f6df8f"
+priest: "#f6df8f",
+schrodingers_cat: "#6d6d6d"
 }
 
 window.updateRoleCount = function(role,value){
@@ -60,6 +61,12 @@ openModal(`
 <h3 style="color:${roleColors.villager}">Villager</h3>
 <p>No special power. Help find the mafia.</p>
 
+<h3 style="color:${roleColors.schrodingers_cat}">Schrödinger's Cat</h3>
+<p>
+If killed by the Vigilante, it joins the town. If killed by the Mafia, it joins the Mafia.
+This happens secretly and is only revealed privately during the night results phase.
+</p>
+
 <button onclick="closeInfo()">Close</button>
 
 </div>
@@ -88,7 +95,8 @@ mayor: false,
 spirit: false,
 framer: false,
 vigilante: false,
-priest: false
+priest: false,
+schrodingers_cat: false,
 }
 
 state.roleWeights = {
@@ -100,7 +108,8 @@ mayor: 100,
 spirit: 100,
 framer: 100,
 vigilante: 100,
-priest: 100
+priest: 100,
+schrodingers_cat: 100,
 }
 
 state.roleCounts = {
@@ -113,6 +122,7 @@ spirit: 1,
 framer: 1,
 vigilante: 1,
 priest: 1,
+schrodingers_cat: 1,
 }
 
 state.vigilanteOutcomeToShow = null
@@ -258,7 +268,7 @@ function showSettings() {
 
   const mafiaRoles = ["framer"]
   const townRoles = ["doctor", "sheriff", "mayor", "spirit", "vigilante", "priest"]
-  const neutralRoles = ["jester", "executioner"]
+  const neutralRoles = ["jester", "executioner", "schrodingers_cat"]
 
   let mafiaOptions = `<option value="0" ${state.mafiaCountOverride === 0 ? "selected" : ""}>Auto (${autoMafia})</option>`
   for(let i = 1; i <= mafiaMax; i++){
@@ -273,8 +283,12 @@ function showSettings() {
   }
 
   function roleDisplayName(role){
-    return role.charAt(0).toUpperCase() + role.slice(1)
+  const customNames = {
+    schrodingers_cat: "Schrödinger's Cat"
   }
+
+  return customNames[role] || (role.charAt(0).toUpperCase() + role.slice(1))
+}
 
   function renderRoleCard(role){
     const enabled = state.rolesEnabled[role]
@@ -1630,7 +1644,7 @@ for(let i=0;i<mafia;i++){
 pool.push("mafia")
 }
 
-["doctor","sheriff","jester","executioner","mayor","spirit","framer","vigilante","priest"].forEach(role=>{
+["doctor","sheriff","jester","executioner","mayor","spirit","framer","vigilante","priest","schrodingers_cat"].forEach(role=>{
 
 if(!state.rolesEnabled[role]) return
 
@@ -2107,7 +2121,9 @@ function resetPresetRoles(){
   state.rolesEnabled.framer = false
   state.rolesEnabled.vigilante = false
   state.rolesEnabled.priest = false
+  state.rolesEnabled.schrodingers_cat = false
 
+  state.roleWeights.schrodingers_cat = 100
   state.roleWeights.priest = 100
   state.roleWeights.doctor = 100
   state.roleWeights.sheriff = 100
@@ -2118,6 +2134,7 @@ function resetPresetRoles(){
   state.roleWeights.framer = 100
   state.roleWeights.vigilante = 100
   
+  state.roleCounts.schrodingers_cat = 1
   state.roleCounts.priest = 1
   state.roleCounts.doctor = 1
   state.roleCounts.sheriff = 1

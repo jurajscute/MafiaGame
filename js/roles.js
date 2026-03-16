@@ -165,6 +165,30 @@ noResultTexts:[
 description:"You win if your assigned target is voted out by the town."
 },
 
+schrodingers_cat:{
+team:"neutral",
+nightAction:null,
+receivesNightResult:false,
+noResultTexts:[
+"Do you even have a plan?",
+"What even are your morals!?",
+"You can win!",
+"It's nice being a cat isn't it.",
+"Got yourself killed yet?",
+"Meow, meow.",
+"Meow, meow, meow.",
+"Your second cousin is Nyan Cat.",
+"Garfield lookin' ahh."
+"I bet you like lasanga...",
+"There's so many ways this game could go.",
+"Meow.",
+"You know, you're REALLY indecisive.",
+"You curl your tail around yourself and nap.",
+"You had a dream about a big fish, yum.",
+"Good kitty."],
+description:"You are join the team of whoever tries to kill you! If you aren't in a team by the end of the game, you lose!"
+},
+
 spirit:{
 team:"village",
 nightAction:null,
@@ -236,7 +260,7 @@ team:"village",
 nightAction:"holy_shield",
 receivesNightResult:true,
 noResultTexts:[
-"You feel evil presences all around you, this town damned!",
+"You feel evil presences all around you, this town is damned!",
 "You drink some holy water to calm yourself... Much better!",
 "Let's see how they like the good ol' G-O-D!",
 "Bless these fools...",
@@ -245,7 +269,7 @@ noResultTexts:[
 "Feels almost silly having to protect these fools.",
 "You dreamed about going to heaven, it was nice, but then you woke up here again.",
 "This is all devils work!",
-"In the name of God, the son, and holy spirit!",
+"In the name of God, the son, and the holy spirit!",
 "You must let your peace reach out to them!",
 "You are the symbol of peace this town needs.",
 "One day you'll be up there with the big guy! Maybe even tomorrow...",

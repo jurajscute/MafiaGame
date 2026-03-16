@@ -141,7 +141,18 @@ mayor: "#1d8161",
 spirit: "#e6aafd",
 framer: "#8b0000",
 vigilante: "#3b48ff",
-priest: "#f6df8f"
+priest: "#f6df8f",
+schrodingers_cat: "#6d6d6d"
+}
+
+function getEffectiveTeam(player){
+  if(!player) return null
+
+  if(player.role === "schrodingers_cat" && player.catAlignment){
+    return player.catAlignment
+  }
+
+  return roles[player.role]?.team || null
 }
 
 function getPlayerByName(name){
@@ -154,8 +165,7 @@ function isPlayerAlive(name){
 }
 
 function getPlayerTeam(player){
-  if(!player) return null
-  return roles[player.role]?.team || null
+  return getEffectiveTeam(player)
 }
 
 function canExecutionerWin(executioner){
@@ -491,6 +501,96 @@ ${renderHostControls()}
 
 `)
 return
+}
+
+if(item && item.type === "cat_converted"){
+  const joinedColor = item.joinedTeam === "mafia"
+    ? roleColors.mafia
+    : roleColors.villager
+
+  const joinedLabel = item.joinedTeam === "mafia"
+    ? "MAFIA"
+    : "TOWN"
+
+  const mafiaNamesHTML = item.mafiaNames?.length
+    ? `
+      <p class="role-description">
+        Your new allies are:
+      </p>
+      <h3 style="color:${roleColors.mafia}; line-height:1.5;">
+        ${item.mafiaNames.join("<br>")}
+      </h3>
+    `
+    : ""
+
+  render(`
+
+<div class="card" style="border-color:${joinedColor};">
+
+<h2 class="role-title" style="color:${roleColors.schrodingers_cat};">
+SCHRÖDINGER'S CAT
+</h2>
+
+<p class="role-description">
+You were attacked... but you were too cute.
+</p>
+
+<p class="role-description">
+Because you were attacked by <strong>${item.killerRoleLabel}</strong>,
+you have secretly joined the
+<span style="color:${joinedColor}; font-weight:bold; text-shadow:0 0 8px ${joinedColor};">
+${joinedLabel}
+</span>.
+</p>
+
+${mafiaNamesHTML}
+
+<button onclick="window.nextNightResultTurn()">Hide</button>
+
+${renderHostControls()}
+
+</div>
+
+`)
+  return
+}
+
+if(item && item.type === "cat_conversion_killer"){
+  const joinedColor = item.joinedTeam === "mafia"
+    ? roleColors.mafia
+    : roleColors.villager
+
+  const joinedLabel = item.joinedTeam === "mafia"
+    ? "MAFIA"
+    : "TOWN"
+
+  render(`
+
+<div class="card" style="border-color:${roleColors.schrodingers_cat};">
+
+<h2 class="role-title" style="color:${roleColors.schrodingers_cat};">
+A CAT JOINS YOU!
+</h2>
+
+<p class="role-description">
+Your target, <strong>${item.targetName}</strong>, was the Schrödinger's Cat.
+</p>
+
+<p class="role-description">
+They did not die publicly. They have secretly joined the
+<span style="color:${joinedColor}; font-weight:bold; text-shadow:0 0 8px ${joinedColor};">
+${joinedLabel}
+</span>.
+</p>
+
+<button onclick="window.nextNightResultTurn()">Hide</button>
+
+${renderHostControls()}
+
+</div>
+
+`)
+  return
 }
 
 if(item && item.type === "priest_result"){
@@ -856,6 +956,41 @@ ${renderHostControls()}
 `)
 }
 
+function convertSchrodingersCat(target, joinedTeam, killerRoleLabel, killerName, privateResults){
+  if(!target || !target.alive) return false
+  if(target.role !== "schrodingers_cat") return false
+  if(target.catAlignment) return false // already converted once
+
+  target.catAlignment = joinedTeam
+
+  addLogEntry(
+    `${target.name} was attacked by the ${killerRoleLabel} and secretly joined the ${joinedTeam}.`
+  )
+
+  privateResults.push({
+    type: "cat_converted",
+    playerName: target.name,
+    joinedTeam,
+    killerRoleLabel,
+    mafiaNames: joinedTeam === "mafia"
+      ? state.players
+          .filter(p => getEffectiveTeam(p) === "mafia" && p.name !== target.name)
+          .map(p => p.name)
+      : []
+  })
+
+  if(killerName){
+    privateResults.push({
+      type: "cat_conversion_killer",
+      playerName: killerName,
+      targetName: target.name,
+      joinedTeam
+    })
+  }
+
+  return true
+}
+
 function getRandomNoResultText(roleName){
 
 const role = roles[roleName]
@@ -1027,7 +1162,12 @@ state.players
       return p.name !== player.name
     }
 
-    return p.name !== player.name
+    if(player.role === "mafia"){
+  return p.name !== player.name && getEffectiveTeam(p) !== "mafia"
+}
+
+return p.name !== player.name
+
 })
 .forEach(p=>{
 targets+=`<button onclick="window.performNightAction('${p.name}')">
@@ -1235,8 +1375,8 @@ function checkWin(){
 
 let alive = state.players.filter(p=>p.alive)
 
-let mafia = alive.filter(p=>p.role==="mafia").length
-let villagers = alive.filter(p=>p.role!=="mafia").length
+let mafia = alive.filter(p => getEffectiveTeam(p) === "mafia").length
+let villagers = alive.filter(p => getEffectiveTeam(p) !== "mafia").length
 
 // Mafia win
 if(mafia >= villagers){
@@ -1539,6 +1679,25 @@ function resolveNightSelections(){
       return
     }
 
+        if(
+      target.role === "schrodingers_cat" &&
+      !target.catAlignment
+    ){
+      const converted = convertSchrodingersCat(
+        target,
+        "village",
+        "Vigilante",
+        shooter.name,
+        privateResults
+      )
+
+      if(converted){
+        state.vigilanteOutcomeToShow = null
+        state.vigilantePublicReveal = null
+        return
+      }
+    }
+
     const targetTeam = getPlayerTeam(target)
     const isWrongTarget =
       targetTeam !== "mafia" &&
@@ -1729,34 +1888,66 @@ function resolveNightSelections(){
         : "Someone was attacked but survived the night."
     })
 
-  }else if(killTarget){
+    }else if(killTarget){
 
     const victim = getPlayerByName(killTarget)
 
-    addLogEntry(`${killTarget} was killed during the night.`)
+    let mafiaKillerName = null
 
-    if(victim && victim.alive){
-      victim.alive = false
-
-      if(!state.nightDeaths.includes(victim.name)){
-        state.nightDeaths.push(victim.name)
+    if(state.mafiaKillMethod === "leader"){
+      const leader = getPlayerByName(state.currentMafiaLeader)
+      if(leader && leader.alive){
+        mafiaKillerName = state.currentMafiaLeader
       }
-
-      let deathText = `${killTarget} was killed during the night.`
-
-      if(shouldRevealOnNightDeath()){
-        deathText += `<br>${revealedRoleText(victim)}`
+    }else{
+      const aliveKills = kills.filter(k => isPlayerAlive(k.actor))
+      if(aliveKills.length){
+        const killAction = aliveKills.find(k => k.target === killTarget) || aliveKills[0]
+        mafiaKillerName = killAction.actor
       }
-
-      publicResults.push({
-        type: "death",
-        text: deathText
-      })
-
-      addSpiritChoiceIfNeeded(victim.name, privateResults)
     }
 
-  }else{
+    if(
+      victim &&
+      victim.alive &&
+      victim.role === "schrodingers_cat" &&
+      !victim.catAlignment
+    ){
+      const converted = convertSchrodingersCat(
+        victim,
+        "mafia",
+        "Mafia",
+        mafiaKillerName,
+        privateResults
+      )
+
+      if(converted){
+        // no public message
+      }
+    }else{
+      addLogEntry(`${killTarget} was killed during the night.`)
+
+      if(victim && victim.alive){
+        victim.alive = false
+
+        if(!state.nightDeaths.includes(victim.name)){
+          state.nightDeaths.push(victim.name)
+        }
+
+        let deathText = `${killTarget} was killed during the night.`
+
+        if(shouldRevealOnNightDeath()){
+          deathText += `<br>${revealedRoleText(victim)}`
+        }
+
+        publicResults.push({
+          type: "death",
+          text: deathText
+        })
+
+        addSpiritChoiceIfNeeded(victim.name, privateResults)
+      }
+    }else{
 
     addLogEntry(`The night was quiet.`)
 
@@ -2326,9 +2517,9 @@ function showRoleRevealEnd(){
   }).join("")
 : `<p style="opacity:0.7;">No log entries recorded.</p>`
 
-let mafia = state.players.filter(p => roles[p.role]?.team === "mafia")
-let town = state.players.filter(p => roles[p.role]?.team === "village")
-let neutral = state.players.filter(p => roles[p.role]?.team === "neutral")
+let mafia = state.players.filter(p => getEffectiveTeam(p) === "mafia")
+let town = state.players.filter(p => getEffectiveTeam(p) === "village")
+let neutral = state.players.filter(p => getEffectiveTeam(p) === "neutral")
 let statsHTML = `
 
 <hr style="opacity:0.3;margin:20px 0;">
@@ -2387,6 +2578,21 @@ ${target ? `
 ` : ""}
 
 `
+}
+
+if(p.role === "schrodingers_cat" && p.catAlignment){
+  const alignColor = p.catAlignment === "mafia" ? roleColors.mafia : roleColors.villager
+  const alignLabel = p.catAlignment === "mafia" ? "JOINED MAFIA" : "JOINED TOWN"
+
+  return `
+    <div class="role-row" style="border-left:4px solid ${roleColors.schrodingers_cat};">
+      <span class="role-player">${p.name}</span>
+      <span class="role-name" style="color:${roleColors.schrodingers_cat}">
+        SCHRÖDINGER'S CAT
+        <span style="color:${alignColor}; opacity:0.9;"> • ${alignLabel}</span>
+      </span>
+    </div>
+  `
 }
 
 return `
