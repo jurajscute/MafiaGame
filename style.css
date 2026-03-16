@@ -272,7 +272,7 @@ body.night{
 background:linear-gradient(135deg,#0b0f2a,#000);
 color:white;
 }
-body.night .card:not(.role-mafia):not(.role-priest):not(.role-vigilante):not(.role-framer):not(.role-doctor):not(.role-sheriff):not(.role-jester):not(.role-executioner):not(.role-mayor):not(.role-spirit){
+body.night .card:not(.role-mafia):not(.role-schrodingers-cat):not(.role-priest):not(.role-vigilante):not(.role-framer):not(.role-doctor):not(.role-sheriff):not(.role-jester):not(.role-executioner):not(.role-mayor):not(.role-spirit){
   background:#1f2436;
   box-shadow:0 15px 35px rgba(14, 14, 14, 0.6),
              0 0 15px rgba(115, 140, 252, 0.05); /* subtle moonlit glow */
@@ -3679,4 +3679,31 @@ body.holy-night-flash .holy-pulse{
 #app{
   position:relative;
   z-index:2;
+}
+
+.role-schrodingers-cat.special-cat-card{
+
+background:
+radial-gradient(circle at top,
+rgba(255,255,255,0.05),
+transparent 40%),
+linear-gradient(
+180deg,
+rgba(30,30,30,0.95),
+rgba(18,18,18,0.95)
+);
+
+border:1px solid rgba(200,200,200,0.15);
+
+box-shadow:
+0 0 25px rgba(255,255,255,0.05),
+0 12px 40px rgba(0,0,0,0.5);
+
+}
+
+.cat-symbol{
+font-size:34px;
+margin-bottom:6px;
+opacity:0.9;
+filter:drop-shadow(0 0 6px rgba(255,255,255,0.3));
 }

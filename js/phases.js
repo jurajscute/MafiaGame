@@ -526,27 +526,86 @@ if(item && item.type === "cat_converted"){
 
   render(`
 
-<div class="card" style="border-color:${joinedColor};">
+<div class="card role-schrodingers-cat special-cat-card">
 
-<h2 class="role-title" style="color:${roleColors.schrodingers_cat};">
+<h2 class="role-title" style="
+color:${roleColors.schrodingers_cat};
+text-shadow:
+0 0 8px rgba(200,200,200,0.45),
+0 0 20px rgba(200,200,200,0.15);
+letter-spacing:3px;
+">
 SCHRÖDINGER'S CAT
 </h2>
 
-<p class="role-description">
-You were attacked... but you were too cute.
+<p class="role-description" style="font-size:18px;margin-top:10px;">
+You were attacked... but you were just too cute.
 </p>
 
-<p class="role-description">
+<div style="
+margin:22px 0;
+padding:18px;
+border-radius:16px;
+background:linear-gradient(
+135deg,
+rgba(255,255,255,0.07),
+rgba(255,255,255,0.02)
+);
+border:1px solid rgba(255,255,255,0.12);
+box-shadow:0 0 16px rgba(255,255,255,0.05);
+">
+
+<p class="role-description" style="margin:0 0 8px 0;">
 Because you were attacked by <strong>${item.killerRoleLabel}</strong>,
 you have secretly joined the
-<span style="color:${joinedColor}; font-weight:bold; text-shadow:0 0 8px ${joinedColor};">
-${joinedLabel}
-</span>.
 </p>
 
-${mafiaNamesHTML}
+<div style="
+font-size:30px;
+font-weight:800;
+letter-spacing:2px;
+color:${joinedColor};
+text-shadow:0 0 8px ${joinedColor};
+">
+${joinedLabel}
+</div>
 
-<button onclick="window.nextNightResultTurn()">Hide</button>
+</div>
+
+${
+item.mafiaNames?.length
+? `
+<div style="
+margin-top:16px;
+padding:14px;
+border-radius:14px;
+background:rgba(231,76,60,0.08);
+border:1px solid rgba(231,76,60,0.18);
+">
+
+<p class="role-description" style="margin-bottom:8px;">
+Your new ally:
+</p>
+
+<div style="
+color:${roleColors.mafia};
+font-size:26px;
+font-weight:800;
+text-shadow:0 0 8px ${roleColors.mafia};
+">
+${item.mafiaNames.join("<br>")}
+</div>
+
+</div>
+`
+: `
+<p class="role-description" style="opacity:0.9;">
+Your fate has changed. Play your new role wisely.
+</p>
+`
+}
+
+<button onclick="window.nextNightResultTurn()">Continue</button>
 
 ${renderHostControls()}
 
@@ -567,24 +626,61 @@ if(item && item.type === "cat_conversion_killer"){
 
   render(`
 
-<div class="card" style="border-color:${roleColors.schrodingers_cat};">
+<div class="card role-schrodingers-cat special-cat-card">
 
-<h2 class="role-title" style="color:${roleColors.schrodingers_cat};">
+<h2 class="role-title" style="
+color:${roleColors.schrodingers_cat};
+text-shadow:
+0 0 8px rgba(200,200,200,0.45),
+0 0 20px rgba(200,200,200,0.15);
+letter-spacing:3px;
+">
 A CAT JOINS YOU!
 </h2>
 
-<p class="role-description">
-Your target, <strong>${item.targetName}</strong>, was the Schrödinger's Cat.
+<p class="role-description" style="font-size:18px;margin-top:10px;">
+Your target, <strong>${item.targetName}</strong>, was Schrödinger's Cat.
 </p>
 
-<p class="role-description">
-They did not die publicly. They have secretly joined the
-<span style="color:${joinedColor}; font-weight:bold; text-shadow:0 0 8px ${joinedColor};">
+<div style="
+margin:20px 0;
+padding:18px;
+border-radius:16px;
+background:linear-gradient(
+135deg,
+rgba(255,255,255,0.07),
+rgba(255,255,255,0.02)
+);
+border:1px solid rgba(255,255,255,0.12);
+box-shadow:0 0 16px rgba(255,255,255,0.05);
+">
+
+<p class="role-description" style="margin:0 0 8px 0;">
+They did not die publicly.
+</p>
+
+<p class="role-description" style="margin:0;">
+They have secretly joined the
+</p>
+
+<div style="
+font-size:30px;
+font-weight:800;
+letter-spacing:2px;
+color:${joinedColor};
+text-shadow:0 0 8px ${joinedColor};
+margin-top:8px;
+">
 ${joinedLabel}
-</span>.
+</div>
+
+</div>
+
+<p class="role-description" style="opacity:0.85;">
+Keep this information secret.
 </p>
 
-<button onclick="window.nextNightResultTurn()">Hide</button>
+<button onclick="window.nextNightResultTurn()">Continue</button>
 
 ${renderHostControls()}
 
