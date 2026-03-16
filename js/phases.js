@@ -1382,7 +1382,7 @@ let villagers = alive.filter(p => getEffectiveTeam(p) !== "mafia").length
 if(mafia >= villagers){
 
 let mafiaPlayers = state.players
-.filter(p => p.role === "mafia")
+.filter(p => getEffectiveTeam(p) === "mafia")
 .map(p => p.name)
 .join("<br>")
 
@@ -1416,7 +1416,7 @@ return true
 if(mafia === 0){
 
 let mafiaPlayers = state.players
-.filter(p => p.role === "mafia")
+.filter(p => getEffectiveTeam(p) === "mafia")
 .map(p => p.name)
 .join("<br>")
 
@@ -1802,7 +1802,6 @@ function resolveNightSelections(){
   }
 
   // Resolve mafia kill after vigilante
-  // Resolve mafia kill after vigilante
   const killTarget = resolveMafiaKillTarget(kills)
   const holyShieldStoppedMafia = !!(holyShieldActive && killTarget)
   const saveSucceeded = !!(!holyShieldStoppedMafia && killTarget && protectedTargets.includes(killTarget))
@@ -1828,12 +1827,12 @@ function resolveNightSelections(){
     }
 
     if(mafiaKillerName){
-  privateResults.push({
-    type: "mafia_kill_blocked_priest",
-    playerName: mafiaKillerName,
-    targetName: killTarget
-  })
-}
+      privateResults.push({
+        type: "mafia_kill_blocked_priest",
+        playerName: mafiaKillerName,
+        targetName: killTarget
+      })
+    }
 
     publicResults.push({
       type: "priest_shield",
@@ -1888,7 +1887,7 @@ function resolveNightSelections(){
         : "Someone was attacked but survived the night."
     })
 
-    }else if(killTarget){
+  }else if(killTarget){
 
     const victim = getPlayerByName(killTarget)
 
@@ -1913,17 +1912,13 @@ function resolveNightSelections(){
       victim.role === "schrodingers_cat" &&
       !victim.catAlignment
     ){
-      const converted = convertSchrodingersCat(
+      convertSchrodingersCat(
         victim,
         "mafia",
         "Mafia",
         mafiaKillerName,
         privateResults
       )
-
-      if(converted){
-        // no public message
-      }
     }else{
       addLogEntry(`${killTarget} was killed during the night.`)
 
@@ -1947,8 +1942,9 @@ function resolveNightSelections(){
 
         addSpiritChoiceIfNeeded(victim.name, privateResults)
       }
-    }else{
+    }
 
+  }else{
     addLogEntry(`The night was quiet.`)
 
     publicResults.push({
@@ -1957,6 +1953,12 @@ function resolveNightSelections(){
     })
   }
 
+  if(!publicResults.length){
+    publicResults.push({
+      type: "peace",
+      text: "The night was quiet."
+    })
+  }
   if(state.vigilanteOutcomeToShow){
     privateResults.push({
       type: "vigilante_outcome",
