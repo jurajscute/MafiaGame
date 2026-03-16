@@ -1459,19 +1459,14 @@ JSON.stringify(value)
 
 }
 
-export function setDay(){
-
-document.body.classList.remove("night")
-document.body.classList.remove("holy-night")
-document.body.classList.add("day")
-
+export function setDay() {
+    document.body.classList.remove("night", "holy-night", "holy-night-flash");
+    document.body.classList.add("day");
 }
 
-export function setNight(){
-
-document.body.classList.remove("day")
-document.body.classList.add("night")
-
+export function setNight() {
+    document.body.classList.remove("day");
+    document.body.classList.add("night");
 }
 
 window.updateMafiaCountOverride = function(value){

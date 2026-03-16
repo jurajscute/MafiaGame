@@ -4,7 +4,7 @@ import {roles} from "./roles.js"
 import {addLogEntry} from "./state.js"
 
 function setDay() {
-    document.body.classList.remove("night");
+    document.body.classList.remove("night", "holy-night", "holy-night-flash");
     document.body.classList.add("day");
 }
 
@@ -1164,16 +1164,20 @@ if(role.nightAction === "holy_shield"){
     })
 
     addLogEntry(`Priest used Holy Spirit. (${player.priestUsesLeft} uses left)`)
-    document.body.classList.add("holy-night-flash")
-setTimeout(() => {
-  document.body.classList.remove("holy-night-flash")
-}, 700)
 
 if(!document.querySelector(".holy-pulse")){
   const pulse = document.createElement("div")
   pulse.className = "holy-pulse"
   document.body.appendChild(pulse)
 }
+
+document.body.classList.remove("holy-night-flash")
+void document.body.offsetWidth
+document.body.classList.add("holy-night-flash")
+
+setTimeout(() => {
+  document.body.classList.remove("holy-night-flash")
+}, 700)
 
   }else{
     addLogEntry(`Priest did not use Holy Spirit.`)
