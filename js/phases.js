@@ -1401,13 +1401,22 @@ function showNightAction(player){
   const currentNightPlayerNumber =
     alivePlayers.findIndex(p => p.name === player.name) + 1
 
+  const actionText = {
+    mafia: "Choose someone to eliminate under cover of darkness.",
+    doctor: "Choose one player to protect tonight.",
+    sheriff: "Choose one player to investigate.",
+    framer: "Choose someone to frame before the Sheriff investigates.",
+    vigilante: "Serve justice carefully — or stand down.",
+    priest: "Call upon the Holy Spirit to shield the town tonight?"
+  }
+
   if(player.role === "priest"){
     const usesLeft = player.priestUsesLeft ?? state.priestUsesPerGame
     const canUse = usesLeft > 0
 
     render(`
 
-      <div class="card reveal-role-card role-priest" style="--reveal-role-color:${roleColors.priest};">
+      <div class="card reveal-role-card role-priest night-action-shell" style="--reveal-role-color:${roleColors.priest};">
 
         <div class="reveal-role-topbar">
           <div class="reveal-role-kicker">Night Action</div>
@@ -1418,42 +1427,48 @@ function showNightAction(player){
 
         <div class="reveal-role-header">
           <div class="reveal-role-player">${player.name}</div>
-          <div class="reveal-role-hint">Choose whether to protect the town</div>
+          <div class="reveal-role-hint">A blessing can change the whole night</div>
         </div>
 
-        <div class="reveal-role-description-wrap">
-          <p class="role-description reveal-role-description">
-            Call upon the Holy Spirit to shield the town tonight?
-          </p>
-        </div>
+        <div class="role-card reveal-role-flip revealed">
+          <div class="role-inner">
+            <div class="role-front reveal-role-front">
+              <div class="reveal-role-front-shimmer"></div>
+              <div class="reveal-role-front-inner">
+                <div class="reveal-role-front-icon">✦</div>
+                <div class="reveal-role-front-label">Your Role</div>
+                <div class="reveal-role-front-text">${roleDisplayName(player.role)}</div>
+              </div>
+            </div>
 
-        <div class="executioner-target-box" style="
-          margin-top:0;
-          margin-bottom:14px;
-          background:linear-gradient(135deg, rgba(243,216,107,0.14), rgba(74,58,8,0.18));
-          border:1px solid rgba(243,216,107,0.24);
-          box-shadow:0 0 14px rgba(243,216,107,0.10);
-          animation:none;
-        ">
-          <div class="executioner-target-label" style="color:${roleColors.priest};">
-            Holy Spirit Uses Left
-          </div>
-          <div class="executioner-target-name" style="
-            color:${roleColors.priest};
-            text-shadow:0 0 10px ${roleColors.priest};
-          ">
-            ${usesLeft}
+            <div class="role-back reveal-role-back" style="color:${roleColors.priest}">
+              <div class="reveal-role-back-inner">
+                <div class="reveal-role-back-kicker">Your Role</div>
+                <div class="reveal-role-name">${roleDisplayName(player.role)}</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="reveal-role-actions">
+        <div class="night-action-panel">
+          <div class="night-action-label">Decision</div>
+          <div class="night-action-text">
+            ${actionText.priest}
+          </div>
+
+          <div class="night-action-note">
+            Holy Spirit uses left: <strong>${usesLeft}</strong>
+          </div>
+        </div>
+
+        <div class="night-action-target-grid">
           ${
             canUse
               ? `<button onclick="window.performNightAction('__use__')">Use Holy Spirit</button>`
               : `<button disabled>No Uses Left</button>`
           }
 
-          <button class="skip-btn" onclick="window.performNightAction('__skip__')">Do Not Use</button>
+          <button class="skip-btn" onclick="window.performNightAction('__skip__')">Skip Holy Spirit</button>
         </div>
 
         ${renderHostControls()}
@@ -1471,15 +1486,12 @@ function showNightAction(player){
       if(!p.alive) return false
 
       if(player.role === "doctor") return true
-
       if(player.role === "framer"){
         return p.name !== player.name && p.role !== "mafia" && p.role !== "framer"
       }
-
       if(player.role === "vigilante"){
         return p.name !== player.name
       }
-
       if(player.role === "mafia"){
         return p.name !== player.name && getEffectiveTeam(p) !== "mafia"
       }
@@ -1495,12 +1507,12 @@ function showNightAction(player){
     })
 
   if(player.role === "vigilante"){
-    targets += `<button class="skip-btn" onclick="window.performNightAction('__skip__')">Skip</button>`
+    targets += `<button class="skip-btn" onclick="window.performNightAction('__skip__')">Skip Attack</button>`
   }
 
   render(`
 
-    <div class="card reveal-role-card role-${roleClass}" style="--reveal-role-color:${roleColors[player.role] || "white"};">
+    <div class="card reveal-role-card role-${roleClass} night-action-shell" style="--reveal-role-color:${roleColors[player.role] || "white"};">
 
       <div class="reveal-role-topbar">
         <div class="reveal-role-kicker">Night Action</div>
@@ -1512,16 +1524,21 @@ function showNightAction(player){
       <div class="reveal-role-header">
         <div class="reveal-role-player">${player.name}</div>
         <div class="reveal-role-hint">
-          ${player.role === "vigilante" ? "Choose carefully" : "Select your target"}
+          ${
+            player.role === "mafia" ? "Move in secret" :
+            player.role === "doctor" ? "Protect wisely" :
+            player.role === "sheriff" ? "Seek the truth" :
+            player.role === "framer" ? "Plant suspicion" :
+            player.role === "vigilante" ? "Justice has a cost" :
+            "Choose your action"
+          }
         </div>
       </div>
 
       <div class="role-card reveal-role-flip revealed">
         <div class="role-inner">
-
           <div class="role-front reveal-role-front">
             <div class="reveal-role-front-shimmer"></div>
-
             <div class="reveal-role-front-inner">
               <div class="reveal-role-front-icon">✦</div>
               <div class="reveal-role-front-label">Your Role</div>
@@ -1535,17 +1552,17 @@ function showNightAction(player){
               <div class="reveal-role-name">${roleDisplayName(player.role)}</div>
             </div>
           </div>
-
         </div>
       </div>
 
-      <div class="reveal-role-description-wrap">
-        <p class="role-description reveal-role-description">
-          ${player.role === "vigilante" ? "Serve justice, or abstain." : "Select a target."}
-        </p>
+      <div class="night-action-panel">
+        <div class="night-action-label">Decision</div>
+        <div class="night-action-text">
+          ${actionText[player.role] || "Choose your target."}
+        </div>
       </div>
 
-      <div class="reveal-role-actions">
+      <div class="night-action-target-grid">
         ${targets}
       </div>
 

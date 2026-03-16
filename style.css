@@ -122,14 +122,36 @@ button:active{
 }
 
 .skip-btn{
-  background:transparent;
-  border:1px solid rgba(255,255,255,.12);
-  color:#9ca3af;
+  background:linear-gradient(180deg, rgba(255,186,73,0.10), rgba(255,255,255,0.02));
+  border:1px dashed rgba(255,186,73,0.38);
+  color:#ffd38a;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 8px 18px rgba(0,0,0,0.18);
 }
 
 .skip-btn:hover{
-  background:rgba(255,255,255,.05);
-  color:white;
+  background:linear-gradient(180deg, rgba(255,186,73,0.16), rgba(255,255,255,0.04));
+  border-color:rgba(255,186,73,0.62);
+  color:#fff1cf;
+  box-shadow:
+    0 12px 22px rgba(0,0,0,0.24),
+    0 0 0 1px rgba(255,186,73,0.10);
+}
+
+.skip-btn::before{
+  content:"SKIP";
+  display:inline-block;
+  margin-right:8px;
+  padding:3px 6px;
+  border-radius:999px;
+  background:rgba(255,186,73,0.14);
+  border:1px solid rgba(255,186,73,0.24);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:0.10em;
+  line-height:1;
+  color:#ffd38a;
 }
 
 .primary-btn{
@@ -4553,4 +4575,104 @@ body.holy-night-flash .holy-pulse{
   max-height:280px;
   overflow-y:auto;
   padding-right:4px;
+}
+
+/* =========================
+   NIGHT ACTION ROLE PANELS
+========================= */
+
+.night-action-shell{
+  position:relative;
+  overflow:hidden;
+}
+
+.night-action-shell::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:0.9;
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.06), transparent 38%);
+}
+
+.night-action-panel{
+  margin:14px 0 16px;
+  padding:16px 16px 14px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 10px 24px rgba(0,0,0,0.16);
+}
+
+.night-action-label{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  opacity:0.68;
+  margin-bottom:8px;
+}
+
+.night-action-text{
+  font-size:15px;
+  line-height:1.45;
+  opacity:0.92;
+}
+
+.night-action-target-grid{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:16px;
+}
+
+.night-action-target-grid button{
+  margin:0;
+}
+
+.night-action-note{
+  margin-top:12px;
+  font-size:13px;
+  line-height:1.45;
+  opacity:0.76;
+}
+
+/* Role-flavored action panels */
+.role-mafia .night-action-panel{
+  background:linear-gradient(180deg, rgba(231,76,60,0.12), rgba(70,10,10,0.20));
+  border-color:rgba(231,76,60,0.18);
+  box-shadow:0 0 20px rgba(231,76,60,0.10);
+}
+
+.role-doctor .night-action-panel{
+  background:linear-gradient(180deg, rgba(46,141,204,0.12), rgba(5,25,45,0.20));
+  border-color:rgba(46,141,204,0.18);
+  box-shadow:0 0 20px rgba(46,141,204,0.10);
+}
+
+.role-sheriff .night-action-panel{
+  background:linear-gradient(180deg, rgba(228,194,0,0.12), rgba(60,42,0,0.20));
+  border-color:rgba(228,194,0,0.18);
+  box-shadow:0 0 20px rgba(228,194,0,0.10);
+}
+
+.role-framer .night-action-panel{
+  background:linear-gradient(180deg, rgba(139,0,0,0.12), rgba(35,0,0,0.22));
+  border-color:rgba(255,107,107,0.16);
+  box-shadow:0 0 20px rgba(139,0,0,0.10);
+}
+
+.role-vigilante .night-action-panel{
+  background:linear-gradient(180deg, rgba(59,72,255,0.12), rgba(8,10,45,0.22));
+  border-color:rgba(59,72,255,0.18);
+  box-shadow:0 0 20px rgba(59,72,255,0.10);
+}
+
+.role-priest .night-action-panel{
+  background:linear-gradient(180deg, rgba(243,216,107,0.13), rgba(64,52,8,0.22));
+  border-color:rgba(243,216,107,0.20);
+  box-shadow:0 0 20px rgba(243,216,107,0.10);
 }
