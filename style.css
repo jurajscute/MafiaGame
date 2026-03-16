@@ -4516,3 +4516,23 @@ body.holy-night-flash .holy-pulse{
     0 0 10px rgba(255,255,255,0.08),
     0 0 22px rgba(120,140,255,0.18);
 }
+
+.pass-phone-card .role-pass-title{
+  font-size: 36px;
+  letter-spacing: 1px;
+}
+
+.pass-phone-card{
+  animation: passFadeIn 0.4s ease;
+}
+
+@keyframes passFadeIn{
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
