@@ -2279,70 +2279,91 @@ convertExecutionerAfterTargetDeath(victim.name, privateResults)
 }
 
 function showMorning(){
-setDay()
+  setDay()
 
-if(checkWin()) return
+  if(checkWin()) return
 
-let results = [...(state.nightResolved?.publicResults || [])]
+  let results = [...(state.nightResolved?.publicResults || [])]
 
-if(state.spiritReveal){
-  let revealedPlayer = state.players.find(p => p.name === state.spiritReveal)
+  if(state.spiritReveal){
+    let revealedPlayer = state.players.find(p => p.name === state.spiritReveal)
 
-  if(revealedPlayer){
-    let revealLabel = ""
-    let revealColor = "white"
+    if(revealedPlayer){
+      let revealLabel = ""
+      let revealColor = "white"
 
-    if(state.spiritRevealType === "team"){
-      if(roles[revealedPlayer.role]?.team === "mafia"){
-        revealLabel = "MAFIA"
-        revealColor = roleColors.mafia
-      }else if(roles[revealedPlayer.role]?.team === "neutral"){
-        revealLabel = "NEUTRAL"
-        revealColor = roleColors.executioner
+      if(state.spiritRevealType === "team"){
+        if(roles[revealedPlayer.role]?.team === "mafia"){
+          revealLabel = "MAFIA"
+          revealColor = roleColors.mafia
+        }else if(roles[revealedPlayer.role]?.team === "neutral"){
+          revealLabel = "NEUTRAL"
+          revealColor = roleColors.executioner
+        }else{
+          revealLabel = "TOWN"
+          revealColor = roleColors.villager
+        }
       }else{
-        revealLabel = "TOWN"
-        revealColor = roleColors.villager
+        revealLabel = revealedPlayer.role.toUpperCase()
+        revealColor = roleColors[revealedPlayer.role] || "white"
       }
-    }else{
-      revealLabel = revealedPlayer.role.toUpperCase()
-      revealColor = roleColors[revealedPlayer.role] || "white"
+
+      results.push({
+        type: "spirit_reveal",
+        text: `
+          The Spirit reveals that <strong>${revealedPlayer.name}</strong> is
+          <span style="
+            color:${revealColor};
+            font-weight:bold;
+            text-shadow:0 0 8px ${revealColor};
+          ">
+            ${revealLabel}
+          </span>
+        `
+      })
     }
-
-    results.push({
-      type: "spirit_reveal",
-      text: `
-        The Spirit reveals that <strong>${revealedPlayer.name}</strong> is
-        <span style="
-          color:${revealColor};
-          font-weight:bold;
-          text-shadow:0 0 8px ${revealColor};
-        ">
-          ${revealLabel}
-        </span>
-      `
-    })
-  }
-}
-
-if(state.vigilantePublicReveal){
-
-  const v = state.vigilantePublicReveal
-  const targetPlayer = state.players.find(p => p.name === v.target)
-  const shooterPlayer = state.players.find(p => p.name === v.shooter)
-
-  let text = ""
-
-  if(v.blocked){
-  if(v.blockedByHolySpirit){
-    text = `The Vigilante tried to slash <strong>${v.target}</strong>, but a holy spirit shield protected the town.`
-  }else{
-    text = `The Vigilante tried to slash <strong>${v.target}</strong>, but the Doctor protected them.`
   }
 
+  if(state.vigilantePublicReveal){
+    const v = state.vigilantePublicReveal
+    const targetPlayer = state.players.find(p => p.name === v.target)
+    const shooterPlayer = state.players.find(p => p.name === v.shooter)
 
-  }else if(v.wrongTarget){
+    let text = ""
 
-    if(v.targetDied){
+    if(v.blocked){
+      if(v.blockedByHolySpirit){
+        text = `The Vigilante tried to slash <strong>${v.target}</strong>, but a holy spirit shield protected the town.`
+      }else{
+        text = `The Vigilante tried to slash <strong>${v.target}</strong>, but the Doctor protected them.`
+      }
+
+    }else if(v.wrongTarget){
+
+      if(v.targetDied){
+        text = `${v.target} was slashed by the Vigilante.`
+
+        if(targetPlayer && shouldRevealOnNightDeath()){
+          text += `<br>${revealedRoleText(targetPlayer)}`
+        }
+      }
+
+      if(v.vigilanteDies){
+        text += `${text ? "<br>" : ""}The Vigilante stabs their own heart in devastation.`
+
+        if(shooterPlayer && shouldRevealOnNightDeath()){
+          text += `<br>${revealedRoleText(shooterPlayer)}`
+        }
+      }
+
+      if(!v.targetDied && !v.vigilanteDies){
+        text = `The Vigilante killed an innocent, they need to get their head straight.`
+      }
+
+    }else if(!v.targetDied){
+      text = `The Vigilante tried to slash <strong>${v.target}</strong>, but nothing happened.`
+
+    }else{
       text = `${v.target} was slashed by the Vigilante.`
 
       if(targetPlayer && shouldRevealOnNightDeath()){
@@ -2350,68 +2371,78 @@ if(state.vigilantePublicReveal){
       }
     }
 
-    if(v.vigilanteDies){
-      text += `${text ? "<br>" : ""}The Vigilante stabs their own heart in devastation.`
+    results.push({
+      type: "vigilante",
+      text
+    })
 
-      if(shooterPlayer && shouldRevealOnNightDeath()){
-        text += `<br>${revealedRoleText(shooterPlayer)}`
-      }
-    }
-
-    if(!v.targetDied && !v.vigilanteDies){
-      text = `The Vigilante killed an innocent, they need to get their head straight.`
-    }
-
-  }else if(!v.targetDied){
-
-    text = `The Vigilante tried to slash <strong>${v.target}</strong>, but nothing happened.`
-
-  }else{
-
-    text = `${v.target} was slashed by the Vigilante.`
-
-    if(targetPlayer && shouldRevealOnNightDeath()){
-      text += `<br>${revealedRoleText(targetPlayer)}`
-    }
+    state.vigilantePublicReveal = null
   }
 
-  results.push({
-    type: "vigilante",
-    text
-  })
+  let resultsHTML = results.map(r => {
+    let cls = ""
+    let label = "Night Event"
 
-  state.vigilantePublicReveal = null
-}
+    if(r.type === "priest_shield"){
+      cls = "night-result-priest"
+      label = "Holy Protection"
+    }
+    if(r.type === "vigilante"){
+      cls = "night-result-vigilante"
+      label = "Vigilante"
+    }
+    if(r.type === "death"){
+      cls = "night-result-death"
+      label = "Death"
+    }
+    if(r.type === "save"){
+      cls = "night-result-save"
+      label = "Saved"
+    }
+    if(r.type === "peace"){
+      cls = "night-result-peace"
+      label = "Quiet Night"
+    }
+    if(r.type === "spirit_reveal"){
+      cls = "night-result-spirit"
+      label = "Spirit Reveal"
+    }
 
-let resultsHTML = results.map(r => {
-  let cls = ""
-  if(r.type === "priest_shield") cls = "night-result-priest"
-  if(r.type === "vigilante") cls = "night-result-vigilante"
-  if(r.type === "death") cls = "night-result-death"
-  if(r.type === "save") cls = "night-result-save"
-  if(r.type === "peace") cls = "night-result-peace"
-  if(r.type === "spirit_reveal") cls = "night-result-spirit"
+    return `
+      <div class="morning-result-card ${cls}">
+        <div class="morning-result-kicker">${label}</div>
+        <div class="morning-result-text">${r.text}</div>
+      </div>
+    `
+  }).join("")
 
-  return `<div class="night-result ${cls}">${r.text}</div>`
-}).join("")
+  render(`
+    <div class="card morning-card">
 
-render(`
+      <div class="morning-hero">
+        <div class="morning-kicker">Daybreak</div>
+        <h2 class="morning-title">Morning</h2>
+        <div class="morning-subtitle">
+          The town wakes up to learn what happened during the night.
+        </div>
+      </div>
 
-<div class="card">
+      <div class="morning-results-wrap">
+        ${resultsHTML}
+      </div>
 
-<h2>Morning</h2>
+      <div class="morning-status-wrap">
+        ${renderPlayerStatus()}
+      </div>
 
-${resultsHTML}
+      <div class="morning-actions">
+        <button class="primary-btn" onclick="window.startVoting()">Start Voting</button>
+      </div>
 
-${renderPlayerStatus()}
+      ${renderHostControls()}
 
-<button onclick="window.startVoting()">Continue</button>
-
-${renderHostControls()}
-
-</div>
-
-`)
+    </div>
+  `)
 }
 
 export function startVoting(){
