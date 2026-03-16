@@ -198,8 +198,10 @@ function convertExecutionerAfterTargetDeath(targetName, privateResults){
 
     const newRole = getExecutionerNewRole()
 
-    player.role = newRole
-    delete state.executionerTargets[player.name]
+    player.wasExecutioner = true
+player.executionerConvertedTo = newRole
+player.role = newRole
+delete state.executionerTargets[player.name]
 
     addLogEntry(`${player.name} became a ${roleDisplayName(newRole)} after their target ${targetName} died.`)
 
@@ -2832,6 +2834,29 @@ const winnerBanner = getFinalWinnerBanner()
           </div>
         `
       }
+
+if(p.wasExecutioner){
+  const currentColor = roleColors[p.role] || "white"
+
+  return `
+    <div class="final-player-card" style="--final-role-color:${currentColor};">
+      <div class="final-player-main">
+        <div class="final-player-name">${p.name}</div>
+        <div class="final-player-role" style="color:${currentColor}">
+          ${roleDisplayName(p.role)}
+          <span class="final-role-tag"
+                style="
+                  color:${roleColors.executioner};
+                  border-color:${roleColors.executioner}33;
+                  background:${roleColors.executioner}14;
+                ">
+            Former Executioner
+          </span>
+        </div>
+      </div>
+    </div>
+  `
+}
 
       return `
         <div class="final-player-card" style="--final-role-color:${color};">

@@ -1788,6 +1788,8 @@ shuffle(pool)
 players.forEach((p,i)=>{
   p.role = pool[i]
   p.catAlignment = null
+  p.wasExecutioner = false
+  p.executionerConvertedTo = null
   p.alive = true
 })
 
