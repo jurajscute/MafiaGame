@@ -2549,27 +2549,48 @@ document.getElementById("roleCard").classList.add("revealed")
 
 function nextPlayer(){
 
-revealIndex++
+  revealIndex++
 
-if(revealIndex >= state.players.length){
+  if(revealIndex >= state.players.length){
 
-render(`
+    render(`
 
-<div class="card">
+<div class="card home-screen-card all-roles-card">
 
-<h2>All roles assigned</h2>
+  <div class="home-hero">
+    <div class="home-kicker">Game Setup</div>
 
-<button onclick="window.startNight()">Start Night</button>
+    <h2 class="home-title">All Roles Assigned</h2>
+
+    <div class="home-subtitle">
+      Every player has seen their secret role. The night is ready to begin.
+    </div>
+  </div>
+
+  <div class="setup-stat-row">
+    <div class="setup-stat-pill">
+      <span class="setup-stat-value">${state.players.length}</span>
+      <span class="setup-stat-text">Roles Revealed</span>
+    </div>
+  </div>
+
+  <div class="reveal-role-description-wrap">
+    <p class="role-description reveal-role-description">
+      Hand the phone back to the host and start the first night when the group is ready.
+    </p>
+  </div>
+
+  <div class="home-actions">
+    <button class="primary-btn" onclick="window.startNight()">Start Night</button>
+  </div>
 
 </div>
 
-`)
+    `)
 
-}else{
-
-showRoleReveal()
-
-}
+  }else{
+    showRoleReveal()
+  }
 
 }
 

@@ -4504,3 +4504,15 @@ body.holy-night-flash .holy-pulse{
     font-size:14px;
   }
 }
+
+.all-roles-card .role-pass-hero{
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 45%),
+    linear-gradient(135deg, rgba(80,90,130,0.35), rgba(25,25,35,0.55));
+}
+
+.all-roles-card .role-pass-title{
+  text-shadow:
+    0 0 10px rgba(255,255,255,0.08),
+    0 0 22px rgba(120,140,255,0.18);
+}
