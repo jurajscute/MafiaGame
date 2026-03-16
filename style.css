@@ -348,6 +348,20 @@ li{
   margin-bottom:30px;
 }
 
+.settings-footer{
+  display:flex;
+  justify-content:center;
+  gap:16px;
+  margin-top:24px;
+}
+
+.settings-footer button{
+  flex:1;
+  width:auto;
+  min-width:0;
+  max-width:200px;
+}
+
 /* =========================
    DAY / NIGHT
 ========================= */
