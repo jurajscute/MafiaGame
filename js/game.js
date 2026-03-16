@@ -2327,11 +2327,11 @@ render(`
 
   <div class="role-pass-hero">
 
-<div class="role-pass-progress">
-Player ${revealIndex + 1} of ${state.players.length}
-</div>
-
     <div class="role-pass-kicker">Pass the Phone</div>
+
+    <div class="role-pass-progress">
+      Player ${revealIndex + 1} of ${state.players.length}
+    </div>
 
     <h2 class="role-pass-title">
       ${player.name}
@@ -2344,11 +2344,7 @@ Player ${revealIndex + 1} of ${state.players.length}
   </div>
 
   <div class="role-pass-actions">
-
-    <button onclick="window.revealRole()">
-      Reveal Role
-    </button>
-
+    <button onclick="window.revealRole()">Reveal Role</button>
   </div>
 
 </div>
@@ -2421,14 +2417,14 @@ if(player.role === "mafia" && state.mafiaKillMethod === "leader"){
     if(player.name === leaderName){
       extraInfo += `
         <div class="framer-target-box">
-          <div class="framer-target-label">Tonights killing is done by</div>
-          <div class="framer-target-name">YOU!</div>
+          <div class="framer-target-label">Tonight's kill is chosen by</div>
+          <div class="framer-target-name">YOU</div>
         </div>
       `
     }else if(state.mafiaKnowsFirstLeader){
       extraInfo += `
         <div class="framer-target-box">
-          <div class="framer-target-label">Tonights killing is done by</div>
+          <div class="framer-target-label">Tonight's kill is chosen by</div>
           <div class="framer-target-name">${leaderName}</div>
         </div>
       `
@@ -2438,33 +2434,51 @@ if(player.role === "mafia" && state.mafiaKillMethod === "leader"){
 
 render(`
 
-<div class="card">
+<div class="card reveal-role-card role-${player.role}">
 
-<h2>Your Role</h2>
+  <div class="reveal-role-topbar">
+    <div class="reveal-role-kicker">Private Role Reveal</div>
+    <div class="reveal-role-progress">
+      ${revealIndex + 1} / ${state.players.length}
+    </div>
+  </div>
 
-<div class="role-card" id="roleCard" onclick="flipRole()">
+  <div class="reveal-role-header">
+    <div class="reveal-role-player">${player.name}</div>
+    <div class="reveal-role-hint">Tap the card to reveal</div>
+  </div>
 
-<div class="role-inner">
+  <div class="role-card reveal-role-flip" id="roleCard" onclick="flipRole()">
+    <div class="role-inner">
 
-<div class="role-front">
-Tap to reveal
-</div>
+      <div class="role-front reveal-role-front">
+        <div class="reveal-role-front-inner">
+          <div class="reveal-role-front-label">Hidden Role</div>
+          <div class="reveal-role-front-text">Tap to reveal</div>
+        </div>
+      </div>
 
-<div class="role-back" style="color:${color}">
-${getRoleDisplayName(player.role)}
-</div>
+      <div class="role-back reveal-role-back" style="color:${color}">
+        <div class="reveal-role-back-inner">
+          <div class="reveal-role-back-kicker">Your Role</div>
+          <div class="reveal-role-name">${getRoleDisplayName(player.role)}</div>
+        </div>
+      </div>
 
-</div>
+    </div>
+  </div>
 
-</div>
+  <div class="reveal-role-description-wrap">
+    <p class="role-description reveal-role-description">
+      ${role.description || ""}
+    </p>
+  </div>
 
-<p class="role-description">
-${role.description || ""}
-</p>
+  ${extraInfo ? `<div class="reveal-role-extra">${extraInfo}</div>` : ""}
 
-${extraInfo}
-
-<button onclick="window.nextPlayer()">Hide</button>
+  <div class="reveal-role-actions">
+    <button onclick="window.nextPlayer()">Hide Role</button>
+  </div>
 
 </div>
 
