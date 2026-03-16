@@ -13,20 +13,19 @@ body{
   font-family:Arial, Helvetica, sans-serif;
   background:linear-gradient(135deg,#2f221e,#1d1402);
   color:white;
-  transition:background 0.6s ease,color 0.6s ease;
-
+  min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  min-height:100vh;
+  transition:background 0.6s ease,color 0.6s ease;
 }
 
 #app{
   width:100%;
-  max-width:420px;
+  max-width:520px;
+  margin:0 auto;
   padding:20px;
   box-sizing:border-box;
-
   display:flex;
   justify-content:center;
   align-items:center;
@@ -34,10 +33,13 @@ body{
 
 .card{
   width:100%;
+  max-width:420px;
+  margin:0 auto;
   background:#332d23;
   padding:35px 25px;
   border-radius:16px;
   text-align:center;
+  box-sizing:border-box;
   box-shadow:0 15px 35px rgba(0,0,0,0.5);
   animation:fadeIn 0.35s ease;
   transition:background 0.6s ease, box-shadow 0.6s ease;
@@ -131,6 +133,81 @@ li{
   }
 }
 
+@media (max-width: 700px){
+  body{
+    align-items:center;
+  }
+
+  #app{
+    max-width:520px;
+    padding:16px;
+    align-items:center;
+  }
+
+  .card{
+    max-width:420px;
+    padding:24px 18px;
+    border-radius:16px;
+  }
+
+  h1{
+    font-size:30px;
+  }
+
+  h2{
+    font-size:24px;
+  }
+
+  button{
+    font-size:17px;
+    padding:13px;
+  }
+
+  .pass-card{
+    width:100%;
+    max-width:420px;
+    padding:30px 22px;
+    border-radius:18px;
+  }
+
+  .pass-player{
+    font-size:34px;
+    margin-bottom:22px;
+  }
+}
+
+@media (max-width: 700px){
+  .settings-modal-shell{
+    width:100vw;
+    height:100vh;
+    max-height:100vh;
+    border-radius:0;
+  }
+}
+
+.final-results-card,
+.final-results-shell,
+.final-results-centered{
+  width:min(980px, calc(100vw - 32px));
+  max-width:980px;
+  margin:0 auto;
+}
+
+.final-results-shell{
+  max-height:min(88vh, 820px);
+  overflow-y:auto;
+}
+
+@media (max-width: 700px){
+  .final-results-shell{
+    width:100%;
+    max-width:none;
+    max-height:90vh;
+    min-height:auto;
+    border-radius:20px;
+    padding:16px;
+  }
+}
 /* =========================
    ROLE CARD FLIP
 ========================= */
