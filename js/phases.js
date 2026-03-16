@@ -201,7 +201,6 @@ function convertExecutionerAfterTargetDeath(targetName, privateResults){
     player.wasExecutioner = true
 player.executionerConvertedTo = newRole
 player.role = newRole
-delete state.executionerTargets[player.name]
 
     addLogEntry(`${player.name} became a ${roleDisplayName(newRole)} after their target ${targetName} died.`)
 
@@ -279,6 +278,87 @@ function renderSimpleWinScreen(bodyClass, cardClass, title, lines){
       <button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
       <button onclick="location.reload()">Restart Game</button>
     </div>
+  `)
+}
+
+function renderVengefulLunaticWin(playerName){
+  document.body.className = "win-executioner-turned-jester"
+
+  render(`
+
+    <div class="card special-chaos-win">
+
+      <h1 class="role-title" style="
+        color:${roleColors.jester};
+        text-shadow:
+          0 0 10px ${roleColors.jester},
+          0 0 22px ${roleColors.jester},
+          0 0 36px rgba(255,62,165,0.45);
+        letter-spacing:2px;
+      ">
+        VENGEFUL LUNATIC
+      </h1>
+
+      <p style="
+        color:#ffd9f0;
+        font-size:18px;
+        margin-top:8px;
+      ">
+        The Executioner lost their purpose... and their mind!
+      </p>
+
+      <div style="
+        margin:24px 0 14px 0;
+        padding:18px;
+        border-radius:18px;
+        background:linear-gradient(
+          135deg,
+          rgba(122,47,111,0.20),
+          rgba(255,62,165,0.18),
+          rgba(255,255,255,0.05)
+        );
+        border:1px solid rgba(255,255,255,0.10);
+        box-shadow:
+          0 0 24px rgba(255,62,165,0.14),
+          0 0 22px rgba(122,47,111,0.10);
+      ">
+        <p style="
+          margin:0;
+          color:${roleColors.jester};
+          font-weight:700;
+          text-shadow:0 0 10px ${roleColors.jester};
+          font-size:22px;
+        ">
+          ${playerName} wins after turning from Executioner into Jester
+        </p>
+      </div>
+
+      <p class="role-description" style="
+        color:#ffeaf7;
+        max-width:520px;
+        margin:0 auto 8px auto;
+      ">
+        Their original target died in the night, their role changed, and the town still
+        fell for the act.
+      </p>
+
+      <p style="
+        color:${roleColors.executioner};
+        opacity:0.95;
+        font-weight:600;
+        text-shadow:0 0 8px ${roleColors.executioner};
+        margin-top:16px;
+      ">
+        First revenge. Then madness.
+      </p>
+
+      <div style="margin-top:24px;">
+        <button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
+        <button onclick="location.reload()">Restart Game</button>
+      </div>
+
+    </div>
+
   `)
 }
 
@@ -2418,16 +2498,23 @@ function handleExecutionerAndJesterVoteWins(player, eliminated, mafiaAliveAfterV
   }
 
   if(player.role === "jester"){
-    addLogEntry(`${player.name} won as the Jester.`)
+  if(player.wasExecutioner && player.executionerConvertedTo === "jester"){
+    addLogEntry(`${player.name} won as the Jester after turning from the Executioner.`)
 
-    renderSimpleWinScreen(
-      "win-jester",
-      "role-jester",
-      "JESTER WINS",
-      [`${player.name} tricked the town into voting them out!`]
-    )
+    renderVengefulLunaticWin(player.name)
     return true
   }
+
+  addLogEntry(`${player.name} won as the Jester.`)
+
+  renderSimpleWinScreen(
+    "win-jester",
+    "role-jester",
+    "JESTER WINS",
+    [`${player.name} tricked the town into voting them out!`]
+  )
+  return true
+}
 
   if(executionerWinner && player.role === "mafia" && mafiaAliveAfterVote === 0){
     addLogEntry(`${executionerWinner.name} won as the Executioner by getting ${eliminated} voted out.`)
@@ -2740,6 +2827,15 @@ function getFinalWinnerBanner(){
       title: "Village Victory",
       subtitle: "The town eliminated every mafia member.",
       className: "final-banner-village"
+    }
+  }
+
+  if(bodyClass.includes("win-executioner-turned-jester")){
+  return {
+    label: "Special Ending",
+    title: "Vengeful Lunatic",
+    subtitle: "A fallen Executioner became the Jester — and still fooled the town.",
+    className: "final-banner-jester-executioner"
     }
   }
 
