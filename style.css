@@ -72,9 +72,15 @@ line-height:1.35;
 /* main container */
 
 #app{
-width:100%;
-max-width:420px;
-padding:20px;
+  width:100%;
+  max-width:1400px;
+  padding:20px;
+  margin:0 auto;
+  box-sizing:border-box;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
 /* card layout */
@@ -4654,5 +4660,61 @@ body{
 
   .final-results-shell > button{
     max-width:none;
+  }
+}
+
+html,
+body{
+  width:100%;
+  min-height:100%;
+}
+
+body{
+  margin:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+#app{
+  width:100%;
+  max-width:1400px;
+  margin:0 auto;
+  padding:20px;
+  box-sizing:border-box;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.final-results-shell{
+  width:min(980px, 100%);
+  max-width:980px;
+  margin:0 auto;
+}
+
+.final-results-card{
+  margin:0 auto;
+}
+
+@media (max-width: 700px){
+  body{
+    align-items:stretch;
+  }
+
+  #app{
+    padding:0;
+    max-width:none;
+    align-items:stretch;
+  }
+
+  .final-results-shell{
+    width:100%;
+    max-width:none;
+    min-height:100vh;
+    max-height:100vh;
+    border-radius:0;
+    margin:0;
   }
 }
