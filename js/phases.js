@@ -2792,7 +2792,7 @@ const winnerBanner = getFinalWinnerBanner()
 
     <div class="final-summary-stat">
       <div class="final-summary-value">${state.gameStats.eliminations}</div>
-      <div class="final-summary-label">Eliminations</div>
+      <div class="final-summary-label">Deaths</div>
     </div>
 
     <div class="final-summary-stat">

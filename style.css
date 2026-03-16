@@ -3199,12 +3199,14 @@ body{
 }
 
 .pregame-hero{
+  position:relative;
+  overflow:hidden;
   margin-bottom:18px;
-  padding:22px;
+  padding:24px 22px 22px;
   border-radius:22px;
   text-align:center;
   background:
-    radial-gradient(circle at top, rgba(255,255,255,0.06), transparent 45%),
+    radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 45%),
     linear-gradient(135deg, rgba(70,70,90,0.35), rgba(25,25,35,0.55));
   border:1px solid rgba(255,255,255,0.10);
   box-shadow:
@@ -3212,8 +3214,20 @@ body{
     0 16px 34px rgba(0,0,0,0.22);
 }
 
+.pregame-hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 20% 25%, rgba(255,255,255,0.08), transparent 24%),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.07), transparent 22%);
+  opacity:0.8;
+}
+
 .pregame-kicker,
-.pregame-section-kicker{
+.pregame-section-kicker,
+.pregame-team-kicker{
   font-size:11px;
   font-weight:800;
   letter-spacing:0.12em;
@@ -3236,8 +3250,11 @@ body{
   margin-top:10px;
   font-size:14px;
   line-height:1.5;
-  opacity:0.8;
+  opacity:0.82;
   text-align:center;
+  max-width:700px;
+  margin-left:auto;
+  margin-right:auto;
 }
 
 .pregame-stat-grid{
@@ -3272,8 +3289,15 @@ body{
   opacity:0.68;
 }
 
-.pregame-panel{
+.pregame-team-sections{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:16px;
   margin-bottom:18px;
+}
+
+.pregame-team-card,
+.pregame-panel{
   padding:18px;
   border-radius:22px;
   background:
@@ -3284,10 +3308,43 @@ body{
     0 14px 28px rgba(0,0,0,0.14);
 }
 
+.pregame-team-town{
+  border-color:rgba(46,141,204,0.16);
+}
+
+.pregame-team-neutral{
+  border-color:rgba(186,116,204,0.16);
+}
+
+.pregame-team-mafia{
+  border-color:rgba(231,76,60,0.16);
+}
+
+.pregame-team-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.pregame-team-title,
 .pregame-section-title{
-  margin:4px 0 14px 0;
+  margin:4px 0 0 0;
   font-size:22px;
   line-height:1.1;
+}
+
+.pregame-team-count{
+  min-width:38px;
+  height:38px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  font-weight:800;
 }
 
 .pregame-role-grid{
@@ -3298,11 +3355,11 @@ body{
 
 .pregame-role-card{
   position:relative;
+  overflow:hidden;
   padding:14px;
   border-radius:16px;
   background:rgba(255,255,255,0.035);
   border:1px solid rgba(255,255,255,0.06);
-  overflow:hidden;
 }
 
 .pregame-role-card::before{
@@ -3321,10 +3378,15 @@ body{
   gap:10px;
 }
 
+.pregame-role-main{
+  min-width:0;
+}
+
 .pregame-role-name{
   font-size:16px;
   font-weight:800;
   line-height:1.15;
+  word-break:break-word;
 }
 
 .pregame-role-count{
@@ -3372,6 +3434,7 @@ body{
   display:flex;
   flex-direction:column;
   gap:10px;
+  margin-top:14px;
 }
 
 .pregame-warning-item{
@@ -3399,7 +3462,7 @@ body{
 }
 
 .pregame-note{
-  margin:0;
+  margin:14px 0 0 0;
   opacity:0.82;
   line-height:1.5;
 }
@@ -3413,8 +3476,14 @@ body{
   opacity:0.7;
 }
 
-.pregame-actions{
+.pregame-actions-wrap{
   margin-top:20px;
+  padding-top:4px;
+}
+
+.pregame-actions{
+  max-width:360px;
+  margin:0 auto;
 }
 
 .pregame-actions button + button{
@@ -3426,6 +3495,11 @@ body{
     width:min(100%, calc(100vw - 24px));
     padding:16px;
     border-radius:20px;
+  }
+
+  .pregame-hero{
+    padding:20px 16px 18px;
+    border-radius:18px;
   }
 
   .pregame-title{
@@ -3440,6 +3514,7 @@ body{
     grid-template-columns:1fr;
   }
 
+  .pregame-team-card,
   .pregame-panel{
     padding:14px;
     border-radius:18px;
@@ -3447,11 +3522,6 @@ body{
 }
 
 @media (max-width: 520px){
-  .pregame-hero{
-    padding:18px 16px;
-    border-radius:18px;
-  }
-
   .pregame-title{
     font-size:24px;
   }
@@ -3467,5 +3537,10 @@ body{
 
   .pregame-stat-value{
     font-size:24px;
+  }
+
+  .pregame-team-title,
+  .pregame-section-title{
+    font-size:20px;
   }
 }

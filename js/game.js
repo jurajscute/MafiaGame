@@ -1748,151 +1748,177 @@ function showPreGameSummary(){
 
   let warnings = getBalanceWarnings()
 
-  let enabledRoles = []
+  const townRoles = ["doctor", "sheriff", "mayor", "spirit", "vigilante", "priest"]
+  const neutralRoles = ["jester", "executioner", "schrodingers_cat"]
+  const mafiaRoles = ["framer"]
 
-  Object.keys(state.rolesEnabled).forEach(role => {
-    if(state.rolesEnabled[role]){
-      enabledRoles.push(role)
+  function isRoleEnabled(role){
+    return !!state.rolesEnabled[role]
+  }
+
+  function buildRoleCard(role){
+    let color = roleColors[role] || "white"
+    let count = state.roleCounts[role] || 1
+    let extras = []
+
+    if(role === "doctor" && state.doctorRevealSave){
+      extras.push("reveals saved player")
     }
-  })
 
-  let rolesHTML = enabledRoles.length
-    ? enabledRoles.map(role => {
-        let color = roleColors[role] || "white"
-        let count = state.roleCounts[role] || 1
-        let extras = []
+    if(role === "priest"){
+      extras.push("blocks all kills for the night")
+      extras.push(`${state.priestUsesPerGame} use${state.priestUsesPerGame === 1 ? "" : "s"}`)
+    }
 
-        if(role === "doctor" && state.doctorRevealSave){
-          extras.push("reveals saved player")
-        }
+    if(role === "jester"){
+      let jesterRuleText = {
+        innocent: "innocent to Sheriff",
+        not_innocent: "not innocent to Sheriff",
+        exact: "revealed exactly by Sheriff"
+      }
 
-        if(role === "priest"){
-          extras.push("blocks all kills for the night")
-          extras.push(`${state.priestUsesPerGame} use${state.priestUsesPerGame === 1 ? "" : "s"}`)
-        }
+      extras.push(jesterRuleText[state.sheriffJesterResult])
 
-        if(role === "jester"){
-          let jesterRuleText = {
-            innocent: "innocent to Sheriff",
-            not_innocent: "not innocent to Sheriff",
-            exact: "revealed exactly by Sheriff"
-          }
+      if(state.jesterWinIfVigilanteKilled){
+        extras.push("wins if Vigilante kills them")
+      }
+    }
 
-          extras.push(jesterRuleText[state.sheriffJesterResult])
+    if(role === "vigilante"){
+      extras.push(
+        state.vigilanteCanKillNeutrals
+          ? "can kill neutrals"
+          : "cannot kill neutrals"
+      )
 
-          if(state.jesterWinIfVigilanteKilled){
-            extras.push("wins if Vigilante kills them")
-          }
-        }
+      let wrongKillText = {
+        both_die: "wrong target: both die",
+        only_vigilante_dies: "wrong target: only Vigilante dies",
+        only_target_dies: "wrong target: only target dies"
+      }
 
-        if(role === "vigilante"){
-          extras.push(
-            state.vigilanteCanKillNeutrals
-              ? "can kill neutrals"
-              : "cannot kill neutrals"
-          )
+      extras.push(wrongKillText[state.vigilanteWrongKillOutcome])
+    }
 
-          let wrongKillText = {
-            both_die: "wrong target: both die",
-            only_vigilante_dies: "wrong target: only Vigilante dies",
-            only_target_dies: "wrong target: only target dies"
-          }
+    if(role === "mayor"){
+      extras.push(`${state.mayorVotePower} vote power`)
+    }
 
-          extras.push(wrongKillText[state.vigilanteWrongKillOutcome])
-        }
+    if(role === "sheriff"){
+      extras.push(
+        state.sheriffExactReveal
+          ? "exact role reveal"
+          : "innocent / not innocent"
+      )
+    }
 
-        if(role === "mayor"){
-          extras.push(`${state.mayorVotePower} vote power`)
-        }
+    if(role === "spirit"){
+      extras.push(
+        state.spiritRevealType === "exact" ? "exact reveal" : "team reveal"
+      )
+      extras.push(
+        state.spiritActivation === "night_only" ? "night deaths only" : "any death"
+      )
 
-        if(role === "sheriff"){
-          extras.push(
-            state.sheriffExactReveal
-              ? "exact role reveal"
-              : "innocent / not innocent"
-          )
-        }
+      if(state.spiritCanSkipReveal){
+        extras.push("can skip reveal")
+      }
+    }
 
-        if(role === "spirit"){
-          extras.push(
-            state.spiritRevealType === "exact" ? "exact reveal" : "team reveal"
-          )
-          extras.push(
-            state.spiritActivation === "night_only" ? "night deaths only" : "any death"
-          )
+    if(role === "framer"){
+      if(state.framerKnowsSuccess) extras.push("knows if frame worked")
+      if(state.framerKnowsMafia) extras.push("knows mafia")
+      if(state.mafiaKnowsFramer) extras.push("mafia knows framer")
+    }
 
-          if(state.spiritCanSkipReveal){
-            extras.push("can skip reveal")
-          }
-        }
+    if(role === "executioner"){
+      let executionerRuleText = {
+        neither: "targets only town",
+        mafia: "can target mafia",
+        jester: "can target jester",
+        both: "can target mafia or jester"
+      }
 
-        if(role === "framer"){
-          if(state.framerKnowsSuccess) extras.push("knows if frame worked")
-          if(state.framerKnowsMafia) extras.push("knows mafia")
-        }
+      let executionerSheriffText = {
+        innocent: "innocent to Sheriff",
+        not_innocent: "not innocent to Sheriff",
+        exact: "revealed exactly by Sheriff"
+      }
 
-        if(role === "executioner"){
-          let executionerRuleText = {
-            neither: "targets only town",
-            mafia: "can target mafia",
-            jester: "can target jester",
-            both: "can target mafia or jester"
-          }
+      extras.push(executionerRuleText[state.executionerTargetRule])
+      extras.push(executionerSheriffText[state.sheriffExecutionerResult])
 
-          let executionerSheriffText = {
-            innocent: "innocent to Sheriff",
-            not_innocent: "not innocent to Sheriff",
-            exact: "revealed exactly by Sheriff"
-          }
+      if(state.executionerWinIfDead){
+        extras.push("wins even if dead")
+      }
 
-          extras.push(executionerRuleText[state.executionerTargetRule])
-          extras.push(executionerSheriffText[state.sheriffExecutionerResult])
+      if(state.executionerWinIfVigilanteKillsTarget){
+        extras.push("wins if Vigilante kills target")
+      }
+    }
 
-          if(state.executionerWinIfDead){
-            extras.push("wins even if dead")
-          }
-
-          if(state.executionerWinIfVigilanteKillsTarget){
-            extras.push("wins if Vigilante kills target")
-          }
-        }
-
-        return `
-          <div class="pregame-role-card" style="--pregame-role-color:${color};">
-            <div class="pregame-role-top">
-              <div>
-                <div class="pregame-role-name" style="color:${color};">
-                  ${getRoleDisplayName(role)}
-                </div>
-                <div class="pregame-role-count">Up to ${count}</div>
-              </div>
+    return `
+      <div class="pregame-role-card" style="--pregame-role-color:${color};">
+        <div class="pregame-role-top">
+          <div class="pregame-role-main">
+            <div class="pregame-role-name" style="color:${color};">
+              ${getRoleDisplayName(role)}
             </div>
-
-            ${
-              extras.length
-                ? `
-                  <div class="pregame-role-tags">
-                    ${extras.map(extra => `
-                      <span class="pregame-role-tag" style="
-                        color:${color};
-                        border-color:${color}33;
-                        background:${color}14;
-                      ">
-                        ${extra}
-                      </span>
-                    `).join("")}
-                  </div>
-                `
-                : ""
-            }
+            <div class="pregame-role-count">
+              Up to ${count}
+            </div>
           </div>
-        `
-      }).join("")
-    : `
-      <div class="pregame-empty">
-        No special roles enabled
+        </div>
+
+        ${
+          extras.length
+            ? `
+              <div class="pregame-role-tags">
+                ${extras.map(extra => `
+                  <span class="pregame-role-tag" style="
+                    color:${color};
+                    border-color:${color}33;
+                    background:${color}14;
+                  ">
+                    ${extra}
+                  </span>
+                `).join("")}
+              </div>
+            `
+            : ""
+        }
       </div>
     `
+  }
+
+  function buildRoleSection(title, kicker, className, rolesArray){
+    const enabled = rolesArray.filter(isRoleEnabled)
+
+    if(!enabled.length){
+      return ""
+    }
+
+    return `
+      <div class="pregame-team-card ${className}">
+        <div class="pregame-team-header">
+          <div>
+            <div class="pregame-team-kicker">${kicker}</div>
+            <h3 class="pregame-team-title">${title}</h3>
+          </div>
+          <div class="pregame-team-count">${enabled.length}</div>
+        </div>
+
+        <div class="pregame-role-grid">
+          ${enabled.map(buildRoleCard).join("")}
+        </div>
+      </div>
+    `
+  }
+
+  const enabledRolesCount =
+    townRoles.filter(isRoleEnabled).length +
+    neutralRoles.filter(isRoleEnabled).length +
+    mafiaRoles.filter(isRoleEnabled).length
 
   let warningsHTML = warnings.length
     ? `
@@ -1918,6 +1944,28 @@ function showPreGameSummary(){
       </div>
     `
 
+  let roleSectionsHTML =
+    buildRoleSection("Town Roles", "Town", "pregame-team-town", townRoles) +
+    buildRoleSection("Neutral Roles", "Neutral", "pregame-team-neutral", neutralRoles) +
+    buildRoleSection("Mafia Roles", "Mafia", "pregame-team-mafia", mafiaRoles)
+
+  if(!roleSectionsHTML.trim()){
+    roleSectionsHTML = `
+      <div class="pregame-team-card">
+        <div class="pregame-team-header">
+          <div>
+            <div class="pregame-team-kicker">Roles</div>
+            <h3 class="pregame-team-title">Enabled Special Roles</h3>
+          </div>
+        </div>
+
+        <div class="pregame-empty">
+          No special roles enabled
+        </div>
+      </div>
+    `
+  }
+
   render(`
     <div class="card pregame-summary-card">
 
@@ -1925,7 +1973,7 @@ function showPreGameSummary(){
         <div class="pregame-kicker">Game Setup</div>
         <h2 class="pregame-title">Pre-Game Summary</h2>
         <div class="pregame-subtitle">
-          Review your setup before roles are assigned.
+          Review your setup, confirm the balance, and make sure everything looks right before roles are assigned.
         </div>
       </div>
 
@@ -1941,7 +1989,7 @@ function showPreGameSummary(){
         </div>
 
         <div class="pregame-stat">
-          <div class="pregame-stat-value">${enabledRoles.length}</div>
+          <div class="pregame-stat-value">${enabledRolesCount}</div>
           <div class="pregame-stat-label">Special Roles</div>
         </div>
 
@@ -1951,20 +1999,17 @@ function showPreGameSummary(){
         </div>
       </div>
 
-      <div class="pregame-panel">
-        <div class="pregame-section-kicker">Roles</div>
-        <h3 class="pregame-section-title">Enabled Special Roles</h3>
-
-        <div class="pregame-role-grid">
-          ${rolesHTML}
-        </div>
+      <div class="pregame-team-sections">
+        ${roleSectionsHTML}
       </div>
 
       ${warningsHTML}
 
-      <div class="pregame-actions">
-        <button onclick="window.confirmStartGame()">Start Game</button>
-        <button class="skip-btn" onclick="window.showSetup()">Back</button>
+      <div class="pregame-actions-wrap">
+        <div class="pregame-actions">
+          <button onclick="window.confirmStartGame()">Start Game</button>
+          <button class="skip-btn" onclick="window.showSetup()">Back</button>
+        </div>
       </div>
 
     </div>
