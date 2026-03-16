@@ -187,16 +187,12 @@ li{
 ========================= */
 
 .pass-screen{
-  background:#25211a;
-  color:white;
   min-height:100vh;
-
   display:flex;
   flex-direction:column;
   justify-content:center;
   align-items:center;
   gap:18px;
-
   text-align:center;
 }
 
@@ -208,11 +204,11 @@ li{
 }
 
 .pass-label{
-  text-align:center;
+  margin:0;
   font-size:14px;
   letter-spacing:3px;
   opacity:0.7;
-  margin:0;
+  text-align:center;
 }
 
 .pass-player{
