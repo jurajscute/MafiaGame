@@ -3519,44 +3519,70 @@ border:1px solid rgba(243,216,107,0.28);
 
 /* Holy night background */
 
+/* Holy night base */
 body.holy-night {
   background:
-    radial-gradient(circle at 50% 20%, rgba(255,230,150,0.25), transparent 60%),
-    linear-gradient(#070b1a, #02040a);
+    radial-gradient(circle at 50% 18%, rgba(255, 226, 140, 0.12), transparent 30%),
+    radial-gradient(circle at 50% 0%, rgba(255, 244, 200, 0.08), transparent 45%),
+    linear-gradient(180deg, #08101f 0%, #0a1224 45%, #050814 100%);
+  position: relative;
+  overflow-x: hidden;
 }
 
-body.holy-night::after{
-content:"";
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-pointer-events:none;
+/* soft sky shimmer behind everything */
+body.holy-night::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
 
-background-image:
-radial-gradient(circle, rgba(255,230,150,0.9) 1px, transparent 2px),
-radial-gradient(circle, rgba(255,230,150,0.6) 1px, transparent 2px);
-
-background-size:120px 120px, 80px 80px;
-background-position:0 0, 40px 40px;
-
-animation:holyParticles 25s linear infinite;
-
-opacity:0.7;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 240, 180, 0.05), transparent 18%),
+    radial-gradient(circle at 75% 22%, rgba(255, 228, 150, 0.04), transparent 20%),
+    radial-gradient(circle at 50% 12%, rgba(255, 245, 210, 0.08), transparent 28%);
 }
 
-@keyframes holyParticles{
-from{
-transform:translateY(0);
-}
-to{
-transform:translateY(-120px);
-}
+/* subtle floating dust behind cards */
+body.holy-night::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.55;
+
+  background-image:
+    radial-gradient(circle, rgba(255, 241, 190, 0.85) 0.8px, transparent 1.8px),
+    radial-gradient(circle, rgba(255, 226, 140, 0.45) 1px, transparent 2.2px),
+    radial-gradient(circle, rgba(255, 248, 220, 0.35) 0.7px, transparent 1.6px);
+
+  background-size:
+    140px 140px,
+    220px 220px,
+    180px 180px;
+
+  background-position:
+    0 0,
+    40px 60px,
+    90px 20px;
+
+  animation: holyDustDrift 18s linear infinite;
 }
 
-body.holy-night .night-sky{
-filter:
-drop-shadow(0 0 10px rgba(255,230,150,0.6))
-drop-shadow(0 0 30px rgba(255,230,150,0.4));
+@keyframes holyDustDrift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-80px);
+  }
+}
+
+.card,
+.player-status-box,
+.host-panel,
+.modal-content {
+  position: relative;
+  z-index: 2;
 }
