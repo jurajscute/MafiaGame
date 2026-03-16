@@ -178,7 +178,7 @@ noResultTexts:[
 "Meow, meow.",
 "Meow, meow, meow.",
 "Your second cousin is Nyan Cat.",
-"Garfield lookin' ahh."
+"Garfield lookin' ahh.",
 "I bet you like lasanga...",
 "There's so many ways this game could go.",
 "Meow.",
@@ -274,7 +274,7 @@ noResultTexts:[
 "You are the symbol of peace this town needs.",
 "One day you'll be up there with the big guy! Maybe even tomorrow...",
 "There's something nice about being so spiritually connected with God."],
-description:"Once per night, you may call upon the Holy Spirit to shield the town. If used, all kills fail that night."
+description:"During night, you may call upon the Holy Spirit to shield the town. If used, all kills fail that night."
 },
 
 }
