@@ -153,6 +153,7 @@ state.executionerWinIfVigilanteKillsTarget = false
 state.priestShieldActive = false
 state.priestBlockedAttacks = []
 state.priestPublicShield = false
+state.priestUsesPerGame = 1
 
 localStorage.setItem("mafiaExecutionerVigilanteWin",JSON.stringify(state.executionerWinIfVigilanteKillsTarget))
 localStorage.setItem("mafiaJesterVigilanteWin",JSON.stringify(state.jesterWinIfVigilanteKilled))
@@ -179,7 +180,6 @@ localStorage.setItem("mafiaSheriffExecutionerResult", JSON.stringify(state.sheri
 localStorage.setItem("mafiaMayorVotePower", JSON.stringify(state.mayorVotePower))
 
 showSettings()
-
 }
 
 window.setSpiritRevealType = function(value){
@@ -1071,6 +1071,21 @@ function buildRolePanelHTML(role){
     `
   }
 
+  if(role === "priest"){
+  advancedHTML = `
+    <div class="settings-field">
+      <label class="settings-field-label">Holy Spirit uses per game</label>
+      <select class="settings-modern-select"
+        onchange="setPriestUsesPerGame(this.value)">
+        <option value="1" ${state.priestUsesPerGame == 1 ? "selected" : ""}>1 use</option>
+        <option value="2" ${state.priestUsesPerGame == 2 ? "selected" : ""}>2 uses</option>
+        <option value="3" ${state.priestUsesPerGame == 3 ? "selected" : ""}>3 uses</option>
+        <option value="4" ${state.priestUsesPerGame == 4 ? "selected" : ""}>4 uses</option>
+      </select>
+    </div>
+  `
+}
+
   return `
     <div class="settings-field">
       <label class="settings-field-label">Role chance</label>
@@ -1141,6 +1156,17 @@ JSON.stringify(state.mafiaCountOverride)
 
 }
 
+window.setPriestUsesPerGame = function(value){
+
+  state.priestUsesPerGame = Number(value)
+
+  localStorage.setItem(
+    "mafiaPriestUsesPerGame",
+    JSON.stringify(state.priestUsesPerGame)
+  )
+
+}
+
 function loadPlayers(){
 
 let saved = localStorage.getItem("mafiaPlayers")
@@ -1203,6 +1229,12 @@ let savedVigilanteWrongKillOutcome = localStorage.getItem("mafiaVigilanteWrongKi
 let savedJesterVigWin = localStorage.getItem("mafiaJesterVigilanteWin")
 
 let savedExecutionerVigilanteWin = localStorage.getItem("mafiaExecutionerVigilanteWin")
+
+let savedPriestUses = localStorage.getItem("mafiaPriestUsesPerGame")
+
+if(savedPriestUses){
+  state.priestUsesPerGame = JSON.parse(savedPriestUses)
+}
 
 if(savedExecutionerVigilanteWin){
 state.executionerWinIfVigilanteKillsTarget = JSON.parse(savedExecutionerVigilanteWin)
@@ -1615,6 +1647,12 @@ shuffle(pool)
 
 players.forEach((p,i)=>{
 p.role = pool[i]
+})
+
+players.forEach(p => {
+  if(p.role === "priest"){
+    p.priestUsesLeft = state.priestUsesPerGame
+  }
 })
 
 let mafiaPlayers = players

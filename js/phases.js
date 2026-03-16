@@ -1119,6 +1119,19 @@ export function performNightAction(targetName){
 let player = state.players[state.nightTurnIndex]
 let role = roles[player.role]
 
+if(player.role === "priest" && action.target === "__use__"){
+
+  if(player.priestUsesLeft <= 0){
+    addLogEntry(`${player.name} tried to use Holy Spirit but had no uses left.`)
+    return
+  }
+
+  player.priestUsesLeft--
+
+  state.priestShieldActive = true
+
+}
+
 if(role.nightAction === "holy_shield"){
   if(targetName === "__use__"){
     state.nightActions.push({

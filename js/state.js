@@ -53,6 +53,8 @@ jesterWinIfVigilanteKilled: false,
 
 executionerWinIfVigilanteKillsTarget: false,
 
+priestUsesPerGame: 1,
+
 gameLog: [],
 gameStats: {
 nights: 0,
