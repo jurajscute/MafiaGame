@@ -1323,50 +1323,75 @@ return `
 
 export function revealNightRole(){
 
-let player = state.players[state.nightTurnIndex]
-let role = roles[player.role]
+  let player = state.players[state.nightTurnIndex]
+  let role = roles[player.role]
+  const alivePlayers = state.players.filter(p => p.alive)
+  const currentNightPlayerNumber =
+    alivePlayers.findIndex(p => p.name === player.name) + 1
 
-if(!role.nightAction){
+  if(!role.nightAction){
+    let roleKey = player.role.toLowerCase()
+    let color = roleColors[roleKey] || "white"
 
-let roleKey = player.role.toLowerCase()
-let color = roleColors[roleKey] || "white"
+    render(`
 
-render(`
+      <div class="card reveal-role-card role-${roleKey}" style="--reveal-role-color:${color};">
 
-<div class="card">
+        <div class="reveal-role-topbar">
+          <div class="reveal-role-kicker">Night Role Reveal</div>
+          <div class="reveal-role-progress">
+            ${state.nightTurnIndex + 1} / ${state.players.filter(p => p.alive).length}
+          </div>
+        </div>
 
-<h2>
-You are a
-<span style="
-color:${color};
-font-weight:bold;
-text-shadow:
-0 0 10px ${color},
-0 0 20px ${color},
-0 0 30px ${color};
-">
-${roleDisplayName(player.role)}
-</span>
-</h2>
+        <div class="reveal-role-header">
+          <div class="reveal-role-player">${player.name}</div>
+          <div class="reveal-role-hint">Sleep peacefully tonight</div>
+        </div>
 
-<p class="role-description">
-${role.description || ""}
-</p>
+        <div class="role-card reveal-role-flip revealed" id="roleCard">
+          <div class="role-inner">
 
-<button onclick="window.nextNightTurn()">Hide</button>
+            <div class="role-front reveal-role-front">
+              <div class="reveal-role-front-shimmer"></div>
 
-${renderHostControls()}
+              <div class="reveal-role-front-inner">
+                <div class="reveal-role-front-icon">✦</div>
+                <div class="reveal-role-front-label">Your Role</div>
+                <div class="reveal-role-front-text">${roleDisplayName(player.role)}</div>
+              </div>
+            </div>
 
-</div>
+            <div class="role-back reveal-role-back" style="color:${color}">
+              <div class="reveal-role-back-inner">
+                <div class="reveal-role-back-kicker">Your Role</div>
+                <div class="reveal-role-name">${roleDisplayName(player.role)}</div>
+              </div>
+            </div>
 
-`)
+          </div>
+        </div>
 
-return
+        <div class="reveal-role-description-wrap">
+          <p class="role-description reveal-role-description">
+            ${role.description || ""}
+          </p>
+        </div>
 
-}
+        <div class="reveal-role-actions">
+          <button onclick="window.nextNightTurn()">Continue</button>
+        </div>
 
-showNightAction(player,role)
+        ${renderHostControls()}
 
+      </div>
+
+    `)
+
+    return
+  }
+
+  showNightAction(player, role)
 }
 
 function showNightAction(player){
