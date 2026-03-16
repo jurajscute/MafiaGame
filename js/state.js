@@ -55,6 +55,8 @@ executionerWinIfVigilanteKillsTarget: false,
 
 priestUsesPerGame: 1,
 
+executionerBecomes: "jester",
+
 gameLog: [],
 gameStats: {
 nights: 0,

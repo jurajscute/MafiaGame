@@ -277,4 +277,26 @@ noResultTexts:[
 description:"During night, you may call upon the Holy Spirit to shield the town. If used, all kills fail that night."
 },
 
+traitor: {
+team: "mafia",
+nightAction:null,
+receivesNightResult:false,
+noResultTexts: [
+"No one knows your devious plan!",
+"Now to figure out who the mafia actually is...",
+"Hm... when will it be your turn to kill?",
+"You know, a life of a traitor must be pretty sucky.",
+"What did those poor villagers ever do to you, huh?",
+"Are you blending in well?",
+"You dream about a life without those boring villagers, how nice!",
+"Your pillow is ridiculously warm tonight, serves you well, traitor!",
+"Gosh, your house stinks.",
+"You must think you're so much better than the villagers, huh?",
+"You know, there's a reason why you're not an actual member of the mafia.",
+"You've always been like this, you ratted out your childhood bestfriend for 2 gold coins.",
+"Why are you even doing this?",
+"The mafia are just SO much cooler."],
+description: "You look like a normal villager, but your goal is to help the Mafia win. You do not know who the Mafia are.",
+}
+
 }

@@ -24,7 +24,8 @@ spirit: "#e6aafd",
 framer: "#8b0000",
 vigilante: "#3b48ff",
 priest: "#f6df8f",
-schrodingers_cat: "#6d6d6d"
+schrodingers_cat: "#6d6d6d",
+traitor: "#c44f4f",
 }
 
 window.updateRoleCount = function(role,value){
@@ -97,6 +98,7 @@ framer: false,
 vigilante: false,
 priest: false,
 schrodingers_cat: false,
+traitor: false,
 }
 
 state.roleWeights = {
@@ -110,6 +112,7 @@ framer: 100,
 vigilante: 100,
 priest: 100,
 schrodingers_cat: 100,
+traitor: 100,
 }
 
 state.roleCounts = {
@@ -123,6 +126,7 @@ framer: 1,
 vigilante: 1,
 priest: 1,
 schrodingers_cat: 1,
+traitor: 1,
 }
 
 state.vigilanteOutcomeToShow = null
@@ -138,6 +142,7 @@ state.mafiaCountOverride = 0
 
 state.revealRolesOnElimination = "none"
 state.executionerWinIfDead = false
+state.executionerBecomes = "jester"
 
 state.framerKnowsSuccess = true
 state.framerKnowsMafia = true
@@ -165,6 +170,7 @@ state.priestBlockedAttacks = []
 state.priestPublicShield = false
 state.priestUsesPerGame = 1
 
+localStorage.setItem("mafiaExecutionerBecomes", JSON.stringify(state.executionerBecomes))
 localStorage.setItem("mafiaExecutionerVigilanteWin",JSON.stringify(state.executionerWinIfVigilanteKillsTarget))
 localStorage.setItem("mafiaJesterVigilanteWin",JSON.stringify(state.jesterWinIfVigilanteKilled))
 localStorage.setItem("mafiaVigilanteCanKillNeutrals", JSON.stringify(state.vigilanteCanKillNeutrals))
@@ -281,7 +287,7 @@ function showSettings() {
   const mafiaMax = maxAllowedMafia(playerCount)
   const autoMafia = playerCount > 0 ? mafiaCount(playerCount) : 1
 
-  const mafiaRoles = ["framer"]
+  const mafiaRoles = ["framer", "traitor"]
   const townRoles = ["doctor", "sheriff", "mayor", "spirit", "vigilante", "priest"]
   const neutralRoles = ["jester", "executioner", "schrodingers_cat"]
 
@@ -479,6 +485,15 @@ function showSettings() {
               <span class="slider"></span>
             </label>
           </div>
+        </div>
+
+        <div class="settings-field">
+          <label class="settings-field-label">After target dies, becomes</label>
+          <select class="settings-modern-select" onchange="setExecutionerBecomes(this.value)">
+            <option value="jester" ${state.executionerBecomes === "jester" ? "selected" : ""}>Jester</option>
+            <option value="villager" ${state.executionerBecomes === "villager" ? "selected" : ""}>Villager</option>
+            <option value="traitor" ${state.executionerBecomes === "traitor" ? "selected" : ""}>Traitor</option>
+          </select>
         </div>
       `
     }
@@ -1078,6 +1093,15 @@ function buildRolePanelHTML(role){
           </label>
         </div>
       </div>
+
+      <div class="settings-field">
+        <label class="settings-field-label">After target dies, becomes</label>
+        <select class="settings-modern-select" onchange="setExecutionerBecomes(this.value)">
+          <option value="jester" ${state.executionerBecomes === "jester" ? "selected" : ""}>Jester</option>
+          <option value="villager" ${state.executionerBecomes === "villager" ? "selected" : ""}>Villager</option>
+          <option value="traitor" ${state.executionerBecomes === "traitor" ? "selected" : ""}>Traitor</option>
+        </select>
+      </div>
     `
   }
 
@@ -1266,6 +1290,12 @@ let savedJesterVigWin = localStorage.getItem("mafiaJesterVigilanteWin")
 let savedExecutionerVigilanteWin = localStorage.getItem("mafiaExecutionerVigilanteWin")
 
 let savedPriestUses = localStorage.getItem("mafiaPriestUsesPerGame")
+
+let savedExecutionerBecomes = localStorage.getItem("mafiaExecutionerBecomes")
+
+if(savedExecutionerBecomes){
+state.executionerBecomes = JSON.parse(savedExecutionerBecomes)
+}
 
 if(savedPriestUses){
   state.priestUsesPerGame = JSON.parse(savedPriestUses)
@@ -1489,6 +1519,17 @@ state.executionerTargetRule = value
 
 localStorage.setItem(
 "mafiaExecutionerTargetRule",
+JSON.stringify(value)
+)
+
+}
+
+window.setExecutionerBecomes = function(value){
+
+state.executionerBecomes = value
+
+localStorage.setItem(
+"mafiaExecutionerBecomes",
 JSON.stringify(value)
 )
 
@@ -1719,7 +1760,7 @@ for(let i=0;i<mafia;i++){
 pool.push("mafia")
 }
 
-["doctor","sheriff","jester","executioner","mayor","spirit","framer","vigilante","priest","schrodingers_cat"].forEach(role=>{
+["doctor","sheriff","jester","executioner","mayor","spirit","framer","vigilante","priest","schrodingers_cat","traitor"].forEach(role=>{
 
 if(!state.rolesEnabled[role]) return
 
@@ -1913,6 +1954,13 @@ function showPreGameSummary(){
         exact: "revealed exactly by Sheriff"
       }
 
+      let executionerBecomeText = {
+        jester: "becomes Jester after target dies",
+        villager: "becomes Villager after target dies",
+        traitor: "becomes Traitor after target dies"
+      }
+
+      extras.push(executionerBecomeText[state.executionerBecomes]) 
       extras.push(executionerRuleText[state.executionerTargetRule])
       extras.push(executionerSheriffText[state.sheriffExecutionerResult])
 
@@ -2589,6 +2637,7 @@ state.doctorRevealSave = false
 state.sheriffExactReveal = false
 state.executionerTargetRule = "neither"
 state.executionerWinIfDead = false
+state.executionerBecomes = "jester"
 state.sheriffJesterResult = "not_innocent"
 state.sheriffExecutionerResult = "not_innocent"
 state.mayorVotePower = 2
@@ -2648,6 +2697,7 @@ state.doctorRevealSave = true
 state.sheriffExactReveal = false
 state.executionerTargetRule = "neither"
 state.executionerWinIfDead = false
+state.executionerBecomes = "jester"
 state.sheriffJesterResult = "not_innocent"
 state.sheriffExecutionerResult = "not_innocent"
 state.mayorVotePower = 2
@@ -2702,6 +2752,7 @@ state.doctorRevealSave = true
 state.sheriffExactReveal = true
 state.executionerTargetRule = "both"
 state.executionerWinIfDead = true
+state.executionerBecomes = "jester"
 state.sheriffJesterResult = "exact"
 state.sheriffExecutionerResult = "exact"
 state.mayorVotePower = 2.5
@@ -2746,6 +2797,7 @@ JSON.stringify(enabled)
 
 function saveSettingsToStorage(){
 
+localStorage.setItem("mafiaExecutionerBecomes", JSON.stringify(state.executionerBecomes))
 localStorage.setItem("mafiaPriestUsesPerGame", JSON.stringify(state.priestUsesPerGame))
 localStorage.setItem("mafiaExecutionerVigilanteWin",JSON.stringify(state.executionerWinIfVigilanteKillsTarget))
 localStorage.setItem("mafiaJesterVigilanteWin",JSON.stringify(state.jesterWinIfVigilanteKilled))

@@ -150,7 +150,8 @@ spirit: "#e6aafd",
 framer: "#8b0000",
 vigilante: "#3b48ff",
 priest: "#f6df8f",
-schrodingers_cat: "#6d6d6d"
+schrodingers_cat: "#6d6d6d",
+traitor: "#c44f4f",
 }
 
 function getEffectiveTeam(player){
@@ -174,6 +175,40 @@ function isPlayerAlive(name){
 
 function getPlayerTeam(player){
   return getEffectiveTeam(player)
+}
+
+function getExecutionerNewRole(){
+  return state.executionerBecomes || "jester"
+}
+
+function hasExecutionerCompletedTarget(executioner){
+  if(!executioner || executioner.role !== "executioner") return false
+
+  const targetName = state.executionerTargets?.[executioner.name]
+  if(!targetName) return false
+
+  const target = getPlayerByName(targetName)
+  return !!(target && !target.alive)
+}
+
+function convertExecutionerAfterTargetDeath(targetName, privateResults){
+  state.players.forEach(player => {
+    if(player.role !== "executioner") return
+    if(state.executionerTargets?.[player.name] !== targetName) return
+
+    const newRole = getExecutionerNewRole()
+
+    player.role = newRole
+    delete state.executionerTargets[player.name]
+
+    addLogEntry(`${player.name} became a ${roleDisplayName(newRole)} after their target ${targetName} died.`)
+
+    privateResults.push({
+      type: "executioner_converted",
+      playerName: player.name,
+      newRole
+    })
+  })
 }
 
 function canExecutionerWin(executioner){
@@ -509,6 +544,46 @@ ${renderHostControls()}
 
 `)
 return
+}
+
+if(item && item.type === "executioner_converted"){
+  const newColor = roleColors[item.newRole] || "white"
+
+  render(`
+
+<div class="card role-${item.newRole}">
+
+<h2 class="role-title">OH WELL...</h2>
+
+<p class="role-description">
+Your target died!
+</p>
+
+<p class="role-description">
+You are no longer the Executioner.
+</p>
+
+<h1 style="
+color:${newColor};
+text-shadow:
+0 0 10px ${newColor},
+0 0 20px ${newColor};
+">
+${roleDisplayName(item.newRole).toUpperCase()}
+</h1>
+
+<p class="role-description">
+Play as your new role from now on.
+</p>
+
+<button onclick="window.nextNightResultTurn()">Continue</button>
+
+${renderHostControls()}
+
+</div>
+
+`)
+  return
 }
 
 if(item && item.type === "cat_converted"){
@@ -1831,6 +1906,8 @@ function resolveNightSelections(){
         { warnPrivately: true }
       )
 
+convertExecutionerAfterTargetDeath(target.name, privateResults)
+
       // Jester special win from Vigilante
       if(target.role === "jester" && state.jesterWinIfVigilanteKilled){
         const executionerWinner = state.executionerWinIfVigilanteKillsTarget
@@ -2032,6 +2109,8 @@ function resolveNightSelections(){
         if(!state.nightDeaths.includes(victim.name)){
           state.nightDeaths.push(victim.name)
         }
+
+convertExecutionerAfterTargetDeath(victim.name, privateResults)
 
         let deathText = `${killTarget} was killed during the night.`
 
