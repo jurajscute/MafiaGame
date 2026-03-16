@@ -1749,6 +1749,18 @@ function showPreGameSummary(){
 
   let warnings = getBalanceWarnings()
 
+  const revealModeText = {
+    none: "No role reveals",
+    death: "Night kill reveals",
+    vote_only: "Vote reveals",
+    death_and_vote: "Night + vote reveals"
+  }
+
+  const mafiaKillText = {
+    leader: "Leader chooses",
+    vote: "Mafia vote"
+  }
+
   let warningsHTML = warnings.length
     ? `
       <div class="final-log-card" style="margin-top:18px;">
@@ -1793,12 +1805,23 @@ function showPreGameSummary(){
         let count = state.roleCounts[role] || 1
         let extras = []
 
-        if(role === "doctor" && state.doctorRevealSave){
-          extras.push("reveals saved player")
+        if(role === "doctor"){
+          if(state.doctorRevealSave){
+            extras.push("reveals saved player")
+          }
+        }
+
+        if(role === "sheriff"){
+          extras.push(
+            state.sheriffExactReveal
+              ? "exact role reveal"
+              : "innocent / not innocent"
+          )
         }
 
         if(role === "priest"){
           extras.push("blocks all kills for the night")
+          extras.push(`${state.priestUsesPerGame} use${state.priestUsesPerGame === 1 ? "" : "s"} per game`)
         }
 
         if(role === "jester"){
@@ -1813,34 +1836,6 @@ function showPreGameSummary(){
           if(state.jesterWinIfVigilanteKilled){
             extras.push("wins if Vigilante kills them")
           }
-        }
-
-        if(role === "vigilante"){
-          extras.push(
-            state.vigilanteCanKillNeutrals
-              ? "can kill neutrals"
-              : "cannot kill neutrals"
-          )
-
-          let wrongKillText = {
-            both_die: "wrong target: both die",
-            only_vigilante_dies: "wrong target: only Vigilante dies",
-            only_target_dies: "wrong target: only target dies"
-          }
-
-          extras.push(wrongKillText[state.vigilanteWrongKillOutcome])
-        }
-
-        if(role === "mayor"){
-          extras.push(`${state.mayorVotePower} vote power`)
-        }
-
-        if(role === "sheriff"){
-          extras.push(
-            state.sheriffExactReveal
-              ? "exact role reveal"
-              : "innocent / not innocent"
-          )
         }
 
         if(role === "executioner"){
@@ -1867,6 +1862,68 @@ function showPreGameSummary(){
           if(state.executionerWinIfVigilanteKillsTarget){
             extras.push("wins if Vigilante kills target")
           }
+        }
+
+        if(role === "mayor"){
+          extras.push(`${state.mayorVotePower} vote power`)
+        }
+
+        if(role === "spirit"){
+          extras.push(
+            state.spiritRevealType === "exact"
+              ? "reveals exact role"
+              : "reveals team only"
+          )
+
+          extras.push(
+            state.spiritActivation === "night_only"
+              ? "night deaths only"
+              : "activates on any death"
+          )
+
+          if(state.spiritCanSkipReveal){
+            extras.push("can skip reveal")
+          }
+        }
+
+        if(role === "framer"){
+          extras.push(
+            state.framerKnowsSuccess
+              ? "knows if frame worked"
+              : "does not know if frame worked"
+          )
+
+          extras.push(
+            state.framerKnowsMafia
+              ? "knows mafia members"
+              : "does not know mafia members"
+          )
+
+          extras.push(
+            state.mafiaKnowsFramer
+              ? "mafia knows framer"
+              : "mafia does not know framer"
+          )
+        }
+
+        if(role === "vigilante"){
+          extras.push(
+            state.vigilanteCanKillNeutrals
+              ? "can kill neutrals"
+              : "cannot kill neutrals"
+          )
+
+          let wrongKillText = {
+            both_die: "wrong target: both die",
+            only_vigilante_dies: "wrong target: only Vigilante dies",
+            only_target_dies: "wrong target: only target dies"
+          }
+
+          extras.push(wrongKillText[state.vigilanteWrongKillOutcome])
+        }
+
+        if(role === "schrodingers_cat"){
+          extras.push("joins side based on who kills it")
         }
 
         return `
@@ -1919,7 +1976,7 @@ function showPreGameSummary(){
         <div class="final-results-kicker">Game Setup</div>
         <h2 class="final-results-title">Pre-Game Summary</h2>
         <div class="final-results-subtitle">
-          Review the player count, mafia count, and enabled special roles before starting.
+          Review the player count, mafia count, roles, and special rules before starting.
         </div>
       </div>
 
@@ -1942,6 +1999,66 @@ function showPreGameSummary(){
         <div class="final-summary-stat">
           <div class="final-summary-value">${warnings.length}</div>
           <div class="final-summary-label">Warnings</div>
+        </div>
+      </div>
+
+      <div class="final-team-card" style="margin-bottom:18px;">
+        <div class="final-team-header">
+          <div>
+            <div class="final-team-kicker">Rules</div>
+            <h3 class="final-team-title">Global Settings</h3>
+          </div>
+        </div>
+
+        <div class="final-team-list">
+          <div class="final-player-card" style="--final-role-color:#ffaa49;">
+            <div class="final-player-main">
+              <div class="final-player-name">Mafia Kill Method</div>
+              <div class="final-player-role">${mafiaKillText[state.mafiaKillMethod]}</div>
+            </div>
+          </div>
+
+          <div class="final-player-card" style="--final-role-color:#8dc2ff;">
+            <div class="final-player-main">
+              <div class="final-player-name">Role Reveal Rule</div>
+              <div class="final-player-role">${revealModeText[state.revealRolesOnElimination]}</div>
+            </div>
+          </div>
+
+          ${
+            state.mafiaKillMethod === "leader"
+              ? `
+                <div class="final-player-card" style="--final-role-color:#e74c3c;">
+                  <div class="final-player-main">
+                    <div class="final-player-name">First Leader Visibility</div>
+                    <div class="final-player-role">
+                      ${state.mafiaKnowsFirstLeader ? "Mafia knows first leader" : "First leader hidden"}
+                    </div>
+                  </div>
+                </div>
+              `
+              : ``
+          }
+
+          ${
+            state.mafiaCountOverride
+              ? `
+                <div class="final-player-card" style="--final-role-color:#f6df8f;">
+                  <div class="final-player-main">
+                    <div class="final-player-name">Mafia Count</div>
+                    <div class="final-player-role">Manual override</div>
+                  </div>
+                </div>
+              `
+              : `
+                <div class="final-player-card" style="--final-role-color:#7ee2a8;">
+                  <div class="final-player-main">
+                    <div class="final-player-name">Mafia Count</div>
+                    <div class="final-player-role">Auto</div>
+                  </div>
+                </div>
+              `
+          }
         </div>
       </div>
 
@@ -1973,74 +2090,158 @@ function showPreGameSummary(){
 
 function getBalanceWarnings(){
 
-let playerCount = state.players.length
-let mafia = state.mafiaCountOverride || mafiaCount(playerCount)
-mafia = Math.min(mafia, maxAllowedMafia(playerCount))
+  let playerCount = state.players.length
+  let mafia = state.mafiaCountOverride || mafiaCount(playerCount)
+  mafia = Math.min(mafia, maxAllowedMafia(playerCount))
 
-let specialRoles = 0
+  const warnings = []
 
-Object.keys(state.rolesEnabled).forEach(role => {
-if(state.rolesEnabled[role]){
-specialRoles += state.roleCounts[role] || 1
-}
-})
+  const enabledCount = role => state.rolesEnabled[role] ? (state.roleCounts[role] || 1) : 0
 
-const hasDoctor = state.rolesEnabled.doctor
-const hasSheriff = state.rolesEnabled.sheriff
-const hasMayor = state.rolesEnabled.mayor
-const hasJester = state.rolesEnabled.jester
-const hasExecutioner = state.rolesEnabled.executioner
-const hasCat = state.rolesEnabled.schrodingers_cat
+  let specialRoles = 0
+  Object.keys(state.rolesEnabled).forEach(role => {
+    if(state.rolesEnabled[role]){
+      specialRoles += state.roleCounts[role] || 1
+    }
+  })
 
-// Most specific combo warnings first
-if(hasMayor && hasSheriff && hasDoctor && playerCount < 7){
-return ["Mayor + Sheriff + Doctor may be too strong in a medium lobby."]
-}
+  const hasDoctor = state.rolesEnabled.doctor
+  const hasSheriff = state.rolesEnabled.sheriff
+  const hasMayor = state.rolesEnabled.mayor
+  const hasJester = state.rolesEnabled.jester
+  const hasExecutioner = state.rolesEnabled.executioner
+  const hasCat = state.rolesEnabled.schrodingers_cat
+  const hasVigilante = state.rolesEnabled.vigilante
+  const hasPriest = state.rolesEnabled.priest
+  const hasSpirit = state.rolesEnabled.spirit
+  const hasFramer = state.rolesEnabled.framer
 
-if(hasCat && playerCount < 6){
-  return ["Schrödinger's Cat can be very swingy in smaller games."]
-}
+  const infoRoles =
+    (hasSheriff ? 1 : 0) +
+    (hasSpirit ? 1 : 0) +
+    (hasDoctor && state.doctorRevealSave ? 1 : 0) +
+    (hasMayor ? 1 : 0)
 
-if(hasMayor && hasSheriff && playerCount < 6){
-return ["Mayor + Sheriff may be too strong in a smaller lobby."]
-}
+  const swingRoles =
+    (hasJester ? 1 : 0) +
+    (hasExecutioner ? 1 : 0) +
+    (hasVigilante ? 1 : 0) +
+    (hasCat ? 1 : 0) +
+    (hasPriest ? 1 : 0)
 
-if(hasDoctor && hasMayor && playerCount < 6){
-return ["Doctor + Mayor together may be too strong in a very small lobby."]
-}
+  if(playerCount < 4){
+    warnings.push("Minimum 4 players is recommended.")
+  }
 
-if(hasDoctor && hasSheriff && playerCount < 6){
-return ["Doctor + Sheriff together may be too strong in a very small lobby."]
-}
+  if(mafia >= Math.ceil(playerCount / 2)){
+    warnings.push("Too many mafia for this player count.")
+  }
 
-// Then broader setup warnings
-if(mafia >= Math.ceil(playerCount / 2)){
-return ["Too many mafia for this player count."]
-}
+  if(playerCount <= 5 && mafia >= 2){
+    warnings.push("2 mafia with 5 or fewer players may end the game very quickly.")
+  }
 
-if(playerCount <= 5 && mafia >= 2){
-return ["2 mafia with 5 or fewer players may end the game very quickly."]
-}
+  if(specialRoles > playerCount - mafia){
+    warnings.push("There may be more special roles than available non-mafia players.")
+  }
 
-if(specialRoles > playerCount - mafia){
-return ["There may be more special roles than available non-mafia players."]
-}
+  if(playerCount <= 6 && specialRoles >= 4){
+    warnings.push("This is a very role-heavy setup for a smaller lobby.")
+  }
 
-// Then single-role warnings
-if(hasMayor && playerCount < 5){
-return ["Mayor can be very strong in smaller games."]
-}
+  if(playerCount <= 7 && infoRoles >= 3){
+    warnings.push("Too many information-heavy roles may make mafia very weak.")
+  }
 
-if(hasExecutioner && playerCount < 6){
-return ["Executioner can be very strong in smaller games."]
-}
+  if(playerCount <= 7 && swingRoles >= 3){
+    warnings.push("This setup has several swingy roles and may feel chaotic.")
+  }
 
-if(hasJester && playerCount < 6){
-return ["Jester can feel very swingy in smaller games."]
-}
+  if(hasMayor && hasSheriff && hasDoctor && playerCount < 7){
+    warnings.push("Mayor + Sheriff + Doctor may be too strong in a medium lobby.")
+  }
 
-return []
+  if(hasMayor && hasSheriff && playerCount < 6){
+    warnings.push("Mayor + Sheriff may be too strong in a smaller lobby.")
+  }
 
+  if(hasDoctor && hasMayor && playerCount < 6){
+    warnings.push("Doctor + Mayor together may be too strong in a very small lobby.")
+  }
+
+  if(hasDoctor && hasSheriff && playerCount < 6){
+    warnings.push("Doctor + Sheriff together may be too strong in a very small lobby.")
+  }
+
+  if(hasMayor && playerCount < 5){
+    warnings.push("Mayor can be very strong in smaller games.")
+  }
+
+  if(hasExecutioner && playerCount < 6){
+    warnings.push("Executioner can be very strong in smaller games.")
+  }
+
+  if(hasJester && playerCount < 6){
+    warnings.push("Jester can feel very swingy in smaller games.")
+  }
+
+  if(hasCat && playerCount < 6){
+    warnings.push("Schrödinger's Cat can be very swingy in smaller games.")
+  }
+
+  if(hasVigilante && playerCount < 6){
+    warnings.push("Vigilante is extremely swingy in smaller lobbies.")
+  }
+
+  if(hasPriest && playerCount < 6){
+    warnings.push("Priest can hard-stop mafia momentum in smaller games.")
+  }
+
+  if(hasPriest && state.priestUsesPerGame >= 2 && playerCount <= 7){
+    warnings.push("Multiple Priest uses can heavily suppress mafia kills.")
+  }
+
+  if(hasSpirit && state.spiritActivation === "any_death" && playerCount <= 7){
+    warnings.push("Spirit activating on any death gives town a lot of extra information.")
+  }
+
+  if(hasSpirit && state.spiritRevealType === "exact" && state.spiritActivation === "any_death"){
+    warnings.push("Exact Spirit reveals on any death may reveal too much information.")
+  }
+
+  if(hasFramer && !hasSheriff){
+    warnings.push("Framer is much weaker if Sheriff is not in the game.")
+  }
+
+  if(hasExecutioner && state.executionerTargetRule === "both" && playerCount <= 7){
+    warnings.push("Executioner targeting both Mafia and Jester increases chaos in smaller games.")
+  }
+
+  if(hasExecutioner && state.executionerWinIfDead){
+    warnings.push("Executioner winning while dead makes them significantly easier to satisfy.")
+  }
+
+  if(hasVigilante && state.vigilanteWrongKillOutcome === "only_target_dies"){
+    warnings.push("This Vigilante setting is very forgiving and makes random shots stronger.")
+  }
+
+  if(hasVigilante && !state.vigilanteCanKillNeutrals && (hasJester || hasExecutioner || hasCat)){
+    warnings.push("Vigilante cannot kill neutrals, which gives neutral roles more room to survive.")
+  }
+
+  if(state.revealRolesOnElimination === "death_and_vote" && playerCount <= 6){
+    warnings.push("Revealing roles on all eliminations gives a lot of public information in smaller games.")
+  }
+
+  if(state.revealRolesOnElimination === "death_and_vote" && hasSpirit){
+    warnings.push("Public role reveals plus Spirit can create a very high-information game.")
+  }
+
+  if(state.mafiaKillMethod === "leader" && !state.mafiaKnowsFirstLeader && mafia >= 3){
+    warnings.push("Hidden first mafia leader may slow down the first night for newer groups.")
+  }
+
+  return [...new Set(warnings)]
 }
 
 revealIndex = 0
