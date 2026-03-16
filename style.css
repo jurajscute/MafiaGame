@@ -4186,8 +4186,17 @@ body{
   margin-bottom:18px;
 }
 
-.reveal-role-flip .role-inner{
+.reveal-role-flip{
   height:170px;
+}
+
+.reveal-role-flip .role-inner{
+  height:100%;
+}
+.reveal-role-front,
+.reveal-role-back{
+  height:100%;
+  display:flex;
 }
 
 .reveal-role-front,
@@ -4306,9 +4315,18 @@ body{
     font-size:26px;
   }
 
-  .reveal-role-flip .role-inner{
-    height:150px;
-  }
+  .reveal-role-flip{
+  height:150px;
+}
+
+.reveal-role-flip .role-inner{
+  height:100%;
+}
+.reveal-role-front,
+.reveal-role-back{
+  height:100%;
+  display:flex;
+}
 
   .reveal-role-front-text{
     font-size:24px;
@@ -4338,9 +4356,18 @@ body{
     font-size:22px;
   }
 
-  .reveal-role-flip .role-inner{
-    height:140px;
-  }
+  .reveal-role-flip{
+  height:140px;
+}
+
+.reveal-role-flip .role-inner{
+  height:100%;
+}
+.reveal-role-front,
+.reveal-role-back{
+  height:100%;
+  display:flex;
+}
 
   .reveal-role-front-text{
     font-size:22px;
@@ -4509,8 +4536,17 @@ body{
   margin-bottom:18px;
 }
 
-.reveal-role-flip .role-inner{
+.reveal-role-flip{
   height:170px;
+}
+
+.reveal-role-flip .role-inner{
+  height:100%;
+}
+.reveal-role-front,
+.reveal-role-back{
+  height:100%;
+  display:flex;
 }
 
 .reveal-role-front,
@@ -4749,9 +4785,18 @@ body{
     font-size:26px;
   }
 
-  .reveal-role-flip .role-inner{
-    height:150px;
-  }
+  .reveal-role-flip{
+  height:150px;
+}
+
+.reveal-role-flip .role-inner{
+  height:100%;
+}
+.reveal-role-front,
+.reveal-role-back{
+  height:100%;
+  display:flex;
+}
 
   .reveal-role-front-text{
     font-size:24px;
@@ -4781,9 +4826,19 @@ body{
     font-size:22px;
   }
 
-  .reveal-role-flip .role-inner{
-    height:140px;
-  }
+  .reveal-role-flip{
+  height:140px;
+}
+
+.reveal-role-flip .role-inner{
+  height:100%;
+}
+
+.reveal-role-front,
+.reveal-role-back{
+  height:100%;
+  display:flex;
+}
 
   .reveal-role-front-text{
     font-size:22px;
@@ -4818,4 +4873,22 @@ body{
     transform:scale(1.25);
     opacity:1;
   }
+}
+
+.reveal-role-back{
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.06), transparent 40%),
+    linear-gradient(180deg, rgba(20,20,30,0.98), rgba(10,10,16,0.98));
+}
+
+.reveal-role-front,
+.reveal-role-back{
+  background-clip:padding-box;
+}
+.reveal-role-flip{
+  perspective:1000px;
+}
+
+.role-inner{
+  transform-style:preserve-3d;
 }
