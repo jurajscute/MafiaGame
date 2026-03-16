@@ -1564,61 +1564,101 @@ render(`
 }
 
 function showSetup(){
-renderPlayerSetup()
+  renderPlayerSetup()
 }
 
 function renderPlayerSetup(){
+  let list = ""
 
-let list=""
+  state.players.forEach((p, i) => {
+    list += `
+      <li class="setup-player-card">
+        <div class="setup-player-left">
+          <div class="setup-player-avatar">👤</div>
 
-state.players.forEach((p,i)=>{
+          <div class="setup-player-input-wrap">
+            <div class="setup-player-label">Player ${i + 1}</div>
+            <input
+              class="setup-player-input"
+              value="${p.name}"
+              oninput="window.renamePlayer(${i}, this.value)"
+              placeholder="Enter player name"
+            >
+          </div>
+        </div>
 
-list += `
+        <button class="setup-remove-btn" onclick="window.removePlayer(${i})" aria-label="Remove player">
+          ✕
+        </button>
+      </li>
+    `
+  })
 
-<li class="player-row">
+  const playerCount = state.players.length
 
-<span class="player-icon">👤</span>
+  render(`
+    <div class="card setup-screen-card">
 
-<input 
-value="${p.name}"
-oninput="window.renamePlayer(${i}, this.value)"
->
+      <div class="setup-hero">
+        <div class="setup-kicker">Game Setup</div>
+        <h2 class="setup-title">Add Players</h2>
+        <div class="setup-subtitle">
+          Build your lobby, rename players, and get everything ready before the game begins.
+        </div>
+      </div>
 
-<button onclick="window.removePlayer(${i})">✖</button>
+      <div class="setup-stat-row">
+        <div class="setup-stat-pill">
+          <span class="setup-stat-value">${playerCount}</span>
+          <span class="setup-stat-text">Player${playerCount === 1 ? "" : "s"}</span>
+        </div>
+      </div>
 
-</li>
+      <div class="setup-list-panel">
+        ${
+          state.players.length
+            ? `
+              <ul class="setup-player-list">
+                ${list}
+              </ul>
+            `
+            : `
+              <div class="setup-empty-state">
+                <div class="setup-empty-icon">🎭</div>
+                <div class="setup-empty-title">No players added yet</div>
+                <div class="setup-empty-text">
+                  Add your first player to start building the game.
+                </div>
+              </div>
+            `
+        }
+      </div>
 
-`
+      <div class="setup-actions">
+        <button onclick="window.addPlayer()">Add Player</button>
+        <button class="skip-btn" onclick="window.clearPlayers()">Reset Players</button>
+        <button onclick="window.startGame()" ${playerCount < 4 ? "disabled" : ""}>
+          Start Game
+        </button>
+      </div>
 
-})
+      ${
+        playerCount < 4
+          ? `
+            <div class="setup-help-note">
+              You need at least <strong>4 players</strong> to start.
+            </div>
+          `
+          : ""
+      }
 
-render(`
-
-<div class="card">
-
-<h2>Add Players</h2>
-
-<ul>
-${list}
-</ul>
-
-<button onclick="window.addPlayer()">Add Player</button>
-
-<button onclick="window.clearPlayers()">Reset Players</button>
-
-<button onclick="window.startGame()">Start Game</button>
-
-</div>
-
-`)
-
+    </div>
+  `)
 }
 
-window.renamePlayer = function(index,newName){
-
-state.players[index].name = newName
-savePlayers()
-
+window.renamePlayer = function(index, newName){
+  state.players[index].name = newName
+  savePlayers()
 }
 
 window.removePlayer = function(index){
