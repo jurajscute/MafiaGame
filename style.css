@@ -117,7 +117,7 @@ button:active{
   display:flex;
   justify-content:center;
   align-items:center;
-  gap:16px;
+  gap:6px;
   flex-wrap:wrap;
 }
 
