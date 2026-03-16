@@ -2791,30 +2791,48 @@ const winnerBanner = getFinalWinnerBanner()
       let color = roleColors[p.role] || "white"
       let target = state.executionerTargets?.[p.name]
 
-      if(p.role === "executioner"){
-        return `
-          <div class="final-player-card executioner-row"
-               style="--final-role-color:${color};"
-               onclick="window.toggleExecutionerReveal('${p.name}')">
+      if(p.role === "executioner" || p.wasExecutioner){
+  const color = roleColors.executioner
+  const target = state.executionerTargets?.[p.name]
+  const turnedInto = p.wasExecutioner && p.executionerConvertedTo
+    ? roleDisplayName(p.executionerConvertedTo)
+    : null
 
-            <div class="final-player-main">
-              <div class="final-player-name">${p.name}</div>
-              <div class="final-player-role" style="color:${color}">
-                <span class="executioner-arrow" id="executioner-arrow-${p.name}">▸</span>
-                ${roleDisplayName(p.role)}
-              </div>
-            </div>
+  return `
+    <div class="final-player-card executioner-row"
+         style="--final-role-color:${color};"
+         onclick="window.toggleExecutionerReveal('${p.name}')">
 
-          </div>
+      <div class="final-player-main">
+        <div class="final-player-name">${p.name}</div>
+        <div class="final-player-role" style="color:${color}">
+          <span class="executioner-arrow" id="executioner-arrow-${p.name}">▸</span>
+          Executioner
+          ${
+            turnedInto
+              ? `<span class="final-role-tag"
+                   style="
+                     color:${roleColors[p.executionerConvertedTo] || "white"};
+                     border-color:${(roleColors[p.executionerConvertedTo] || "white")}33;
+                     background:${(roleColors[p.executionerConvertedTo] || "white")}14;
+                   ">
+                   turned ${turnedInto}
+                 </span>`
+              : ""
+          }
+        </div>
+      </div>
 
-          ${target ? `
-            <div class="executioner-target-reveal final-target-reveal" id="executioner-target-${p.name}">
-              <span class="executioner-target-reveal-label">Target:</span>
-              <span class="executioner-target-reveal-name">${target}</span>
-            </div>
-          ` : ""}
-        `
-      }
+    </div>
+
+    ${target ? `
+      <div class="executioner-target-reveal final-target-reveal" id="executioner-target-${p.name}">
+        <span class="executioner-target-reveal-label">Target:</span>
+        <span class="executioner-target-reveal-name">${target}</span>
+      </div>
+    ` : ""}
+  `
+}
 
       if(p.role === "schrodingers_cat" && p.catAlignment){
         const alignColor = p.catAlignment === "mafia" ? roleColors.mafia : roleColors.villager
@@ -2834,29 +2852,6 @@ const winnerBanner = getFinalWinnerBanner()
           </div>
         `
       }
-
-if(p.wasExecutioner){
-  const currentColor = roleColors[p.role] || "white"
-
-  return `
-    <div class="final-player-card" style="--final-role-color:${currentColor};">
-      <div class="final-player-main">
-        <div class="final-player-name">${p.name}</div>
-        <div class="final-player-role" style="color:${currentColor}">
-          ${roleDisplayName(p.role)}
-          <span class="final-role-tag"
-                style="
-                  color:${roleColors.executioner};
-                  border-color:${roleColors.executioner}33;
-                  background:${roleColors.executioner}14;
-                ">
-            Former Executioner
-          </span>
-        </div>
-      </div>
-    </div>
-  `
-}
 
       return `
         <div class="final-player-card" style="--final-role-color:${color};">
