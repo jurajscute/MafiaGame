@@ -3128,3 +3128,121 @@ body.holy-night-flash .holy-pulse{
     height:40px;
   }
 }
+
+/* =========================
+   FIX: NORMAL CARDS SHOULD NOT FILL SCREEN
+   only settings + final results can be fullscreen-ish
+========================= */
+
+/* keep the app centered */
+body{
+  justify-content:center;
+  align-items:center;
+}
+
+#app{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+  box-sizing:border-box;
+}
+
+/* default game cards */
+.card:not(.final-results-card):not(.final-results-shell):not(.settings-modal-shell):not(.pass-screen){
+  width:min(420px, calc(100vw - 32px));
+  max-width:420px;
+  margin:0 auto;
+  min-height:auto;
+  max-height:none;
+  border-radius:16px;
+}
+
+/* pass phone layout */
+.pass-screen{
+  min-height:auto;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:18px;
+  text-align:center;
+}
+
+.pass-card{
+  width:min(420px, calc(100vw - 32px));
+  max-width:420px;
+  margin:0 auto;
+}
+
+/* final results stays large */
+.final-results-card,
+.final-results-shell,
+.final-results-centered{
+  width:min(980px, calc(100vw - 32px));
+  max-width:980px;
+  margin:0 auto;
+}
+
+/* mobile: normal cards stay card-sized */
+@media (max-width: 700px){
+  body{
+    align-items:center !important;
+  }
+
+  #app{
+    padding:16px !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+
+  .card:not(.final-results-card):not(.final-results-shell):not(.settings-modal-shell):not(.pass-screen){
+    width:min(420px, calc(100vw - 24px)) !important;
+    max-width:420px !important;
+    min-height:auto !important;
+    max-height:none !important;
+    margin:0 auto !important;
+    border-radius:16px !important;
+    padding:24px 18px !important;
+  }
+
+  .pass-card{
+    width:min(420px, calc(100vw - 24px)) !important;
+    max-width:420px !important;
+    min-height:auto !important;
+    margin:0 auto !important;
+    border-radius:18px !important;
+  }
+
+  /* only final results can feel fullscreen */
+  .final-results-card{
+    width:100% !important;
+    max-width:none !important;
+    max-height:100vh !important;
+    min-height:100vh !important;
+    border-radius:0 !important;
+    margin:0 !important;
+  }
+
+  /* only settings modal can be fullscreen */
+  .settings-modal-shell{
+    width:100vw !important;
+    height:100vh !important;
+    max-height:100vh !important;
+    border-radius:0 !important;
+  }
+}
+
+@media (max-width: 520px){
+  .card:not(.final-results-card):not(.final-results-shell):not(.settings-modal-shell):not(.pass-screen){
+    width:min(420px, calc(100vw - 20px)) !important;
+    max-width:420px !important;
+  }
+
+  .pass-card{
+    width:min(420px, calc(100vw - 20px)) !important;
+    max-width:420px !important;
+  }
+}
