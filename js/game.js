@@ -40,40 +40,319 @@ JSON.stringify(state.roleCounts)
 }
 
 function showInfo(){
+  const modal = document.getElementById("infoModal")
 
-openModal(`
+  const townRoles = ["villager", "doctor", "sheriff", "mayor", "spirit", "vigilante", "priest"]
+  const neutralRoles = ["jester", "executioner", "schrodingers_cat"]
+  const mafiaRoles = ["mafia", "framer", "traitor"]
 
-<div class="modal-content">
+  function roleTeam(role){
+    if(mafiaRoles.includes(role)) return "Mafia"
+    if(neutralRoles.includes(role)) return "Neutral"
+    return "Town"
+  }
 
-<h2>Game Rules</h2>
+  function roleRulesText(role){
+    if(role === "mafia"){
+      return `
+        Chooses one player to eliminate each night.
+        ${
+          state.mafiaKillMethod === "leader"
+            ? `The kill is chosen by a rotating leader.`
+            : `The mafia vote on who to kill.`
+        }
+      `
+    }
 
-<h3 style="color:${roleColors.mafia}">Mafia</h3>
-<p>Chooses one player to eliminate each night.</p>
+    if(role === "villager"){
+      return `
+        No special power. Use discussion, deduction, and voting to find the mafia.
+      `
+    }
 
-<h3 style="color:${roleColors.doctor}">Doctor</h3>
-<p>Can protect one player from elimination.</p>
+    if(role === "doctor"){
+      return `
+        Protects one player each night from being killed.
+        ${
+          state.doctorRevealSave
+            ? `If a save happens, it is revealed publicly.`
+            : `Saves stay hidden from the town.`
+        }
+      `
+    }
 
-<h3 style="color:${roleColors.sheriff}">Sheriff</h3>
-<p>Investigates a player to see if they are mafia.</p>
+    if(role === "sheriff"){
+      return `
+        Investigates one player each night.
+        ${
+          state.sheriffExactReveal
+            ? `Gets the exact role as the result.`
+            : `Gets an innocent / not innocent style result.`
+        }
+      `
+    }
 
-<h3 style="color:${roleColors.jester}">Jester</h3>
-<p>Wins if they get voted out during the day.</p>
+    if(role === "mayor"){
+      return `
+        Has stronger voting power during the day.
+        Current setting: ${state.mayorVotePower} votes.
+      `
+    }
 
-<h3 style="color:${roleColors.villager}">Villager</h3>
-<p>No special power. Help find the mafia.</p>
+    if(role === "spirit"){
+      return `
+        After dying, can reveal ${
+          state.spiritRevealType === "team" ? "a player's team" : "a player's exact role"
+        }.
+        Activates on ${
+          state.spiritActivation === "any_death" ? "any death" : "night deaths only"
+        }.
+        ${
+          state.spiritCanSkipReveal
+            ? `Can choose to skip the reveal.`
+            : `Must choose someone to reveal.`
+        }
+      `
+    }
 
-<h3 style="color:${roleColors.schrodingers_cat}">Schrödinger's Cat</h3>
-<p>
-If killed by the Vigilante, it joins the town. If killed by the Mafia, it joins the Mafia.
-This happens secretly and is only revealed privately during the night results phase.
-</p>
+    if(role === "vigilante"){
+      return `
+        Chooses someone to attack at night.
+        ${
+          state.vigilanteCanKillNeutrals
+            ? `Can kill neutral roles.`
+            : `Cannot kill neutral roles.`
+        }
+        Wrong target outcome: ${
+          state.vigilanteWrongKillOutcome === "both_die"
+            ? "both die"
+            : state.vigilanteWrongKillOutcome === "only_vigilante_dies"
+              ? "only Vigilante dies"
+              : "only target dies"
+        }.
+      `
+    }
 
-<button onclick="closeInfo()">Close</button>
+    if(role === "priest"){
+      return `
+        Can call upon the Holy Spirit to shield the whole town from attacks.
+        Uses per game: ${state.priestUsesPerGame}.
+      `
+    }
 
-</div>
+    if(role === "jester"){
+      return `
+        Wins if voted out by the town.
+        Sheriff sees Jester as ${
+          state.sheriffJesterResult === "exact"
+            ? "the exact role"
+            : state.sheriffJesterResult === "innocent"
+              ? "innocent"
+              : "not innocent"
+        }.
+        ${
+          state.jesterWinIfVigilanteKilled
+            ? `Also wins if killed by the Vigilante.`
+            : `Does not win if killed by the Vigilante.`
+        }
+      `
+    }
 
-`)
+    if(role === "executioner"){
+      return `
+        Wins by getting their assigned target eliminated.
+        Can target ${
+          state.executionerTargetRule === "both"
+            ? "town, mafia, or jester"
+            : state.executionerTargetRule === "mafia"
+              ? "town or mafia"
+              : state.executionerTargetRule === "jester"
+                ? "town or jester"
+                : "town only"
+        }.
+        ${
+          state.executionerWinIfDead
+            ? `Can still win while dead.`
+            : `Must be alive to win.`
+        }
+        After target dies, becomes ${
+          state.executionerBecomes === "jester"
+            ? "Jester"
+            : state.executionerBecomes === "traitor"
+              ? "Traitor"
+              : "Villager"
+        }.
+      `
+    }
 
+    if(role === "schrodingers_cat"){
+      return `
+        If attacked by the Mafia, joins the Mafia instead of dying.
+        If attacked by the Vigilante, joins the Town instead of dying.
+        This conversion is secret and revealed privately.
+      `
+    }
+
+    if(role === "framer"){
+      return `
+        Frames a player so they appear suspicious to the Sheriff.
+        ${
+          state.framerKnowsSuccess
+            ? `The Framer learns if the frame worked.`
+            : `The Framer does not learn if the frame worked.`
+        }
+        ${
+          state.framerKnowsMafia
+            ? `The Framer knows who the mafia are.`
+            : `The Framer does not know who the mafia are.`
+        }
+      `
+    }
+
+    if(role === "traitor"){
+      return `
+        A hidden ally of the mafia. Counts with the mafia team for victory.
+      `
+    }
+
+    return roles[role]?.description || "No description available."
+  }
+
+  function roleStatus(role){
+    if(role === "villager" || role === "mafia") return "Core"
+
+    if(state.rolesEnabled[role]){
+      const count = state.roleCounts[role] || 1
+      return `Enabled · Up to ${count}`
+    }
+
+    return "Disabled"
+  }
+
+  function renderRoleCard(role){
+    const color = roleColors[role] || "#ffffff"
+    const enabled = role === "villager" || role === "mafia" || !!state.rolesEnabled[role]
+
+    return `
+      <div class="rules-role-card ${enabled ? "rules-role-enabled" : "rules-role-disabled"}"
+           style="--rules-role-color:${color};">
+
+        <button
+          class="rules-role-header"
+          onclick="window.toggleInfoRole('${role}')"
+          type="button"
+        >
+          <div class="rules-role-header-main">
+            <div class="rules-role-name" style="color:${color}">
+              ${roleDisplayName(role)}
+            </div>
+            <div class="rules-role-team">
+              ${roleTeam(role)}
+            </div>
+          </div>
+
+          <div class="rules-role-header-side">
+            <div class="rules-role-status">
+              ${roleStatus(role)}
+            </div>
+            <div class="rules-role-arrow" id="rules-arrow-${role}">▾</div>
+          </div>
+        </button>
+
+        <div class="rules-role-panel" id="rules-panel-${role}">
+          <div class="rules-role-panel-inner">
+            <div class="rules-role-description">
+              ${roleRulesText(role)}
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  }
+
+  function buildSection(title, rolesList, className){
+    const visibleRoles = rolesList.filter(role => {
+      if(role === "villager" || role === "mafia") return true
+      return !!state.rolesEnabled[role]
+    })
+
+    if(!visibleRoles.length) return ""
+
+    return `
+      <div class="rules-section ${className}">
+        <div class="rules-section-bar">
+          <div>
+            <div class="rules-section-kicker">Role Group</div>
+            <h3 class="rules-section-title">${title}</h3>
+          </div>
+          <div class="rules-section-count">${visibleRoles.length}</div>
+        </div>
+
+        <div class="rules-role-list">
+          ${visibleRoles.map(renderRoleCard).join("")}
+        </div>
+      </div>
+    `
+  }
+
+  const content = `
+    <div class="modal-content rules-modal-shell">
+
+      <div class="settings-header">
+        <div class="settings-header-main">
+          <div>
+            <h2 class="settings-title-modern">Game Rules</h2>
+            <div class="settings-subtitle-modern">
+              Roles currently active in this setup, organized by team.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-scroll">
+
+        <div class="rules-hero">
+          <div class="rules-kicker">Reference</div>
+          <h2 class="rules-title">Current Role Guide</h2>
+          <div class="rules-subtitle">
+            Tap any role card to expand it and quickly review what it does in this game.
+          </div>
+        </div>
+
+        ${buildSection("Town", townRoles, "rules-section-town")}
+        ${buildSection("Neutral", neutralRoles, "rules-section-neutral")}
+        ${buildSection("Mafia", mafiaRoles, "rules-section-mafia")}
+
+      </div>
+
+      <div class="settings-footer">
+        <button class="close-settings-btn" onclick="closeInfo()">Close</button>
+      </div>
+    </div>
+  `
+
+  if(modal.classList.contains("show")){
+    swapModalContent(content)
+  }else{
+    openModal(content)
+  }
+}
+
+window.toggleInfoRole = function(role){
+  const panel = document.getElementById(`rules-panel-${role}`)
+  const arrow = document.getElementById(`rules-arrow-${role}`)
+
+  if(!panel || !arrow) return
+
+  const isOpen = panel.classList.contains("show")
+
+  if(isOpen){
+    panel.classList.remove("show")
+    arrow.style.transform = "rotate(0deg)"
+  }else{
+    panel.classList.add("show")
+    arrow.style.transform = "rotate(180deg)"
+  }
 }
 
 window.toggleHostMode = function(enabled){
