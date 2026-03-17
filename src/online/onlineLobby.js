@@ -20,12 +20,28 @@ function getOnlineSettings() {
 }
 
 window.markOnlineReady = async function() {
-  if (!demoRoom?.code || !currentPlayerId) return
+  console.log("markOnlineReady clicked")
+  console.log("demoRoom:", demoRoom)
+  console.log("currentPlayerId:", currentPlayerId)
 
-  const readyRef = ref(db, `rooms/${demoRoom.code}/gameState/readyMap/${currentPlayerId}`)
+  if (!demoRoom?.code) {
+    console.warn("No room code found")
+    return
+  }
+
+  if (!currentPlayerId) {
+    console.warn("No currentPlayerId found")
+    return
+  }
+
+  const readyRef = ref(
+    db,
+    `rooms/${demoRoom.code}/gameState/readyMap/${currentPlayerId}`
+  )
 
   try {
     await set(readyRef, true)
+    console.log("Ready saved successfully")
   } catch (error) {
     console.error("Failed to mark player ready:", error)
   }
@@ -346,37 +362,38 @@ window.saveOnlineSettings = async function () {
 function subscribeToRoom(roomCode) {
   const roomRef = ref(db, `rooms/${roomCode}`)
 
-  onValue(roomRef, (snapshot) => {
-  demoRoom = snapshot.val()
+  onValue(roomRef, async (snapshot) => {
+    demoRoom = snapshot.val()
 
-  if (!demoRoom) {
-    render(`
-      <div class="card home-screen-card">
-        <div class="home-hero">
-          <div class="home-kicker">Online Room</div>
-          <h2 class="home-title">Room Not Found</h2>
-          <div class="home-subtitle">
-            This room does not exist, or was deleted.
+    if (!demoRoom) {
+      render(`
+        <div class="card home-screen-card">
+          <div class="home-hero">
+            <div class="home-kicker">Online Room</div>
+            <h2 class="home-title">Room Not Found</h2>
+            <div class="home-subtitle">
+              This room does not exist, or was deleted.
+            </div>
+          </div>
+
+          <div class="home-actions">
+            <button class="primary-btn" onclick="window.showOnlineMenu()">
+              Back
+            </button>
           </div>
         </div>
+      `)
+      return
+    }
 
-        <div class="home-actions">
-          <button class="primary-btn" onclick="window.showOnlineMenu()">
-            Back
-          </button>
-        </div>
-      </div>
-    `)
-    return
-  }
+    if (demoRoom.phase === "in_game") {
+      renderOnlineGame()
+      await maybeAdvanceOnlinePhase()
+      return
+    }
 
-  if (demoRoom.phase === "in_game") {
-    renderOnlineGame()
-    return
-  }
-
-  renderRoomLobby()
-})
+    renderRoomLobby()
+  })
 }
 
 window.showOnlineLobbyHome = function () {
@@ -545,6 +562,42 @@ function renderOnlineProceedButton(label = "Continue") {
       ${label}
     </button>
   `
+}
+
+function getNextOnlinePhase(currentPhase) {
+  if (currentPhase === "role_reveal") return "night_select"
+  if (currentPhase === "night_select") return "night_results"
+  if (currentPhase === "night_results") return "morning"
+  if (currentPhase === "morning") return "voting"
+  if (currentPhase === "voting") return "vote_results"
+  if (currentPhase === "vote_results") return "night_select"
+
+  return currentPhase
+}
+
+async function maybeAdvanceOnlinePhase() {
+  if (!currentIsHost || !demoRoom?.gameState) return
+
+  const gameState = demoRoom.gameState
+  const alivePlayers = (gameState.players || []).filter(player => player.alive !== false)
+  const readyMap = gameState.readyMap || {}
+
+  const everyoneReady =
+    alivePlayers.length > 0 &&
+    alivePlayers.every(player => readyMap[player.id])
+
+  if (!everyoneReady) return
+
+  const nextPhase = getNextOnlinePhase(gameState.phase)
+
+  try {
+    await update(getOnlineRoomRef(), {
+      "gameState/phase": nextPhase,
+      "gameState/readyMap": {}
+    })
+  } catch (error) {
+    console.error("Failed to auto-advance online phase:", error)
+  }
 }
 
 function renderOnlineGame() {
@@ -938,17 +991,12 @@ function getRoleDescription(role) {
 window.advanceOnlinePhase = async function () {
   if (!currentIsHost || !demoRoom?.gameState) return
 
-  const currentPhase = demoRoom.gameState.phase
-  let nextPhase = currentPhase
-
-  if (currentPhase === "role_reveal") nextPhase = "day"
-  else if (currentPhase === "day") nextPhase = "night"
-  else if (currentPhase === "night") nextPhase = "voting"
-  else if (currentPhase === "voting") nextPhase = "day"
+  const nextPhase = getNextOnlinePhase(demoRoom.gameState.phase)
 
   try {
     await update(getOnlineRoomRef(), {
-      "gameState/phase": nextPhase
+      "gameState/phase": nextPhase,
+      "gameState/readyMap": {}
     })
   } catch (error) {
     console.error("Failed to advance phase:", error)
