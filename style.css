@@ -1908,6 +1908,12 @@ body.night .top-ui button{
   filter:grayscale(35%);
 }
 
+.modal-content .reset-settings-btn{
+  background:linear-gradient(135deg,#8b1e1e,#5e1010);
+  color:white;
+  margin-top:0px;
+}
+
 .modal-content .reset-settings-btn:hover{
   background:linear-gradient(135deg,#a32626,#701414);
 }
