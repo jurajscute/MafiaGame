@@ -576,6 +576,7 @@ window.toggleHostMode = function(enabled){
     "mafiaHostMode",
     JSON.stringify(enabled)
   )
+  refreshPregameSummaryIfOpen()
 }
 
 window.resetSettings = function(){
@@ -699,7 +700,7 @@ localStorage.setItem(
 "mafiaSpiritRevealType",
 JSON.stringify(value)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 window.setSpiritActivation = function(value){
@@ -710,7 +711,7 @@ localStorage.setItem(
 "mafiaSpiritActivation",
 JSON.stringify(value)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 window.toggleSpiritCanSkipReveal = function(enabled){
@@ -721,7 +722,7 @@ localStorage.setItem(
 "mafiaSpiritCanSkipReveal",
 JSON.stringify(enabled)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
   export function roleDisplayName(role){
@@ -1244,7 +1245,7 @@ localStorage.setItem(
 "mafiaJesterVigilanteWin",
 JSON.stringify(enabled)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 
@@ -1336,14 +1337,14 @@ localStorage.setItem(
 "mafiaRoleWeights",
 JSON.stringify(state.roleWeights)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 window.showSettings = showSettings
 
 window.toggleRole = function(role, enabled){
   state.rolesEnabled[role] = enabled
-
+refreshPregameSummaryIfOpen()
   localStorage.setItem(
     "mafiaRoles",
     JSON.stringify(state.rolesEnabled)
@@ -1716,7 +1717,7 @@ window.setPriestUsesPerGame = function(value){
     "mafiaPriestUsesPerGame",
     JSON.stringify(state.priestUsesPerGame)
   )
-
+refreshPregameSummaryIfOpen()
 }
 
 function loadPlayers(){
@@ -1904,7 +1905,7 @@ localStorage.setItem(
 "mafiaKnowsFirstLeader",
 JSON.stringify(enabled)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 window.toggleFramerKnowsSuccess = function(enabled){
@@ -1915,7 +1916,7 @@ localStorage.setItem(
 "mafiaFramerKnowsSuccess",
 JSON.stringify(enabled)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 window.toggleFramerKnowsMafia = function(enabled){
@@ -1926,7 +1927,7 @@ localStorage.setItem(
 "mafiaFramerKnowsMafia",
 JSON.stringify(enabled)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 window.toggleMafiaKnowsFramer = function(enabled){
@@ -1937,7 +1938,7 @@ localStorage.setItem(
 "mafiaMafiaKnowsFramer",
 JSON.stringify(enabled)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 window.setMafiaKillMethod = function(value){
@@ -1948,7 +1949,7 @@ localStorage.setItem(
 "mafiaKillMethod",
 JSON.stringify(value)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 window.setMayorVotePower = function(value){
@@ -1959,7 +1960,7 @@ localStorage.setItem(
 "mafiaMayorVotePower",
 JSON.stringify(state.mayorVotePower)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 window.setSheriffExecutionerResult = function(value){
@@ -1970,7 +1971,7 @@ localStorage.setItem(
 "mafiaSheriffExecutionerResult",
 JSON.stringify(value)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 window.setSheriffJesterResult = function(value){
@@ -1981,7 +1982,7 @@ localStorage.setItem(
 "mafiaSheriffJesterResult",
 JSON.stringify(value)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 window.setRevealRolesOnElimination = function(value){
@@ -1992,7 +1993,7 @@ localStorage.setItem(
 "mafiaRevealRolesOnElimination",
 JSON.stringify(value)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 window.toggleExecutionerWinIfDead = function(enabled){
@@ -2003,7 +2004,7 @@ localStorage.setItem(
 "mafiaExecutionerWinIfDead",
 JSON.stringify(enabled)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 window.setExecutionerTargetRule = function(value){
@@ -2014,7 +2015,7 @@ localStorage.setItem(
 "mafiaExecutionerTargetRule",
 JSON.stringify(value)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 window.setExecutionerBecomes = function(value){
@@ -2025,7 +2026,7 @@ localStorage.setItem(
 "mafiaExecutionerBecomes",
 JSON.stringify(value)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 export function setDay() {
@@ -2067,7 +2068,7 @@ localStorage.setItem(
 "mafiaDoctorReveal",
 JSON.stringify(enabled)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 window.toggleSheriffExactReveal = function(enabled){
@@ -2078,7 +2079,7 @@ localStorage.setItem(
 "mafiaSheriffExactReveal",
 JSON.stringify(enabled)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 function showHome(){
@@ -2242,96 +2243,113 @@ clampMafiaOverride()
 }
 
 function assignRoles(){
+  let players = state.players
 
-let players = state.players
-let pool = []
+  let mafia = state.mafiaCountOverride || mafiaCount(players.length)
+  mafia = Math.min(mafia, maxAllowedMafia(players.length))
 
-let mafia = state.mafiaCountOverride || mafiaCount(players.length)
-mafia = Math.min(mafia, maxAllowedMafia(players.length))
+  const guaranteedRoles = []
+  const optionalPool = []
 
-for(let i=0;i<mafia;i++){
-pool.push("mafia")
-}
-
-["doctor","sheriff","jester","executioner","mayor","spirit","framer","vigilante","priest","schrodingers_cat","traitor"].forEach(role=>{
-
-if(!state.rolesEnabled[role]) return
-
-let weight = state.roleWeights[role] || 0
-let max = state.roleCounts[role] || 1
-
-for(let i=0;i<max;i++){
-
-let roll = Math.random()*100
-
-if(roll < weight){
-pool.push(role)
-}
-
-}
-
-})
-
-while(pool.length < players.length){
-pool.push("villager")
-}
-
-shuffle(pool)
-
-players.forEach((p,i)=>{
-  p.role = pool[i]
-  p.catAlignment = null
-  p.wasExecutioner = false
-  p.executionerConvertedTo = null
-  p.alive = true
-})
-
-players.forEach(p => {
-  if(p.role === "priest"){
-    p.priestUsesLeft = state.priestUsesPerGame
+  // Always guarantee core mafia roles
+  for(let i = 0; i < mafia; i++){
+    guaranteedRoles.push("mafia")
   }
-})
 
-let mafiaPlayers = players
-  .filter(p => p.role === "mafia")
-  .map(p => p.name)
+  // Roll optional/special roles into a separate pool
+  ;["doctor","sheriff","jester","executioner","mayor","spirit","framer","vigilante","priest","schrodingers_cat","traitor"].forEach(role => {
+    if(!state.rolesEnabled[role]) return
 
-state.mafiaLeaderOrder = shuffle([...mafiaPlayers])
-state.mafiaLeaderIndex = 0
-state.currentMafiaLeader = state.mafiaLeaderOrder[0] || null
+    let weight = state.roleWeights[role] || 0
+    let max = state.roleCounts[role] || 1
 
-state.executionerTargets = {}
-
-let executioners = players.filter(p => p.role === "executioner")
-
-executioners.forEach(executioner => {
-
-  let possibleTargets = players.filter(p => {
-    if(p.name === executioner.name) return false
-    if(p.role === "executioner") return false
-
-    if(state.executionerTargetRule === "neither"){
-      return p.role !== "mafia" && p.role !== "jester"
+    for(let i = 0; i < max; i++){
+      let roll = Math.random() * 100
+      if(roll < weight){
+        optionalPool.push(role)
+      }
     }
-
-    if(state.executionerTargetRule === "mafia"){
-      return p.role !== "jester"
-    }
-
-    if(state.executionerTargetRule === "jester"){
-      return p.role !== "mafia"
-    }
-
-    return true // both
   })
 
-  if(possibleTargets.length){
-    let target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)]
-    state.executionerTargets[executioner.name] = target.name
+  // Shuffle optional roles so selection is random
+  shuffle(optionalPool)
+
+  // Fill remaining slots after guaranteed mafia
+  const slotsLeft = Math.max(0, players.length - guaranteedRoles.length)
+  let finalPool = [
+    ...guaranteedRoles,
+    ...optionalPool.slice(0, slotsLeft)
+  ]
+
+  // Fill any leftover space with villagers
+  while(finalPool.length < players.length){
+    finalPool.push("villager")
   }
 
-})
+  // Final shuffle so mafia aren't always grouped at the front
+  shuffle(finalPool)
 
+  players.forEach((p, i) => {
+    p.role = finalPool[i]
+    p.catAlignment = null
+    p.wasExecutioner = false
+    p.executionerConvertedTo = null
+    p.alive = true
+  })
+
+  players.forEach(p => {
+    if(p.role === "priest"){
+      p.priestUsesLeft = state.priestUsesPerGame
+    }
+  })
+
+  let mafiaPlayers = players
+    .filter(p => p.role === "mafia")
+    .map(p => p.name)
+
+  state.mafiaLeaderOrder = shuffle([...mafiaPlayers])
+  state.mafiaLeaderIndex = 0
+  state.currentMafiaLeader = state.mafiaLeaderOrder[0] || null
+
+  state.executionerTargets = {}
+
+  let executioners = players.filter(p => p.role === "executioner")
+
+  executioners.forEach(executioner => {
+    let possibleTargets = players.filter(p => {
+      if(p.name === executioner.name) return false
+      if(p.role === "executioner") return false
+
+      if(state.executionerTargetRule === "neither"){
+        return p.role !== "mafia" && p.role !== "jester"
+      }
+
+      if(state.executionerTargetRule === "mafia"){
+        return p.role !== "jester"
+      }
+
+      if(state.executionerTargetRule === "jester"){
+        return p.role !== "mafia"
+      }
+
+      return true
+    })
+
+    if(possibleTargets.length){
+      let target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)]
+      state.executionerTargets[executioner.name] = target.name
+    }
+  })
+  if(!players.some(p => p.role === "mafia")){
+  console.error("Role assignment failed: no mafia assigned.")
+}
+}
+
+function refreshPregameSummaryIfOpen(){
+  const pregameCard = document.querySelector(".pregame-summary-card")
+  if(pregameCard){
+    showPreGameSummary()
+  }
 }
 
 function startGame(){
@@ -2359,6 +2377,55 @@ function showPreGameSummary(){
   function isRoleEnabled(role){
     return !!state.rolesEnabled[role]
   }
+
+function getEnabledSpecialRoleCopies(rolesArray){
+  return rolesArray.reduce((total, role) => {
+    if(!state.rolesEnabled[role]) return total
+    return total + (state.roleCounts[role] || 1)
+  }, 0)
+}
+
+function getVillagerCountEstimate(){
+  const enabledCopies =
+    getEnabledSpecialRoleCopies(townRoles) +
+    getEnabledSpecialRoleCopies(neutralRoles) +
+    getEnabledSpecialRoleCopies(mafiaRoles)
+
+  return Math.max(0, playerCount - mafia - enabledCopies)
+}
+
+function buildCoreRoleCard(role, count, team, description){
+  const color = roleColors[role] || "#fff"
+
+  return `
+    <div class="pregame-role-card" style="--pregame-role-color:${color};">
+      <div class="pregame-role-top">
+        <div class="pregame-role-main">
+          <div class="pregame-role-name" style="color:${color};">
+            ${getRoleDisplayName(role)}
+          </div>
+          <div class="pregame-role-count">
+            ${count}
+          </div>
+        </div>
+      </div>
+
+      <div class="pregame-role-tags">
+        <span class="pregame-role-tag" style="
+          color:${color};
+          border-color:${color}33;
+          background:${color}14;
+        ">
+          ${team}
+        </span>
+      </div>
+
+      <p class="pregame-note" style="margin-top:12px;">
+        ${description}
+      </p>
+    </div>
+  `
+}
 
   function buildRoleCard(role){
     let color = roleColors[role] || "white"
@@ -2526,10 +2593,10 @@ function showPreGameSummary(){
     `
   }
 
-  const enabledRolesCount =
-    townRoles.filter(isRoleEnabled).length +
-    neutralRoles.filter(isRoleEnabled).length +
-    mafiaRoles.filter(isRoleEnabled).length
+  const enabledSpecialRoleTypes =
+  townRoles.filter(isRoleEnabled).length +
+  neutralRoles.filter(isRoleEnabled).length +
+  mafiaRoles.filter(isRoleEnabled).length
 
   let warningsHTML = warnings.length
     ? `
@@ -2555,27 +2622,71 @@ function showPreGameSummary(){
       </div>
     `
 
-  let roleSectionsHTML =
-    buildRoleSection("Town Roles", "Town", "pregame-team-town", townRoles) +
-    buildRoleSection("Neutral Roles", "Neutral", "pregame-team-neutral", neutralRoles) +
-    buildRoleSection("Mafia Roles", "Mafia", "pregame-team-mafia", mafiaRoles)
+  const villagerCount = getVillagerCountEstimate()
 
-  if(!roleSectionsHTML.trim()){
-    roleSectionsHTML = `
-      <div class="pregame-team-card">
-        <div class="pregame-team-header">
-          <div>
-            <div class="pregame-team-kicker">Roles</div>
-            <h3 class="pregame-team-title">Enabled Special Roles</h3>
+let townSectionCards = `
+  ${buildCoreRoleCard("villager", `${villagerCount} guaranteed fill`, "Town", "No special power. Help find the mafia.")}
+  ${townRoles.filter(isRoleEnabled).map(buildRoleCard).join("")}
+`
+
+let neutralSectionCards = `
+  ${neutralRoles.filter(isRoleEnabled).map(buildRoleCard).join("")}
+`
+
+let mafiaSectionCards = `
+  ${buildCoreRoleCard("mafia", `${mafia} guaranteed`, "Mafia", "Chooses one player to eliminate each night.")}
+  ${mafiaRoles.filter(isRoleEnabled).map(buildRoleCard).join("")}
+`
+
+let roleSectionsHTML = `
+  <div class="pregame-team-card pregame-team-town">
+    <div class="pregame-team-header">
+      <div>
+        <div class="pregame-team-kicker">Town</div>
+        <h3 class="pregame-team-title">Town Roles</h3>
+      </div>
+      <div class="pregame-team-count">${1 + townRoles.filter(isRoleEnabled).length}</div>
+    </div>
+
+    <div class="pregame-role-grid">
+      ${townSectionCards}
+    </div>
+  </div>
+
+  ${
+    neutralRoles.some(isRoleEnabled)
+      ? `
+        <div class="pregame-team-card pregame-team-neutral">
+          <div class="pregame-team-header">
+            <div>
+              <div class="pregame-team-kicker">Neutral</div>
+              <h3 class="pregame-team-title">Neutral Roles</h3>
+            </div>
+            <div class="pregame-team-count">${neutralRoles.filter(isRoleEnabled).length}</div>
+          </div>
+
+          <div class="pregame-role-grid">
+            ${neutralSectionCards}
           </div>
         </div>
-
-        <div class="pregame-empty">
-          No special roles enabled
-        </div>
-      </div>
-    `
+      `
+      : ""
   }
+
+  <div class="pregame-team-card pregame-team-mafia">
+    <div class="pregame-team-header">
+      <div>
+        <div class="pregame-team-kicker">Mafia</div>
+        <h3 class="pregame-team-title">Mafia Roles</h3>
+      </div>
+      <div class="pregame-team-count">${1 + mafiaRoles.filter(isRoleEnabled).length}</div>
+    </div>
+
+    <div class="pregame-role-grid">
+      ${mafiaSectionCards}
+    </div>
+  </div>
+`
 
   render(`
     <div class="card pregame-summary-card">
@@ -2600,9 +2711,9 @@ function showPreGameSummary(){
         </div>
 
         <div class="pregame-stat">
-          <div class="pregame-stat-value">${enabledRolesCount}</div>
-          <div class="pregame-stat-label">Special Roles</div>
-        </div>
+  <div class="pregame-stat-value">${enabledSpecialRoleTypes + 2}</div>
+  <div class="pregame-stat-label">Role Types</div>
+</div>
 
         <div class="pregame-stat">
           <div class="pregame-stat-value">${warnings.length}</div>
@@ -3324,7 +3435,7 @@ localStorage.setItem(
 "mafiaExecutionerVigilanteWin",
 JSON.stringify(enabled)
 )
-
+refreshPregameSummaryIfOpen()
 }
 
 function saveSettingsToStorage(){
@@ -3364,6 +3475,7 @@ window.toggleVigilanteCanKillNeutrals = function(enabled){
     "mafiaVigilanteCanKillNeutrals",
     JSON.stringify(enabled)
   )
+  refreshPregameSummaryIfOpen()
 }
 
 window.setVigilanteWrongKillOutcome = function(value){
@@ -3373,6 +3485,7 @@ window.setVigilanteWrongKillOutcome = function(value){
     "mafiaVigilanteWrongKillOutcome",
     JSON.stringify(value)
   )
+refreshPregameSummaryIfOpen()
 }
 
 window.showSetup=showSetup
