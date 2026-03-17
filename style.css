@@ -644,9 +644,9 @@ body.night .card:not(.role-mafia):not(.special-chaos-win):not(.special-spirit-wi
 
 .special-spirit-win{
   background:
-    radial-gradient(circle at top, rgba(255,255,255,0.04), transparent 38%),
-    linear-gradient(180deg, rgba(184, 116, 184, 0.96), rgba(71, 113, 148, 0.98));
-  border:1px solid rgba(255,255,255,0.10);
+    radial-gradient(circle at top, rgba(138, 189, 255, 0.363), transparent 38%),
+    linear-gradient(180deg, rgba(184, 116, 184, 0.37), rgba(71, 113, 148, 0.98));
+  border:1px solid rgba(173, 209, 255, 0.507);
   box-shadow:
     0 0 30px rgba(59, 150, 255, 0.274),
     0 0 30px rgba(245, 165, 255, 0.274);
@@ -680,6 +680,20 @@ body.night .card:not(.role-mafia):not(.special-chaos-win):not(.special-spirit-wi
   box-shadow:
     0 0 30px rgba(110, 0, 51, 0.322),
     0 0 30px rgba(255, 62, 165, 0.295);
+}
+
+body.win-spirit-reveal{
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255, 173, 255, 0.521), transparent 40%),
+    radial-gradient(circle at 70% 80%, rgba(120, 181, 255, 0.5), transparent 45%),
+    linear-gradient(180deg, #e092ff, #91a9ec);
+}
+
+body.win-cat-betrayal{
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.10), transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(231,76,60,0.18), transparent 45%),
+    linear-gradient(180deg, #1a0f0f, #0b0505);
 }
 
 .special-chaos-panel{
