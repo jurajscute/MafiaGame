@@ -19,6 +19,18 @@ function getOnlineSettings() {
   return demoRoom?.settings || null
 }
 
+window.markOnlineReady = async function() {
+  if (!demoRoom?.code || !currentPlayerId) return
+
+  const readyRef = ref(db, `rooms/${demoRoom.code}/gameState/readyMap/${currentPlayerId}`)
+
+  try {
+    await set(readyRef, true)
+  } catch (error) {
+    console.error("Failed to mark player ready:", error)
+  }
+}
+
 async function pushOnlineSettings(partialSettings) {
   if (!currentIsHost || !currentRoomCode) return
 
