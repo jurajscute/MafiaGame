@@ -46,10 +46,46 @@ function showInfo(){
   const neutralRoles = ["jester", "executioner", "schrodingers_cat"]
   const mafiaRoles = ["mafia", "framer", "traitor"]
 
+  const allRoles = [...townRoles, ...neutralRoles, ...mafiaRoles]
+
   function roleTeam(role){
     if(mafiaRoles.includes(role)) return "Mafia"
     if(neutralRoles.includes(role)) return "Neutral"
     return "Town"
+  }
+
+  function isRoleActive(role){
+    if(role === "villager" || role === "mafia") return true
+    return !!state.rolesEnabled[role]
+  }
+
+  function roleStatus(role){
+    if(role === "villager" || role === "mafia") return "Core"
+    if(state.rolesEnabled[role]){
+      const count = state.roleCounts[role] || 1
+      return `Enabled · Up to ${count}`
+    }
+    return "Disabled"
+  }
+
+  function roleTags(role){
+    const tags = []
+
+    if(role === "villager") tags.push("Town", "Core")
+    if(role === "mafia") tags.push("Mafia", "Killing", "Core")
+    if(role === "doctor") tags.push("Town", "Protection")
+    if(role === "sheriff") tags.push("Town", "Info")
+    if(role === "mayor") tags.push("Town", "Voting")
+    if(role === "spirit") tags.push("Town", "Info", "After Death")
+    if(role === "vigilante") tags.push("Town", "Killing", "Chaos")
+    if(role === "priest") tags.push("Town", "Protection", "Rare")
+    if(role === "jester") tags.push("Neutral", "Chaos", "Win Condition")
+    if(role === "executioner") tags.push("Neutral", "Target", "Win Condition")
+    if(role === "schrodingers_cat") tags.push("Neutral", "Chaos", "Conversion")
+    if(role === "framer") tags.push("Mafia", "Deception", "Info")
+    if(role === "traitor") tags.push("Mafia", "Hidden")
+
+    return tags
   }
 
   function roleRulesText(role){
@@ -61,12 +97,17 @@ function showInfo(){
             ? `The kill is chosen by a rotating leader.`
             : `The mafia vote on who to kill.`
         }
+        ${
+          state.mafiaKnowsFirstLeader
+            ? `The mafia know who the first leader is.`
+            : `The first leader is hidden.`
+        }
       `
     }
 
     if(role === "villager"){
       return `
-        No special power. Use discussion, deduction, and voting to find the mafia.
+        No special power. Your job is to discuss, vote, and figure out who the mafia are before they take over the town.
       `
     }
 
@@ -75,7 +116,7 @@ function showInfo(){
         Protects one player each night from being killed.
         ${
           state.doctorRevealSave
-            ? `If a save happens, it is revealed publicly.`
+            ? `If a save happens, the saved player is revealed.`
             : `Saves stay hidden from the town.`
         }
       `
@@ -87,7 +128,7 @@ function showInfo(){
         ${
           state.sheriffExactReveal
             ? `Gets the exact role as the result.`
-            : `Gets an innocent / not innocent style result.`
+            : `Gets an innocent / not innocent style result instead of the exact role.`
         }
       `
     }
@@ -109,7 +150,7 @@ function showInfo(){
         }.
         ${
           state.spiritCanSkipReveal
-            ? `Can choose to skip the reveal.`
+            ? `Can skip the reveal.`
             : `Must choose someone to reveal.`
         }
       `
@@ -173,9 +214,14 @@ function showInfo(){
         ${
           state.executionerWinIfDead
             ? `Can still win while dead.`
-            : `Must be alive to win.`
+            : `Must stay alive to win.`
         }
-        After target dies, becomes ${
+        ${
+          state.executionerWinIfVigilanteKillsTarget
+            ? `Can also win if the Vigilante kills their target.`
+            : `Does not win if the Vigilante kills their target.`
+        }
+        After the target dies, becomes ${
           state.executionerBecomes === "jester"
             ? "Jester"
             : state.executionerBecomes === "traitor"
@@ -189,7 +235,7 @@ function showInfo(){
       return `
         If attacked by the Mafia, joins the Mafia instead of dying.
         If attacked by the Vigilante, joins the Town instead of dying.
-        This conversion is secret and revealed privately.
+        This conversion happens secretly and is only revealed privately.
       `
     }
 
@@ -206,37 +252,55 @@ function showInfo(){
             ? `The Framer knows who the mafia are.`
             : `The Framer does not know who the mafia are.`
         }
+        ${
+          state.mafiaKnowsFramer
+            ? `The mafia know who the Framer is.`
+            : `The mafia do not know who the Framer is.`
+        }
       `
     }
 
     if(role === "traitor"){
       return `
-        A hidden ally of the mafia. Counts with the mafia team for victory.
+        A hidden ally of the mafia. Works with the mafia team and helps them reach their win condition.
       `
     }
 
     return roles[role]?.description || "No description available."
   }
 
-  function roleStatus(role){
-    if(role === "villager" || role === "mafia") return "Core"
+  function renderTag(tag){
+    const lower = tag.toLowerCase()
+    let cls = "rules-tag"
 
-    if(state.rolesEnabled[role]){
-      const count = state.roleCounts[role] || 1
-      return `Enabled · Up to ${count}`
-    }
+    if(lower === "town") cls += " rules-tag-town"
+    else if(lower === "mafia") cls += " rules-tag-mafia"
+    else if(lower === "neutral") cls += " rules-tag-neutral"
+    else if(lower === "info") cls += " rules-tag-info"
+    else if(lower === "killing") cls += " rules-tag-killing"
+    else if(lower === "protection") cls += " rules-tag-protection"
+    else if(lower === "chaos") cls += " rules-tag-chaos"
+    else if(lower === "voting") cls += " rules-tag-voting"
+    else if(lower === "conversion") cls += " rules-tag-conversion"
+    else cls += " rules-tag-generic"
 
-    return "Disabled"
+    return `<span class="${cls}">${tag}</span>`
   }
 
   function renderRoleCard(role){
     const color = roleColors[role] || "#ffffff"
-    const enabled = role === "villager" || role === "mafia" || !!state.rolesEnabled[role]
+    const enabled = isRoleActive(role)
 
     return `
-      <div class="rules-role-card ${enabled ? "rules-role-enabled" : "rules-role-disabled"}"
-           style="--rules-role-color:${color};">
-
+      <div
+        class="rules-role-card ${enabled ? "rules-role-enabled" : "rules-role-disabled"}"
+        data-role-card="${role}"
+        data-role-name="${roleDisplayName(role).toLowerCase()}"
+        data-role-team="${roleTeam(role).toLowerCase()}"
+        data-role-tags="${roleTags(role).join(" ").toLowerCase()}"
+        data-role-active="${enabled ? "true" : "false"}"
+        style="--rules-role-color:${color};"
+      >
         <button
           class="rules-role-header"
           onclick="window.toggleInfoRole('${role}')"
@@ -248,6 +312,10 @@ function showInfo(){
             </div>
             <div class="rules-role-team">
               ${roleTeam(role)}
+            </div>
+
+            <div class="rules-role-tags-row">
+              ${roleTags(role).map(renderTag).join("")}
             </div>
           </div>
 
@@ -271,25 +339,18 @@ function showInfo(){
   }
 
   function buildSection(title, rolesList, className){
-    const visibleRoles = rolesList.filter(role => {
-      if(role === "villager" || role === "mafia") return true
-      return !!state.rolesEnabled[role]
-    })
-
-    if(!visibleRoles.length) return ""
-
     return `
-      <div class="rules-section ${className}">
+      <div class="rules-section ${className}" data-rules-section="${title.toLowerCase()}">
         <div class="rules-section-bar">
           <div>
             <div class="rules-section-kicker">Role Group</div>
             <h3 class="rules-section-title">${title}</h3>
           </div>
-          <div class="rules-section-count">${visibleRoles.length}</div>
+          <div class="rules-section-count" id="rules-count-${title.toLowerCase()}">0</div>
         </div>
 
         <div class="rules-role-list">
-          ${visibleRoles.map(renderRoleCard).join("")}
+          ${rolesList.map(renderRoleCard).join("")}
         </div>
       </div>
     `
@@ -297,13 +358,12 @@ function showInfo(){
 
   const content = `
     <div class="modal-content rules-modal-shell">
-
       <div class="settings-header">
         <div class="settings-header-main">
           <div>
             <h2 class="settings-title-modern">Game Rules</h2>
             <div class="settings-subtitle-modern">
-              Roles currently active in this setup, organized by team.
+              Search, filter, and expand the roles in your current setup.
             </div>
           </div>
         </div>
@@ -313,15 +373,68 @@ function showInfo(){
 
         <div class="rules-hero">
           <div class="rules-kicker">Reference</div>
-          <h2 class="rules-title">Current Role Guide</h2>
+          <h2 class="rules-title">Role Guide</h2>
           <div class="rules-subtitle">
-            Tap any role card to expand it and quickly review what it does in this game.
+            Tap any card to expand it. Use search or filters to quickly find a role.
+          </div>
+        </div>
+
+        <div class="rules-toolbar">
+          <div class="rules-search-wrap">
+            <input
+              id="rulesSearchInput"
+              class="rules-search-input"
+              type="text"
+              placeholder="Search roles, teams, or tags..."
+              oninput="window.filterInfoRoles()"
+            >
+          </div>
+
+          <div class="rules-toggle-row">
+            <button
+              type="button"
+              id="rulesShowActiveBtn"
+              class="rules-filter-btn rules-filter-btn-active"
+              onclick="window.setInfoRoleView('active')"
+            >
+              Only Active
+            </button>
+
+            <button
+              type="button"
+              id="rulesShowAllBtn"
+              class="rules-filter-btn"
+              onclick="window.setInfoRoleView('all')"
+            >
+              Show All
+            </button>
+          </div>
+        </div>
+
+        <div class="rules-toolbar rules-toolbar-secondary">
+          <div class="rules-chip-row">
+            <button type="button" class="rules-chip active" data-filter="all" onclick="window.setInfoQuickFilter('all')">All</button>
+            <button type="button" class="rules-chip" data-filter="town" onclick="window.setInfoQuickFilter('town')">Town</button>
+            <button type="button" class="rules-chip" data-filter="neutral" onclick="window.setInfoQuickFilter('neutral')">Neutral</button>
+            <button type="button" class="rules-chip" data-filter="mafia" onclick="window.setInfoQuickFilter('mafia')">Mafia</button>
+            <button type="button" class="rules-chip" data-filter="info" onclick="window.setInfoQuickFilter('info')">Info</button>
+            <button type="button" class="rules-chip" data-filter="killing" onclick="window.setInfoQuickFilter('killing')">Killing</button>
+            <button type="button" class="rules-chip" data-filter="protection" onclick="window.setInfoQuickFilter('protection')">Protection</button>
+            <button type="button" class="rules-chip" data-filter="chaos" onclick="window.setInfoQuickFilter('chaos')">Chaos</button>
           </div>
         </div>
 
         ${buildSection("Town", townRoles, "rules-section-town")}
         ${buildSection("Neutral", neutralRoles, "rules-section-neutral")}
         ${buildSection("Mafia", mafiaRoles, "rules-section-mafia")}
+
+        <div id="rulesEmptyState" class="rules-empty-state hidden">
+          <div class="rules-empty-icon">🔎</div>
+          <div class="rules-empty-title">No roles found</div>
+          <div class="rules-empty-text">
+            Try a different search or filter.
+          </div>
+        </div>
 
       </div>
 
@@ -332,9 +445,110 @@ function showInfo(){
   `
 
   if(modal.classList.contains("show")){
-    swapModalContent(content)
+    swapModalContent(content, initInfoModal)
   }else{
-    openModal(content)
+    openModal(content, initInfoModal)
+  }
+}
+
+window.infoRoleViewMode = "active"
+window.infoQuickFilter = "all"
+
+function initInfoModal(){
+  window.infoRoleViewMode = "active"
+  window.infoQuickFilter = "all"
+  window.filterInfoRoles()
+}
+
+window.toggleInfoRole = function(role){
+  const panel = document.getElementById(`rules-panel-${role}`)
+  const arrow = document.getElementById(`rules-arrow-${role}`)
+
+  if(!panel || !arrow) return
+
+  const isOpen = panel.classList.contains("show")
+
+  if(isOpen){
+    panel.classList.remove("show")
+    arrow.style.transform = "rotate(0deg)"
+  }else{
+    panel.classList.add("show")
+    arrow.style.transform = "rotate(180deg)"
+  }
+}
+
+window.setInfoRoleView = function(mode){
+  window.infoRoleViewMode = mode
+
+  const activeBtn = document.getElementById("rulesShowActiveBtn")
+  const allBtn = document.getElementById("rulesShowAllBtn")
+
+  if(activeBtn) activeBtn.classList.toggle("rules-filter-btn-active", mode === "active")
+  if(allBtn) allBtn.classList.toggle("rules-filter-btn-active", mode === "all")
+
+  window.filterInfoRoles()
+}
+
+window.setInfoQuickFilter = function(filter){
+  window.infoQuickFilter = filter
+
+  document.querySelectorAll(".rules-chip").forEach(chip => {
+    chip.classList.toggle("active", chip.dataset.filter === filter)
+  })
+
+  window.filterInfoRoles()
+}
+
+window.filterInfoRoles = function(){
+  const searchInput = document.getElementById("rulesSearchInput")
+  const search = (searchInput?.value || "").trim().toLowerCase()
+
+  const cards = [...document.querySelectorAll("[data-role-card]")]
+  const sections = [...document.querySelectorAll("[data-rules-section]")]
+  const emptyState = document.getElementById("rulesEmptyState")
+
+  let visibleCount = 0
+
+  cards.forEach(card => {
+    const name = card.dataset.roleName || ""
+    const team = card.dataset.roleTeam || ""
+    const tags = card.dataset.roleTags || ""
+    const active = card.dataset.roleActive === "true"
+
+    const matchesSearch =
+      !search ||
+      name.includes(search) ||
+      team.includes(search) ||
+      tags.includes(search)
+
+    const matchesMode =
+      window.infoRoleViewMode === "all" ? true : active
+
+    const matchesQuick =
+      window.infoQuickFilter === "all"
+        ? true
+        : team.includes(window.infoQuickFilter) || tags.includes(window.infoQuickFilter)
+
+    const show = matchesSearch && matchesMode && matchesQuick
+
+    card.classList.toggle("hidden", !show)
+
+    if(show) visibleCount++
+  })
+
+  sections.forEach(section => {
+    const visibleCards = section.querySelectorAll("[data-role-card]:not(.hidden)")
+    const countEl = section.querySelector(".rules-section-count")
+
+    if(countEl){
+      countEl.textContent = visibleCards.length
+    }
+
+    section.classList.toggle("hidden", visibleCards.length === 0)
+  })
+
+  if(emptyState){
+    emptyState.classList.toggle("hidden", visibleCount !== 0)
   }
 }
 
