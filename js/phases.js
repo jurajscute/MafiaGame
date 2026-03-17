@@ -2482,32 +2482,63 @@ passPhone(player.name,"window.showVoteOptions()")
 
 export function showVoteOptions(){
 
-let alivePlayers = state.players.filter(p=>p.alive)
+  let alivePlayers = state.players.filter(p => p.alive)
+  let currentVoter = alivePlayers[state.voteTurnIndex]
 
-let buttons=""
+  let buttons = ""
 
-alivePlayers.forEach(p=>{
-buttons+=`<button onclick="window.castVote('${p.name}')">${p.name}</button>`
-})
+  alivePlayers.forEach(p => {
+    buttons += `
+      <button class="vote-player-btn" onclick="window.castVote('${p.name}')">
+        <span class="vote-player-name">${p.name}</span>
+        <span class="vote-player-label">Vote</span>
+      </button>
+    `
+  })
 
-buttons+=`<button class="skip-btn" onclick="window.castVote('skip')">Skip Vote</button>`
+  buttons += `
+    <button class="skip-btn vote-skip-btn" onclick="window.castVote('skip')">
+      <span class="vote-player-name">Skip Vote</span>
+      <span class="vote-player-label">No elimination</span>
+    </button>
+  `
 
-render(`
+  render(`
 
-<div class="card">
+  <div class="card voting-card morning-vote-card">
 
-<h2>Cast Your Vote</h2>
+    <div class="voting-hero">
+      <div class="voting-kicker">Town Judgment</div>
+      <h2 class="voting-title">Cast Your Vote</h2>
+      <div class="voting-subtitle">
+        Choose who should be eliminated before night falls.
+      </div>
 
-${buttons}
+      ${
+        currentVoter
+          ? `
+            <div class="current-voter-pill">
+              <span class="current-voter-dot"></span>
+              <strong>${currentVoter.name}</strong> is currently voting
+            </div>
+          `
+          : ""
+      }
+    </div>
 
-${renderPlayerStatus()}
+    <div class="voting-grid">
+      ${buttons}
+    </div>
 
-${renderHostControls()}
+    <div class="voting-status-wrap">
+      ${renderPlayerStatus()}
+    </div>
 
-</div>
+    ${renderHostControls()}
 
-`)
+  </div>
 
+  `)
 }
 
 function renderStandardVoteResult(resultsHTML, eliminated, player, includeSpiritReveal = false){
