@@ -5210,3 +5210,225 @@ body.holy-night-flash .holy-pulse{
     border-radius:16px;
   }
 }
+
+.morning-btn{
+  background:
+    linear-gradient(180deg, #e0b879, #c79a58);
+
+  color:#2a1d0f;
+
+  border:1px solid rgba(120,85,40,0.35);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    0 10px 22px rgba(0,0,0,0.28),
+    0 0 18px rgba(255,200,120,0.25);
+
+  text-shadow:
+    0 1px 0 rgba(255,255,255,0.35);
+
+  font-weight:700;
+}
+
+.morning-btn:hover{
+  background:
+    linear-gradient(180deg, #e9c98c, #d3a766);
+
+  box-shadow:
+    0 14px 28px rgba(0,0,0,0.32),
+    0 0 24px rgba(255,210,140,0.35);
+}
+
+.morning-btn:active{
+  transform:translateY(1px);
+  box-shadow:
+    0 6px 14px rgba(0,0,0,0.25);
+}
+
+.morning-btn{
+  position:relative;
+  overflow:hidden;
+}
+
+.morning-btn::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at top, rgba(255,255,255,0.35), transparent 60%);
+  opacity:0.4;
+  pointer-events:none;
+}
+
+.voting-results-card{
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.05), transparent 38%),
+    linear-gradient(180deg, rgba(54,38,26,0.96), rgba(34,24,18,0.98));
+  border:1px solid rgba(201,158,104,0.16);
+  box-shadow:
+    0 20px 42px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.voting-results-header{
+  margin-bottom:18px;
+}
+
+.vote-results-panel{
+  padding:16px;
+  border-radius:18px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.06);
+  margin-bottom:18px;
+}
+
+.vote-label-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:6px;
+}
+
+.vote-label-main{
+  font-size:15px;
+  font-weight:700;
+  color:#f2e4cf;
+}
+
+.vote-label-count{
+  min-width:32px;
+  text-align:center;
+  padding:4px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.08);
+  font-size:12px;
+  font-weight:800;
+  color:#f4dcc0;
+}
+
+.vote-row{
+  margin:12px 0;
+}
+
+.vote-row-skip .vote-label-main{
+  color:#d0c0b0;
+}
+
+.vote-bar-bg{
+  height:12px;
+  background:rgba(255,255,255,0.08);
+  border-radius:999px;
+  overflow:hidden;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,0.28);
+}
+
+.vote-bar-fill{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(135deg, #d9aa66, #b97e3d);
+  box-shadow:
+    0 0 10px rgba(217,170,102,0.22),
+    inset 0 1px 0 rgba(255,255,255,0.18);
+  transition:width 0.35s ease;
+}
+
+.vote-bar-fill-skip{
+  background:linear-gradient(135deg, #9a8d82, #75685f);
+  box-shadow:
+    0 0 10px rgba(180,170,160,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+.vote-outcome-banner{
+  text-align:center;
+  padding:18px 16px;
+  border-radius:18px;
+  margin-bottom:18px;
+  border:1px solid rgba(255,255,255,0.10);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 10px 24px rgba(0,0,0,0.18);
+}
+
+.vote-outcome-kicker{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  opacity:0.68;
+  margin-bottom:8px;
+}
+
+.vote-outcome-title{
+  font-size:28px;
+  font-weight:900;
+  line-height:1.05;
+}
+
+.vote-outcome-subtitle{
+  margin-top:8px;
+  font-size:14px;
+  opacity:0.8;
+}
+
+.vote-outcome-elimination{
+  background:
+    radial-gradient(circle at top, rgba(201,158,104,0.10), transparent 50%),
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025));
+}
+
+.vote-outcome-tie{
+  background:
+    radial-gradient(circle at top, rgba(180,180,180,0.08), transparent 50%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+}
+
+.vote-outcome-skip{
+  background:
+    radial-gradient(circle at top, rgba(140,140,140,0.08), transparent 50%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+}
+
+.vote-outcome-neutral{
+  background:
+    radial-gradient(circle at top, rgba(180,160,130,0.08), transparent 50%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+}
+
+.vote-reveal-wrap{
+  margin-bottom:18px;
+}
+
+.spirit-public-reveal{
+  text-align:center;
+  padding:18px 16px;
+}
+
+.spirit-public-kicker{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  opacity:0.72;
+  margin-bottom:10px;
+}
+
+.spirit-public-text{
+  font-size:15px;
+  line-height:1.5;
+  margin-bottom:12px;
+}
+
+.spirit-public-role{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 16px;
+  border-radius:999px;
+  border:1px solid;
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}

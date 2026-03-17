@@ -36,9 +36,9 @@ export function passPhone(name, action){
           </p>
         </div>
 
-        <button class="${isMorningStyle ? "primary-btn" : ""}" onclick="${action}">
-          I'm Ready
-        </button>
+        <button class="${isMorningStyle ? "morning-btn" : ""}" onclick="${action}">
+  ${isMorningStyle ? "Start My Vote" : "I'm Ready"}
+</button>
       </div>
     </div>
   `)

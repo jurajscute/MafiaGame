@@ -2436,7 +2436,7 @@ function showMorning(){
       </div>
 
       <div class="morning-actions">
-        <button class="primary-btn" onclick="window.startVoting()">Start Voting</button>
+        <button class="morning-btn" onclick="window.startVoting()">Start Voting</button>
       </div>
 
       ${renderHostControls()}
@@ -2543,21 +2543,39 @@ export function showVoteOptions(){
 
 function renderStandardVoteResult(resultsHTML, eliminated, player, includeSpiritReveal = false){
   render(`
-    <div class="card">
-      <h2>Voting Results</h2>
+    <div class="card morning-card voting-results-card">
 
-      ${resultsHTML}
+      <div class="morning-header voting-results-header">
+        <div class="morning-kicker">Day Resolution</div>
+        <h2 class="morning-title">Voting Results</h2>
+        <p class="morning-subtitle">
+          The town has chosen who to cast out.
+        </p>
+      </div>
 
-      <hr>
+      <div class="vote-results-panel">
+        ${resultsHTML}
+      </div>
 
-      <h2 class="elimination-text">
-        ${eliminated} was voted out
-      </h2>
+      <div class="vote-outcome-banner vote-outcome-elimination">
+        <div class="vote-outcome-kicker">Eliminated</div>
+        <div class="vote-outcome-title">${eliminated}</div>
+        <div class="vote-outcome-subtitle">The town has voted them out.</div>
+      </div>
 
-      ${player && shouldRevealOnVoteDeath() ? revealedRoleText(player) : ""}
+      ${player && shouldRevealOnVoteDeath() ? `
+        <div class="vote-reveal-wrap">
+          ${revealedRoleText(player)}
+        </div>
+      ` : ""}
+
       ${includeSpiritReveal ? renderSpiritPublicReveal() : ""}
 
-      <button onclick="window.nextNight()">Next Night</button>
+      ${renderPlayerStatus()}
+
+      <button class="primary-btn" onclick="window.nextNight()">Next Night</button>
+
+      ${renderHostControls()}
     </div>
   `)
 }
@@ -2695,7 +2713,6 @@ function continueResolveVotesAfterSpirit(){
 }
 
 function resolveVotes(){
-
   let highest = 0
   let eliminated = null
   let tie = false
@@ -2705,18 +2722,21 @@ function resolveVotes(){
   let maxVotes = voteCounts.length ? Math.max(...voteCounts) : 1
 
   for(let name in state.votes){
-
     let count = state.votes[name]
     let label = name === "skip" ? "Skip Vote" : name
     let percent = (count / maxVotes) * 100
 
+    const isSkip = name === "skip"
+
     resultsHTML += `
-      <div class="vote-row">
-        <div class="vote-label">
-          ${label} — ${count}
+      <div class="vote-row ${isSkip ? "vote-row-skip" : ""}">
+        <div class="vote-label-row">
+          <div class="vote-label-main">${label}</div>
+          <div class="vote-label-count">${count}</div>
         </div>
+
         <div class="vote-bar-bg">
-          <div class="vote-bar-fill" style="width:${percent}%"></div>
+          <div class="vote-bar-fill ${isSkip ? "vote-bar-fill-skip" : ""}" style="width:${percent}%"></div>
         </div>
       </div>
     `
@@ -2734,13 +2754,30 @@ function resolveVotes(){
     addLogEntry(`Voting ended in a tie. Nobody was eliminated.`)
 
     render(`
-      <div class="card">
-        <h2>Voting Results</h2>
-        ${resultsHTML}
-        <hr>
-        <h2>It's a tie! Nobody was eliminated.</h2>
+      <div class="card morning-card voting-results-card">
+
+        <div class="morning-header voting-results-header">
+          <div class="morning-kicker">Day Resolution</div>
+          <h2 class="morning-title">Voting Results</h2>
+          <p class="morning-subtitle">
+            The town could not agree on a single target.
+          </p>
+        </div>
+
+        <div class="vote-results-panel">
+          ${resultsHTML}
+        </div>
+
+        <div class="vote-outcome-banner vote-outcome-tie">
+          <div class="vote-outcome-kicker">Outcome</div>
+          <div class="vote-outcome-title">It's a tie</div>
+          <div class="vote-outcome-subtitle">Nobody was eliminated.</div>
+        </div>
+
         ${renderPlayerStatus()}
-        <button onclick="window.nextNight()">Next Night</button>
+
+        <button class="primary-btn" onclick="window.nextNight()">Next Night</button>
+
         ${renderHostControls()}
       </div>
     `)
@@ -2751,13 +2788,30 @@ function resolveVotes(){
     addLogEntry(`The town skipped the vote.`)
 
     render(`
-      <div class="card">
-        <h2>Voting Results</h2>
-        ${resultsHTML}
-        <hr>
-        <h2>The town skipped the vote.</h2>
+      <div class="card morning-card voting-results-card">
+
+        <div class="morning-header voting-results-header">
+          <div class="morning-kicker">Day Resolution</div>
+          <h2 class="morning-title">Voting Results</h2>
+          <p class="morning-subtitle">
+            The town chose caution over elimination.
+          </p>
+        </div>
+
+        <div class="vote-results-panel">
+          ${resultsHTML}
+        </div>
+
+        <div class="vote-outcome-banner vote-outcome-skip">
+          <div class="vote-outcome-kicker">Outcome</div>
+          <div class="vote-outcome-title">Vote Skipped</div>
+          <div class="vote-outcome-subtitle">No one was eliminated today.</div>
+        </div>
+
         ${renderPlayerStatus()}
-        <button onclick="window.nextNight()">Next Night</button>
+
+        <button class="primary-btn" onclick="window.nextNight()">Next Night</button>
+
         ${renderHostControls()}
       </div>
     `)
@@ -2786,60 +2840,110 @@ function resolveVotes(){
       if(handleExecutionerAndJesterVoteWins(player, eliminated, mafiaAliveAfterVote)) return
       if(checkWin()) return
 
-      renderStandardVoteResult(resultsHTML, eliminated, player)
+      render(`
+        <div class="card morning-card voting-results-card">
+
+          <div class="morning-header voting-results-header">
+            <div class="morning-kicker">Day Resolution</div>
+            <h2 class="morning-title">Voting Results</h2>
+            <p class="morning-subtitle">
+              The town has chosen who to cast out.
+            </p>
+          </div>
+
+          <div class="vote-results-panel">
+            ${resultsHTML}
+          </div>
+
+          <div class="vote-outcome-banner vote-outcome-elimination">
+            <div class="vote-outcome-kicker">Eliminated</div>
+            <div class="vote-outcome-title">${eliminated}</div>
+            <div class="vote-outcome-subtitle">The town has voted them out.</div>
+          </div>
+
+          ${player && shouldRevealOnVoteDeath() ? `
+            <div class="vote-reveal-wrap">
+              ${revealedRoleText(player)}
+            </div>
+          ` : ""}
+
+          ${renderPlayerStatus()}
+
+          <button class="primary-btn" onclick="window.nextNight()">Next Night</button>
+
+          ${renderHostControls()}
+        </div>
+      `)
       return
     }
   }
 
   render(`
-    <div class="card">
-      <h2>Voting Results</h2>
-      ${resultsHTML}
-      <hr>
-      <h2>Nobody was eliminated.</h2>
-      <button onclick="window.nextNight()">Next Night</button>
+    <div class="card morning-card voting-results-card">
+
+      <div class="morning-header voting-results-header">
+        <div class="morning-kicker">Day Resolution</div>
+        <h2 class="morning-title">Voting Results</h2>
+      </div>
+
+      <div class="vote-results-panel">
+        ${resultsHTML}
+      </div>
+
+      <div class="vote-outcome-banner vote-outcome-neutral">
+        <div class="vote-outcome-kicker">Outcome</div>
+        <div class="vote-outcome-title">No Elimination</div>
+      </div>
+
+      <button class="primary-btn" onclick="window.nextNight()">Next Night</button>
     </div>
   `)
 }
 
 function renderSpiritPublicReveal(){
+  if(!state.spiritReveal) return ""
 
-if(!state.spiritReveal) return ""
+  let revealedPlayer = state.players.find(p => p.name === state.spiritReveal)
+  if(!revealedPlayer) return ""
 
-let revealedPlayer = state.players.find(p => p.name === state.spiritReveal)
-if(!revealedPlayer) return ""
+  let revealLabel = ""
+  let revealColor = "white"
 
-let revealLabel = ""
-let revealColor = "white"
-
-if(state.spiritRevealType === "team"){
-  if(roles[revealedPlayer.role]?.team === "mafia"){
-    revealLabel = "MAFIA"
-    revealColor = roleColors.mafia
-  }else if(roles[revealedPlayer.role]?.team === "neutral"){
-    revealLabel = "NEUTRAL"
-    revealColor = roleColors.executioner
+  if(state.spiritRevealType === "team"){
+    if(roles[revealedPlayer.role]?.team === "mafia"){
+      revealLabel = "MAFIA"
+      revealColor = roleColors.mafia
+    }else if(roles[revealedPlayer.role]?.team === "neutral"){
+      revealLabel = "NEUTRAL"
+      revealColor = roleColors.executioner
+    }else{
+      revealLabel = "TOWN"
+      revealColor = roleColors.villager
+    }
   }else{
-    revealLabel = "TOWN"
-    revealColor = roleColors.villager
+    revealLabel = roleDisplayName(revealedPlayer.role).toUpperCase()
+    revealColor = roleColors[revealedPlayer.role] || "white"
   }
-}else{
-  revealLabel = revealedPlayer.role.toUpperCase()
-  revealColor = roleColors[revealedPlayer.role] || "white"
-}
 
-return `
-<div class="night-result night-result-spirit">
-  The Spirit reveals that <strong>${revealedPlayer.name}</strong> is
-  <span style="
-    color:${revealColor};
-    font-weight:bold;
-    text-shadow:0 0 8px ${revealColor};
-  ">
-    ${revealLabel}
-  </span>
-</div>
-`
+  return `
+    <div class="night-result night-result-spirit spirit-public-reveal">
+      <div class="spirit-public-kicker">Spirit Revelation</div>
+
+      <div class="spirit-public-text">
+        The Spirit reveals that <strong>${revealedPlayer.name}</strong> is
+      </div>
+
+      <div class="spirit-public-role"
+        style="
+          color:${revealColor};
+          text-shadow:0 0 10px ${revealColor}, 0 0 20px ${revealColor};
+          border-color:${revealColor}33;
+          background:${revealColor}12;
+        ">
+        ${revealLabel}
+      </div>
+    </div>
+  `
 }
 
 window.toggleExecutionerReveal = function(playerName){
