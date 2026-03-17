@@ -645,7 +645,7 @@ body.night .card:not(.role-mafia):not(.special-chaos-win):not(.special-spirit-wi
 .special-spirit-win{
   background:
     radial-gradient(circle at top, rgba(138, 189, 255, 0.363), transparent 38%),
-    linear-gradient(180deg, rgba(71, 113, 148, 0.98), rgba(184, 116, 184, 0.37));
+    linear-gradient(180deg, rgba(50, 80, 105, 0.98), rgba(110, 70, 110, 0.37));
   border:1px solid rgba(173, 209, 255, 0.507);
   box-shadow:
     0 0 30px rgba(59, 150, 255, 0.274),
