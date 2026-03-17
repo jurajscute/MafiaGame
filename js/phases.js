@@ -1839,7 +1839,7 @@ if(
   catConversion.joinedTeam === "mafia"
 ){
   addLogEntry(`MAFIA'S BEST FRIEND: ${catConversion.playerName} joined the mafia during the night, and the mafia won the following morning.`)
-  renderQuantumBetrayalWin(catConversion.playerName)
+  renderGoodKittyWin(catConversion.playerName)
   return true
 }
 
