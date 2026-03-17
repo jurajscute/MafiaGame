@@ -24,8 +24,8 @@ window.markOnlineReady = async function() {
   console.log("demoRoom:", demoRoom)
   console.log("currentPlayerId:", currentPlayerId)
 
-  if (!demoRoom?.code) {
-    console.warn("No room code found")
+  if (!currentRoomCode) {
+    console.warn("No currentRoomCode found")
     return
   }
 
@@ -36,7 +36,7 @@ window.markOnlineReady = async function() {
 
   const readyRef = ref(
     db,
-    `rooms/${demoRoom.code}/gameState/readyMap/${currentPlayerId}`
+    `rooms/${currentRoomCode}/gameState/readyMap/${currentPlayerId}`
   )
 
   try {
@@ -693,7 +693,7 @@ function renderOnlineRoleReveal() {
       <div class="reveal-role-topbar">
         <div class="reveal-role-kicker">Online Role Reveal</div>
         <div class="reveal-role-progress">
-          ${demoRoom.code}
+          ${currentRoomCode}
         </div>
       </div>
 
@@ -755,7 +755,7 @@ function renderOnlineNightSelect() {
       <div class="reveal-role-topbar">
         <div class="reveal-role-kicker">Night Phase</div>
         <div class="reveal-role-progress">
-          ${demoRoom.code}
+          ${currentRoomCode}
         </div>
       </div>
 
