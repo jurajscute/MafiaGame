@@ -44,16 +44,6 @@ export function createRoom({ roomCode, hostName }) {
   }
 }
 
-export function createRoomPlayer({ id, name, isHost = false }) {
-  return {
-    id,
-    name,
-    isHost,
-    connected: true,
-    joinedAt: Date.now()
-  }
-}
-
 function defaultRolesEnabled() {
   return {
     doctor: false,
