@@ -580,11 +580,21 @@ async function maybeAdvanceOnlinePhase() {
 
   const gameState = demoRoom.gameState
   const alivePlayers = (gameState.players || []).filter(player => player.alive !== false)
+ let everyoneReady = false
+
+if (gameState.phase === "night_select") {
+  const actions = gameState.submittedActions || {}
+
+  everyoneReady =
+    alivePlayers.length > 0 &&
+    alivePlayers.every(player => actions[player.id])
+} else {
   const readyMap = gameState.readyMap || {}
 
-  const everyoneReady =
+  everyoneReady =
     alivePlayers.length > 0 &&
     alivePlayers.every(player => readyMap[player.id])
+}
 
   if (!everyoneReady) return
 
@@ -592,9 +602,10 @@ async function maybeAdvanceOnlinePhase() {
 
   try {
     await update(getOnlineRoomRef(), {
-      "gameState/phase": nextPhase,
-      "gameState/readyMap": {}
-    })
+  "gameState/phase": nextPhase,
+  "gameState/readyMap": {},
+  "gameState/submittedActions": {}
+})
   } catch (error) {
     console.error("Failed to auto-advance online phase:", error)
   }
@@ -742,62 +753,77 @@ function renderOnlineRoleReveal() {
   `)
 }
 
+window.submitNightAction = async function(type, target = null) {
+  if (!demoRoom?.gameState || !currentPlayerId) return
+
+  try {
+    await update(getOnlineRoomRef(), {
+      [`gameState/submittedActions/${currentPlayerId}`]: {
+        type,
+        target
+      },
+      [`gameState/readyMap/${currentPlayerId}`]: true
+    })
+  } catch (error) {
+    console.error("Failed to submit action:", error)
+  }
+}
+
 function renderOnlineNightSelect() {
   const me = getOnlineMe()
   if (!me) return
 
-  const color = roleColors[me.role] || "white"
-  const role = roles[me.role]
+  const alivePlayers = getOnlineAlivePlayers().filter(p => p.id !== currentPlayerId)
+
+  const targetButtons = alivePlayers.map(player => `
+    <button class="primary-btn" onclick="window.submitNightAction('${getActionType(me.role)}', '${player.name}')">
+      ${player.name}
+    </button>
+  `).join("")
+
+  let content = ""
+
+  if (["mafia", "doctor", "sheriff", "vigilante", "framer"].includes(me.role)) {
+    content = `
+      <div class="player-status-box">
+        <h3>Select Target</h3>
+        ${targetButtons}
+      </div>
+    `
+  } else {
+    content = `
+      <div class="player-status-box">
+        <h3>No Action</h3>
+        <button class="primary-btn" onclick="window.submitNightAction('none')">
+          Continue
+        </button>
+      </div>
+    `
+  }
 
   render(`
-    <div class="card reveal-role-card role-${me.role}" style="--reveal-role-color:${color};">
-
-      <div class="reveal-role-topbar">
-        <div class="reveal-role-kicker">Night Phase</div>
-        <div class="reveal-role-progress">
-          ${currentRoomCode}
-        </div>
-      </div>
+    <div class="card reveal-role-card role-${me.role}">
 
       <div class="reveal-role-header">
         <div class="reveal-role-player">${me.name}</div>
-        <div class="reveal-role-hint">Night actions will go here next</div>
+        <div class="reveal-role-hint">Choose your night action</div>
       </div>
 
-      <div class="role-card reveal-role-flip revealed">
-        <div class="role-inner">
-          <div class="role-front reveal-role-front">
-            <div class="reveal-role-front-shimmer"></div>
-            <div class="reveal-role-front-inner">
-              <div class="reveal-role-front-icon">✦</div>
-              <div class="reveal-role-front-label">Your Role</div>
-              <div class="reveal-role-front-text">${roleDisplayName(me.role)}</div>
-            </div>
-          </div>
-
-          <div class="role-back reveal-role-back" style="color:${color}">
-            <div class="reveal-role-back-inner">
-              <div class="reveal-role-back-kicker">Your Role</div>
-              <div class="reveal-role-name">${roleDisplayName(me.role)}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="reveal-role-description-wrap">
-        <p class="role-description reveal-role-description">
-          ${role?.description || ""}
-        </p>
-      </div>
+      ${content}
 
       ${renderOnlineProgressBox()}
 
-      <div class="reveal-role-actions">
-        ${renderOnlineProceedButton("Continue")}
-      </div>
-
     </div>
   `)
+}
+
+function getActionType(role) {
+  if (role === "mafia") return "kill"
+  if (role === "doctor") return "save"
+  if (role === "sheriff") return "investigate"
+  if (role === "vigilante") return "kill"
+  if (role === "framer") return "frame"
+  return "none"
 }
 
 function renderOnlineNightResults() {
@@ -995,9 +1021,10 @@ window.advanceOnlinePhase = async function () {
 
   try {
     await update(getOnlineRoomRef(), {
-      "gameState/phase": nextPhase,
-      "gameState/readyMap": {}
-    })
+  "gameState/phase": nextPhase,
+  "gameState/readyMap": {},
+  "gameState/submittedActions": {}
+})
   } catch (error) {
     console.error("Failed to advance phase:", error)
     alert("Failed to advance phase: " + error.message)
