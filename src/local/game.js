@@ -1,6 +1,7 @@
 import { state, addLogEntry, resetGameTracking } from "./state.js"
 import { roles } from "../core/roles.js"
 import { shuffle, mafiaCount } from "../core/utils.js"
+import { roleColors, roleDisplayName } from "../core/gameData.js"
 import { render } from "./ui.js"
 import {
   startNight,
@@ -11,22 +12,6 @@ import {
   showVoteOptions,
   castVote
 } from "./phases.js"
-
-const roleColors = {
-mafia: "#e74c3c",
-doctor: "#2e8dcc",
-sheriff: "#e4c200",
-villager: "#8dc2ff",
-jester: "#ff3ea5",
-executioner: "#7a2f6f",
-mayor: "#1d8161",
-spirit: "#e6aafd",
-framer: "#8b0000",
-vigilante: "#3b48ff",
-priest: "#f6df8f",
-schrodingers_cat: "#6d6d6d",
-traitor: "#c44f4f",
-}
 
 window.updateRoleCount = function(role,value){
 
@@ -723,21 +708,6 @@ localStorage.setItem(
 JSON.stringify(enabled)
 )
 refreshPregameSummaryIfOpen()
-}
-
-  export function roleDisplayName(role){
-  const customNames = {
-    schrodingers_cat: "Schrödinger's Cat"
-  }
-  return customNames[role] || (role.charAt(0).toUpperCase() + role.slice(1))
-}
-
-function getRoleDisplayName(role){
-  const names = {
-    schrodingers_cat: "Schrödinger's Cat"
-  }
-
-  return names[role] || role.charAt(0).toUpperCase() + role.slice(1)
 }
 
 function initSettingsModal(){
@@ -2402,7 +2372,7 @@ function buildCoreRoleCard(role, count, team, description){
       <div class="pregame-role-top">
         <div class="pregame-role-main">
           <div class="pregame-role-name" style="color:${color};">
-            ${getRoleDisplayName(role)}
+            ${roleDisplayName(role)}
           </div>
           <div class="pregame-role-count">
             ${count}
@@ -2540,7 +2510,7 @@ function buildCoreRoleCard(role, count, team, description){
         <div class="pregame-role-top">
           <div class="pregame-role-main">
             <div class="pregame-role-name" style="color:${color};">
-              ${getRoleDisplayName(role)}
+              ${roleDisplayName(role)}
             </div>
             <div class="pregame-role-count">
               Up to ${count}
@@ -3120,7 +3090,7 @@ render(`
       <div class="role-back reveal-role-back" style="color:${color}">
         <div class="reveal-role-back-inner">
           <div class="reveal-role-back-kicker">Your Role</div>
-          <div class="reveal-role-name">${getRoleDisplayName(player.role)}</div>
+          <div class="reveal-role-name">${roleDisplayName(player.role)}</div>
         </div>
       </div>
 

@@ -1,15 +1,8 @@
 import { state, resetNightActions } from "./state.js"
 import { render, passPhone } from "./ui.js"
 import { roles } from "../core/roles.js"
+import { roleColors, roleDisplayName, getEffectiveTeam } from "../core/gameData.js"
 import {addLogEntry} from "./state.js"
-
-function roleDisplayName(role){
-  const names = {
-    schrodingers_cat: "Schrödinger's Cat"
-  }
-
-  return names[role] || (role.charAt(0).toUpperCase() + role.slice(1))
-}
 
 function setDay() {
     document.body.classList.remove("night", "holy-night", "holy-night-flash");
@@ -138,32 +131,6 @@ if(state.mafiaKillMethod === "leader"){
 resetNightActions()
 
 showNightTurn()
-}
-
-const roleColors = {
-mafia: "#e74c3c",
-doctor: "#2e8dcc",
-sheriff: "#e4c200",
-villager: "#8dc2ff",
-jester: "#ff3ea5",
-executioner: "#7a2f6f",
-mayor: "#1d8161",
-spirit: "#e6aafd",
-framer: "#8b0000",
-vigilante: "#3b48ff",
-priest: "#f6df8f",
-schrodingers_cat: "#6d6d6d",
-traitor: "#c44f4f",
-}
-
-function getEffectiveTeam(player){
-  if(!player) return null
-
-  if(player.role === "schrodingers_cat" && player.catAlignment){
-    return player.catAlignment
-  }
-
-  return roles[player.role]?.team || null
 }
 
 function getPlayerByName(name){
