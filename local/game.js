@@ -1,15 +1,15 @@
-import {state, addLogEntry, resetGameTracking} from "./state.js"
-import {roles} from "./roles.js"
-import {shuffle,mafiaCount} from "./utils.js"
-import {render} from "./ui.js"
+import { state, addLogEntry, resetGameTracking } from "./state.js"
+import { roles } from "../core/roles.js"
+import { shuffle, mafiaCount } from "../core/utils.js"
+import { render } from "./ui.js"
 import {
-startNight,
-startVoting,
-nextNightTurn,
-revealNightRole,
-performNightAction,
-showVoteOptions,
-castVote
+  startNight,
+  startVoting,
+  nextNightTurn,
+  revealNightRole,
+  performNightAction,
+  showVoteOptions,
+  castVote
 } from "./phases.js"
 
 const roleColors = {

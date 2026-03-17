@@ -1,6 +1,6 @@
-import {state, resetNightActions} from "./state.js"
-import {render, passPhone} from "./ui.js"
-import {roles} from "./roles.js"
+import { state, resetNightActions } from "./state.js"
+import { render, passPhone } from "./ui.js"
+import { roles } from "../core/roles.js"
 import {addLogEntry} from "./state.js"
 
 function roleDisplayName(role){

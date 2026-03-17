@@ -1,5 +1,10 @@
 export const state = {
 
+specialWinChecks: {
+  catConvertedTonight: null,
+  spiritRevealedThisMorning: null
+},
+
 phase:"home",
 
 players:[],
@@ -39,9 +44,6 @@ priestPublicShield: false,
 mayorVotePower: 2,
 
 spiritReveal: null,
-
-catConvertedTonight: null,
-spiritRevealedThisMorning: null,
 
 mafiaKillMethod: "leader",
 currentMafiaLeader: null,
@@ -95,11 +97,7 @@ sheriff: 50,
 jester: 50
 },
 
-nightActions:{
-kill:null,
-save:null,
-investigate:null
-},
+nightActions: [],
 
 roleCounts:{
 doctor:1,
