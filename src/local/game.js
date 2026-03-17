@@ -3,6 +3,7 @@ import { roles } from "../core/roles.js"
 import { shuffle, mafiaCount } from "../core/utils.js"
 import { roleColors, roleDisplayName } from "../core/gameData.js"
 import { maxAllowedMafia, getResolvedMafiaCount } from "../core/setupLogic.js"
+import { assignRolesToPlayers } from "../core/roleAssignment.js"
 import { render } from "./ui.js"
 import {
   startNight,
@@ -2203,124 +2204,12 @@ renderPlayerSetup()
 clampMafiaOverride()
 }
 
-function assignRoles(){
-  let players = state.players
+function assignRoles() {
+  assignRolesToPlayers(state)
 
-  let mafia = getResolvedMafiaCount(players.length, state.mafiaCountOverride)
-
-  const guaranteedRoles = []
-  const optionalPool = []
-
-  // Always guarantee core mafia roles
-  for(let i = 0; i < mafia; i++){
-    guaranteedRoles.push("mafia")
+  if (!state.players.some(p => p.role === "mafia")) {
+    console.error("Role assignment failed: no mafia assigned.")
   }
-
-  // Roll optional/special roles into a separate pool
-  ;["doctor","sheriff","jester","executioner","mayor","spirit","framer","vigilante","priest","schrodingers_cat","traitor"].forEach(role => {
-    if(!state.rolesEnabled[role]) return
-
-    let weight = state.roleWeights[role] || 0
-    let max = state.roleCounts[role] || 1
-
-    for(let i = 0; i < max; i++){
-      let roll = Math.random() * 100
-      if(roll < weight){
-        optionalPool.push(role)
-      }
-    }
-  })
-
-  // Shuffle optional roles so selection is random
-  shuffle(optionalPool)
-
-  // Fill remaining slots after guaranteed mafia
-  const slotsLeft = Math.max(0, players.length - guaranteedRoles.length)
-  let finalPool = [
-    ...guaranteedRoles,
-    ...optionalPool.slice(0, slotsLeft)
-  ]
-
-  // Fill any leftover space with villagers
-  while(finalPool.length < players.length){
-    finalPool.push("villager")
-  }
-
-  // Final shuffle so mafia aren't always grouped at the front
-  shuffle(finalPool)
-
-  players.forEach((p, i) => {
-    p.role = finalPool[i]
-    p.catAlignment = null
-    p.wasExecutioner = false
-    p.executionerConvertedTo = null
-    p.alive = true
-  })
-
-  players.forEach(p => {
-    if(p.role === "priest"){
-      p.priestUsesLeft = state.priestUsesPerGame
-    }
-  })
-
-  let mafiaPlayers = players
-    .filter(p => p.role === "mafia")
-    .map(p => p.name)
-
-  state.mafiaLeaderOrder = shuffle([...mafiaPlayers])
-  state.mafiaLeaderIndex = 0
-  state.currentMafiaLeader = state.mafiaLeaderOrder[0] || null
-
-  state.executionerTargets = {}
-
-  let executioners = players.filter(p => p.role === "executioner")
-
-  executioners.forEach(executioner => {
-    let possibleTargets = players.filter(p => {
-      if(p.name === executioner.name) return false
-      if(p.role === "executioner") return false
-
-      if(state.executionerTargetRule === "neither"){
-        return p.role !== "mafia" && p.role !== "jester"
-      }
-
-      if(state.executionerTargetRule === "mafia"){
-        return p.role !== "jester"
-      }
-
-      if(state.executionerTargetRule === "jester"){
-        return p.role !== "mafia"
-      }
-
-      return true
-    })
-
-    if(possibleTargets.length){
-      let target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)]
-      state.executionerTargets[executioner.name] = target.name
-    }
-  })
-  if(!players.some(p => p.role === "mafia")){
-  console.error("Role assignment failed: no mafia assigned.")
-}
-}
-
-function refreshPregameSummaryIfOpen(){
-  const pregameCard = document.querySelector(".pregame-summary-card")
-  if(pregameCard){
-    showPreGameSummary()
-  }
-}
-
-function startGame(){
-
-if(state.players.length < 4){
-alert("Minimum 4 players")
-return
-}
-
-showPreGameSummary()
-
 }
 
 function showPreGameSummary(){
