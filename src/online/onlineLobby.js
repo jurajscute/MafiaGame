@@ -333,23 +333,36 @@ function subscribeToRoom(roomCode) {
   const roomRef = ref(db, `rooms/${roomCode}`)
 
   onValue(roomRef, (snapshot) => {
-    if (!snapshot.exists()) {
-      alert("Room no longer exists.")
-      demoRoom = null
-      currentRoomCode = null
-      currentPlayerId = null
-      currentIsHost = false
-      window.showOnlineLobbyHome()
-      return
-    }
+  demoRoom = snapshot.val()
 
-        if (demoRoom.phase === "in_game") {
-      renderOnlineGame()
-      return
-    }
+  if (!demoRoom) {
+    render(`
+      <div class="card home-screen-card">
+        <div class="home-hero">
+          <div class="home-kicker">Online Room</div>
+          <h2 class="home-title">Room Not Found</h2>
+          <div class="home-subtitle">
+            This room does not exist, or was deleted.
+          </div>
+        </div>
 
-    renderRoomLobby()
-  })
+        <div class="home-actions">
+          <button class="primary-btn" onclick="window.showOnlineMenu()">
+            Back
+          </button>
+        </div>
+      </div>
+    `)
+    return
+  }
+
+  if (demoRoom.phase === "in_game") {
+    renderOnlineGame()
+    return
+  }
+
+  renderRoomLobby()
+})
 }
 
 window.showOnlineLobbyHome = function () {
