@@ -1,12 +1,7 @@
 import { render } from "../local/ui.js"
 import { createRoom, createRoomPlayer } from "../core/onlineRoom.js"
 import { db } from "./firebase.js"
-import {
-  ref,
-  set,
-  get,
-  child
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"
+import { ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"
 
 let demoRoom = null
 
