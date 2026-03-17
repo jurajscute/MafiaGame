@@ -3494,4 +3494,6 @@ closeInfo()
 }
 })
 
-showHome()
+export function bootLocalGame() {
+  showHome()
+}
