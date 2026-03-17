@@ -741,7 +741,7 @@ window.confirmStartGame = function(){
   state.openExecutionerReveal = null
   state.gameStarted = true
   resetGameTracking()
-  assignRoles()
+  assignRolesToPlayers()
   revealIndex = 0
   showRoleReveal()
 }
