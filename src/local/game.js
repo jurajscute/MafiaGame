@@ -2,6 +2,7 @@ import { state, addLogEntry, resetGameTracking } from "./state.js"
 import { roles } from "../core/roles.js"
 import { shuffle, mafiaCount } from "../core/utils.js"
 import { roleColors, roleDisplayName } from "../core/gameData.js"
+import { maxAllowedMafia, getResolvedMafiaCount } from "../core/setupLogic.js"
 import { render } from "./ui.js"
 import {
   startNight,
@@ -2020,16 +2021,6 @@ JSON.stringify(state.mafiaCountOverride)
 
 }
 
-function maxAllowedMafia(playerCount){
-
-if(playerCount < 4) return 1
-if(playerCount <= 7) return 2
-if(playerCount <= 10) return 3
-if(playerCount <= 13) return 4
-return 5
-
-}
-
 window.toggleDoctorReveal = function(enabled){
 
 state.doctorRevealSave = enabled
@@ -2215,8 +2206,7 @@ clampMafiaOverride()
 function assignRoles(){
   let players = state.players
 
-  let mafia = state.mafiaCountOverride || mafiaCount(players.length)
-  mafia = Math.min(mafia, maxAllowedMafia(players.length))
+  let mafia = getResolvedMafiaCount(players.length, state.mafiaCountOverride)
 
   const guaranteedRoles = []
   const optionalPool = []
@@ -2335,8 +2325,7 @@ showPreGameSummary()
 
 function showPreGameSummary(){
   let playerCount = state.players.length
-  let mafia = state.mafiaCountOverride || mafiaCount(playerCount)
-  mafia = Math.min(mafia, maxAllowedMafia(playerCount))
+  let mafia = getResolvedMafiaCount(playerCount, state.mafiaCountOverride)
 
   let warnings = getBalanceWarnings()
 
@@ -2711,8 +2700,7 @@ let roleSectionsHTML = `
 
 function getBalanceWarnings(){
   let playerCount = state.players.length
-  let mafia = state.mafiaCountOverride || mafiaCount(playerCount)
-  mafia = Math.min(mafia, maxAllowedMafia(playerCount))
+  let mafia = getResolvedMafiaCount(playerCount, state.mafiaCountOverride)
 
   const warnings = []
 
