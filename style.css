@@ -406,7 +406,7 @@ body.night{
   color:white;
 }
 
-body.night .card:not(.role-mafia):not(.special-chaos-win):not(.special-exejes-win):not(.role-schrodingers-cat):not(.role-priest):not(.role-vigilante):not(.role-framer):not(.role-doctor):not(.role-sheriff):not(.role-jester):not(.role-executioner):not(.role-mayor):not(.role-spirit){
+body.night .card:not(.role-mafia):not(.special-chaos-win):not(.special-spirit-win):not(.special-kitty-win):not(.special-exejes-win):not(.role-schrodingers-cat):not(.role-priest):not(.role-vigilante):not(.role-framer):not(.role-doctor):not(.role-sheriff):not(.role-jester):not(.role-executioner):not(.role-mayor):not(.role-spirit){
   background:#1f2436;
   box-shadow:
     0 15px 35px rgba(14, 14, 14, 0.6),
@@ -642,10 +642,30 @@ body.night .card:not(.role-mafia):not(.special-chaos-win):not(.special-exejes-wi
     #141428;
 }
 
+.special-spirit-win{
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.04), transparent 38%),
+    linear-gradient(180deg, rgba(184, 116, 184, 0.96), rgba(71, 113, 148, 0.98));
+  border:1px solid rgba(255,255,255,0.10);
+  box-shadow:
+    0 0 30px rgba(59, 150, 255, 0.274),
+    0 0 30px rgba(245, 165, 255, 0.274);
+}
+
+.special-kitty-win{
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.04), transparent 38%),
+    linear-gradient(180deg, rgba(88, 88, 88, 0.96), rgba(53, 0, 0, 0.98));
+  border:1px solid rgba(255,255,255,0.10);
+  box-shadow:
+    0 0 30px rgba(180, 0, 0, 0.274),
+    0 0 30px rgba(109, 109, 109, 0.274);
+}
+
 .special-chaos-win{
   background:
     radial-gradient(circle at top, rgba(255,255,255,0.04), transparent 38%),
-    linear-gradient(180deg, rgba(54, 54, 112, 0.96), rgba(15, 15, 56, 0.98));
+    linear-gradient(180deg, rgba(96, 54, 112, 0.96), rgba(15, 15, 56, 0.98));
   border:1px solid rgba(255,255,255,0.10);
   box-shadow:
     0 0 30px rgba(59, 72, 255, 0.274),

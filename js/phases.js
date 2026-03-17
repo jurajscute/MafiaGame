@@ -114,6 +114,8 @@ window.setDay = setDay;
 window.setNight = setNight;
 
 export function startNight(){
+state.specialWinChecks.catConvertedTonight = null
+state.specialWinChecks.spiritRevealedThisMorning = null
 state.gameStats.nights++
 addLogEntry(`Night ${state.gameStats.nights} began.`)
 
@@ -277,6 +279,149 @@ function renderSimpleWinScreen(bodyClass, cardClass, title, lines){
 
       <button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
       <button onclick="location.reload()">Restart Game</button>
+    </div>
+  `)
+}
+
+function renderVoiceFromBeyondWin(spiritName, revealedName){
+  document.body.className = "win-spirit-reveal"
+
+  render(`
+    <div class="card special-spirit-win">
+
+      <h1 class="role-title" style="
+        color:${roleColors.spirit};
+        text-shadow:
+          0 0 10px ${roleColors.spirit},
+          0 0 22px ${roleColors.spirit},
+          0 0 36px rgba(192,132,252,0.42);
+        letter-spacing:2px;
+      ">
+        VOICE FROM BEYOND
+      </h1>
+
+      <p style="
+        color:#eadbff;
+        font-size:18px;
+        margin-top:8px;
+      ">
+        The dead spoke... and the town listened.
+      </p>
+
+      <div style="
+        margin:24px 0 14px 0;
+        padding:18px;
+        border-radius:18px;
+        background:linear-gradient(
+          135deg,
+          rgba(192,132,252,0.14),
+          rgba(108,52,131,0.18),
+          rgba(255,255,255,0.05)
+        );
+        border:1px solid rgba(255,255,255,0.10);
+        box-shadow:
+          0 0 24px rgba(192,132,252,0.12),
+          0 0 22px rgba(108,52,131,0.10);
+      ">
+        <p style="
+          margin:0 0 10px 0;
+          color:${roleColors.spirit};
+          font-weight:700;
+          text-shadow:0 0 10px ${roleColors.spirit};
+        ">
+          ${spiritName} revealed ${revealedName}
+        </p>
+
+        <p style="
+          margin:0;
+          color:#f3eaff;
+          font-weight:600;
+        ">
+          The town voted them out that same morning.
+        </p>
+      </div>
+
+      <p class="role-description" style="
+        color:#f1e9ff;
+        max-width:520px;
+        margin:0 auto 8px auto;
+      ">
+        A whisper from beyond the grave changed the course of the day.
+      </p>
+
+      <div style="margin-top:24px;">
+        <button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
+        <button onclick="location.reload()">Restart Game</button>
+      </div>
+
+    </div>
+  `)
+}
+
+function renderGoodKittyWin(catName){
+  document.body.className = "win-cat-betrayal"
+
+  render(`
+    <div class="card special-kitty-win">
+
+      <h1 class="role-title" style="
+        color:${roleColors.schrodingers_cat};
+        text-shadow:
+          0 0 10px rgba(220,220,220,0.8),
+          0 0 22px rgba(220,220,220,0.45),
+          0 0 36px rgba(255,255,255,0.18);
+        letter-spacing:2px;
+      ">
+        MAFIA'S BEST FRIEND
+      </h1>
+
+      <p style="
+        color:#e6e6e6;
+        font-size:18px;
+        margin-top:8px;
+      ">
+        The cat changed sides... and doomed the town.
+      </p>
+
+      <div style="
+        margin:24px 0 14px 0;
+        padding:18px;
+        border-radius:18px;
+        background:linear-gradient(
+          135deg,
+          rgba(255,255,255,0.08),
+          rgba(231,76,60,0.12),
+          rgba(0,0,0,0.15)
+        );
+        border:1px solid rgba(255,255,255,0.10);
+        box-shadow:
+          0 0 24px rgba(255,255,255,0.08),
+          0 0 22px rgba(231,76,60,0.08);
+      ">
+        <p style="
+          margin:0;
+          color:${roleColors.schrodingers_cat};
+          font-weight:700;
+          text-shadow:0 0 10px rgba(220,220,220,0.55);
+          font-size:22px;
+        ">
+          ${catName} sealed the mafia's victory
+        </p>
+      </div>
+
+      <p class="role-description" style="
+        color:#f0f0f0;
+        max-width:520px;
+        margin:0 auto 8px auto;
+      ">
+        The cat was recruited by the mafia and with that, outnumbered the town!
+      </p>
+
+      <div style="margin-top:24px;">
+        <button onclick="window.showRoleRevealEnd()">Reveal Roles</button>
+        <button onclick="location.reload()">Restart Game</button>
+      </div>
+
     </div>
   `)
 }
@@ -1132,6 +1277,11 @@ function convertSchrodingersCat(target, joinedTeam, killerRoleLabel, killerName,
 
   target.catAlignment = joinedTeam
 
+  state.specialWinChecks.catConvertedTonight = {
+  playerName: target.name,
+  joinedTeam
+}
+
   addLogEntry(
     `${target.name} was attacked by the ${killerRoleLabel} and secretly joined the ${joinedTeam}.`
   )
@@ -1681,6 +1831,17 @@ let villagers = alive.filter(p => getEffectiveTeam(p) !== "mafia").length
 
 // Mafia win
 if(mafia >= villagers){
+
+const catConversion = state.specialWinChecks?.catConvertedTonight
+
+if(
+  catConversion &&
+  catConversion.joinedTeam === "mafia"
+){
+  addLogEntry(`MAFIA'S BEST FRIEND: ${catConversion.playerName} joined the mafia during the night, and the mafia won the following morning.`)
+  renderQuantumBetrayalWin(catConversion.playerName)
+  return true
+}
 
 let mafiaPlayers = state.players
 .filter(p => getEffectiveTeam(p) === "mafia")
@@ -2299,6 +2460,8 @@ convertExecutionerAfterTargetDeath(victim.name, privateResults)
 function showMorning(){
   setDay()
 
+state.specialWinChecks.spiritRevealedThisMorning = null
+
   if(checkWin()) return
 
   let results = [...(state.nightResolved?.publicResults || [])]
@@ -2340,6 +2503,8 @@ function showMorning(){
         `
       })
     }
+
+    state.specialWinChecks.spiritRevealedThisMorning = revealedPlayer.name
   }
 
   if(state.vigilantePublicReveal){
@@ -2842,6 +3007,19 @@ function resolveVotes(){
 
     let player = state.players.find(p => p.name === eliminated)
 
+    const spiritRevealTarget = state.specialWinChecks?.spiritRevealedThisMorning
+const spiritPlayer = state.players.find(p => !p.alive && p.role === "spirit")
+
+if(
+  spiritRevealTarget &&
+  eliminated === spiritRevealTarget &&
+  spiritPlayer
+){
+  addLogEntry(`${spiritPlayer.name} achieved a Voice From Beyond ending by revealing ${eliminated}, who was voted out the same morning.`)
+  renderVoiceFromBeyondWin(spiritPlayer.name, eliminated)
+  return
+}
+
     if(player){
       player.alive = false
 
@@ -2916,6 +3094,7 @@ function resolveVotes(){
       <button class="primary-btn" onclick="window.nextNight()">Next Night</button>
     </div>
   `)
+  state.specialWinChecks.spiritRevealedThisMorning = null
 }
 
 function renderSpiritPublicReveal(){
@@ -2990,6 +3169,24 @@ if(!isOpen){
 
 function getFinalWinnerBanner(){
   const bodyClass = document.body.className || ""
+
+  if(bodyClass.includes("win-spirit-reveal")){
+  return {
+    label: "Special Ending",
+    title: "Voice From Beyond",
+    subtitle: "The Spirit revealed the truth, and the town acted on it that same morning.",
+    className: "final-banner-chaos"
+  }
+}
+
+if(bodyClass.includes("win-cat-betrayal")){
+  return {
+    label: "Special Ending",
+    title: "Mafia's Best Friend",
+    subtitle: "Schrödinger's Cat changed sides during the night and tipped the game to the mafia by morning.",
+    className: "final-banner-chaos"
+  }
+}
 
   if(bodyClass.includes("win-jester-executioner-vigilante")){
     return {
@@ -3273,6 +3470,7 @@ export { showRoleRevealEnd }
 window.showRoleRevealEnd = showRoleRevealEnd
 
 export function nextNight(){
+  state.specialWinChecks.spiritRevealedThisMorning = null
 
 startNight()
 

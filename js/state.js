@@ -40,6 +40,9 @@ mayorVotePower: 2,
 
 spiritReveal: null,
 
+catConvertedTonight: null,
+spiritRevealedThisMorning: null
+
 mafiaKillMethod: "leader",
 currentMafiaLeader: null,
 mafiaLeaderIndex: 0,
@@ -127,7 +130,10 @@ export function resetGameTracking(){
     votesCast: 0,
     eliminations: 0
   }
-
+state.specialWinChecks = {
+  catConvertedTonight: null,
+  spiritRevealedThisMorning: null
+}
   state.gameLog = []
   state.nightDeaths = []
   state.nightActions = []
