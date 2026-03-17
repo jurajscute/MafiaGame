@@ -8,6 +8,30 @@ let currentRoomCode = null
 let currentPlayerId = null
 let currentIsHost = false
 
+function getOnlineRoomRef() {
+  return ref(db, `rooms/${currentRoomCode}`)
+}
+
+function getOnlineSettings() {
+  return demoRoom?.settings || null
+}
+
+async function pushOnlineSettings(partialSettings) {
+  if (!currentIsHost || !currentRoomCode) return
+
+  const currentSettings = getOnlineSettings()
+  if (!currentSettings) return
+
+  const merged = {
+    ...currentSettings,
+    ...partialSettings
+  }
+
+  await update(getOnlineRoomRef(), {
+    settings: merged
+  })
+}
+
 function generateRoomCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
   let code = ""
@@ -124,6 +148,10 @@ function renderRoomLobby() {
   if (!demoRoom) return
 
   const players = demoRoom.players || []
+  const settings = demoRoom.settings || {}
+  const enabledRoles = Object.entries(settings.rolesEnabled || {})
+    .filter(([, enabled]) => enabled)
+    .map(([role]) => role)
 
   const playerListHTML = players.length
     ? players.map(player => `
@@ -172,16 +200,130 @@ function renderRoomLobby() {
         </ul>
       </div>
 
-      <div class="setup-actions">
+      <div class="setup-list-panel" style="margin-top:16px;">
+        <div class="setup-empty-title" style="margin-bottom:10px;">Online Settings</div>
+
+        <div style="text-align:left; display:flex; flex-direction:column; gap:8px;">
+          <div><strong>Mafia kill method:</strong> ${settings.mafiaKillMethod || "leader"}</div>
+          <div><strong>Reveal on elimination:</strong> ${settings.revealRolesOnElimination || "none"}</div>
+          <div><strong>Mafia count override:</strong> ${settings.mafiaCountOverride || 0}</div>
+          <div><strong>Enabled roles:</strong> ${enabledRoles.length ? enabledRoles.join(", ") : "none"}</div>
+        </div>
+      </div>
+
+            <div class="setup-actions">
         <button class="skip-btn" onclick="window.showOnlineLobbyHome()">Back</button>
+
         ${
           currentIsHost
-            ? `<button class="primary-btn" onclick="alert('Next: sync game settings/start game')">Start Online Game</button>`
+            ? `
+              <button onclick="window.showOnlineSettingsEditor()">Edit Online Settings</button>
+              <button class="primary-btn" onclick="window.startOnlineGame()">Start Online Game</button>
+            `
             : `<button class="primary-btn" disabled>Waiting for Host</button>`
         }
       </div>
     </div>
   `)
+}
+
+function showOnlineSettingsEditor() {
+  if (!currentIsHost || !demoRoom) {
+    alert("Only the host can edit online settings.")
+    return
+  }
+
+  const settings = demoRoom.settings || {}
+  const rolesEnabled = settings.rolesEnabled || {}
+
+  render(`
+    <div class="card setup-screen-card">
+      <div class="setup-hero">
+        <div class="setup-kicker">Online Lobby</div>
+        <h2 class="setup-title">Edit Online Settings</h2>
+        <div class="setup-subtitle">
+          These settings sync to every player in the room.
+        </div>
+      </div>
+
+      <div class="setup-list-panel" style="text-align:left;">
+        <label style="display:block; margin-bottom:12px;">
+          Mafia Kill Method
+          <select id="onlineMafiaKillMethod" class="settings-modern-select">
+            <option value="leader" ${settings.mafiaKillMethod === "leader" ? "selected" : ""}>Leader chooses</option>
+            <option value="vote" ${settings.mafiaKillMethod === "vote" ? "selected" : ""}>Mafia vote</option>
+          </select>
+        </label>
+
+        <label style="display:block; margin-bottom:12px;">
+          Reveal Roles On Elimination
+          <select id="onlineRevealRoles" class="settings-modern-select">
+            <option value="none" ${settings.revealRolesOnElimination === "none" ? "selected" : ""}>Never</option>
+            <option value="death" ${settings.revealRolesOnElimination === "death" ? "selected" : ""}>Night kill only</option>
+            <option value="vote_only" ${settings.revealRolesOnElimination === "vote_only" ? "selected" : ""}>Vote only</option>
+            <option value="death_and_vote" ${settings.revealRolesOnElimination === "death_and_vote" ? "selected" : ""}>Night kill and vote</option>
+          </select>
+        </label>
+
+        <label style="display:block; margin-bottom:16px;">
+          Mafia Count Override
+          <input
+            id="onlineMafiaCountOverride"
+            type="number"
+            min="0"
+            max="5"
+            value="${settings.mafiaCountOverride ?? 0}"
+            class="settings-modern-number"
+          >
+        </label>
+
+        <div style="margin-bottom:10px; font-weight:700;">Enable Roles</div>
+
+        <div style="display:grid; gap:10px;">
+          ${Object.keys(rolesEnabled).map(role => `
+            <label style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 12px; border-radius:12px; background:rgba(255,255,255,0.04);">
+              <span>${roleDisplayName(role)}</span>
+              <input type="checkbox" data-online-role="${role}" ${rolesEnabled[role] ? "checked" : ""}>
+            </label>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="setup-actions">
+        <button class="skip-btn" onclick="renderRoomLobby()">Back</button>
+        <button class="primary-btn" onclick="window.saveOnlineSettings()">Save Online Settings</button>
+      </div>
+    </div>
+  `)
+}
+
+window.saveOnlineSettings = async function () {
+  if (!currentIsHost || !demoRoom) return
+
+  const mafiaKillMethod = document.getElementById("onlineMafiaKillMethod")?.value || "leader"
+  const revealRolesOnElimination = document.getElementById("onlineRevealRoles")?.value || "none"
+  const mafiaCountOverride = Number(document.getElementById("onlineMafiaCountOverride")?.value || 0)
+
+  const currentSettings = demoRoom.settings || {}
+  const nextRolesEnabled = { ...(currentSettings.rolesEnabled || {}) }
+
+  document.querySelectorAll("[data-online-role]").forEach(input => {
+    nextRolesEnabled[input.dataset.onlineRole] = input.checked
+  })
+
+  try {
+    await pushOnlineSettings({
+      mafiaKillMethod,
+      revealRolesOnElimination,
+      mafiaCountOverride,
+      rolesEnabled: nextRolesEnabled
+    })
+
+    alert("Online settings saved.")
+  } catch (error) {
+    console.error("Failed to save online settings:", error)
+    alert("Failed to save online settings: " + error.message)
+  }
 }
 
 function subscribeToRoom(roomCode) {
@@ -199,6 +341,21 @@ function subscribeToRoom(roomCode) {
     }
 
     demoRoom = snapshot.val()
+        if (demoRoom.phase === "starting") {
+      render(`
+        <div class="card home-screen-card">
+          <div class="home-hero">
+            <div class="home-kicker">Online Game</div>
+            <h2 class="home-title">Game Starting</h2>
+            <div class="home-subtitle">
+              The host started the online game. Next step is syncing full gameplay.
+            </div>
+          </div>
+        </div>
+      `)
+      return
+    }
+
     renderRoomLobby()
   })
 }
@@ -249,6 +406,26 @@ window.confirmCreateOnlineRoom = async function () {
   } catch (error) {
     console.error("Failed to create room:", error)
     alert("Failed to create room: " + error.message)
+  }
+}
+
+window.startOnlineGame = async function () {
+  if (!currentIsHost || !demoRoom) {
+    alert("Only the host can start the online game.")
+    return
+  }
+
+  try {
+    await update(getOnlineRoomRef(), {
+      phase: "starting",
+      gameState: {
+        startedAt: Date.now(),
+        started: true
+      }
+    })
+  } catch (error) {
+    console.error("Failed to start online game:", error)
+    alert("Failed to start online game: " + error.message)
   }
 }
 
@@ -323,3 +500,5 @@ window.showOnlineNetworkingNotice = function () {
 export function bootOnlineLobby() {
   renderOnlineMenu()
 }
+
+window.showOnlineSettingsEditor = showOnlineSettingsEditor
