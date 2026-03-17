@@ -593,133 +593,133 @@ function showSettings() {
   }
 
   const content = `
-    <div class="modal-content settings-modal-shell">
-      <div class="settings-header">
-        <div class="settings-header-main">
-          <div>
-            <h2 class="settings-title-modern">Game Settings</h2>
-            <div class="settings-subtitle-modern">
-              ${state.gameStarted ? "Settings are locked during the game" : "Configure roles, rules, and special conditions"}
-            </div>
+  <div class="modal-content settings-modal-shell">
+    <div class="settings-header">
+      <div class="settings-header-main">
+        <div>
+          <h2 class="settings-title-modern">Game Settings</h2>
+          <div class="settings-subtitle-modern">
+            ${state.gameStarted ? "Settings are locked during the game" : "Configure roles, rules, and special conditions"}
           </div>
-
-          ${state.gameStarted ? `
-            <div class="settings-lock-badge">🔒 Locked</div>
-          ` : ""}
         </div>
+
+        ${state.gameStarted ? `
+          <div class="settings-lock-badge">🔒 Locked</div>
+        ` : ""}
       </div>
 
-      <div class="settings-scroll">
-
-        <div class="settings-section-modern">
-          <div class="settings-section-title-modern">Quick Setup</div>
-
-          <div class="settings-grid-two">
-            <div class="settings-quick-card">
-              <label class="settings-field-label">Host Mode</label>
-              <div class="settings-field-inline">
-                <span class="settings-field-label-inline">Enable host controls</span>
-                <label class="switch">
-                  <input type="checkbox"
-                    ${state.hostMode ? "checked" : ""}
-                    onchange="toggleHostMode(this.checked)">
-                  <span class="slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="settings-quick-card">
-              <label class="settings-field-label">Reveal roles on elimination</label>
-              <select class="settings-modern-select" onchange="setRevealRolesOnElimination(this.value)">
-                <option value="none" ${state.revealRolesOnElimination === "none" ? "selected" : ""}>Never</option>
-                <option value="death" ${state.revealRolesOnElimination === "death" ? "selected" : ""}>Night kill only</option>
-                <option value="vote_only" ${state.revealRolesOnElimination === "vote_only" ? "selected" : ""}>Vote only</option>
-                <option value="death_and_vote" ${state.revealRolesOnElimination === "death_and_vote" ? "selected" : ""}>Night kill and vote</option>
-              </select>
-            </div>
-
-            <div class="settings-quick-card">
-              <label class="settings-field-label">How many mafia?</label>
-              <select class="settings-modern-select" onchange="window.updateMafiaCountOverride(this.value)">
-                ${mafiaOptions}
-              </select>
-              <div class="settings-help-text">
-                Auto recommends <strong>${autoMafia}</strong>. Max with ${playerCount} player${playerCount === 1 ? "" : "s"}: <strong>${mafiaMax}</strong>
-              </div>
-            </div>
-
-            <div class="settings-quick-card">
-              <label class="settings-field-label">Mafia kill method</label>
-              <select class="settings-modern-select" onchange="setMafiaKillMethod(this.value)">
-                <option value="leader" ${state.mafiaKillMethod === "leader" ? "selected" : ""}>Leader chooses</option>
-                <option value="vote" ${state.mafiaKillMethod === "vote" ? "selected" : ""}>Mafia vote</option>
-              </select>
-              <div class="settings-help-text">
-                Leader rotates nightly. Vote breaks ties randomly.
-              </div>
-            </div>
-          </div>
-
-          <div class="settings-quick-card settings-full-width-card">
-            <label class="settings-field-label">Presets</label>
-            <div class="settings-preset-row">
-              <button type="button" onclick="applyPreset('classic')">Classic</button>
-              <button type="button" onclick="applyPreset('beginner')">Beginner</button>
-              <button type="button" onclick="applyPreset('chaotic')">Chaotic</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="settings-section-modern">
-          <div class="settings-section-title-modern">Global Mafia Settings</div>
-
-          <div class="settings-grid-two">
-            <div class="settings-quick-card">
-              <div class="settings-field-inline">
-                <span class="settings-field-label-inline">Mafia know who the Framer is</span>
-                <label class="switch">
-                  <input type="checkbox"
-                    ${state.mafiaKnowsFramer ? "checked" : ""}
-                    onchange="toggleMafiaKnowsFramer(this.checked)">
-                  <span class="slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="settings-quick-card">
-              <div class="settings-field-inline">
-                <span class="settings-field-label-inline">Mafia know the first leader</span>
-                <label class="switch">
-                  <input type="checkbox"
-                    ${state.mafiaKnowsFirstLeader ? "checked" : ""}
-                    onchange="toggleMafiaKnowsFirstLeader(this.checked)">
-                  <span class="slider"></span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="settings-section-modern">
-          <div class="settings-section-title-modern">Roles</div>
-
-          <div class="settings-role-group-title">Town</div>
-          ${townRoles.map(renderRoleCard).join("")}
-
-          <div class="settings-role-group-title">Neutral</div>
-          ${neutralRoles.map(renderRoleCard).join("")}
-
-          <div class="settings-role-group-title">Mafia</div>
-          ${mafiaRoles.map(renderRoleCard).join("")}
-        </div>
-      </div>
-
-      <div class="settings-footer">
-        <button type="button" class="reset-settings-btn" onclick="confirmResetSettings()">Reset Settings</button>
-        <button class="close-settings-btn" onclick="closeInfo()">Close</button>
+      <div class="settings-header-actions">
+        <button type="button" class="reset-settings-btn" onclick="confirmResetSettings()">Reset</button>
+        <button type="button" class="close-settings-btn" onclick="closeInfo()">Close</button>
       </div>
     </div>
-  `
+
+    <div class="settings-scroll">
+
+      <div class="settings-section-modern">
+        <div class="settings-section-title-modern">Quick Setup</div>
+
+        <div class="settings-grid-two">
+          <div class="settings-quick-card">
+            <label class="settings-field-label">Host Mode</label>
+            <div class="settings-field-inline">
+              <span class="settings-field-label-inline">Enable host controls</span>
+              <label class="switch">
+                <input type="checkbox"
+                  ${state.hostMode ? "checked" : ""}
+                  onchange="toggleHostMode(this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-quick-card">
+            <label class="settings-field-label">Reveal roles on elimination</label>
+            <select class="settings-modern-select" onchange="setRevealRolesOnElimination(this.value)">
+              <option value="none" ${state.revealRolesOnElimination === "none" ? "selected" : ""}>Never</option>
+              <option value="death" ${state.revealRolesOnElimination === "death" ? "selected" : ""}>Night kill only</option>
+              <option value="vote_only" ${state.revealRolesOnElimination === "vote_only" ? "selected" : ""}>Vote only</option>
+              <option value="death_and_vote" ${state.revealRolesOnElimination === "death_and_vote" ? "selected" : ""}>Night kill and vote</option>
+            </select>
+          </div>
+
+          <div class="settings-quick-card">
+            <label class="settings-field-label">How many mafia?</label>
+            <select class="settings-modern-select" onchange="window.updateMafiaCountOverride(this.value)">
+              ${mafiaOptions}
+            </select>
+            <div class="settings-help-text">
+              Auto recommends <strong>${autoMafia}</strong>. Max with ${playerCount} player${playerCount === 1 ? "" : "s"}: <strong>${mafiaMax}</strong>
+            </div>
+          </div>
+
+          <div class="settings-quick-card">
+            <label class="settings-field-label">Mafia kill method</label>
+            <select class="settings-modern-select" onchange="setMafiaKillMethod(this.value)">
+              <option value="leader" ${state.mafiaKillMethod === "leader" ? "selected" : ""}>Leader chooses</option>
+              <option value="vote" ${state.mafiaKillMethod === "vote" ? "selected" : ""}>Mafia vote</option>
+            </select>
+            <div class="settings-help-text">
+              Leader rotates nightly. Vote breaks ties randomly.
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-quick-card settings-full-width-card">
+          <label class="settings-field-label">Presets</label>
+          <div class="settings-preset-row">
+            <button type="button" onclick="applyPreset('classic')">Classic</button>
+            <button type="button" onclick="applyPreset('beginner')">Beginner</button>
+            <button type="button" onclick="applyPreset('chaotic')">Chaotic</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section-modern">
+        <div class="settings-section-title-modern">Global Mafia Settings</div>
+
+        <div class="settings-grid-two">
+          <div class="settings-quick-card">
+            <div class="settings-field-inline">
+              <span class="settings-field-label-inline">Mafia know who the Framer is</span>
+              <label class="switch">
+                <input type="checkbox"
+                  ${state.mafiaKnowsFramer ? "checked" : ""}
+                  onchange="toggleMafiaKnowsFramer(this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-quick-card">
+            <div class="settings-field-inline">
+              <span class="settings-field-label-inline">Mafia know the first leader</span>
+              <label class="switch">
+                <input type="checkbox"
+                  ${state.mafiaKnowsFirstLeader ? "checked" : ""}
+                  onchange="toggleMafiaKnowsFirstLeader(this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section-modern">
+        <div class="settings-section-title-modern">Roles</div>
+
+        <div class="settings-role-group-title">Town</div>
+        ${townRoles.map(renderRoleCard).join("")}
+
+        <div class="settings-role-group-title">Neutral</div>
+        ${neutralRoles.map(renderRoleCard).join("")}
+
+        <div class="settings-role-group-title">Mafia</div>
+        ${mafiaRoles.map(renderRoleCard).join("")}
+      </div>
+    </div>
+  </div>
+`
 
   if(modal.classList.contains("show")){
     swapModalContent(content, initSettingsModal)
