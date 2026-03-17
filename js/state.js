@@ -41,7 +41,7 @@ mayorVotePower: 2,
 spiritReveal: null,
 
 catConvertedTonight: null,
-spiritRevealedThisMorning: null
+spiritRevealedThisMorning: null,
 
 mafiaKillMethod: "leader",
 currentMafiaLeader: null,
