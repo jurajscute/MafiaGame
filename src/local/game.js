@@ -737,11 +737,19 @@ addLogEntry("Host revealed final roles early.")
 showRoleRevealEnd()
 }
 
+function assignRoles() {
+  assignRolesToPlayers(state)
+
+  if (!state.players.some(p => p.role === "mafia")) {
+    console.error("Role assignment failed: no mafia assigned.")
+  }
+}
+
 window.confirmStartGame = function(){
   state.openExecutionerReveal = null
   state.gameStarted = true
   resetGameTracking()
-  assignRolesToPlayers()
+  assignRoles()
   revealIndex = 0
   showRoleReveal()
 }
