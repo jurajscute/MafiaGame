@@ -40,7 +40,13 @@ export function createRoom({ roomCode, hostName }) {
       executionerWinIfDead: false,
       executionerBecomes: "jester"
     },
-    gameState: null
+    gameState: {
+  started: false,
+  phase: "lobby",
+  revealIndex: 0,
+  players: [],
+  hostMessage: ""
+}
   }
 }
 

@@ -343,19 +343,8 @@ function subscribeToRoom(roomCode) {
       return
     }
 
-    demoRoom = snapshot.val()
-        if (demoRoom.phase === "starting") {
-      render(`
-        <div class="card home-screen-card">
-          <div class="home-hero">
-            <div class="home-kicker">Online Game</div>
-            <h2 class="home-title">Game Starting</h2>
-            <div class="home-subtitle">
-              The host started the online game. Next step is syncing full gameplay.
-            </div>
-          </div>
-        </div>
-      `)
+        if (demoRoom.phase === "in_game") {
+      renderOnlineGame()
       return
     }
 
@@ -419,12 +408,11 @@ window.startOnlineGame = async function () {
   }
 
   try {
+    const onlineGameState = buildOnlineGameState(demoRoom)
+
     await update(getOnlineRoomRef(), {
-      phase: "starting",
-      gameState: {
-        startedAt: Date.now(),
-        started: true
-      }
+      phase: "in_game",
+      gameState: onlineGameState
     })
   } catch (error) {
     console.error("Failed to start online game:", error)
@@ -480,6 +468,131 @@ window.fakeJoinRoom = async function () {
   }
 }
 
+function renderOnlineGame() {
+  const gameState = demoRoom?.gameState
+  if (!gameState) return
+
+  const me = gameState.players?.find(player => player.id === currentPlayerId)
+  if (!me) {
+    render(`
+      <div class="card home-screen-card">
+        <div class="home-hero">
+          <div class="home-kicker">Online Game</div>
+          <h2 class="home-title">Player Not Found</h2>
+          <div class="home-subtitle">
+            Your player entry was not found in this room.
+          </div>
+        </div>
+      </div>
+    `)
+    return
+  }
+
+  const executionerTarget = gameState.executionerTargets?.[me.name] || null
+
+  render(`
+    <div class="card reveal-role-card role-${me.role}">
+      <div class="reveal-role-topbar">
+        <div class="reveal-role-kicker">Online Game</div>
+        <div class="reveal-role-progress">${gameState.phase}</div>
+      </div>
+
+      <div class="reveal-role-header">
+        <div class="reveal-role-player">${me.name}</div>
+        <div class="reveal-role-hint">
+          This is your private role. Do not show other players.
+        </div>
+      </div>
+
+      <div class="night-action-role-box">
+        <div class="night-action-role-kicker">Your Role</div>
+        <div class="night-action-role-name">
+          ${roleDisplayName(me.role)}
+        </div>
+        <p class="role-description">
+          ${getRoleDescription(me.role)}
+        </p>
+      </div>
+
+      ${
+        executionerTarget
+          ? `
+            <div class="executioner-target-box">
+              <div class="executioner-target-label">Your target is</div>
+              <div class="executioner-target-name">${executionerTarget}</div>
+            </div>
+          `
+          : ""
+      }
+
+      <div class="player-status-box" style="margin-top:16px;">
+        <h3>Players in Game</h3>
+        ${gameState.players.map(player => `
+          <div class="status-row ${player.alive ? "alive" : "dead"}">
+            <span>${player.name}</span>
+            <span>${player.alive ? "Alive" : "Dead ☠"}</span>
+          </div>
+        `).join("")}
+      </div>
+
+      ${
+        currentIsHost
+          ? `
+            <button class="primary-btn" onclick="window.advanceOnlinePhase()">
+              Advance Phase
+            </button>
+          `
+          : `
+            <button class="primary-btn" disabled>
+              Waiting For Host
+            </button>
+          `
+      }
+    </div>
+  `)
+}
+
+function getRoleDescription(role) {
+  const roleDescriptions = {
+    villager: "You have no special ability. Find the mafia.",
+    mafia: "Work with the mafia to eliminate villagers each night.",
+    doctor: "Choose one player each night to protect from being killed.",
+    sheriff: "Investigate a player each night to learn if they are suspicious.",
+    mayor: "Your vote has extra power during the day.",
+    jester: "You win if the town votes you out.",
+    executioner: "You win if your assigned target is voted out by the town.",
+    spirit: "If you die, you may reveal information to the town.",
+    framer: "Choose a player each night to make them look suspicious to the Sheriff.",
+    vigilante: "At night, you may attack one player, but mistakes are dangerous.",
+    priest: "You may shield the town and block all kills for a night.",
+    schrodingers_cat: "If attacked, you join the attacker’s side instead of dying.",
+    traitor: "You secretly help the mafia win."
+  }
+
+  return roleDescriptions[role] || "No description available."
+}
+
+window.advanceOnlinePhase = async function () {
+  if (!currentIsHost || !demoRoom?.gameState) return
+
+  const currentPhase = demoRoom.gameState.phase
+  let nextPhase = currentPhase
+
+  if (currentPhase === "role_reveal") nextPhase = "day"
+  else if (currentPhase === "day") nextPhase = "night"
+  else if (currentPhase === "night") nextPhase = "voting"
+  else if (currentPhase === "voting") nextPhase = "day"
+
+  try {
+    await update(getOnlineRoomRef(), {
+      "gameState/phase": nextPhase
+    })
+  } catch (error) {
+    console.error("Failed to advance phase:", error)
+    alert("Failed to advance phase: " + error.message)
+  }
+}
+
 window.showOnlineNetworkingNotice = function () {
   render(`
     <div class="card home-screen-card">
@@ -504,4 +617,5 @@ export function bootOnlineLobby() {
   renderOnlineMenu()
 }
 
+window.renderOnlineGame = renderOnlineGame
 window.showOnlineSettingsEditor = showOnlineSettingsEditor
