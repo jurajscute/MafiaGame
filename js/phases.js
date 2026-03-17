@@ -1240,6 +1240,22 @@ export function revealNightRole(){
   if(!role.nightAction){
     let roleKey = player.role.toLowerCase()
     let color = roleColors[roleKey] || "white"
+    let extraInfo = ""
+
+    if(player.role === "executioner"){
+      const target = state.executionerTargets?.[player.name]
+
+      if(target){
+        extraInfo = `
+          <div class="reveal-role-extra">
+            <div class="executioner-target-box">
+              <div class="executioner-target-label">Your target is</div>
+              <div class="executioner-target-name">${target}</div>
+            </div>
+          </div>
+        `
+      }
+    }
 
     render(`
 
@@ -1248,7 +1264,7 @@ export function revealNightRole(){
         <div class="reveal-role-topbar">
           <div class="reveal-role-kicker">Night Role Reveal</div>
           <div class="reveal-role-progress">
-            ${state.nightTurnIndex + 1} / ${state.players.filter(p => p.alive).length}
+            ${currentNightPlayerNumber} / ${alivePlayers.length}
           </div>
         </div>
 
@@ -1285,6 +1301,8 @@ export function revealNightRole(){
             ${role.description || ""}
           </p>
         </div>
+
+        ${extraInfo}
 
         <div class="reveal-role-actions">
           <button onclick="window.nextNightTurn()">Continue</button>
