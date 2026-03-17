@@ -1,9 +1,12 @@
 import { render } from "../local/ui.js"
 import { createRoom, createRoomPlayer } from "../core/onlineRoom.js"
 import { db } from "./firebase.js"
-import { ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"
+import { ref, set, get, child, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"
 
 let demoRoom = null
+let currentRoomCode = null
+let currentPlayerId = null
+let currentIsHost = false
 
 function generateRoomCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
@@ -120,20 +123,31 @@ function renderJoinSetup() {
 function renderRoomLobby() {
   if (!demoRoom) return
 
-  const playersHtml = demoRoom.players.map(player => `
-    <li class="setup-player-card">
-      <div class="setup-player-left">
-        <div class="setup-player-avatar">👤</div>
+  const players = demoRoom.players || []
 
-        <div class="setup-player-input-wrap">
-          <div class="setup-player-label">
-            ${player.isHost ? "Host" : "Player"}
+  const playerListHTML = players.length
+    ? players.map(player => `
+        <li class="setup-player-card">
+          <div class="setup-player-left">
+            <div class="setup-player-avatar">${player.isHost ? "👑" : "👤"}</div>
+            <div class="setup-player-input-wrap">
+              <div class="setup-player-label">${player.isHost ? "Host" : "Player"}</div>
+              <div class="setup-player-input" style="display:flex;align-items:center;">
+                ${player.name}
+              </div>
+            </div>
           </div>
-          <div class="setup-player-input">${player.name}</div>
+        </li>
+      `).join("")
+    : `
+      <div class="setup-empty-state">
+        <div class="setup-empty-icon">🎭</div>
+        <div class="setup-empty-title">No players yet</div>
+        <div class="setup-empty-text">
+          Waiting for players to join...
         </div>
       </div>
-    </li>
-  `).join("")
+    `
 
   render(`
     <div class="card setup-screen-card">
@@ -141,34 +155,52 @@ function renderRoomLobby() {
         <div class="setup-kicker">Online Lobby</div>
         <h2 class="setup-title">Room ${demoRoom.roomCode}</h2>
         <div class="setup-subtitle">
-          This is your future online room. Networking comes next.
+          Send this room code to your friends so they can join.
         </div>
       </div>
 
       <div class="setup-stat-row">
         <div class="setup-stat-pill">
-          <span class="setup-stat-value">${demoRoom.players.length}</span>
-          <span class="setup-stat-text">Player${demoRoom.players.length === 1 ? "" : "s"}</span>
+          <span class="setup-stat-value">${players.length}</span>
+          <span class="setup-stat-text">Player${players.length === 1 ? "" : "s"}</span>
         </div>
       </div>
 
       <div class="setup-list-panel">
         <ul class="setup-player-list">
-          ${playersHtml}
+          ${playerListHTML}
         </ul>
       </div>
 
       <div class="setup-actions">
-        <button class="primary-btn" onclick="window.showOnlineNetworkingNotice()">
-          Continue
-        </button>
-
-        <button class="skip-btn" onclick="window.showOnlineLobbyHome()">
-          Leave Lobby
-        </button>
+        <button class="skip-btn" onclick="window.showOnlineLobbyHome()">Back</button>
+        ${
+          currentIsHost
+            ? `<button class="primary-btn" onclick="alert('Next: sync game settings/start game')">Start Online Game</button>`
+            : `<button class="primary-btn" disabled>Waiting for Host</button>`
+        }
       </div>
     </div>
   `)
+}
+
+function subscribeToRoom(roomCode) {
+  const roomRef = ref(db, `rooms/${roomCode}`)
+
+  onValue(roomRef, (snapshot) => {
+    if (!snapshot.exists()) {
+      alert("Room no longer exists.")
+      demoRoom = null
+      currentRoomCode = null
+      currentPlayerId = null
+      currentIsHost = false
+      window.showOnlineLobbyHome()
+      return
+    }
+
+    demoRoom = snapshot.val()
+    renderRoomLobby()
+  })
 }
 
 window.showOnlineLobbyHome = function () {
@@ -189,27 +221,34 @@ window.confirmCreateOnlineRoom = async function () {
   }
 
   const roomCode = generateRoomCode()
+  const hostPlayerId = `host-${Date.now()}`
 
-  demoRoom = createRoom({
+  const room = createRoom({
     roomCode,
     hostName
   })
 
   const hostPlayer = createRoomPlayer({
-    id: "local-host",
+    id: hostPlayerId,
     name: hostName,
     isHost: true
   })
 
-  demoRoom.players.push(hostPlayer)
-  demoRoom.hostId = hostPlayer.id
+  room.players.push(hostPlayer)
+  room.hostId = hostPlayer.id
 
   try {
-    await set(ref(db, `rooms/${roomCode}`), demoRoom)
-    renderRoomLobby()
+    await set(ref(db, `rooms/${roomCode}`), room)
+
+    currentRoomCode = roomCode
+    currentPlayerId = hostPlayerId
+    currentIsHost = true
+    demoRoom = room
+
+    subscribeToRoom(roomCode)
   } catch (error) {
     console.error("Failed to create room:", error)
-    alert("Failed to create room.")
+    alert("Failed to create room: " + error.message)
   }
 }
 
@@ -235,35 +274,29 @@ window.fakeJoinRoom = async function () {
     }
 
     const room = snapshot.val()
+    const players = room.players || []
 
-    render(`
-      <div class="card setup-screen-card">
-        <div class="setup-hero">
-          <div class="setup-kicker">Room Found</div>
-          <h2 class="setup-title">Room ${code}</h2>
-          <div class="setup-subtitle">
-            Connected to Firebase successfully.
-          </div>
-        </div>
+    const newPlayerId = `player-${Date.now()}`
+    const newPlayer = createRoomPlayer({
+      id: newPlayerId,
+      name,
+      isHost: false
+    })
 
-        <div class="setup-list-panel">
-          <div class="setup-empty-text">
-            Host: <strong>${room.hostName}</strong><br>
-            Players currently in room: <strong>${room.players?.length || 0}</strong><br><br>
-            Next step: actually add the joining player into the room.
-          </div>
-        </div>
+    const updatedPlayers = [...players, newPlayer]
 
-        <div class="setup-actions">
-          <button class="primary-btn" onclick="window.showOnlineLobbyHome()">
-            Back
-          </button>
-        </div>
-      </div>
-    `)
+    await update(ref(db, `rooms/${code}`), {
+      players: updatedPlayers
+    })
+
+    currentRoomCode = code
+    currentPlayerId = newPlayerId
+    currentIsHost = false
+
+    subscribeToRoom(code)
   } catch (error) {
     console.error("Failed to join room:", error)
-    alert("Failed to load room.")
+    alert("Failed to join room: " + error.message)
   }
 }
 
