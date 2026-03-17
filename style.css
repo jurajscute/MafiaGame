@@ -645,7 +645,7 @@ body.night .card:not(.role-mafia):not(.special-chaos-win):not(.special-spirit-wi
 .special-spirit-win{
   background:
     radial-gradient(circle at top, rgba(138, 189, 255, 0.363), transparent 38%),
-    linear-gradient(180deg, rgba(184, 116, 184, 0.37), rgba(71, 113, 148, 0.98));
+    linear-gradient(180deg, rgba(71, 113, 148, 0.98), rgba(184, 116, 184, 0.37));
   border:1px solid rgba(173, 209, 255, 0.507);
   box-shadow:
     0 0 30px rgba(59, 150, 255, 0.274),
@@ -655,7 +655,7 @@ body.night .card:not(.role-mafia):not(.special-chaos-win):not(.special-spirit-wi
 .special-kitty-win{
   background:
     radial-gradient(circle at top, rgba(255,255,255,0.04), transparent 38%),
-    linear-gradient(180deg, rgba(88, 88, 88, 0.96), rgba(53, 0, 0, 0.98));
+    linear-gradient(180deg, rgba(53, 0, 0, 0.98), rgba(58, 58, 58, 0.96));
   border:1px solid rgba(255,255,255,0.10);
   box-shadow:
     0 0 30px rgba(180, 0, 0, 0.274),
@@ -2930,6 +2930,41 @@ body.holy-night-flash .holy-pulse{
     radial-gradient(circle at right top, rgba(122,47,111,0.16), transparent 28%),
     linear-gradient(135deg, rgba(34,36,90,0.46), rgba(35,10,39,0.68));
   border-color:rgba(255,255,255,0.12);
+}
+
+.final-banner-exejes{
+  background:
+    radial-gradient(circle at left top, rgba(255,62,165,0.28), transparent 28%),
+    radial-gradient(circle at center top, rgba(140,0,60,0.22), transparent 26%),
+    radial-gradient(circle at right top, rgba(200,40,120,0.24), transparent 28%),
+    linear-gradient(135deg, rgba(90,10,40,0.75), rgba(40,0,20,0.95));
+  border-color:rgba(255,255,255,0.12);
+}
+
+.final-banner-spirit{
+  background:
+    radial-gradient(circle at left top, rgba(140,200,255,0.28), transparent 28%),
+    radial-gradient(circle at center top, rgba(255,200,235,0.22), transparent 26%),
+    radial-gradient(circle at right top, rgba(200,230,255,0.20), transparent 28%),
+    linear-gradient(135deg, rgba(80,120,180,0.45), rgba(255,200,235,0.35));
+  border-color:rgba(255,255,255,0.14);
+}
+
+.final-banner-kitty{
+  background:
+    radial-gradient(circle at left top, rgba(255,60,60,0.18), transparent 28%),
+    radial-gradient(circle at center top, rgba(160,160,160,0.14), transparent 26%),
+    radial-gradient(circle at right top, rgba(90,90,90,0.16), transparent 28%),
+    linear-gradient(135deg, rgba(30,30,30,0.85), rgba(10,10,10,0.95));
+  border-color:rgba(255,255,255,0.10);
+}
+.final-banner-chaos,
+.final-banner-kitty,
+.final-banner-spirit,
+.final-banner-exejes{
+  box-shadow:
+    0 0 24px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.08);
 }
 
 .final-summary-grid{

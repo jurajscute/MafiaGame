@@ -3175,7 +3175,7 @@ function getFinalWinnerBanner(){
     label: "Special Ending",
     title: "Voice From Beyond",
     subtitle: "The Spirit revealed the truth, and the town acted on it that same morning.",
-    className: "final-banner-chaos"
+    className: "final-banner-spirit"
   }
 }
 
@@ -3184,7 +3184,7 @@ if(bodyClass.includes("win-cat-betrayal")){
     label: "Special Ending",
     title: "Mafia's Best Friend",
     subtitle: "Schrödinger's Cat changed sides during the night and tipped the game to the mafia by morning.",
-    className: "final-banner-chaos"
+    className: "final-banner-kitty"
   }
 }
 
@@ -3238,7 +3238,7 @@ if(bodyClass.includes("win-cat-betrayal")){
     label: "Special Ending",
     title: "Vengeful Lunatic",
     subtitle: "A fallen Executioner became the Jester — and still fooled the town.",
-    className: "final-banner-jester-executioner"
+    className: "final-banner-exejes"
     }
   }
 
