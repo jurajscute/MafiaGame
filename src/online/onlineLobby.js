@@ -1,5 +1,7 @@
 import { render } from "../local/ui.js"
 import { createRoom, createRoomPlayer } from "../core/onlineRoom.js"
+import { db } from "./firebase.js"
+import { ref, set, get, child } from "firebase/database"
 
 let demoRoom = null
 
@@ -177,7 +179,7 @@ window.createOnlineRoom = function () {
   renderHostSetup()
 }
 
-window.confirmCreateOnlineRoom = function () {
+window.confirmCreateOnlineRoom = async function () {
   const input = document.getElementById("hostNameInput")
   const hostName = (input?.value || "").trim()
 
@@ -202,14 +204,20 @@ window.confirmCreateOnlineRoom = function () {
   demoRoom.players.push(hostPlayer)
   demoRoom.hostId = hostPlayer.id
 
-  renderRoomLobby()
+  try {
+    await set(ref(db, `rooms/${roomCode}`), demoRoom)
+    renderRoomLobby()
+  } catch (error) {
+    console.error("Failed to create room:", error)
+    alert("Failed to create room.")
+  }
 }
 
 window.showJoinRoomScreen = function () {
   renderJoinSetup()
 }
 
-window.fakeJoinRoom = function () {
+window.fakeJoinRoom = async function () {
   const name = (document.getElementById("joinNameInput")?.value || "").trim()
   const code = (document.getElementById("joinCodeInput")?.value || "").trim().toUpperCase()
 
@@ -218,23 +226,45 @@ window.fakeJoinRoom = function () {
     return
   }
 
-  render(`
-    <div class="card home-screen-card">
-      <div class="home-hero">
-        <div class="home-kicker">Online Join</div>
-        <h1 class="home-title">Networking Next</h1>
-        <div class="home-subtitle">
-          You entered ${code} as ${name}. Real room joining comes in the next step.
+  try {
+    const snapshot = await get(child(ref(db), `rooms/${code}`))
+
+    if (!snapshot.exists()) {
+      alert("Room not found.")
+      return
+    }
+
+    const room = snapshot.val()
+
+    render(`
+      <div class="card setup-screen-card">
+        <div class="setup-hero">
+          <div class="setup-kicker">Room Found</div>
+          <h2 class="setup-title">Room ${code}</h2>
+          <div class="setup-subtitle">
+            Connected to Firebase successfully.
+          </div>
+        </div>
+
+        <div class="setup-list-panel">
+          <div class="setup-empty-text">
+            Host: <strong>${room.hostName}</strong><br>
+            Players currently in room: <strong>${room.players?.length || 0}</strong><br><br>
+            Next step: actually add the joining player into the room.
+          </div>
+        </div>
+
+        <div class="setup-actions">
+          <button class="primary-btn" onclick="window.showOnlineLobbyHome()">
+            Back
+          </button>
         </div>
       </div>
-
-      <div class="home-actions">
-        <button class="primary-btn" onclick="window.showOnlineLobbyHome()">
-          Back
-        </button>
-      </div>
-    </div>
-  `)
+    `)
+  } catch (error) {
+    console.error("Failed to join room:", error)
+    alert("Failed to load room.")
+  }
 }
 
 window.showOnlineNetworkingNotice = function () {
