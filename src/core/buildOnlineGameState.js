@@ -38,6 +38,8 @@ nightResolved: {
 },
 nightPrivateResults: [],
 nightDeaths: [],
+votes: {},
+voteResults: null,
   players: tempState.players.map(player => ({
     id: player.id,
     name: player.name,

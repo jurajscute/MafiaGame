@@ -5,6 +5,7 @@ import { db } from "./firebase.js"
 import { ref, set, get, child, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"
 import { roleColors, roleDisplayName } from "../core/gameData.js"
 import { roles } from "../core/roles.js"
+import { resolveOnlineVotes } from "../core/resolveOnlineVotes.js"
 import { resolveOnlineNight } from "../core/resolveOnlineNight.js"
 
 let demoRoom = null
@@ -18,6 +19,22 @@ function getOnlineRoomRef() {
 
 function getOnlineSettings() {
   return demoRoom?.settings || null
+}
+
+window.submitOnlineVote = async function(targetName) {
+  if (!demoRoom?.code || !currentPlayerId) return
+
+  const me = getOnlineMe()
+  if (!me || me.alive === false) return
+
+  try {
+    await update(ref(db, `rooms/${demoRoom.code}/gameState`), {
+      [`votes/${currentPlayerId}`]: targetName
+    })
+  } catch (error) {
+    console.error("Failed to submit vote:", error)
+    alert("Failed to submit vote: " + error.message)
+  }
 }
 
 window.markOnlineReady = async function() {
@@ -582,23 +599,29 @@ async function maybeAdvanceOnlinePhase() {
   const gameState = demoRoom.gameState
   const alivePlayers = (gameState.players || []).filter(player => player.alive !== false)
 
-  let everyoneReady = false
+  let everyoneDone = false
 
   if (gameState.phase === "night_select") {
     const actions = gameState.submittedActions || {}
 
-    everyoneReady =
+    everyoneDone =
       alivePlayers.length > 0 &&
       alivePlayers.every(player => actions[player.id])
+  } else if (gameState.phase === "voting") {
+    const votes = gameState.votes || {}
+
+    everyoneDone =
+      alivePlayers.length > 0 &&
+      alivePlayers.every(player => votes[player.id])
   } else {
     const readyMap = gameState.readyMap || {}
 
-    everyoneReady =
+    everyoneDone =
       alivePlayers.length > 0 &&
       alivePlayers.every(player => readyMap[player.id])
   }
 
-  if (!everyoneReady) return
+  if (!everyoneDone) return
 
   try {
     if (gameState.phase === "night_select") {
@@ -613,7 +636,19 @@ async function maybeAdvanceOnlinePhase() {
         "gameState/readyMap": {},
         "gameState/submittedActions": {}
       })
+      return
+    }
 
+    if (gameState.phase === "voting") {
+      const resolved = resolveOnlineVotes(gameState)
+
+      await update(getOnlineRoomRef(), {
+        "gameState/players": resolved.players,
+        "gameState/voteResults": resolved.voteResults,
+        "gameState/phase": "vote_results",
+        "gameState/readyMap": {},
+        "gameState/votes": {}
+      })
       return
     }
 
@@ -622,13 +657,13 @@ async function maybeAdvanceOnlinePhase() {
     if (gameState.phase === "role_reveal") nextPhase = "night_select"
     else if (gameState.phase === "night_results") nextPhase = "morning"
     else if (gameState.phase === "morning") nextPhase = "voting"
-    else if (gameState.phase === "voting") nextPhase = "vote_results"
     else if (gameState.phase === "vote_results") nextPhase = "night_select"
 
     await update(getOnlineRoomRef(), {
       "gameState/phase": nextPhase,
       "gameState/readyMap": {},
-      "gameState/submittedActions": {}
+      "gameState/submittedActions": {},
+      "gameState/votes": {}
     })
   } catch (error) {
     console.error("Failed to advance online phase:", error)
@@ -959,6 +994,38 @@ function renderOnlineMorning() {
 }
 
 function renderOnlineVoting() {
+  const me = getOnlineMe()
+  if (!me) return
+
+  const alivePlayers = getOnlineAlivePlayers()
+  const myVote = demoRoom?.gameState?.votes?.[currentPlayerId] || null
+
+  let buttons = ""
+
+  alivePlayers.forEach(player => {
+    buttons += `
+      <button
+        class="vote-player-btn"
+        onclick="window.submitOnlineVote('${player.name}')"
+        ${myVote ? "disabled" : ""}
+      >
+        <span class="vote-player-name">${player.name}</span>
+        <span class="vote-player-label">Vote</span>
+      </button>
+    `
+  })
+
+  buttons += `
+    <button
+      class="skip-btn vote-skip-btn"
+      onclick="window.submitOnlineVote('skip')"
+      ${myVote ? "disabled" : ""}
+    >
+      <span class="vote-player-name">Skip Vote</span>
+      <span class="vote-player-label">No elimination</span>
+    </button>
+  `
+
   const playersHTML = (demoRoom?.gameState?.players || []).map(player => {
     return `
       <div class="status-row ${player.alive !== false ? "alive" : "dead"}">
@@ -973,10 +1040,25 @@ function renderOnlineVoting() {
 
       <div class="voting-hero">
         <div class="voting-kicker">Town Judgment</div>
-        <h2 class="voting-title">Voting</h2>
+        <h2 class="voting-title">Cast Your Vote</h2>
         <div class="voting-subtitle">
-          Online vote submission comes next.
+          Choose who should be eliminated before night falls.
         </div>
+
+        ${
+          myVote
+            ? `
+              <div class="current-voter-pill">
+                <span class="current-voter-dot"></span>
+                <strong>You voted for ${myVote === "skip" ? "Skip Vote" : myVote}</strong>
+              </div>
+            `
+            : ""
+        }
+      </div>
+
+      <div class="voting-grid">
+        ${buttons}
       </div>
 
       <div class="player-status-box">
@@ -986,15 +1068,78 @@ function renderOnlineVoting() {
 
       ${renderOnlineProgressBox()}
 
-      <div class="reveal-role-actions">
-        ${renderOnlineProceedButton("Continue")}
-      </div>
-
     </div>
   `)
 }
 
 function renderOnlineVoteResults() {
+  const voteResults = demoRoom?.gameState?.voteResults || {
+    voteCounts: {},
+    eliminated: null,
+    resultType: "none"
+  }
+
+  const voteCounts = voteResults.voteCounts || {}
+  const maxVotes = Object.values(voteCounts).length
+    ? Math.max(...Object.values(voteCounts))
+    : 1
+
+  let resultsHTML = ""
+
+  for (const [name, count] of Object.entries(voteCounts)) {
+    const label = name === "skip" ? "Skip Vote" : name
+    const percent = (count / maxVotes) * 100
+    const isSkip = name === "skip"
+
+    resultsHTML += `
+      <div class="vote-row ${isSkip ? "vote-row-skip" : ""}">
+        <div class="vote-label-row">
+          <div class="vote-label-main">${label}</div>
+          <div class="vote-label-count">${count}</div>
+        </div>
+
+        <div class="vote-bar-bg">
+          <div class="vote-bar-fill ${isSkip ? "vote-bar-fill-skip" : ""}" style="width:${percent}%"></div>
+        </div>
+      </div>
+    `
+  }
+
+  let outcomeHTML = ""
+
+  if (voteResults.resultType === "tie") {
+    outcomeHTML = `
+      <div class="vote-outcome-banner vote-outcome-tie">
+        <div class="vote-outcome-kicker">Outcome</div>
+        <div class="vote-outcome-title">It's a tie</div>
+        <div class="vote-outcome-subtitle">Nobody was eliminated.</div>
+      </div>
+    `
+  } else if (voteResults.resultType === "skip") {
+    outcomeHTML = `
+      <div class="vote-outcome-banner vote-outcome-skip">
+        <div class="vote-outcome-kicker">Outcome</div>
+        <div class="vote-outcome-title">Vote Skipped</div>
+        <div class="vote-outcome-subtitle">No one was eliminated today.</div>
+      </div>
+    `
+  } else if (voteResults.resultType === "elimination") {
+    outcomeHTML = `
+      <div class="vote-outcome-banner vote-outcome-elimination">
+        <div class="vote-outcome-kicker">Eliminated</div>
+        <div class="vote-outcome-title">${voteResults.eliminated}</div>
+        <div class="vote-outcome-subtitle">The town has voted them out.</div>
+      </div>
+    `
+  } else {
+    outcomeHTML = `
+      <div class="vote-outcome-banner vote-outcome-neutral">
+        <div class="vote-outcome-kicker">Outcome</div>
+        <div class="vote-outcome-title">No Elimination</div>
+      </div>
+    `
+  }
+
   const playersHTML = (demoRoom?.gameState?.players || []).map(player => {
     return `
       <div class="status-row ${player.alive !== false ? "alive" : "dead"}">
@@ -1011,21 +1156,25 @@ function renderOnlineVoteResults() {
         <div class="morning-kicker">Day Resolution</div>
         <h2 class="morning-title">Voting Results</h2>
         <p class="morning-subtitle">
-          Shared vote results will appear here.
+          The town has chosen who to cast out.
         </p>
       </div>
 
       <div class="vote-results-panel">
-        <div class="vote-row">
-          <div class="vote-label-row">
-            <div class="vote-label-main">Results pending</div>
-            <div class="vote-label-count">-</div>
+        ${resultsHTML || `
+          <div class="vote-row">
+            <div class="vote-label-row">
+              <div class="vote-label-main">No votes recorded</div>
+              <div class="vote-label-count">0</div>
+            </div>
+            <div class="vote-bar-bg">
+              <div class="vote-bar-fill" style="width:0%"></div>
+            </div>
           </div>
-          <div class="vote-bar-bg">
-            <div class="vote-bar-fill" style="width:100%"></div>
-          </div>
-        </div>
+        `}
       </div>
+
+      ${outcomeHTML}
 
       <div class="player-status-box">
         <h3>Players</h3>
