@@ -375,7 +375,7 @@ li{
 ========================= */
 
 body.day{
-  background:linear-gradient(135deg, #3b4946, #426866);
+  background:linear-gradient(135deg, #ffc369, #ffe7d4);
   color:white;
   position:relative;
   overflow-x:hidden;
