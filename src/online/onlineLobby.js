@@ -1,6 +1,5 @@
 import { render } from "../local/ui.js"
 import { createRoom, createRoomPlayer } from "../core/onlineRoom.js"
-import { roleDisplayName } from "../core/gameData.js"
 import { buildOnlineGameState } from "../core/buildOnlineGameState.js"
 import { db } from "./firebase.js"
 import { ref, set, get, child, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"
