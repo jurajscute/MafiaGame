@@ -228,6 +228,8 @@ function renderRoomLobby() {
   `)
 }
 
+window.renderRoomLobby = renderRoomLobby
+
 function showOnlineSettingsEditor() {
   if (!currentIsHost || !demoRoom) {
     alert("Only the host can edit online settings.")
