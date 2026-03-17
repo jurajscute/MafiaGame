@@ -33,9 +33,11 @@ export function buildOnlineGameState(room) {
   nightNumber: 0,
   readyMap: {},
   submittedActions: {},
-  submittedVotes: {},
-  publicResults: [],
-  privateResults: {},
+nightResolved: {
+  publicResults: []
+},
+nightPrivateResults: [],
+nightDeaths: [],
   players: tempState.players.map(player => ({
     id: player.id,
     name: player.name,

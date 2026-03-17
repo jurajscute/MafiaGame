@@ -5,6 +5,7 @@ import { db } from "./firebase.js"
 import { ref, set, get, child, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"
 import { roleColors, roleDisplayName } from "../core/gameData.js"
 import { roles } from "../core/roles.js"
+import { resolveOnlineNight } from "../core/resolveOnlineNight.js"
 
 let demoRoom = null
 let currentRoomCode = null
@@ -580,34 +581,57 @@ async function maybeAdvanceOnlinePhase() {
 
   const gameState = demoRoom.gameState
   const alivePlayers = (gameState.players || []).filter(player => player.alive !== false)
- let everyoneReady = false
 
-if (gameState.phase === "night_select") {
-  const actions = gameState.submittedActions || {}
+  let everyoneReady = false
 
-  everyoneReady =
-    alivePlayers.length > 0 &&
-    alivePlayers.every(player => actions[player.id])
-} else {
-  const readyMap = gameState.readyMap || {}
+  if (gameState.phase === "night_select") {
+    const actions = gameState.submittedActions || {}
 
-  everyoneReady =
-    alivePlayers.length > 0 &&
-    alivePlayers.every(player => readyMap[player.id])
-}
+    everyoneReady =
+      alivePlayers.length > 0 &&
+      alivePlayers.every(player => actions[player.id])
+  } else {
+    const readyMap = gameState.readyMap || {}
+
+    everyoneReady =
+      alivePlayers.length > 0 &&
+      alivePlayers.every(player => readyMap[player.id])
+  }
 
   if (!everyoneReady) return
 
-  const nextPhase = getNextOnlinePhase(gameState.phase)
-
   try {
+    if (gameState.phase === "night_select") {
+      const resolved = resolveOnlineNight(gameState, demoRoom.settings || {})
+
+      await update(getOnlineRoomRef(), {
+        "gameState/players": resolved.players,
+        "gameState/nightDeaths": resolved.nightDeaths,
+        "gameState/nightResolved": resolved.nightResolved,
+        "gameState/nightPrivateResults": resolved.nightPrivateResults,
+        "gameState/phase": "night_results",
+        "gameState/readyMap": {},
+        "gameState/submittedActions": {}
+      })
+
+      return
+    }
+
+    let nextPhase = gameState.phase
+
+    if (gameState.phase === "role_reveal") nextPhase = "night_select"
+    else if (gameState.phase === "night_results") nextPhase = "morning"
+    else if (gameState.phase === "morning") nextPhase = "voting"
+    else if (gameState.phase === "voting") nextPhase = "vote_results"
+    else if (gameState.phase === "vote_results") nextPhase = "night_select"
+
     await update(getOnlineRoomRef(), {
-  "gameState/phase": nextPhase,
-  "gameState/readyMap": {},
-  "gameState/submittedActions": {}
-})
+      "gameState/phase": nextPhase,
+      "gameState/readyMap": {},
+      "gameState/submittedActions": {}
+    })
   } catch (error) {
-    console.error("Failed to auto-advance online phase:", error)
+    console.error("Failed to advance online phase:", error)
   }
 }
 
@@ -830,6 +854,10 @@ function renderOnlineNightResults() {
   const me = getOnlineMe()
   if (!me) return
 
+  const myResult = (demoRoom?.gameState?.nightPrivateResults || []).find(
+    result => result.playerId === currentPlayerId
+  )
+
   const color = roleColors[me.role] || "white"
 
   render(`
@@ -842,17 +870,33 @@ function renderOnlineNightResults() {
 
       <div class="reveal-role-header">
         <div class="reveal-role-player">${me.name}</div>
-        <div class="reveal-role-hint">Private results will go here next</div>
+        <div class="reveal-role-hint">Your private night result</div>
       </div>
 
       <div class="night-action-role-box">
         <div class="night-action-role-kicker">Result</div>
-        <div class="night-action-role-name" style="color:${color}; text-shadow:0 0 10px ${color};">
-          ${roleDisplayName(me.role)}
-        </div>
-        <p class="role-description">
-          Night result syncing comes next. For now, use Continue to test the shared flow.
-        </p>
+
+        ${
+          myResult
+            ? `
+              <div class="night-action-role-name" style="color:${color}; text-shadow:0 0 10px ${color};">
+                ${me.role === "sheriff" ? "Investigation" : roleDisplayName(me.role)}
+              </div>
+
+              <p class="role-description">
+                ${myResult.text}
+              </p>
+            `
+            : `
+              <div class="night-action-role-name" style="color:${color}; text-shadow:0 0 10px ${color};">
+                ${roleDisplayName(me.role)}
+              </div>
+
+              <p class="role-description">
+                Nothing special happened to you tonight.
+              </p>
+            `
+        }
       </div>
 
       ${renderOnlineProgressBox()}
@@ -866,6 +910,8 @@ function renderOnlineNightResults() {
 }
 
 function renderOnlineMorning() {
+  const publicResults = demoRoom?.gameState?.nightResolved?.publicResults || []
+
   const playersHTML = (demoRoom?.gameState?.players || []).map(player => {
     return `
       <div class="status-row ${player.alive !== false ? "alive" : "dead"}">
@@ -875,6 +921,13 @@ function renderOnlineMorning() {
     `
   }).join("")
 
+  const resultsHTML = publicResults.map(result => `
+    <div class="morning-result-card night-result-${result.type}">
+      <div class="morning-result-kicker">Night Event</div>
+      <div class="morning-result-text">${result.text}</div>
+    </div>
+  `).join("")
+
   render(`
     <div class="card morning-card">
 
@@ -882,17 +935,12 @@ function renderOnlineMorning() {
         <div class="morning-kicker">Daybreak</div>
         <h2 class="morning-title">Morning</h2>
         <div class="morning-subtitle">
-          Online morning phase.
+          The town wakes up to learn what happened during the night.
         </div>
       </div>
 
       <div class="morning-results-wrap">
-        <div class="morning-result-card night-result-peace">
-          <div class="morning-result-kicker">Morning</div>
-          <div class="morning-result-text">
-            Shared public results will appear here.
-          </div>
-        </div>
+        ${resultsHTML}
       </div>
 
       <div class="player-status-box">
