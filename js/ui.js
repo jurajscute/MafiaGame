@@ -1,3 +1,4 @@
+import {state} from "./state.js"
 const screen=document.getElementById("screen")
 
 export function render(html){
@@ -11,39 +12,34 @@ return `<button onclick="${action}">${text}</button>`
 }
 
 export function passPhone(name, action){
+  const isMorningStyle =
+    state.phase === "voting" ||
+    document.body.classList.contains("day")
+
   render(`
+    <div class="pass-screen ${isMorningStyle ? "pass-screen-morning" : "pass-screen-night"}">
+      <div class="card ${isMorningStyle ? "pass-card-morning" : "pass-card"}">
 
-    <div class="pass-screen">
+        <div class="pass-phone-hero ${isMorningStyle ? "pass-phone-hero-morning" : "pass-phone-hero-night"}">
+          <div class="pass-label">
+            ${isMorningStyle ? "DAY PHASE" : "PASS THE PHONE"}
+          </div>
 
-      <div class="card role-pass-card pass-phone-card">
+          <h1 class="pass-player"><strong>${name}</strong></h1>
 
-        <div class="role-pass-hero">
-          <div class="role-pass-kicker">Pass the Phone</div>
-
-          <h2 class="role-pass-title">
-            ${name}
-          </h2>
-
-          <div class="role-pass-subtitle">
-           Greetings ${name}, make sure no one can see your screen.
-           </div>
-        </div>
-
-        <div class="reveal-role-description-wrap">
-          <p class="role-description reveal-role-description">
-            When you're ready, continue privately.
+          <p class="role-description pass-phone-description">
+            ${
+              isMorningStyle
+                ? "Hand the phone to the next player for the vote."
+                : "Make sure nobody else is looking before continuing."
+            }
           </p>
         </div>
 
-        <div class="role-pass-actions">
-          <button class="primary-btn" onclick="${action}">
-            I'm Ready
-          </button>
-        </div>
-
+        <button class="${isMorningStyle ? "primary-btn" : ""}" onclick="${action}">
+          I'm Ready
+        </button>
       </div>
-
     </div>
-
   `)
 }
