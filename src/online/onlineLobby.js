@@ -482,86 +482,422 @@ window.fakeJoinRoom = async function () {
   }
 }
 
+function getOnlineMe() {
+  return demoRoom?.gameState?.players?.find(player => player.id === currentPlayerId) || null
+}
+
+function getOnlineAlivePlayers() {
+  return (demoRoom?.gameState?.players || []).filter(player => player.alive !== false)
+}
+
+function getOnlineReadyMap() {
+  return demoRoom?.gameState?.readyMap || {}
+}
+
+function isOnlineMeReady() {
+  return !!getOnlineReadyMap()[currentPlayerId]
+}
+
+function getOnlineReadyCount() {
+  return Object.values(getOnlineReadyMap()).filter(Boolean).length
+}
+
+function getOnlineRequiredReadyCount() {
+  return getOnlineAlivePlayers().length
+}
+
+function renderOnlineProgressBox() {
+  return `
+    <div class="player-status-box" style="margin-top:16px;">
+      <h3>Phase Progress</h3>
+      <div class="status-row">
+        <span>Ready Players</span>
+        <span>${getOnlineReadyCount()} / ${getOnlineRequiredReadyCount()}</span>
+      </div>
+    </div>
+  `
+}
+
+function renderOnlineProceedButton(label = "Continue") {
+  if (isOnlineMeReady()) {
+    return `
+      <button class="primary-btn" disabled>
+        Waiting For Other Players
+      </button>
+    `
+  }
+
+  return `
+    <button class="primary-btn" onclick="window.markOnlineReady()">
+      ${label}
+    </button>
+  `
+}
+
 function renderOnlineGame() {
   const gameState = demoRoom?.gameState
-  if (!gameState) return
 
-  const me = gameState.players?.find(player => player.id === currentPlayerId)
-  if (!me) {
+  if (!gameState) {
     render(`
       <div class="card home-screen-card">
         <div class="home-hero">
           <div class="home-kicker">Online Game</div>
-          <h2 class="home-title">Player Not Found</h2>
+          <h2 class="home-title">No Game State</h2>
           <div class="home-subtitle">
-            Your player entry was not found in this room.
+            The room is missing its game state.
           </div>
+        </div>
+
+        <div class="home-actions">
+          <button class="primary-btn" onclick="window.showOnlineMenu()">
+            Back
+          </button>
         </div>
       </div>
     `)
     return
   }
 
-  const executionerTarget = gameState.executionerTargets?.[me.name] || null
+  if (gameState.phase === "role_reveal") {
+    renderOnlineRoleReveal()
+    return
+  }
+
+  if (gameState.phase === "night_select") {
+    renderOnlineNightSelect()
+    return
+  }
+
+  if (gameState.phase === "night_results") {
+    renderOnlineNightResults()
+    return
+  }
+
+  if (gameState.phase === "morning") {
+    renderOnlineMorning()
+    return
+  }
+
+  if (gameState.phase === "voting") {
+    renderOnlineVoting()
+    return
+  }
+
+  if (gameState.phase === "vote_results") {
+    renderOnlineVoteResults()
+    return
+  }
 
   render(`
-    <div class="card reveal-role-card role-${me.role}">
+    <div class="card home-screen-card">
+      <div class="home-hero">
+        <div class="home-kicker">Online Game</div>
+        <h2 class="home-title">Unknown Phase</h2>
+        <div class="home-subtitle">
+          Current phase: ${gameState.phase}
+        </div>
+      </div>
+    </div>
+  `)
+}
+
+function renderOnlineRoleReveal() {
+  const me = getOnlineMe()
+  if (!me) return
+
+  const color = roleColors[me.role] || "white"
+  const role = roles[me.role]
+  let extraInfo = ""
+
+  if (me.role === "executioner") {
+    const target = demoRoom?.gameState?.executionerTargets?.[me.name]
+    if (target) {
+      extraInfo = `
+        <div class="executioner-target-box">
+          <div class="executioner-target-label">Your target is</div>
+          <div class="executioner-target-name">${target}</div>
+        </div>
+      `
+    }
+  }
+
+  render(`
+    <div class="card reveal-role-card role-${me.role}" style="--reveal-role-color:${color};">
+
       <div class="reveal-role-topbar">
-        <div class="reveal-role-kicker">Online Game</div>
-        <div class="reveal-role-progress">${gameState.phase}</div>
+        <div class="reveal-role-kicker">Online Role Reveal</div>
+        <div class="reveal-role-progress">
+          ${demoRoom.code}
+        </div>
       </div>
 
       <div class="reveal-role-header">
         <div class="reveal-role-player">${me.name}</div>
-        <div class="reveal-role-hint">
-          This is your private role. Do not show other players.
+        <div class="reveal-role-hint">This is your private role</div>
+      </div>
+
+      <div class="role-card reveal-role-flip revealed">
+        <div class="role-inner">
+
+          <div class="role-front reveal-role-front">
+            <div class="reveal-role-front-shimmer"></div>
+            <div class="reveal-role-front-inner">
+              <div class="reveal-role-front-icon">✦</div>
+              <div class="reveal-role-front-label">Your Role</div>
+              <div class="reveal-role-front-text">${roleDisplayName(me.role)}</div>
+            </div>
+          </div>
+
+          <div class="role-back reveal-role-back" style="color:${color}">
+            <div class="reveal-role-back-inner">
+              <div class="reveal-role-back-kicker">Your Role</div>
+              <div class="reveal-role-name">${roleDisplayName(me.role)}</div>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <div class="night-action-role-box">
-        <div class="night-action-role-kicker">Your Role</div>
-        <div class="night-action-role-name">
-          ${roleDisplayName(me.role)}
-        </div>
-        <p class="role-description">
-          ${getRoleDescription(me.role)}
+      <div class="reveal-role-description-wrap">
+        <p class="role-description reveal-role-description">
+          ${role?.description || ""}
         </p>
       </div>
 
-      ${
-        executionerTarget
-          ? `
-            <div class="executioner-target-box">
-              <div class="executioner-target-label">Your target is</div>
-              <div class="executioner-target-name">${executionerTarget}</div>
-            </div>
-          `
-          : ""
-      }
+      ${extraInfo ? `<div class="reveal-role-extra">${extraInfo}</div>` : ""}
 
-      <div class="player-status-box" style="margin-top:16px;">
-        <h3>Players in Game</h3>
-        ${gameState.players.map(player => `
-          <div class="status-row ${player.alive ? "alive" : "dead"}">
-            <span>${player.name}</span>
-            <span>${player.alive ? "Alive" : "Dead ☠"}</span>
-          </div>
-        `).join("")}
+      ${renderOnlineProgressBox()}
+
+      <div class="reveal-role-actions">
+        ${renderOnlineProceedButton("Continue")}
       </div>
 
-      ${
-        currentIsHost
-          ? `
-            <button class="primary-btn" onclick="window.advanceOnlinePhase()">
-              Advance Phase
-            </button>
-          `
-          : `
-            <button class="primary-btn" disabled>
-              Waiting For Host
-            </button>
-          `
-      }
+    </div>
+  `)
+}
+
+function renderOnlineNightSelect() {
+  const me = getOnlineMe()
+  if (!me) return
+
+  const color = roleColors[me.role] || "white"
+  const role = roles[me.role]
+
+  render(`
+    <div class="card reveal-role-card role-${me.role}" style="--reveal-role-color:${color};">
+
+      <div class="reveal-role-topbar">
+        <div class="reveal-role-kicker">Night Phase</div>
+        <div class="reveal-role-progress">
+          ${demoRoom.code}
+        </div>
+      </div>
+
+      <div class="reveal-role-header">
+        <div class="reveal-role-player">${me.name}</div>
+        <div class="reveal-role-hint">Night actions will go here next</div>
+      </div>
+
+      <div class="role-card reveal-role-flip revealed">
+        <div class="role-inner">
+          <div class="role-front reveal-role-front">
+            <div class="reveal-role-front-shimmer"></div>
+            <div class="reveal-role-front-inner">
+              <div class="reveal-role-front-icon">✦</div>
+              <div class="reveal-role-front-label">Your Role</div>
+              <div class="reveal-role-front-text">${roleDisplayName(me.role)}</div>
+            </div>
+          </div>
+
+          <div class="role-back reveal-role-back" style="color:${color}">
+            <div class="reveal-role-back-inner">
+              <div class="reveal-role-back-kicker">Your Role</div>
+              <div class="reveal-role-name">${roleDisplayName(me.role)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal-role-description-wrap">
+        <p class="role-description reveal-role-description">
+          ${role?.description || ""}
+        </p>
+      </div>
+
+      ${renderOnlineProgressBox()}
+
+      <div class="reveal-role-actions">
+        ${renderOnlineProceedButton("Continue")}
+      </div>
+
+    </div>
+  `)
+}
+
+function renderOnlineNightResults() {
+  const me = getOnlineMe()
+  if (!me) return
+
+  const color = roleColors[me.role] || "white"
+
+  render(`
+    <div class="card reveal-role-card role-${me.role}" style="--reveal-role-color:${color};">
+
+      <div class="reveal-role-topbar">
+        <div class="reveal-role-kicker">Night Results</div>
+        <div class="reveal-role-progress">${demoRoom.code}</div>
+      </div>
+
+      <div class="reveal-role-header">
+        <div class="reveal-role-player">${me.name}</div>
+        <div class="reveal-role-hint">Private results will go here next</div>
+      </div>
+
+      <div class="night-action-role-box">
+        <div class="night-action-role-kicker">Result</div>
+        <div class="night-action-role-name" style="color:${color}; text-shadow:0 0 10px ${color};">
+          ${roleDisplayName(me.role)}
+        </div>
+        <p class="role-description">
+          Night result syncing comes next. For now, use Continue to test the shared flow.
+        </p>
+      </div>
+
+      ${renderOnlineProgressBox()}
+
+      <div class="reveal-role-actions">
+        ${renderOnlineProceedButton("Continue")}
+      </div>
+
+    </div>
+  `)
+}
+
+function renderOnlineMorning() {
+  const playersHTML = (demoRoom?.gameState?.players || []).map(player => {
+    return `
+      <div class="status-row ${player.alive !== false ? "alive" : "dead"}">
+        <span>${player.name}</span>
+        <span>${player.alive !== false ? "Alive" : "Dead ☠"}</span>
+      </div>
+    `
+  }).join("")
+
+  render(`
+    <div class="card morning-card">
+
+      <div class="morning-hero">
+        <div class="morning-kicker">Daybreak</div>
+        <h2 class="morning-title">Morning</h2>
+        <div class="morning-subtitle">
+          Online morning phase.
+        </div>
+      </div>
+
+      <div class="morning-results-wrap">
+        <div class="morning-result-card night-result-peace">
+          <div class="morning-result-kicker">Morning</div>
+          <div class="morning-result-text">
+            Shared public results will appear here.
+          </div>
+        </div>
+      </div>
+
+      <div class="player-status-box">
+        <h3>Players</h3>
+        ${playersHTML}
+      </div>
+
+      ${renderOnlineProgressBox()}
+
+      <div class="morning-actions">
+        ${renderOnlineProceedButton("Continue")}
+      </div>
+
+    </div>
+  `)
+}
+
+function renderOnlineVoting() {
+  const playersHTML = (demoRoom?.gameState?.players || []).map(player => {
+    return `
+      <div class="status-row ${player.alive !== false ? "alive" : "dead"}">
+        <span>${player.name}</span>
+        <span>${player.alive !== false ? "Alive" : "Dead ☠"}</span>
+      </div>
+    `
+  }).join("")
+
+  render(`
+    <div class="card voting-card morning-vote-card">
+
+      <div class="voting-hero">
+        <div class="voting-kicker">Town Judgment</div>
+        <h2 class="voting-title">Voting</h2>
+        <div class="voting-subtitle">
+          Online vote submission comes next.
+        </div>
+      </div>
+
+      <div class="player-status-box">
+        <h3>Players</h3>
+        ${playersHTML}
+      </div>
+
+      ${renderOnlineProgressBox()}
+
+      <div class="reveal-role-actions">
+        ${renderOnlineProceedButton("Continue")}
+      </div>
+
+    </div>
+  `)
+}
+
+function renderOnlineVoteResults() {
+  const playersHTML = (demoRoom?.gameState?.players || []).map(player => {
+    return `
+      <div class="status-row ${player.alive !== false ? "alive" : "dead"}">
+        <span>${player.name}</span>
+        <span>${player.alive !== false ? "Alive" : "Dead ☠"}</span>
+      </div>
+    `
+  }).join("")
+
+  render(`
+    <div class="card morning-card voting-results-card">
+
+      <div class="morning-header voting-results-header">
+        <div class="morning-kicker">Day Resolution</div>
+        <h2 class="morning-title">Voting Results</h2>
+        <p class="morning-subtitle">
+          Shared vote results will appear here.
+        </p>
+      </div>
+
+      <div class="vote-results-panel">
+        <div class="vote-row">
+          <div class="vote-label-row">
+            <div class="vote-label-main">Results pending</div>
+            <div class="vote-label-count">-</div>
+          </div>
+          <div class="vote-bar-bg">
+            <div class="vote-bar-fill" style="width:100%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="player-status-box">
+        <h3>Players</h3>
+        ${playersHTML}
+      </div>
+
+      ${renderOnlineProgressBox()}
+
+      <div class="reveal-role-actions">
+        ${renderOnlineProceedButton("Continue")}
+      </div>
+
     </div>
   `)
 }

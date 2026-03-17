@@ -27,23 +27,28 @@ export function buildOnlineGameState(room) {
   assignRolesToPlayers(tempState)
 
   return {
-    started: true,
-    phase: "role_reveal",
-    revealIndex: 0,
-    hostMessage: "Roles assigned. Everyone check your role.",
-    players: tempState.players.map(player => ({
-      id: player.id,
-      name: player.name,
-      alive: player.alive,
-      role: player.role,
-      catAlignment: player.catAlignment,
-      wasExecutioner: player.wasExecutioner,
-      executionerConvertedTo: player.executionerConvertedTo,
-      priestUsesLeft: player.priestUsesLeft ?? null
-    })),
-    executionerTargets: tempState.executionerTargets || {},
-    mafiaLeaderOrder: tempState.mafiaLeaderOrder || [],
-    mafiaLeaderIndex: tempState.mafiaLeaderIndex || 0,
-    currentMafiaLeader: tempState.currentMafiaLeader || null
-  }
+  started: true,
+  phase: "role_reveal",
+  dayNumber: 1,
+  nightNumber: 0,
+  readyMap: {},
+  submittedActions: {},
+  submittedVotes: {},
+  publicResults: [],
+  privateResults: {},
+  players: tempState.players.map(player => ({
+    id: player.id,
+    name: player.name,
+    alive: player.alive,
+    role: player.role,
+    catAlignment: player.catAlignment,
+    wasExecutioner: player.wasExecutioner,
+    executionerConvertedTo: player.executionerConvertedTo,
+    priestUsesLeft: player.priestUsesLeft ?? null
+  })),
+  executionerTargets: tempState.executionerTargets || {},
+  mafiaLeaderOrder: tempState.mafiaLeaderOrder || [],
+  mafiaLeaderIndex: tempState.mafiaLeaderIndex || 0,
+  currentMafiaLeader: tempState.currentMafiaLeader || null
+}
 }
