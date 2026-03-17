@@ -4,6 +4,8 @@ import { roleDisplayName } from "../core/gameData.js"
 import { buildOnlineGameState } from "../core/buildOnlineGameState.js"
 import { db } from "./firebase.js"
 import { ref, set, get, child, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"
+import { roleColors, roleDisplayName } from "../core/gameData.js"
+import { roles } from "../core/roles.js"
 
 let demoRoom = null
 let currentRoomCode = null
