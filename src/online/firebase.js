@@ -1,8 +1,5 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"
+import { getDatabase } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -13,9 +10,8 @@ const firebaseConfig = {
   storageBucket: "mafiagame-401bb.firebasestorage.app",
   messagingSenderId: "557392490097",
   appId: "1:557392490097:web:8651981af45ca46730b5d0",
-  measurementId: "G-3FS8FN1YRH"
 };
+const app = initializeApp(firebaseConfig)
+const db = getDatabase(app)
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+export { db }
