@@ -37,10 +37,18 @@ function renderModeSelect() {
     }
   })
 
-  document.getElementById("onlineModeBtn").addEventListener("click", () => {
-    appState.mode = "online"
-    renderOnlineComingSoon()
-  })
+  document.getElementById("onlineModeBtn").addEventListener("click", async () => {
+  appState.mode = "online"
+  const mod = await import("./online/onlineLobby.js")
+  if (mod && typeof mod.bootOnlineLobby === "function") {
+    mod.bootOnlineLobby()
+  }
+})
+}
+
+window.backToModeSelect = function () {
+  appState.mode = null
+  renderModeSelect()
 }
 
 function renderOnlineComingSoon() {
