@@ -2204,9 +2204,6 @@ renderPlayerSetup()
 clampMafiaOverride()
 }
 
-import { shuffle } from "./utils.js"
-import { getResolvedMafiaCount } from "./setupLogic.js"
-
 const OPTIONAL_ROLES = [
   "doctor",
   "sheriff",
