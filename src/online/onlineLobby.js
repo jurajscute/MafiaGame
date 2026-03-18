@@ -980,7 +980,7 @@ function renderOnlineRoleReveal() {
 
       <div class="reveal-role-header">
         <div class="reveal-role-player">${me.name}</div>
-        <div class="reveal-role-hint">Tap to reveal!</div>
+        <div class="reveal-role-hint">Examine your role!</div>
       </div>
 
       <div class="role-card reveal-role-flip" id="roleCard" onclick="window.flipOnlineRoleCard()">
@@ -990,8 +990,7 @@ function renderOnlineRoleReveal() {
             <div class="reveal-role-front-shimmer"></div>
             <div class="reveal-role-front-inner">
               <div class="reveal-role-front-icon">✦</div>
-              <div class="reveal-role-front-label">Your Role</div>
-              <div class="reveal-role-front-text">${roleDisplayName(me.role)}</div>
+              <div class="reveal-role-front-label">Tap to reveal!</div>
             </div>
           </div>
 
@@ -1039,17 +1038,85 @@ window.submitNightAction = async function(type, target = null) {
   }
 }
 
+function renderOnlineNightActionCard({
+  me,
+  titleKicker = "Night Action",
+  hint = "Choose your action",
+  panelLabel = "Decision",
+  panelText = "Choose your target.",
+  buttonsHTML = "",
+  submitted = false,
+  submittedText = "You are ready."
+}) {
+  const roleColor = roleColors[me.role] || "white"
+  const alivePlayers = getOnlineAlivePlayers()
+  const currentNightPlayerNumber =
+    alivePlayers.findIndex(player => player.id === me.id) + 1
+
+  render(`
+    <div class="card reveal-role-card role-${me.role} night-action-shell" style="--reveal-role-color:${roleColor};">
+
+      <div class="reveal-role-topbar">
+        <div class="reveal-role-kicker">${titleKicker}</div>
+        <div class="reveal-role-progress">
+          ${currentNightPlayerNumber} / ${alivePlayers.length}
+        </div>
+      </div>
+
+      <div class="reveal-role-header">
+        <div class="reveal-role-player">${me.name}</div>
+        <div class="reveal-role-hint">${hint}</div>
+      </div>
+
+      <div class="role-card reveal-role-flip revealed">
+        <div class="role-inner">
+          <div class="role-front reveal-role-front">
+            <div class="reveal-role-front-shimmer"></div>
+            <div class="reveal-role-front-inner">
+              <div class="reveal-role-front-icon">✦</div>
+              <div class="reveal-role-front-label">Your Role</div>
+              <div class="reveal-role-front-text">${roleDisplayName(me.role)}</div>
+            </div>
+          </div>
+
+          <div class="role-back reveal-role-back" style="color:${roleColor}">
+            <div class="reveal-role-back-inner">
+              <div class="reveal-role-back-kicker">Your Role</div>
+              <div class="reveal-role-name">${roleDisplayName(me.role)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="night-action-panel">
+        <div class="night-action-label">${submitted ? "Action Submitted" : panelLabel}</div>
+        <div class="night-action-text">
+          ${submitted ? submittedText : panelText}
+        </div>
+      </div>
+
+      ${submitted ? "" : `<div class="night-action-target-grid">${buttonsHTML}</div>`}
+
+      ${renderOnlineProgressBox()}
+
+      <div class="reveal-role-actions">
+        ${
+          submitted
+            ? `<button class="primary-btn" disabled>Waiting For Other Players</button>`
+            : ""
+        }
+      </div>
+
+    </div>
+  `)
+}
+
 function renderOnlineNightSelect() {
   const me = getOnlineMe()
   if (!me) return
 
   const myAction = getMySubmittedAction()
-  const alivePlayers = getOnlineAlivePlayers()
   const role = roles[me.role]
-  const roleColor = roleColors[me.role] || "white"
-
-  const currentNightPlayerNumber =
-    alivePlayers.findIndex(player => player.id === me.id) + 1
 
   const actionText = {
     mafia: "Choose someone to eliminate under cover of darkness.",
@@ -1059,136 +1126,52 @@ function renderOnlineNightSelect() {
     vigilante: "Serve justice carefully — or stand down."
   }
 
+  const hintText = {
+    mafia: "Move in secret",
+    doctor: "Protect wisely",
+    sheriff: "Seek the truth",
+    framer: "Plant suspicion",
+    vigilante: "Justice has a cost"
+  }
+
   if (myAction) {
     let submittedText = "You are ready."
+
     if (myAction.type === "kill" && myAction.target) {
       submittedText = `You chose ${myAction.target}.`
-    }
-    if (myAction.type === "save" && myAction.target) {
+    } else if (myAction.type === "save" && myAction.target) {
       submittedText = `You chose to protect ${myAction.target}.`
-    }
-    if (myAction.type === "investigate" && myAction.target) {
+    } else if (myAction.type === "investigate" && myAction.target) {
       submittedText = `You chose to investigate ${myAction.target}.`
-    }
-    if (myAction.type === "frame" && myAction.target) {
+    } else if (myAction.type === "frame" && myAction.target) {
       submittedText = `You chose to frame ${myAction.target}.`
-    }
-    if (myAction.type === "skip") {
+    } else if (myAction.type === "skip") {
       submittedText = `You chose to skip your action.`
-    }
-    if (myAction.type === "none") {
+    } else if (myAction.type === "none") {
       submittedText = `You have finished for the night.`
     }
 
-    render(`
-      <div class="card reveal-role-card role-${me.role} night-action-shell" style="--reveal-role-color:${roleColor};">
-
-        <div class="reveal-role-topbar">
-          <div class="reveal-role-kicker">Night Action</div>
-          <div class="reveal-role-progress">
-            ${currentNightPlayerNumber} / ${alivePlayers.length}
-          </div>
-        </div>
-
-        <div class="reveal-role-header">
-          <div class="reveal-role-player">${me.name}</div>
-          <div class="reveal-role-hint">Waiting for the rest of the players</div>
-        </div>
-
-        <div class="role-card reveal-role-flip revealed">
-          <div class="role-inner">
-            <div class="role-front reveal-role-front">
-              <div class="reveal-role-front-shimmer"></div>
-              <div class="reveal-role-front-inner">
-                <div class="reveal-role-front-icon">✦</div>
-                <div class="reveal-role-front-label">Your Role</div>
-                <div class="reveal-role-front-text">${roleDisplayName(me.role)}</div>
-              </div>
-            </div>
-
-            <div class="role-back reveal-role-back" style="color:${roleColor}">
-              <div class="reveal-role-back-inner">
-                <div class="reveal-role-back-kicker">Your Role</div>
-                <div class="reveal-role-name">${roleDisplayName(me.role)}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="night-action-role-box">
-          <div class="night-action-role-kicker">Action Submitted</div>
-          <div class="night-action-role-name" style="color:${roleColor}; text-shadow:0 0 10px ${roleColor};">
-            READY
-          </div>
-
-          <p class="role-description">
-            ${submittedText}
-          </p>
-        </div>
-
-        ${renderOnlineProgressBox()}
-
-        <div class="reveal-role-actions">
-          <button class="primary-btn" disabled>Waiting For Other Players</button>
-        </div>
-
-      </div>
-    `)
+    renderOnlineNightActionCard({
+      me,
+      hint: "Waiting for the rest of the players",
+      submitted: true,
+      submittedText
+    })
     return
   }
 
   if (!role?.nightAction) {
-    render(`
-      <div class="card reveal-role-card role-${me.role}" style="--reveal-role-color:${roleColor};">
-
-        <div class="reveal-role-topbar">
-          <div class="reveal-role-kicker">Night Role Reveal</div>
-          <div class="reveal-role-progress">
-            ${currentNightPlayerNumber} / ${alivePlayers.length}
-          </div>
-        </div>
-
-        <div class="reveal-role-header">
-          <div class="reveal-role-player">${me.name}</div>
-          <div class="reveal-role-hint">Sleep peacefully tonight</div>
-        </div>
-
-        <div class="role-card reveal-role-flip revealed">
-          <div class="role-inner">
-            <div class="role-front reveal-role-front">
-              <div class="reveal-role-front-shimmer"></div>
-              <div class="reveal-role-front-inner">
-                <div class="reveal-role-front-icon">✦</div>
-                <div class="reveal-role-front-label">Your Role</div>
-                <div class="reveal-role-front-text">${roleDisplayName(me.role)}</div>
-              </div>
-            </div>
-
-            <div class="role-back reveal-role-back" style="color:${roleColor}">
-              <div class="reveal-role-back-inner">
-                <div class="reveal-role-back-kicker">Your Role</div>
-                <div class="reveal-role-name">${roleDisplayName(me.role)}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="reveal-role-description-wrap">
-          <p class="role-description reveal-role-description">
-            ${role.description || ""}
-          </p>
-        </div>
-
-        ${renderOnlineProgressBox()}
-
-        <div class="reveal-role-actions">
-          <button class="primary-btn" onclick="window.submitNightAction('none')">Continue</button>
-        </div>
-
-      </div>
-    `)
+    renderOnlineNightActionCard({
+      me,
+      hint: "Sleep peacefully tonight",
+      panelLabel: "Night",
+      panelText: "You have no action tonight.",
+      buttonsHTML: `<button class="primary-btn" onclick="window.submitNightAction('none')">Continue</button>`
+    })
     return
   }
+
+  const alivePlayers = getOnlineAlivePlayers()
 
   const validTargets = alivePlayers.filter(player => {
     if (player.id === me.id) {
@@ -1217,66 +1200,13 @@ function renderOnlineNightSelect() {
       ? `<button class="skip-btn" onclick="window.submitNightAction('skip')">Skip Attack</button>`
       : ""
 
-  render(`
-    <div class="card reveal-role-card role-${me.role} night-action-shell" style="--reveal-role-color:${roleColor};">
-
-      <div class="reveal-role-topbar">
-        <div class="reveal-role-kicker">Night Action</div>
-        <div class="reveal-role-progress">
-          ${currentNightPlayerNumber} / ${alivePlayers.length}
-        </div>
-      </div>
-
-      <div class="reveal-role-header">
-        <div class="reveal-role-player">${me.name}</div>
-        <div class="reveal-role-hint">
-          ${
-            me.role === "mafia" ? "Move in secret" :
-            me.role === "doctor" ? "Protect wisely" :
-            me.role === "sheriff" ? "Seek the truth" :
-            me.role === "framer" ? "Plant suspicion" :
-            me.role === "vigilante" ? "Justice has a cost" :
-            "Choose your action"
-          }
-        </div>
-      </div>
-
-      <div class="role-card reveal-role-flip revealed">
-        <div class="role-inner">
-          <div class="role-front reveal-role-front">
-            <div class="reveal-role-front-shimmer"></div>
-            <div class="reveal-role-front-inner">
-              <div class="reveal-role-front-icon">✦</div>
-              <div class="reveal-role-front-label">Your Role</div>
-              <div class="reveal-role-front-text">${roleDisplayName(me.role)}</div>
-            </div>
-          </div>
-
-          <div class="role-back reveal-role-back" style="color:${roleColor}">
-            <div class="reveal-role-back-inner">
-              <div class="reveal-role-back-kicker">Your Role</div>
-              <div class="reveal-role-name">${roleDisplayName(me.role)}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="night-action-panel">
-        <div class="night-action-label">Decision</div>
-        <div class="night-action-text">
-          ${actionText[me.role] || "Choose your target."}
-        </div>
-      </div>
-
-      <div class="night-action-target-grid">
-        ${buttonsHTML}
-        ${skipButton}
-      </div>
-
-      ${renderOnlineProgressBox()}
-
-    </div>
-  `)
+  renderOnlineNightActionCard({
+    me,
+    hint: hintText[me.role] || "Choose your action",
+    panelLabel: "Decision",
+    panelText: actionText[me.role] || "Choose your target.",
+    buttonsHTML: buttonsHTML + skipButton
+  })
 }
 
 function getActionType(role) {
