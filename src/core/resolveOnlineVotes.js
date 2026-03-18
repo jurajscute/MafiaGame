@@ -82,6 +82,32 @@ export function resolveOnlineVotes(gameState) {
     }
   }
 
+    let finalResult = null
+
+  const aliveAfterVote = players.filter(player => player.alive !== false)
+  const mafiaAlive = aliveAfterVote.filter(player => player.role === "mafia").length
+  const nonMafiaAlive = aliveAfterVote.filter(player => player.role !== "mafia").length
+
+  if (resultType === "jester_win") {
+    finalResult = {
+      type: "jester_win",
+      winner: eliminated
+    }
+  } else if (resultType === "executioner_win") {
+    finalResult = {
+      type: "executioner_win",
+      winner
+    }
+  } else if (mafiaAlive === 0) {
+    finalResult = {
+      type: "village_win"
+    }
+  } else if (mafiaAlive >= nonMafiaAlive) {
+    finalResult = {
+      type: "mafia_win"
+    }
+  }
+
   return {
     players,
     voteResults: {
@@ -90,6 +116,8 @@ export function resolveOnlineVotes(gameState) {
       resultType,
       revealedRole,
       winner
-    }
+    },
+    finalResult
   }
+}
 }

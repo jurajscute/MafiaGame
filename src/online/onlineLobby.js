@@ -658,6 +658,20 @@ async function maybeAdvanceOnlinePhase() {
     if (gameState.phase === "voting") {
       const resolved = resolveOnlineVotes(gameState)
 
+const updates = {
+  "gameState/players": resolved.players,
+  "gameState/voteResults": resolved.voteResults,
+  "gameState/finalResult": resolved.finalResult || null
+}
+
+if (resolved.finalResult) {
+  updates["gameState/phase"] = "game_over"
+} else {
+  updates["gameState/phase"] = "vote_results"
+}
+
+await update(getOnlineRoomRef(), updates)
+
       await update(getOnlineRoomRef(), {
         "gameState/players": resolved.players,
         "gameState/voteResults": resolved.voteResults,
@@ -740,6 +754,11 @@ function renderOnlineGame() {
     return
   }
 
+  if (gameState.phase === "game_over") {
+    renderOnlineGameOver()
+    return
+  }
+
   render(`
     <div class="card home-screen-card">
       <div class="home-hero">
@@ -749,6 +768,75 @@ function renderOnlineGame() {
           Current phase: ${gameState.phase}
         </div>
       </div>
+    </div>
+  `)
+}
+
+function renderOnlineGameOver() {
+  const finalResult = demoRoom?.gameState?.finalResult || {}
+  const players = demoRoom?.gameState?.players || []
+
+  let title = "Game Over"
+  let subtitle = "The game has ended."
+  let bodyClass = "win-village"
+
+  if (finalResult.type === "mafia_win") {
+    title = "MAFIA WINS"
+    subtitle = "The mafia have taken control of the town."
+    bodyClass = "win-mafia"
+  } else if (finalResult.type === "village_win") {
+    title = "VILLAGE WINS"
+    subtitle = "The town has eliminated all mafia members."
+    bodyClass = "win-village"
+  } else if (finalResult.type === "jester_win") {
+    title = "JESTER WINS"
+    subtitle = `${finalResult.winner} fooled the town into voting them out.`
+    bodyClass = "win-jester"
+  } else if (finalResult.type === "executioner_win") {
+    title = "EXECUTIONER WINS"
+    subtitle = `${finalResult.winner} achieved their goal.`
+    bodyClass = "win-executioner"
+  }
+
+  const playersHTML = players.map(player => `
+    <div class="final-player-card" style="--final-role-color:${roleColors[player.role] || "white"};">
+      <div class="final-player-main">
+        <div class="final-player-name">${player.name}</div>
+        <div class="final-player-role" style="color:${roleColors[player.role] || "white"}">
+          ${roleDisplayName(player.role)}
+        </div>
+      </div>
+    </div>
+  `).join("")
+
+  document.body.className = bodyClass
+
+  render(`
+    <div class="card final-results-card final-results-shell">
+
+      <div class="final-results-hero">
+        <div class="final-results-kicker">Online Match Complete</div>
+        <h2 class="final-results-title">${title}</h2>
+        <div class="final-results-subtitle">
+          ${subtitle}
+        </div>
+      </div>
+
+      <div class="final-team-card final-team-town">
+        <div class="final-team-header">
+          <div>
+            <div class="final-team-kicker">All Players</div>
+            <h3 class="final-team-title">Final Roles</h3>
+          </div>
+          <div class="final-team-count">${players.length}</div>
+        </div>
+
+        <div class="final-team-list">
+          ${playersHTML}
+        </div>
+      </div>
+
+      <button onclick="window.showOnlineMenu()">Back To Online Menu</button>
     </div>
   `)
 }
@@ -1307,5 +1395,6 @@ export function bootOnlineLobby() {
   renderOnlineMenu()
 }
 
+window.showOnlineMenu = renderOnlineMenu
 window.renderOnlineGame = renderOnlineGame
 window.showOnlineSettingsEditor = showOnlineSettingsEditor
