@@ -7,7 +7,10 @@ import { roleColors, roleDisplayName } from "../core/gameData.js"
 import { roles } from "../core/roles.js"
 import { resolveOnlineVotes } from "../core/resolveOnlineVotes.js"
 import { resolveOnlineNight } from "../core/resolveOnlineNight.js"
-import { buildSharedRoleRevealScreen } from "../core/sharedScreens.js"
+import {
+  buildSharedRoleRevealScreen,
+  buildSharedNightActionScreen
+} from "../core/sharedScreens.js"
 
 let demoRoom = null
 let currentRoomCode = null
@@ -1004,75 +1007,33 @@ window.submitNightAction = async function(type, target = null) {
 
 function renderOnlineNightActionCard({
   me,
-  titleKicker = "Night Action",
   hint = "Choose your action",
   panelLabel = "Decision",
   panelText = "Choose your target.",
   buttonsHTML = "",
   submitted = false,
-  submittedText = "You are ready."
+  submittedText = "You are ready.",
+  actionButtonHTML = ""
 }) {
-  const roleColor = roleColors[me.role] || "white"
   const alivePlayers = getOnlineAlivePlayers()
   const currentNightPlayerNumber =
     alivePlayers.findIndex(player => player.id === me.id) + 1
 
-  render(`
-    <div class="card reveal-role-card role-${me.role} night-action-shell" style="--reveal-role-color:${roleColor};">
-
-      <div class="reveal-role-topbar">
-        <div class="reveal-role-kicker">${titleKicker}</div>
-        <div class="reveal-role-progress">
-          ${currentNightPlayerNumber} / ${alivePlayers.length}
-        </div>
-      </div>
-
-      <div class="reveal-role-header">
-        <div class="reveal-role-player">${me.name}</div>
-        <div class="reveal-role-hint">${hint}</div>
-      </div>
-
-      <div class="role-card reveal-role-flip revealed">
-        <div class="role-inner">
-          <div class="role-front reveal-role-front">
-            <div class="reveal-role-front-shimmer"></div>
-            <div class="reveal-role-front-inner">
-              <div class="reveal-role-front-icon">✦</div>
-              <div class="reveal-role-front-label">Your Role</div>
-              <div class="reveal-role-front-text">${roleDisplayName(me.role)}</div>
-            </div>
-          </div>
-
-          <div class="role-back reveal-role-back" style="color:${roleColor}">
-            <div class="reveal-role-back-inner">
-              <div class="reveal-role-back-kicker">Your Role</div>
-              <div class="reveal-role-name">${roleDisplayName(me.role)}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="night-action-panel">
-        <div class="night-action-label">${submitted ? "Action Submitted" : panelLabel}</div>
-        <div class="night-action-text">
-          ${submitted ? submittedText : panelText}
-        </div>
-      </div>
-
-      ${submitted ? "" : `<div class="night-action-target-grid">${buttonsHTML}</div>`}
-
-      ${renderOnlineProgressBox()}
-
-      <div class="reveal-role-actions">
-        ${
-          submitted
-            ? `<button class="primary-btn" disabled>Waiting For Other Players</button>`
-            : ""
-        }
-      </div>
-
-    </div>
-  `)
+  render(
+    buildSharedNightActionScreen({
+      playerName: me.name,
+      role: me.role,
+      progressText: `${currentNightPlayerNumber} / ${alivePlayers.length}`,
+      hintText: hint,
+      panelLabel,
+      panelText,
+      buttonsHTML,
+      submitted,
+      submittedText,
+      progressBoxHTML: renderOnlineProgressBox(),
+      actionButtonHTML
+    })
+  )
 }
 
 function renderOnlineNightResultCard({
@@ -1185,15 +1146,15 @@ function renderOnlineNightSelect() {
   }
 
   if (!role?.nightAction) {
-    renderOnlineNightActionCard({
-      me,
-      hint: "Sleep peacefully tonight",
-      panelLabel: "Night",
-      panelText: "You have no action tonight.",
-      buttonsHTML: `<button class="primary-btn" onclick="window.submitNightAction('none')">Continue</button>`
-    })
-    return
-  }
+  renderOnlineNightActionCard({
+    me,
+    hint: "Sleep peacefully tonight",
+    panelLabel: "Night",
+    panelText: "You have no action tonight.",
+    actionButtonHTML: `<button class="primary-btn" onclick="window.submitNightAction('none')">Continue</button>`
+  })
+  return
+}
 
   const alivePlayers = getOnlineAlivePlayers()
 

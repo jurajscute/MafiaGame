@@ -63,3 +63,74 @@ export function buildSharedRoleRevealScreen({
     </div>
   `
 }
+
+export function buildSharedNightActionScreen({
+  playerName,
+  role,
+  progressText,
+  hintText,
+  panelLabel = "Decision",
+  panelText = "Choose your target.",
+  buttonsHTML = "",
+  submitted = false,
+  submittedText = "You are ready.",
+  progressBoxHTML = "",
+  actionButtonHTML = ""
+}) {
+  const roleColor = roleColors[role] || "white"
+
+  return `
+    <div class="card reveal-role-card role-${role} night-action-shell" style="--reveal-role-color:${roleColor};">
+
+      <div class="reveal-role-topbar">
+        <div class="reveal-role-kicker">Night Action</div>
+        <div class="reveal-role-progress">${progressText}</div>
+      </div>
+
+      <div class="reveal-role-header">
+        <div class="reveal-role-player">${playerName}</div>
+        <div class="reveal-role-hint">${hintText}</div>
+      </div>
+
+      <div class="role-card reveal-role-flip revealed">
+        <div class="role-inner">
+          <div class="role-front reveal-role-front">
+            <div class="reveal-role-front-shimmer"></div>
+            <div class="reveal-role-front-inner">
+              <div class="reveal-role-front-icon">✦</div>
+              <div class="reveal-role-front-label">Your Role</div>
+              <div class="reveal-role-front-text">${roleDisplayName(role)}</div>
+            </div>
+          </div>
+
+          <div class="role-back reveal-role-back" style="color:${roleColor}">
+            <div class="reveal-role-back-inner">
+              <div class="reveal-role-back-kicker">Your Role</div>
+              <div class="reveal-role-name">${roleDisplayName(role)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="night-action-panel">
+        <div class="night-action-label">${submitted ? "Action Submitted" : panelLabel}</div>
+        <div class="night-action-text">
+          ${submitted ? submittedText : panelText}
+        </div>
+      </div>
+
+      ${submitted ? "" : `<div class="night-action-target-grid">${buttonsHTML}</div>`}
+
+      ${progressBoxHTML}
+
+      <div class="reveal-role-actions">
+        ${
+          submitted
+            ? `<button class="primary-btn" disabled>Waiting For Other Players</button>`
+            : actionButtonHTML
+        }
+      </div>
+
+    </div>
+  `
+}
