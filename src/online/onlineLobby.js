@@ -421,11 +421,32 @@ function subscribeToRoom(roomCode) {
   onValue(roomRef, async (snapshot) => {
     demoRoom = snapshot.val()
 
-        if (demoRoom?.hostId && currentPlayerId) {
+    if (!demoRoom) {
+      render(`
+        <div class="card home-screen-card">
+          <div class="home-hero">
+            <div class="home-kicker">Online Room</div>
+            <h2 class="home-title">Room Not Found</h2>
+            <div class="home-subtitle">
+              This room does not exist, or was deleted.
+            </div>
+          </div>
+
+          <div class="home-actions">
+            <button class="primary-btn" onclick="window.showOnlineMenu()">
+              Back
+            </button>
+          </div>
+        </div>
+      `)
+      return
+    }
+
+    if (demoRoom.hostId && currentPlayerId) {
       currentIsHost = demoRoom.hostId === currentPlayerId
     }
 
-    if (demoRoom && currentIsHost) {
+    if (currentIsHost) {
       const players = demoRoom.players || []
       const presence = demoRoom.presence || {}
 
@@ -455,53 +476,21 @@ function subscribeToRoom(roomCode) {
       }
     }
 
-if (demoRoom.phase === "in_game") {
-  const nextScreenKey = getOnlineScreenKey()
+    if (demoRoom.phase === "in_game") {
+      const nextScreenKey = getOnlineScreenKey()
 
-  if (nextScreenKey !== lastRenderedScreenKey) {
-    lastRenderedScreenKey = nextScreenKey
-    renderOnlineGame()
-  } else {
-    patchOnlineProgressBox()
-  }
+      if (nextScreenKey !== lastRenderedScreenKey) {
+        lastRenderedScreenKey = nextScreenKey
+        renderOnlineGame()
+      } else {
+        patchOnlineProgressBox()
+      }
 
-  await maybeAdvanceOnlinePhase()
-  return
-}
-
-    if (!demoRoom) {
-      render(`
-        <div class="card home-screen-card">
-          <div class="home-hero">
-            <div class="home-kicker">Online Room</div>
-            <h2 class="home-title">Room Not Found</h2>
-            <div class="home-subtitle">
-              This room does not exist, or was deleted.
-            </div>
-          </div>
-
-          <div class="home-actions">
-            <button class="primary-btn" onclick="window.showOnlineMenu()">
-              Back
-            </button>
-          </div>
-        </div>
-      `)
+      await maybeAdvanceOnlinePhase()
       return
     }
 
-    if (demoRoom.phase === "in_game") {
-  const nextScreenKey = getOnlineScreenKey()
-
-  if (nextScreenKey !== lastRenderedScreenKey) {
-    lastRenderedScreenKey = nextScreenKey
-    renderOnlineGame()
-  }
-
-  await maybeAdvanceOnlinePhase()
-  return
-}
-
+    lastRenderedScreenKey = null
     renderRoomLobby()
   })
 }
