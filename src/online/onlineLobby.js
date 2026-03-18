@@ -1360,27 +1360,40 @@ function renderOnlineMorning() {
     </div>
   `).join("")
 
-  const resultsHTML = publicResults.map(result => {
-    let extraClass = "night-result-peace"
+  let resultsHTML = ""
 
-    if (result.type === "death") extraClass = "night-result-death"
-    if (result.type === "save") extraClass = "night-result-save"
+if (!publicResults.length) {
+  resultsHTML = `
+    <div class="morning-result-card night-result-peace">
+      <div class="morning-result-kicker">Night</div>
+      <div class="morning-result-text">The night was quiet.</div>
+    </div>
+  `
+} else {
+  resultsHTML = publicResults.map(result => {
+    let extraClass = "night-result-peace"
+    let kicker = "Night"
+
+    if (result.type === "death") {
+      extraClass = "night-result-death"
+      kicker = "Eliminated"
+    }
+
+    if (result.type === "save") {
+      extraClass = "night-result-save"
+      kicker = "Survived"
+    }
 
     return `
       <div class="morning-result-card ${extraClass}">
-        <div class="morning-result-kicker">
-          ${
-            result.type === "death" ? "Elimination" :
-            result.type === "save" ? "Survival" :
-            "Night"
-          }
-        </div>
+        <div class="morning-result-kicker">${kicker}</div>
         <div class="morning-result-text">
           ${result.text}
         </div>
       </div>
     `
   }).join("")
+}
 
   render(`
     <div class="card morning-card">
@@ -1461,15 +1474,24 @@ const totalVoters = getOnlineAlivePlayers().length
     <div class="card voting-card morning-vote-card">
 
       <div class="voting-hero">
-      <div class="current-voter-pill">
-  <span class="current-voter-dot"></span>
-  <strong>${voteCount} / ${totalVoters} players have voted</strong>
+
+  <div class="voting-kicker">Town Judgment</div>
+  <h2 class="voting-title">Cast Your Vote</h2>
+
+  <div class="voting-subtitle">
+    ${
+      myVote
+        ? `You have chosen ${myVote === "skip" ? "to skip" : myVote}.`
+        : "Choose who should be eliminated before night falls."
+    }
+  </div>
+
+  <div class="current-voter-pill">
+    <span class="current-voter-dot"></span>
+    <strong>${voteCount} / ${totalVoters} players have voted</strong>
+  </div>
+
 </div>
-        <div class="voting-kicker">Town Judgment</div>
-        <h2 class="voting-title">Cast Your Vote</h2>
-        <div class="voting-subtitle">
-          Choose who should be eliminated before night falls.
-        </div>
 
         ${
           myVote
@@ -1629,46 +1651,35 @@ document.body.className = "day"
   }).join("")
 
   render(`
-    <div class="card morning-card voting-results-card">
+  <div class="card morning-card voting-results-card">
 
-      <div class="morning-header voting-results-header">
-        <div class="morning-kicker">Day Resolution</div>
-        <h2 class="morning-title">Voting Results</h2>
-        <p class="morning-subtitle">
-          The town has chosen who to cast out.
-        </p>
-      </div>
-
-      <div class="vote-results-panel">
-        ${resultsHTML || `
-          <div class="vote-row">
-            <div class="vote-label-row">
-              <div class="vote-label-main">No votes recorded</div>
-              <div class="vote-label-count">0</div>
-            </div>
-            <div class="vote-bar-bg">
-              <div class="vote-bar-fill" style="width:0%"></div>
-            </div>
-          </div>
-        `}
-      </div>
-
-      ${outcomeHTML}
-
-      <div class="player-status-box">
-        <h3>Players</h3>
-        ${playersHTML}
-      </div>
-
-      ${renderOnlineProgressBox()}
-
-      <div class="reveal-role-actions">
-        ${renderOnlineProceedButton("Continue")}
-      </div>
-
+    <div class="morning-header voting-results-header">
+      <div class="morning-kicker">Day Resolution</div>
+      <h2 class="morning-title">Voting Results</h2>
+      <p class="morning-subtitle">
+        The town has chosen who to cast out.
+      </p>
     </div>
-  `)
-}
+
+    ${outcomeHTML}
+
+    <div class="vote-results-panel">
+      ${resultsHTML}
+    </div>
+
+    <div class="player-status-box">
+      <h3>Players</h3>
+      ${playersHTML}
+    </div>
+
+    ${renderOnlineProgressBox()}
+
+    <div class="reveal-role-actions">
+      ${renderOnlineProceedButton("Continue")}
+    </div>
+
+  </div>
+`)
 
 function getRoleDescription(role) {
   const roleDescriptions = {
