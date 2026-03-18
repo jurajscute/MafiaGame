@@ -656,38 +656,32 @@ async function maybeAdvanceOnlinePhase() {
     }
 
     if (gameState.phase === "voting") {
-      const resolved = resolveOnlineVotes(gameState)
+  const resolved = resolveOnlineVotes(gameState)
 
-const updates = {
-  "gameState/players": resolved.players,
-  "gameState/voteResults": resolved.voteResults,
-  "gameState/finalResult": resolved.finalResult || null
+  await update(getOnlineRoomRef(), {
+    "gameState/players": resolved.players,
+    "gameState/voteResults": resolved.voteResults,
+    "gameState/finalResult": resolved.finalResult || null,
+    "gameState/phase": resolved.finalResult ? "game_over" : "vote_results",
+    "gameState/readyMap": {},
+    "gameState/votes": {}
+  })
+
+  return
 }
-
-if (resolved.finalResult) {
-  updates["gameState/phase"] = "game_over"
-} else {
-  updates["gameState/phase"] = "vote_results"
-}
-
-await update(getOnlineRoomRef(), updates)
-
-      await update(getOnlineRoomRef(), {
-        "gameState/players": resolved.players,
-        "gameState/voteResults": resolved.voteResults,
-        "gameState/phase": "vote_results",
-        "gameState/readyMap": {},
-        "gameState/votes": {}
-      })
-      return
-    }
 
     let nextPhase = gameState.phase
 
-    if (gameState.phase === "role_reveal") nextPhase = "night_select"
-    else if (gameState.phase === "night_results") nextPhase = "morning"
-    else if (gameState.phase === "morning") nextPhase = "voting"
-    else if (gameState.phase === "vote_results") nextPhase = "night_select"
+if (gameState.phase === "role_reveal") nextPhase = "night_select"
+else if (gameState.phase === "night_results") nextPhase = "morning"
+else if (gameState.phase === "morning") nextPhase = "voting"
+else if (gameState.phase === "vote_results") {
+  if (gameState.finalResult) {
+    nextPhase = "game_over"
+  } else {
+    nextPhase = "night_select"
+  }
+}
 
     await update(getOnlineRoomRef(), {
       "gameState/phase": nextPhase,
