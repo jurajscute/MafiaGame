@@ -774,6 +774,44 @@ function renderOnlineGameOver() {
   const finalResult = demoRoom?.gameState?.finalResult || {}
   const players = demoRoom?.gameState?.players || []
 
+  if (finalResult.type === "jester_win") {
+    document.body.className = "win-jester"
+
+    render(`
+      <div class="card role-jester">
+
+        <h1 class="role-title">JESTER WINS</h1>
+
+        <p>${finalResult.winner} tricked the town into voting them out!</p>
+
+        ${renderOnlineProgressBox()}
+
+        <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+
+      </div>
+    `)
+    return
+  }
+
+  if (finalResult.type === "executioner_win") {
+    document.body.className = "win-executioner"
+
+    render(`
+      <div class="card role-executioner">
+
+        <h1 class="role-title">EXECUTIONER WINS</h1>
+
+        <p>${finalResult.winner} succeeded in getting ${finalResult.target} voted out!</p>
+
+        ${renderOnlineProgressBox()}
+
+        <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+
+      </div>
+    `)
+    return
+  }
+
   let title = "Game Over"
   let subtitle = "The game has ended."
   let bodyClass = "win-village"
@@ -786,14 +824,6 @@ function renderOnlineGameOver() {
     title = "VILLAGE WINS"
     subtitle = "The town has eliminated all mafia members."
     bodyClass = "win-village"
-  } else if (finalResult.type === "jester_win") {
-    title = "JESTER WINS"
-    subtitle = `${finalResult.winner} fooled the town into voting them out.`
-    bodyClass = "win-jester"
-  } else if (finalResult.type === "executioner_win") {
-    title = "EXECUTIONER WINS"
-    subtitle = `${finalResult.winner} achieved their goal.`
-    bodyClass = "win-executioner"
   }
 
   const playersHTML = players.map(player => `
