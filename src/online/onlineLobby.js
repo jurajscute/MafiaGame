@@ -36,6 +36,24 @@ function getOnlineSettings() {
   return demoRoom?.settings || null
 }
 
+function applyOnlinePhaseTheme(phase) {
+  if (phase === "role_reveal" || phase === "night_select" || phase === "night_results") {
+    document.body.className = "night"
+    return
+  }
+
+  if (phase === "morning" || phase === "voting" || phase === "vote_results") {
+    document.body.className = "day"
+    return
+  }
+
+  if (phase === "game_over") {
+    return
+  }
+
+  document.body.className = ""
+}
+
 async function registerPresence(roomCode, playerId) {
   const presenceRef = ref(db, `rooms/${roomCode}/presence/${playerId}`)
 
@@ -131,6 +149,7 @@ function generateRoomCode() {
 }
 
 function renderOnlineMenu() {
+  document.body.className = ""
   render(`
     <div class="card home-screen-card">
       <div class="home-hero">
@@ -161,6 +180,7 @@ function renderOnlineMenu() {
 }
 
 function renderHostSetup() {
+  document.body.className = ""
   render(`
     <div class="card setup-screen-card">
       <div class="setup-hero">
@@ -193,6 +213,7 @@ function renderHostSetup() {
 }
 
 function renderJoinSetup() {
+  document.body.className = ""
   render(`
     <div class="card setup-screen-card">
       <div class="setup-hero">
@@ -232,6 +253,7 @@ function renderJoinSetup() {
 }
 
 function renderRoomLobby() {
+  document.body.className = ""
   if (!demoRoom) return
 
   const players = demoRoom.players || []
@@ -496,9 +518,17 @@ function subscribeToRoom(roomCode) {
 }
 
 function patchOnlineProgressBox() {
-  const el = document.getElementById("onlineReadyCount")
-  if (el) {
-    el.textContent = `${getOnlineReadyCount()} / ${getOnlineRequiredReadyCount()}`
+  const readyEl = document.getElementById("onlineReadyCount")
+  if (readyEl) {
+    readyEl.textContent = `${getOnlineReadyCount()} / ${getOnlineRequiredReadyCount()}`
+  }
+
+  const voteEl = document.getElementById("onlineVoteCount")
+  if (voteEl) {
+    const votes = demoRoom?.gameState?.votes || {}
+    const voteCount = Object.keys(votes).length
+    const totalVoters = getOnlineAlivePlayers().length
+    voteEl.textContent = `${voteCount} / ${totalVoters} players have voted`
   }
 }
 
@@ -893,6 +923,7 @@ function getOnlineScreenKey() {
 
 function renderOnlineGame() {
   const gameState = demoRoom?.gameState
+  applyOnlinePhaseTheme(gameState?.phase)
 
   if (!gameState) {
     render(`
@@ -1526,9 +1557,9 @@ const totalVoters = getOnlineAlivePlayers().length
   </div>
 
   <div class="current-voter-pill">
-    <span class="current-voter-dot"></span>
-    <strong>${voteCount} / ${totalVoters} players have voted</strong>
-  </div>
+  <span class="current-voter-dot"></span>
+  <strong id="onlineVoteCount">${voteCount} / ${totalVoters} players have voted</strong>
+</div>
 
 </div>
 
@@ -1604,8 +1635,6 @@ if (voteResults.resultType === "executioner_win") {
   render(screen.html)
   return
 }
-
-document.body.className = "day"
 
   const voteCounts = voteResults.voteCounts || {}
   const maxVotes = Object.values(voteCounts).length
