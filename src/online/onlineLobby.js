@@ -10,7 +10,10 @@ import { resolveOnlineNight } from "../core/resolveOnlineNight.js"
 import {
   buildSharedRoleRevealScreen,
   buildSharedNightActionScreen,
-  buildSharedNightResultScreen
+  buildSharedNightResultScreen,
+  buildSharedMorningScreen,
+  buildSharedVoteResultsScreen,
+  buildSharedWinScreen
 } from "../core/sharedScreens.js"
 
 let demoRoom = null
@@ -780,128 +783,120 @@ function renderOnlineGameOver() {
   const players = demoRoom?.gameState?.players || []
 
 if (finalResult.type === "jester_executioner_win") {
-  document.body.className = "win-jester-executioner"
-
-  render(`
-    <div class="card role-jester">
-      <h1 class="role-title">JESTER & EXECUTIONER WIN</h1>
+  const screen = buildSharedWinScreen({
+    bodyClass: "win-jester-executioner",
+    cardClass: "role-jester",
+    title: "JESTER & EXECUTIONER WIN",
+    linesHTML: `
       <p>${finalResult.winner} was voted out and wins as the Jester.</p>
       <p>${finalResult.executionerWinner} also wins because ${finalResult.winner} was their target.</p>
-
-      ${renderOnlineProgressBox()}
-
+    `,
+    progressBoxHTML: renderOnlineProgressBox(),
+    continueButtonHTML: `
       <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
-    </div>
-  `)
+    `
+  })
+
+  document.body.className = screen.bodyClass
+  render(screen.html)
   return
 }
 
 if (finalResult.type === "village_executioner_win") {
-  document.body.className = "win-village-executioner"
-
-  render(`
-    <div class="card role-executioner">
-      <h1 class="role-title">VILLAGE & EXECUTIONER WIN</h1>
+  const screen = buildSharedWinScreen({
+    bodyClass: "win-village-executioner",
+    cardClass: "role-executioner",
+    title: "VILLAGE & EXECUTIONER WIN",
+    linesHTML: `
       <p>${finalResult.winner} succeeded in getting ${finalResult.target} voted out!</p>
       <p>The village also wins because ${finalResult.target} was a part of the mafia.</p>
-
-      ${renderOnlineProgressBox()}
-
+    `,
+    progressBoxHTML: renderOnlineProgressBox(),
+    continueButtonHTML: `
       <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
-    </div>
-  `)
+    `
+  })
+
+  document.body.className = screen.bodyClass
+  render(screen.html)
   return
 }
 
   if (finalResult.type === "jester_win") {
-    document.body.className = "win-jester"
+  const screen = buildSharedWinScreen({
+    bodyClass: "win-jester",
+    cardClass: "role-jester",
+    title: "JESTER WINS",
+    linesHTML: `
+      <p>${finalResult.winner} tricked the town into voting them out!</p>
+    `,
+    progressBoxHTML: renderOnlineProgressBox(),
+    continueButtonHTML: `
+      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+    `
+  })
 
-    render(`
-      <div class="card role-jester">
-
-        <h1 class="role-title">JESTER WINS</h1>
-
-        <p>${finalResult.winner} tricked the town into voting them out!</p>
-
-        ${renderOnlineProgressBox()}
-
-        <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
-
-      </div>
-    `)
-    return
-  }
+  document.body.className = screen.bodyClass
+  render(screen.html)
+  return
+}
 
   if (finalResult.type === "executioner_win") {
-    document.body.className = "win-executioner"
+  const screen = buildSharedWinScreen({
+    bodyClass: "win-executioner",
+    cardClass: "role-executioner",
+    title: "EXECUTIONER WINS",
+    linesHTML: `
+      <p>${finalResult.winner} succeeded in getting ${finalResult.target} voted out!</p>
+    `,
+    progressBoxHTML: renderOnlineProgressBox(),
+    continueButtonHTML: `
+      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+    `
+  })
 
-    render(`
-      <div class="card role-executioner">
-
-        <h1 class="role-title">EXECUTIONER WINS</h1>
-
-        <p>${finalResult.winner} succeeded in getting ${finalResult.target} voted out!</p>
-
-        ${renderOnlineProgressBox()}
-
-        <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
-
-      </div>
-    `)
-    return
-  }
+  document.body.className = screen.bodyClass
+  render(screen.html)
+  return
+}
 
   if (finalResult.type === "mafia_win") {
-  document.body.className = "win-mafia"
-
-  render(`
-    <div class="card role-mafia">
-
-      <h1 class="role-title">MAFIA WINS</h1>
-
+  const screen = buildSharedWinScreen({
+    bodyClass: "win-mafia",
+    cardClass: "role-mafia",
+    title: "MAFIA WINS",
+    linesHTML: `
       <p>The mafia have taken control of the town.</p>
-
-      ${renderOnlineProgressBox()}
-
+    `,
+    progressBoxHTML: renderOnlineProgressBox(),
+    continueButtonHTML: `
       <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+    `
+  })
 
-    </div>
-  `)
+  document.body.className = screen.bodyClass
+  render(screen.html)
   return
 }
 
 if (finalResult.type === "village_win") {
-  document.body.className = "win-village"
-
-  render(`
-    <div class="card role-doctor">
-
-      <h1 class="role-title">VILLAGE WINS</h1>
-
+  const screen = buildSharedWinScreen({
+    bodyClass: "win-village",
+    cardClass: "role-doctor",
+    title: "VILLAGE WINS",
+    linesHTML: `
       <p>The town has eliminated all mafia members.</p>
-
-      ${renderOnlineProgressBox()}
-
+    `,
+    progressBoxHTML: renderOnlineProgressBox(),
+    continueButtonHTML: `
       <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+    `
+  })
 
-    </div>
-  `)
+  document.body.className = screen.bodyClass
+  render(screen.html)
   return
 }
-
-  let title = "Game Over"
-  let subtitle = "The game has ended."
-  let bodyClass = "win-village"
-
-  if (finalResult.type === "mafia_win") {
-    title = "MAFIA WINS"
-    subtitle = "The mafia have taken control of the town."
-    bodyClass = "win-mafia"
-  } else if (finalResult.type === "village_win") {
-    title = "VILLAGE WINS"
-    subtitle = "The town has eliminated all mafia members."
-    bodyClass = "win-village"
-  }
 
   const playersHTML = players.map(player => `
     <div class="final-player-card" style="--final-role-color:${roleColors[player.role] || "white"};">
@@ -1253,7 +1248,6 @@ function renderOnlineNightResults() {
 
 function renderOnlineMorning() {
   const publicResults = demoRoom?.gameState?.nightResolved?.publicResults || []
-
   const players = demoRoom?.gameState?.players || []
 
   const playersHTML = players.map(player => `
@@ -1265,67 +1259,47 @@ function renderOnlineMorning() {
 
   let resultsHTML = ""
 
-if (!publicResults.length) {
-  resultsHTML = `
-    <div class="morning-result-card night-result-peace">
-      <div class="morning-result-kicker">Night</div>
-      <div class="morning-result-text">The night was quiet.</div>
-    </div>
-  `
-} else {
-  resultsHTML = publicResults.map(result => {
-    let extraClass = "night-result-peace"
-    let kicker = "Night"
-
-    if (result.type === "death") {
-      extraClass = "night-result-death"
-      kicker = "Eliminated"
-    }
-
-    if (result.type === "save") {
-      extraClass = "night-result-save"
-      kicker = "Survived"
-    }
-
-    return `
-      <div class="morning-result-card ${extraClass}">
-        <div class="morning-result-kicker">${kicker}</div>
-        <div class="morning-result-text">
-          ${result.text}
-        </div>
+  if (!publicResults.length) {
+    resultsHTML = `
+      <div class="morning-result-card night-result-peace">
+        <div class="morning-result-kicker">Night</div>
+        <div class="morning-result-text">The night was quiet.</div>
       </div>
     `
-  }).join("")
-}
+  } else {
+    resultsHTML = publicResults.map(result => {
+      let extraClass = "night-result-peace"
+      let kicker = "Night"
 
-  render(`
-    <div class="card morning-card">
+      if (result.type === "death") {
+        extraClass = "night-result-death"
+        kicker = "Eliminated"
+      }
 
-      <div class="morning-hero">
-        <div class="morning-kicker">Daybreak</div>
-        <h2 class="morning-title">Morning</h2>
-        <div class="morning-subtitle">
-          The town wakes to see what the night has brought.
+      if (result.type === "save") {
+        extraClass = "night-result-save"
+        kicker = "Survived"
+      }
+
+      return `
+        <div class="morning-result-card ${extraClass}">
+          <div class="morning-result-kicker">${kicker}</div>
+          <div class="morning-result-text">
+            ${result.text}
+          </div>
         </div>
-      </div>
+      `
+    }).join("")
+  }
 
-      <div class="morning-results-wrap">
-        ${resultsHTML}
-      </div>
-
-      <div class="player-status-box">
-        <h3>Players</h3>
-        ${playersHTML}
-      </div>
-
-      ${renderOnlineProgressBox()}
-
-      <div class="morning-actions">
-        ${renderOnlineProceedButton("Continue")}
-      </div>
-
-    </div>
-  `)
+  render(
+    buildSharedMorningScreen({
+      resultsHTML,
+      playersHTML,
+      progressBoxHTML: renderOnlineProgressBox(),
+      continueButtonHTML: renderOnlineProceedButton("Continue")
+    })
+  )
 }
 
 function renderOnlineVoting() {
@@ -1552,36 +1526,15 @@ document.body.className = "day"
     `
   }).join("")
 
-  render(`
-  <div class="card morning-card voting-results-card">
-
-    <div class="morning-header voting-results-header">
-      <div class="morning-kicker">Day Resolution</div>
-      <h2 class="morning-title">Voting Results</h2>
-      <p class="morning-subtitle">
-        The town has chosen who to cast out.
-      </p>
-    </div>
-
-    ${outcomeHTML}
-
-    <div class="vote-results-panel">
-      ${resultsHTML}
-    </div>
-
-    <div class="player-status-box">
-      <h3>Players</h3>
-      ${playersHTML}
-    </div>
-
-    ${renderOnlineProgressBox()}
-
-    <div class="reveal-role-actions">
-      ${renderOnlineProceedButton("Continue")}
-    </div>
-
-  </div>
-`)
+  render(
+  buildSharedVoteResultsScreen({
+    outcomeHTML,
+    resultsHTML,
+    playersHTML,
+    progressBoxHTML: renderOnlineProgressBox(),
+    continueButtonHTML: renderOnlineProceedButton("Continue")
+  })
+)
 }
 
 function getRoleDescription(role) {

@@ -196,3 +196,102 @@ export function buildSharedNightActionScreen({
     </div>
   `
 }
+
+export function buildSharedMorningScreen({
+  resultsHTML = "",
+  playersHTML = "",
+  progressBoxHTML = "",
+  continueButtonHTML = ""
+}) {
+  return `
+    <div class="card morning-card">
+
+      <div class="morning-hero">
+        <div class="morning-kicker">Daybreak</div>
+        <h2 class="morning-title">Morning</h2>
+        <div class="morning-subtitle">
+          The town wakes to see what the night has brought.
+        </div>
+      </div>
+
+      <div class="morning-results-wrap">
+        ${resultsHTML}
+      </div>
+
+      <div class="player-status-box">
+        <h3>Players</h3>
+        ${playersHTML}
+      </div>
+
+      ${progressBoxHTML}
+
+      <div class="morning-actions">
+        ${continueButtonHTML}
+      </div>
+
+    </div>
+  `
+}
+
+export function buildSharedVoteResultsScreen({
+  outcomeHTML = "",
+  resultsHTML = "",
+  playersHTML = "",
+  progressBoxHTML = "",
+  continueButtonHTML = ""
+}) {
+  return `
+    <div class="card morning-card voting-results-card">
+
+      <div class="morning-header voting-results-header">
+        <div class="morning-kicker">Day Resolution</div>
+        <h2 class="morning-title">Voting Results</h2>
+        <p class="morning-subtitle">
+          The town has chosen who to cast out.
+        </p>
+      </div>
+
+      ${outcomeHTML}
+
+      <div class="vote-results-panel">
+        ${resultsHTML}
+      </div>
+
+      <div class="player-status-box">
+        <h3>Players</h3>
+        ${playersHTML}
+      </div>
+
+      ${progressBoxHTML}
+
+      <div class="reveal-role-actions">
+        ${continueButtonHTML}
+      </div>
+
+    </div>
+  `
+}
+
+export function buildSharedWinScreen({
+  bodyClass = "win-village",
+  cardClass = "role-doctor",
+  title = "GAME OVER",
+  linesHTML = "",
+  progressBoxHTML = "",
+  continueButtonHTML = ""
+}) {
+  return {
+    bodyClass,
+    html: `
+      <div class="card ${cardClass}">
+        <h1 class="role-title">${title}</h1>
+
+        ${linesHTML}
+
+        ${progressBoxHTML}
+
+        ${continueButtonHTML}
+      </div>
+    `
+  }
+}
