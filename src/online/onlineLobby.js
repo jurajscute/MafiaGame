@@ -774,21 +774,35 @@ function renderOnlineGameOver() {
   const finalResult = demoRoom?.gameState?.finalResult || {}
   const players = demoRoom?.gameState?.players || []
 
-if (finalResult.type === "jester_executioner_win") {
+if (voteResults.resultType === "jester_executioner_win") {
   document.body.className = "win-jester-executioner"
 
   render(`
     <div class="card role-jester">
-
       <h1 class="role-title">JESTER & EXECUTIONER WIN</h1>
-
-      <p>${finalResult.winner} was voted out and wins as the Jester.</p>
-      <p>${finalResult.executionerWinner} also wins because ${finalResult.winner} was their target.</p>
+      <p>${voteResults.eliminated} was voted out and wins as the Jester.</p>
+      <p>${voteResults.winner} also wins because ${voteResults.eliminated} was their target.</p>
 
       ${renderOnlineProgressBox()}
 
       <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+    </div>
+  `)
+  return
+}
 
+if (voteResults.resultType === "village_executioner_win") {
+  document.body.className = "win-village-executioner"
+
+  render(`
+    <div class="card role-executioner">
+      <h1 class="role-title">VILLAGE & EXECUTIONER WIN</h1>
+      <p>${voteResults.winner} succeeded in getting ${voteResults.eliminated} voted out!</p>
+      <p>The village also wins because ${voteResults.eliminated} was mafia.</p>
+
+      ${renderOnlineProgressBox()}
+
+      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
     </div>
   `)
   return
@@ -812,26 +826,6 @@ if (finalResult.type === "jester_executioner_win") {
     `)
     return
   }
-
-  if (finalResult.type === "village_executioner_win") {
-  document.body.className = "win-village-executioner"
-
-  render(`
-    <div class="card role-executioner">
-
-      <h1 class="role-title">VILLAGE & EXECUTIONER WIN</h1>
-
-      <p>${finalResult.winner} succeeded in getting ${finalResult.target} voted out!</p>
-      <p>The village also wins because ${finalResult.target} was a part of the mafia.</p>
-
-      ${renderOnlineProgressBox()}
-
-      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
-
-    </div>
-  `)
-  return
-}
 
   if (finalResult.type === "executioner_win") {
     document.body.className = "win-executioner"
@@ -947,6 +941,13 @@ if (finalResult.type === "village_win") {
   `)
 }
 
+window.flipOnlineRoleCard = function() {
+  const card = document.getElementById("roleCard")
+  if (card) {
+    card.classList.add("revealed")
+  }
+}
+
 function renderOnlineRoleReveal() {
   const me = getOnlineMe()
   if (!me) return
@@ -979,10 +980,10 @@ function renderOnlineRoleReveal() {
 
       <div class="reveal-role-header">
         <div class="reveal-role-player">${me.name}</div>
-        <div class="reveal-role-hint">This is your private role</div>
+        <div class="reveal-role-hint">Tap to reveal!</div>
       </div>
 
-      <div class="role-card reveal-role-flip revealed">
+      <div class="role-card reveal-role-flip" id="roleCard" onclick="window.flipOnlineRoleCard()">
         <div class="role-inner">
 
           <div class="role-front reveal-role-front">
