@@ -69,7 +69,7 @@ function renderOnlineVoteProgressBox() {
       <div class="online-progress-track">
         <div
           id="onlineVoteBar"
-          class="online-progress-fill"
+          class="online-vote-fill"
           style="width:${percent}%"
         ></div>
       </div>
@@ -1102,6 +1102,7 @@ function getOnlineScreenKey() {
   const myVote = gameState.votes?.[currentPlayerId] || ""
   const myReady = gameState.readyMap?.[currentPlayerId] ? "ready" : "not_ready"
   const myMorningSeen = gameState.morningSeen?.[currentPlayerId] ? "seen" : "not_seen"
+  const myFinalResultsSeen = gameState.finalResultsSeen?.[currentPlayerId] ? "seen" : "not_seen"
   const myAction = gameState.submittedActions?.[currentPlayerId]
     ? JSON.stringify(gameState.submittedActions[currentPlayerId])
     : ""
@@ -1112,6 +1113,7 @@ function getOnlineScreenKey() {
     myVote,
     myReady,
     myMorningSeen,
+    myFinalResultsSeen,
     myAction,
     voteResultType: gameState.voteResults?.resultType || "",
     finalResultType: gameState.finalResult?.type || "",
@@ -1429,7 +1431,6 @@ if (finalResult.type === "jester_executioner_win") {
       <p>${finalResult.winner} was voted out and wins as the Jester.</p>
       <p>${finalResult.executionerWinner} also wins because ${finalResult.winner} was their target.</p>
     `,
-    progressBoxHTML: renderOnlineProgressBox(),
     continueButtonHTML: `
       <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
     `
@@ -1449,7 +1450,6 @@ if (finalResult.type === "village_executioner_win") {
       <p>${finalResult.winner} succeeded in getting ${finalResult.target} voted out!</p>
       <p>The village also wins because ${finalResult.target} was a part of the mafia.</p>
     `,
-    progressBoxHTML: renderOnlineProgressBox(),
     continueButtonHTML: `
       <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
     `
@@ -1468,7 +1468,6 @@ if (finalResult.type === "village_executioner_win") {
     linesHTML: `
       <p>${finalResult.winner} tricked the town into voting them out!</p>
     `,
-    progressBoxHTML: renderOnlineProgressBox(),
     continueButtonHTML: `
       <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
     `
@@ -1487,7 +1486,6 @@ if (finalResult.type === "village_executioner_win") {
     linesHTML: `
       <p>${finalResult.winner} succeeded in getting ${finalResult.target} voted out!</p>
     `,
-    progressBoxHTML: renderOnlineProgressBox(),
     continueButtonHTML: `
       <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
     `
@@ -1506,7 +1504,6 @@ if (finalResult.type === "village_executioner_win") {
     linesHTML: `
       <p>The mafia have taken control of the town.</p>
     `,
-    progressBoxHTML: renderOnlineProgressBox(),
     continueButtonHTML: `
       <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
     `
@@ -1525,7 +1522,6 @@ if (finalResult.type === "village_win") {
     linesHTML: `
       <p>The town has eliminated all mafia members.</p>
     `,
-    progressBoxHTML: renderOnlineProgressBox(),
     continueButtonHTML: `
       <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
     `
@@ -1542,8 +1538,6 @@ if (finalResult.type === "village_win") {
     <div class="card role-doctor">
       <h1 class="role-title">GAME OVER</h1>
       <p>The game has ended.</p>
-
-      ${renderOnlineProgressBox()}
 
       <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
     </div>

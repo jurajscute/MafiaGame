@@ -6376,7 +6376,16 @@ body.holy-night-flash .holy-pulse{
   height: 100%;
   width: 0%;
   border-radius: 999px;
-  background: linear-gradient(90deg, rgba(120,220,255,0.9), rgba(140,255,200,0.95));
+  background: linear-gradient(90deg, rgba(21, 43, 79), rgba(0, 17, 102));
+  box-shadow: 0 0 12px rgba(120,220,255,0.35);
+  transition: width 0.22s ease;
+}
+
+.online-vote-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(171, 116, 0), rgba(255, 212, 120));
   box-shadow: 0 0 12px rgba(120,220,255,0.35);
   transition: width 0.22s ease;
 }
