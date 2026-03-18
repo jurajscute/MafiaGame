@@ -1092,7 +1092,9 @@ function renderOnlineVoteResults() {
   const voteResults = demoRoom?.gameState?.voteResults || {
     voteCounts: {},
     eliminated: null,
-    resultType: "none"
+    resultType: "none",
+    revealedRole: null,
+    winner: null
   }
 
   const voteCounts = voteResults.voteCounts || {}
@@ -1139,36 +1141,48 @@ function renderOnlineVoteResults() {
         <div class="vote-outcome-subtitle">No one was eliminated today.</div>
       </div>
     `
-if (voteResults.resultType === "jester_win") {
-  outcomeHTML = `
-    <div class="vote-outcome-banner vote-outcome-jester">
-      <div class="vote-outcome-kicker">Jester Wins</div>
-      <div class="vote-outcome-title">${voteResults.eliminated}</div>
-      <div class="vote-outcome-subtitle">
-        The town has been deceived.
+  } else if (voteResults.resultType === "jester_win") {
+    outcomeHTML = `
+      <div class="vote-outcome-banner vote-outcome-elimination">
+        <div class="vote-outcome-kicker">Jester Wins</div>
+        <div class="vote-outcome-title">${voteResults.eliminated}</div>
+        ${
+          voteResults.revealedRole
+            ? `<div class="revealed-role">(${roleDisplayName(voteResults.revealedRole)})</div>`
+            : ""
+        }
+        <div class="vote-outcome-subtitle">
+          The town has been deceived.
+        </div>
       </div>
-    </div>
-  `
-}
-
-else if (voteResults.resultType === "executioner_win") {
-  outcomeHTML = `
-    <div class="vote-outcome-banner vote-outcome-executioner">
-      <div class="vote-outcome-kicker">Executioner Wins</div>
-      <div class="vote-outcome-title">${voteResults.winner}</div>
-      <div class="vote-outcome-subtitle">
-        Their target ${voteResults.eliminated} has been eliminated.
+    `
+  } else if (voteResults.resultType === "executioner_win") {
+    outcomeHTML = `
+      <div class="vote-outcome-banner vote-outcome-elimination">
+        <div class="vote-outcome-kicker">Executioner Wins</div>
+        <div class="vote-outcome-title">${voteResults.eliminated}</div>
+        ${
+          voteResults.revealedRole
+            ? `<div class="revealed-role">(${roleDisplayName(voteResults.revealedRole)})</div>`
+            : ""
+        }
+        <div class="vote-outcome-subtitle">
+          ${voteResults.winner
+            ? `${voteResults.winner} has achieved their goal.`
+            : `The Executioner has won.`}
+        </div>
       </div>
-    </div>
-  `
-}
-
+    `
   } else if (voteResults.resultType === "elimination") {
     outcomeHTML = `
       <div class="vote-outcome-banner vote-outcome-elimination">
         <div class="vote-outcome-kicker">Eliminated</div>
-        <div class="vote-outcome-title">${voteResults.eliminated}
-${voteResults.revealedRole ? `<div class="revealed-role">(${roleDisplayName(voteResults.revealedRole)})</div>` : ""}</div>
+        <div class="vote-outcome-title">${voteResults.eliminated}</div>
+        ${
+          voteResults.revealedRole
+            ? `<div class="revealed-role">(${roleDisplayName(voteResults.revealedRole)})</div>`
+            : ""
+        }
         <div class="vote-outcome-subtitle">The town has voted them out.</div>
       </div>
     `
