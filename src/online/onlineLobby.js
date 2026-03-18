@@ -537,8 +537,14 @@ window.confirmCreateOnlineRoom = async function () {
   room.hostId = hostPlayer.id
 
   try {
-    await set(ref(db, `rooms/${roomCode}`), room)
-    await registerPresence(roomCode, hostPlayerId)
+    await set(ref(db, `rooms/${roomCode}`), {
+  ...room,
+  presence: {
+    [hostPlayerId]: true
+  }
+})
+
+await onDisconnect(ref(db, `rooms/${roomCode}/presence/${hostPlayerId}`)).remove()
 
     currentRoomCode = roomCode
     currentPlayerId = hostPlayerId
@@ -679,11 +685,12 @@ window.fakeJoinRoom = async function () {
 
     const updatedPlayers = [...players, newPlayer]
 
-    await update(ref(db, `rooms/${code}`), {
-      players: updatedPlayers
-    })
+await update(ref(db), {
+  [`rooms/${code}/players`]: updatedPlayers,
+  [`rooms/${code}/presence/${newPlayerId}`]: true
+})
 
-    await registerPresence(code, newPlayerId)
+await onDisconnect(ref(db, `rooms/${code}/presence/${newPlayerId}`)).remove()
 
     currentRoomCode = code
     currentPlayerId = newPlayerId
