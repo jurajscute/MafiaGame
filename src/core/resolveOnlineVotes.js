@@ -1,11 +1,20 @@
+import { roles } from "./roles.js"
 export function resolveOnlineVotes(gameState) {
   const players = JSON.parse(JSON.stringify(gameState.players || []))
   const votes = gameState.votes || {}
 
+  const gameLog = [...(gameState.gameLog || [])]
+  const gameStats = {
+    nights: 0,
+    votesCast: 0,
+    eliminations: 0,
+    ...(gameState.gameStats || {})
+  }
+
   const alivePlayers = players.filter(player => player.alive !== false)
 
   gameLog.push(`Day ${gameStats.nights}`)
-gameStats.votesCast += Object.keys(votes).length
+  gameStats.votesCast += Object.keys(votes).length
 
   const voteCounts = {}
   let highest = 0
@@ -48,25 +57,26 @@ gameStats.votesCast += Object.keys(votes).length
   let finalResult = null
 
   if (tie || !eliminated || eliminated === "skip") {
-  if (tie) {
-    gameLog.push("The town vote ended in a tie.")
+    if (tie) {
+      gameLog.push("The town vote ended in a tie.")
+      resultType = "tie"
+    } else {
+      gameLog.push("The town chose to skip elimination.")
+      resultType = "skip"
+    }
+
+    eliminated = null
   } else {
-    gameLog.push("The town chose to skip elimination.")
-  }
+    const player = players.find(p => p.name === eliminated)
 
-  eliminated = null
-  resultType = tie ? "tie" : "skip"
-} else {
-    const eliminatedPlayer = players.find(p => p.name === eliminated)
-
-    if (!eliminatedPlayer) {
+    if (!player) {
       eliminated = null
       resultType = "none"
     } else {
       player.alive = false
-gameStats.eliminations += 1
-gameLog.push(`${player.name} was voted out by the town.`)
-resultType = "elimination"
+      gameStats.eliminations += 1
+      gameLog.push(`${player.name} was voted out by the town.`)
+      resultType = "elimination"
 
       const revealSetting = gameState?.settings?.revealRolesOnElimination || "none"
 
@@ -74,61 +84,58 @@ resultType = "elimination"
         revealSetting === "vote_only" ||
         revealSetting === "death_and_vote"
       ) {
-        revealedRole = eliminatedPlayer.role
+        revealedRole = player.role
+      }
+
+      if (player.role === "jester") {
+        resultType = "jester_win"
+        gameLog.push(`${player.name} was voted out and won as the Jester.`)
       }
 
       const executioner = players.find(p =>
-        p.role === "executioner" &&
+        (p.role === "executioner" || p.wasExecutioner) &&
         p.alive !== false &&
         gameState.executionerTargets?.[p.name] === eliminated
       )
 
-      const isJester = eliminatedPlayer.role === "jester"
-      const isLastMafia =
-        eliminatedPlayer.role === "mafia" &&
-        players.filter(p => p.alive !== false && p.role === "mafia").length === 0
-
-      if (isJester && executioner) {
-        resultType = "jester_executioner_win"
-        winner = executioner.name
+      if (executioner && resultType === "jester_win") {
         finalResult = {
           type: "jester_executioner_win",
-          winner: eliminatedPlayer.name,
+          winner: player.name,
           executionerWinner: executioner.name
-        }
-      } else if (isJester) {
-        resultType = "jester_win"
-        gameLog.push(`${player.name} was voted out and won as the Jester.`),
-        finalResult = {
-          type: "jester_win",
-          winner: eliminatedPlayer.name
-        }
-      } else if (executioner && isLastMafia) {
-        resultType = "village_executioner_win"
-        winner = executioner.name
-        finalResult = {
-          type: "village_executioner_win",
-          winner: executioner.name,
-          target: eliminatedPlayer.name
         }
       } else if (executioner) {
         resultType = "executioner_win"
         winner = executioner.name
-        gameLog.push(`${winner} achieved their goal when ${eliminated} was voted out.`),
+        gameLog.push(`${winner} achieved their goal when ${eliminated} was voted out.`)
+
+        if (roles[player.role]?.team === "mafia") {
+          finalResult = {
+            type: "village_executioner_win",
+            winner,
+            target: eliminated
+          }
+        } else {
+          finalResult = {
+            type: "executioner_win",
+            winner,
+            target: eliminated
+          }
+        }
+      } else if (resultType === "jester_win") {
         finalResult = {
-          type: "executioner_win",
-          winner: executioner.name,
-          target: eliminatedPlayer.name
+          type: "jester_win",
+          winner: player.name
         }
       }
     }
   }
 
-  if (!finalResult) {
-    const aliveAfterVote = players.filter(player => player.alive !== false)
-    const mafiaAlive = aliveAfterVote.filter(player => player.role === "mafia").length
-    const nonMafiaAlive = aliveAfterVote.filter(player => player.role !== "mafia").length
+  const aliveAfterVote = players.filter(player => player.alive !== false)
+  const mafiaAlive = aliveAfterVote.filter(player => player.role === "mafia").length
+  const nonMafiaAlive = aliveAfterVote.filter(player => player.role !== "mafia").length
 
+  if (!finalResult) {
     if (mafiaAlive === 0) {
       finalResult = {
         type: "village_win"
@@ -141,16 +148,16 @@ resultType = "elimination"
   }
 
   return {
-  players,
-  voteResults: {
-    voteCounts,
-    eliminated,
-    resultType,
-    revealedRole,
-    winner
-  },
-  finalResult,
-  gameLog,
-  gameStats
-}
+    players,
+    voteResults: {
+      voteCounts,
+      eliminated,
+      resultType,
+      revealedRole,
+      winner
+    },
+    finalResult,
+    gameLog,
+    gameStats
+  }
 }
