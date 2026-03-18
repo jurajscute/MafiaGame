@@ -774,6 +774,26 @@ function renderOnlineGameOver() {
   const finalResult = demoRoom?.gameState?.finalResult || {}
   const players = demoRoom?.gameState?.players || []
 
+if (finalResult.type === "jester_executioner_win") {
+  document.body.className = "win-jester-executioner"
+
+  render(`
+    <div class="card role-jester">
+
+      <h1 class="role-title">JESTER & EXECUTIONER WIN</h1>
+
+      <p>${finalResult.winner} was voted out and wins as the Jester.</p>
+      <p>${finalResult.executionerWinner} also wins because ${finalResult.winner} was their target.</p>
+
+      ${renderOnlineProgressBox()}
+
+      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+
+    </div>
+  `)
+  return
+}
+
   if (finalResult.type === "jester_win") {
     document.body.className = "win-jester"
 
@@ -793,6 +813,26 @@ function renderOnlineGameOver() {
     return
   }
 
+  if (finalResult.type === "village_executioner_win") {
+  document.body.className = "win-village-executioner"
+
+  render(`
+    <div class="card role-executioner">
+
+      <h1 class="role-title">VILLAGE & EXECUTIONER WIN</h1>
+
+      <p>${finalResult.winner} succeeded in getting ${finalResult.target} voted out!</p>
+      <p>The village also wins because ${finalResult.target} was a part of the mafia.</p>
+
+      ${renderOnlineProgressBox()}
+
+      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+
+    </div>
+  `)
+  return
+}
+
   if (finalResult.type === "executioner_win") {
     document.body.className = "win-executioner"
 
@@ -811,6 +851,44 @@ function renderOnlineGameOver() {
     `)
     return
   }
+
+  if (finalResult.type === "mafia_win") {
+  document.body.className = "win-mafia"
+
+  render(`
+    <div class="card role-mafia">
+
+      <h1 class="role-title">MAFIA WINS</h1>
+
+      <p>The mafia have taken control of the town.</p>
+
+      ${renderOnlineProgressBox()}
+
+      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+
+    </div>
+  `)
+  return
+}
+
+if (finalResult.type === "village_win") {
+  document.body.className = "win-village"
+
+  render(`
+    <div class="card role-doctor">
+
+      <h1 class="role-title">VILLAGE WINS</h1>
+
+      <p>The town has eliminated all mafia members.</p>
+
+      ${renderOnlineProgressBox()}
+
+      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+
+    </div>
+  `)
+  return
+}
 
   let title = "Game Over"
   let subtitle = "The game has ended."
