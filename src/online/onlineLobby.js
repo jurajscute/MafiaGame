@@ -7,6 +7,7 @@ import { roleColors, roleDisplayName } from "../core/gameData.js"
 import { roles } from "../core/roles.js"
 import { resolveOnlineVotes } from "../core/resolveOnlineVotes.js"
 import { resolveOnlineNight } from "../core/resolveOnlineNight.js"
+import { buildSharedRoleRevealScreen } from "../core/sharedScreens.js"
 
 let demoRoom = null
 let currentRoomCode = null
@@ -774,14 +775,14 @@ function renderOnlineGameOver() {
   const finalResult = demoRoom?.gameState?.finalResult || {}
   const players = demoRoom?.gameState?.players || []
 
-if (voteResults.resultType === "jester_executioner_win") {
+if (finalResult.type === "jester_executioner_win") {
   document.body.className = "win-jester-executioner"
 
   render(`
     <div class="card role-jester">
       <h1 class="role-title">JESTER & EXECUTIONER WIN</h1>
-      <p>${voteResults.eliminated} was voted out and wins as the Jester.</p>
-      <p>${voteResults.winner} also wins because ${voteResults.eliminated} was their target.</p>
+      <p>${finalResult.winner} was voted out and wins as the Jester.</p>
+      <p>${finalResult.executionerWinner} also wins because ${finalResult.winner} was their target.</p>
 
       ${renderOnlineProgressBox()}
 
@@ -791,14 +792,14 @@ if (voteResults.resultType === "jester_executioner_win") {
   return
 }
 
-if (voteResults.resultType === "village_executioner_win") {
+if (finalResult.type === "village_executioner_win") {
   document.body.className = "win-village-executioner"
 
   render(`
     <div class="card role-executioner">
       <h1 class="role-title">VILLAGE & EXECUTIONER WIN</h1>
-      <p>${voteResults.winner} succeeded in getting ${voteResults.eliminated} voted out!</p>
-      <p>The village also wins because ${voteResults.eliminated} was mafia.</p>
+      <p>${finalResult.winner} succeeded in getting ${finalResult.target} voted out!</p>
+      <p>The village also wins because ${finalResult.target} was a part of the mafia.</p>
 
       ${renderOnlineProgressBox()}
 
@@ -952,7 +953,6 @@ function renderOnlineRoleReveal() {
   const me = getOnlineMe()
   if (!me) return
 
-  const color = roleColors[me.role] || "white"
   const role = roles[me.role]
   let extraInfo = ""
 
@@ -968,58 +968,22 @@ function renderOnlineRoleReveal() {
     }
   }
 
-  render(`
-    <div class="card reveal-role-card role-${me.role}" style="--reveal-role-color:${color};">
-
-      <div class="reveal-role-topbar">
-        <div class="reveal-role-kicker">Online Role Reveal</div>
-        <div class="reveal-role-progress">
-          ${currentRoomCode}
-        </div>
-      </div>
-
-      <div class="reveal-role-header">
-        <div class="reveal-role-player">${me.name}</div>
-        <div class="reveal-role-hint">Examine your role!</div>
-      </div>
-
-      <div class="role-card reveal-role-flip" id="roleCard" onclick="window.flipOnlineRoleCard()">
-        <div class="role-inner">
-
-          <div class="role-front reveal-role-front">
-            <div class="reveal-role-front-shimmer"></div>
-            <div class="reveal-role-front-inner">
-              <div class="reveal-role-front-icon">✦</div>
-              <div class="reveal-role-front-label">Tap to reveal!</div>
-            </div>
-          </div>
-
-          <div class="role-back reveal-role-back" style="color:${color}">
-            <div class="reveal-role-back-inner">
-              <div class="reveal-role-back-kicker">Your Role</div>
-              <div class="reveal-role-name">${roleDisplayName(me.role)}</div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <div class="reveal-role-description-wrap">
-        <p class="role-description reveal-role-description">
-          ${role?.description || ""}
-        </p>
-      </div>
-
-      ${extraInfo ? `<div class="reveal-role-extra">${extraInfo}</div>` : ""}
-
-      ${renderOnlineProgressBox()}
-
-      <div class="reveal-role-actions">
+  render(
+    buildSharedRoleRevealScreen({
+      playerName: me.name,
+      role: me.role,
+      roleDescription: role?.description || "",
+      progressText: currentRoomCode,
+      hintText: "Tap the card to reveal",
+      extraInfoHTML: extraInfo,
+      continueButtonHTML: `
+        ${renderOnlineProgressBox()}
         ${renderOnlineProceedButton("Continue")}
-      </div>
-
-    </div>
-  `)
+      `,
+      flipped: false,
+      flipHandler: `id="roleCard" onclick="window.flipOnlineRoleCard()"`
+    })
+  )
 }
 
 window.submitNightAction = async function(type, target = null) {
@@ -1503,7 +1467,6 @@ const totalVoters = getOnlineAlivePlayers().length
             `
             : ""
         }
-      </div>
 
       <div class="voting-grid">
         ${buttons}
