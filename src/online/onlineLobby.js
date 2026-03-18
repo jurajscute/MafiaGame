@@ -1171,6 +1171,16 @@ function getActionType(role) {
   return "none"
 }
 
+function getOnlineNoResultText(role) {
+  const pool = roles[role]?.noResultTexts || []
+
+  if (!pool.length) {
+    return "The night passes in uneasy silence."
+  }
+
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
 function renderOnlineNightResults() {
   const me = getOnlineMe()
   if (!me) return
@@ -1232,13 +1242,13 @@ function renderOnlineNightResults() {
   }
 
   renderOnlineNightResultCard({
-    me,
-    hint: "Nothing special reached you tonight",
-    boxKicker: "Your Role",
-    title: roleDisplayName(me.role),
-    titleColor: roleColors[me.role] || "white",
-    bodyText: "No results tonight."
-  })
+  me,
+  hint: "Nothing special reached you tonight",
+  boxKicker: "Your Role",
+  title: roleDisplayName(me.role),
+  titleColor: roleColors[me.role] || "white",
+  bodyText: getOnlineNoResultText(me.role)
+})
 }
 
 function renderOnlineMorning() {
