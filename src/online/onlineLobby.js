@@ -37,18 +37,6 @@ function haveAllOnlinePlayersSeenFinalResults() {
   return players.length > 0 && players.every(player => seenMap[player.id])
 }
 
-window.advanceToOnlineFinalResults = async function () {
-  if (!currentRoomCode || !currentPlayerId) return
-
-  try {
-    await update(getOnlineRoomRef(), {
-      [`gameState/finalResultsSeen/${currentPlayerId}`]: true
-    })
-  } catch (error) {
-    console.error("Failed to advance to final results:", error)
-  }
-}
-
 function getOnlineRoomRef() {
   return ref(db, `rooms/${currentRoomCode}`)
 }
@@ -828,7 +816,7 @@ function renderOnlineProceedButton(label = "Continue") {
   }
 
   return `
-    <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
+    <button class="primary-btn" onclick="window.markOnlineReady()">
       ${label}
     </button>
   `
@@ -846,40 +834,35 @@ function getNextOnlinePhase(currentPhase) {
 }
 
 async function maybeAdvanceOnlinePhase() {
-
-if (gameState.phase === "game_over") {
-  if (haveAllOnlinePlayersSeenFinalResults()) {
-    // everyone has moved on personally; now they are all on final results
-  }
-  return
-}
-
-const allSeenFinalResults = haveAllOnlinePlayersSeenFinalResults()
-
-if (gameState.phase === "game_over" && allSeenFinalResults) {
-  const readyMap = gameState.readyMap || {}
-  const presence = demoRoom?.presence || {}
-  const playersForLobbyReturn = (gameState.players || []).filter(player => presence[player.id])
-
-  const everyoneReadyToReturn =
-    playersForLobbyReturn.length > 0 &&
-    playersForLobbyReturn.every(player => readyMap[player.id])
-
-  if (!everyoneReadyToReturn) return
-
-  await update(getOnlineRoomRef(), {
-    phase: "lobby",
-    gameState: null
-  })
-  return
-}
-
   if (!currentIsHost || !demoRoom?.gameState) return
+
   const gameState = demoRoom.gameState
   const presence = demoRoom?.presence || {}
-const alivePlayers = (gameState.players || []).filter(
-  player => player.alive !== false && presence[player.id]
-)
+
+  if (gameState.phase === "game_over") {
+    const allSeenFinalResults = haveAllOnlinePlayersSeenFinalResults()
+
+    if (!allSeenFinalResults) return
+
+    const readyMap = gameState.readyMap || {}
+    const playersForLobbyReturn = (gameState.players || []).filter(player => presence[player.id])
+
+    const everyoneReadyToReturn =
+      playersForLobbyReturn.length > 0 &&
+      playersForLobbyReturn.every(player => readyMap[player.id])
+
+    if (!everyoneReadyToReturn) return
+
+    await update(getOnlineRoomRef(), {
+      phase: "lobby",
+      gameState: null
+    })
+    return
+  }
+
+  const alivePlayers = (gameState.players || []).filter(
+    player => player.alive !== false && presence[player.id]
+  )
 
   let everyoneDone = false
 
@@ -922,32 +905,33 @@ const alivePlayers = (gameState.players || []).filter(
     }
 
     if (gameState.phase === "voting") {
-  const resolved = resolveOnlineVotes(gameState)
+      const resolved = resolveOnlineVotes(gameState)
 
-  await update(getOnlineRoomRef(), {
-    "gameState/players": resolved.players,
-    "gameState/voteResults": resolved.voteResults,
-    "gameState/finalResult": resolved.finalResult || null,
-    "gameState/phase": resolved.finalResult ? "game_over" : "vote_results",
-    "gameState/readyMap": {},
-    "gameState/votes": {}
-  })
+      await update(getOnlineRoomRef(), {
+        "gameState/players": resolved.players,
+        "gameState/voteResults": resolved.voteResults,
+        "gameState/finalResult": resolved.finalResult || null,
+        "gameState/phase": resolved.finalResult ? "game_over" : "vote_results",
+        "gameState/readyMap": {},
+        "gameState/votes": {},
+        "gameState/finalResultsSeen": {}
+      })
 
-  return
-}
+      return
+    }
 
     let nextPhase = gameState.phase
 
-if (gameState.phase === "role_reveal") nextPhase = "night_select"
-else if (gameState.phase === "night_results") nextPhase = "morning"
-else if (gameState.phase === "morning") nextPhase = "voting"
-else if (gameState.phase === "vote_results") {
-  if (gameState.finalResult) {
-    nextPhase = "game_over"
-  } else {
-    nextPhase = "night_select"
-  }
-}
+    if (gameState.phase === "role_reveal") nextPhase = "night_select"
+    else if (gameState.phase === "night_results") nextPhase = "morning"
+    else if (gameState.phase === "morning") nextPhase = "voting"
+    else if (gameState.phase === "vote_results") {
+      if (gameState.finalResult) {
+        nextPhase = "game_over"
+      } else {
+        nextPhase = "night_select"
+      }
+    }
 
     await update(getOnlineRoomRef(), {
       "gameState/phase": nextPhase,
@@ -967,6 +951,7 @@ function getOnlineScreenKey() {
   const me = getOnlineMe()
   const myVote = gameState.votes?.[currentPlayerId] || ""
   const myReady = gameState.readyMap?.[currentPlayerId] ? "ready" : "not_ready"
+  const mySeenFinalResults = gameState.finalResultsSeen?.[currentPlayerId] ? "seen" : "not_seen"
   const myAction = gameState.submittedActions?.[currentPlayerId]
     ? JSON.stringify(gameState.submittedActions[currentPlayerId])
     : ""
@@ -976,6 +961,7 @@ function getOnlineScreenKey() {
     meAlive: me?.alive,
     myVote,
     myReady,
+    mySeenFinalResults,
     myAction,
     voteResultType: gameState.voteResults?.resultType || "",
     finalResultType: gameState.finalResult?.type || "",
