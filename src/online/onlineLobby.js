@@ -9,7 +9,8 @@ import { resolveOnlineVotes } from "../core/resolveOnlineVotes.js"
 import { resolveOnlineNight } from "../core/resolveOnlineNight.js"
 import {
   buildSharedRoleRevealScreen,
-  buildSharedNightActionScreen
+  buildSharedNightActionScreen,
+  buildSharedNightResultScreen
 } from "../core/sharedScreens.js"
 
 let demoRoom = null
@@ -1038,7 +1039,6 @@ function renderOnlineNightActionCard({
 
 function renderOnlineNightResultCard({
   me,
-  kicker = "Night Results",
   hint = "Your night result",
   boxClass = "",
   boxKicker = "Result",
@@ -1047,53 +1047,21 @@ function renderOnlineNightResultCard({
   bodyText = "",
   continueLabel = "Continue"
 }) {
-  const color = roleColors[me.role] || "white"
-  const displayColor = titleColor || color
-
-  render(`
-    <div class="card reveal-role-card role-${me.role}" style="--reveal-role-color:${color};">
-
-      <div class="reveal-role-topbar">
-        <div class="reveal-role-kicker">${kicker}</div>
-        <div class="reveal-role-progress">${currentRoomCode}</div>
-      </div>
-
-      <div class="reveal-role-header">
-        <div class="reveal-role-player">${me.name}</div>
-        <div class="reveal-role-hint">${hint}</div>
-      </div>
-
-      <div class="night-action-role-box ${boxClass}">
-        <div class="night-action-role-kicker">${boxKicker}</div>
-
-        ${
-          title
-            ? `
-              <div class="night-action-role-name" style="
-                color:${displayColor};
-                text-shadow:
-                  0 0 10px ${displayColor},
-                  0 0 20px ${displayColor};
-              ">
-                ${title}
-              </div>
-            `
-            : ""
-        }
-
-        <p class="role-description">
-          ${bodyText}
-        </p>
-      </div>
-
-      ${renderOnlineProgressBox()}
-
-      <div class="reveal-role-actions">
-        ${renderOnlineProceedButton(continueLabel)}
-      </div>
-
-    </div>
-  `)
+  render(
+    buildSharedNightResultScreen({
+      playerName: me.name,
+      role: me.role,
+      progressText: currentRoomCode,
+      hintText: hint,
+      boxClass,
+      boxKicker,
+      title,
+      titleColor,
+      bodyText,
+      progressBoxHTML: renderOnlineProgressBox(),
+      continueButtonHTML: renderOnlineProceedButton(continueLabel)
+    })
+  )
 }
 
 function renderOnlineNightSelect() {

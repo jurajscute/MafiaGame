@@ -64,6 +64,68 @@ export function buildSharedRoleRevealScreen({
   `
 }
 
+export function buildSharedNightResultScreen({
+  playerName,
+  role,
+  progressText,
+  hintText,
+  boxClass = "",
+  boxKicker = "Result",
+  title = "",
+  titleColor = "",
+  bodyText = "",
+  progressBoxHTML = "",
+  continueButtonHTML = ""
+}) {
+  const color = roleColors[role] || "white"
+  const displayColor = titleColor || color
+
+  return `
+    <div class="card reveal-role-card role-${role}" style="--reveal-role-color:${color};">
+
+      <div class="reveal-role-topbar">
+        <div class="reveal-role-kicker">Night Results</div>
+        <div class="reveal-role-progress">${progressText}</div>
+      </div>
+
+      <div class="reveal-role-header">
+        <div class="reveal-role-player">${playerName}</div>
+        <div class="reveal-role-hint">${hintText}</div>
+      </div>
+
+      <div class="night-action-role-box ${boxClass}">
+        <div class="night-action-role-kicker">${boxKicker}</div>
+
+        ${
+          title
+            ? `
+              <div class="night-action-role-name" style="
+                color:${displayColor};
+                text-shadow:
+                  0 0 10px ${displayColor},
+                  0 0 20px ${displayColor};
+              ">
+                ${title}
+              </div>
+            `
+            : ""
+        }
+
+        <p class="role-description">
+          ${bodyText}
+        </p>
+      </div>
+
+      ${progressBoxHTML}
+
+      <div class="reveal-role-actions">
+        ${continueButtonHTML}
+      </div>
+
+    </div>
+  `
+}
+
 export function buildSharedNightActionScreen({
   playerName,
   role,
