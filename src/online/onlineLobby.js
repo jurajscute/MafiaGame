@@ -51,6 +51,32 @@ window.advanceOnlineMorning = async function () {
   }
 }
 
+function renderOnlineVoteProgressBox() {
+  const votes = demoRoom?.gameState?.votes || {}
+  const voteCount = Object.keys(votes).length
+  const totalVoters = getOnlineAlivePlayers().length
+  const percent = totalVoters > 0 ? (voteCount / totalVoters) * 100 : 0
+
+  return `
+    <div class="player-status-box online-progress-box" style="margin-top:16px;">
+      <h3>Phase Progress</h3>
+
+      <div class="status-row">
+        <span>Votes Cast</span>
+        <span id="onlineVoteCount">${voteCount} / ${totalVoters}</span>
+      </div>
+
+      <div class="online-progress-track">
+        <div
+          id="onlineVoteBar"
+          class="online-progress-fill"
+          style="width:${percent}%"
+        ></div>
+      </div>
+    </div>
+  `
+}
+
 function hasOnlinePlayerSeenFinalResults() {
   return !!demoRoom?.gameState?.finalResultsSeen?.[currentPlayerId]
 }
@@ -121,6 +147,18 @@ window.submitOnlineVote = async function(targetName) {
     console.warn("Player is dead or missing")
     return
   }
+
+  const phase = demoRoom?.gameState?.phase
+
+if (phase !== "morning" && phase !== "voting") {
+  console.warn("Voting is not available right now")
+  return
+}
+
+if (phase === "morning" && !hasOnlinePlayerSeenMorning()) {
+  console.warn("Player has not advanced past morning yet")
+  return
+}
 
   try {
     await update(ref(db, `rooms/${currentRoomCode}/gameState`), {
@@ -571,28 +609,35 @@ function subscribeToRoom(roomCode) {
 
 function patchOnlineProgressBox() {
   const readyEl = document.getElementById("onlineReadyCount")
-  const barEl = document.getElementById("onlineReadyBar")
+  const readyBarEl = document.getElementById("onlineReadyBar")
 
   if (readyEl) {
     const includeDead = readyEl.dataset.includeDead === "true"
-    const mapName = readyEl.dataset.mapName || "readyMap"
-    const readyCount = getOnlineReadyCount(includeDead, mapName)
+    const readyCount = getOnlineReadyCount(includeDead)
     const requiredCount = getOnlineRequiredReadyCount(includeDead)
 
     readyEl.textContent = `${readyCount} / ${requiredCount}`
 
-    if (barEl) {
+    if (readyBarEl) {
       const percent = requiredCount > 0 ? (readyCount / requiredCount) * 100 : 0
-      barEl.style.width = `${percent}%`
+      readyBarEl.style.width = `${percent}%`
     }
   }
 
   const voteEl = document.getElementById("onlineVoteCount")
+  const voteBarEl = document.getElementById("onlineVoteBar")
+
   if (voteEl) {
     const votes = demoRoom?.gameState?.votes || {}
     const voteCount = Object.keys(votes).length
     const totalVoters = getOnlineAlivePlayers().length
-    voteEl.textContent = `${voteCount} / ${totalVoters} players have voted`
+
+    voteEl.textContent = `${voteCount} / ${totalVoters}`
+
+    if (voteBarEl) {
+      const percent = totalVoters > 0 ? (voteCount / totalVoters) * 100 : 0
+      voteBarEl.style.width = `${percent}%`
+    }
   }
 }
 
@@ -958,18 +1003,21 @@ async function maybeAdvanceOnlinePhase() {
   everyoneDone =
     alivePlayers.length > 0 &&
     alivePlayers.every(player => actions[player.id])
+
+} else if (gameState.phase === "morning") {
+  const votes = gameState.votes || {}
+
+  everyoneDone =
+    alivePlayers.length > 0 &&
+    alivePlayers.every(player => votes[player.id])
+
 } else if (gameState.phase === "voting") {
   const votes = gameState.votes || {}
 
   everyoneDone =
     alivePlayers.length > 0 &&
     alivePlayers.every(player => votes[player.id])
-} else if (gameState.phase === "morning") {
-  const morningSeen = gameState.morningSeen || {}
 
-  everyoneDone =
-    alivePlayers.length > 0 &&
-    alivePlayers.every(player => morningSeen[player.id])
 } else {
   const readyMap = gameState.readyMap || {}
 
@@ -998,23 +1046,23 @@ async function maybeAdvanceOnlinePhase() {
       return
     }
 
-    if (gameState.phase === "voting") {
-      const resolved = resolveOnlineVotes(gameState)
+    if (gameState.phase === "morning" || gameState.phase === "voting") {
+  const resolved = resolveOnlineVotes(gameState)
 
-      await update(getOnlineRoomRef(), {
-  "gameState/players": resolved.players,
-  "gameState/voteResults": resolved.voteResults,
-  "gameState/finalResult": resolved.finalResult || null,
-  "gameState/gameLog": resolved.gameLog,
-  "gameState/gameStats": resolved.gameStats,
-  "gameState/phase": resolved.finalResult ? "game_over" : "vote_results",
-  "gameState/readyMap": {},
-  "gameState/votes": {},
-  "gameState/finalResultsSeen": {}
-})
+  await update(getOnlineRoomRef(), {
+    "gameState/players": resolved.players,
+    "gameState/voteResults": resolved.voteResults,
+    "gameState/finalResult": resolved.finalResult || null,
+    "gameState/gameLog": resolved.gameLog,
+    "gameState/gameStats": resolved.gameStats,
+    "gameState/phase": resolved.finalResult ? "game_over" : "vote_results",
+    "gameState/readyMap": {},
+    "gameState/votes": {},
+    "gameState/finalResultsSeen": {}
+  })
 
-      return
-    }
+  return
+}
 
     let nextPhase = gameState.phase
 
@@ -1053,7 +1101,7 @@ function getOnlineScreenKey() {
   const me = getOnlineMe()
   const myVote = gameState.votes?.[currentPlayerId] || ""
   const myReady = gameState.readyMap?.[currentPlayerId] ? "ready" : "not_ready"
-  const mySeenFinalResults = gameState.finalResultsSeen?.[currentPlayerId] ? "seen" : "not_seen"
+  const myMorningSeen = gameState.morningSeen?.[currentPlayerId] ? "seen" : "not_seen"
   const myAction = gameState.submittedActions?.[currentPlayerId]
     ? JSON.stringify(gameState.submittedActions[currentPlayerId])
     : ""
@@ -1063,7 +1111,7 @@ function getOnlineScreenKey() {
     meAlive: me?.alive,
     myVote,
     myReady,
-    mySeenFinalResults,
+    myMorningSeen,
     myAction,
     voteResultType: gameState.voteResults?.resultType || "",
     finalResultType: gameState.finalResult?.type || "",
@@ -1120,14 +1168,18 @@ const leaveButtonHTML = `
   }
 
   if (gameState.phase === "morning") {
-    renderOnlineMorning()
-    return
-  }
-
-  if (gameState.phase === "voting") {
+  if (hasOnlinePlayerSeenMorning()) {
     renderOnlineVoting()
-    return
+  } else {
+    renderOnlineMorning()
   }
+  return
+}
+
+if (gameState.phase === "voting") {
+  renderOnlineVoting()
+  return
+}
 
   if (gameState.phase === "vote_results") {
     renderOnlineVoteResults()
@@ -1850,27 +1902,23 @@ function renderOnlineMorning() {
   }
 
   render(
-    buildSharedMorningScreen({
-      resultsHTML,
-      playersHTML,
-      progressBoxHTML: renderOnlineProgressBox({
-  label: "Players Ready",
-  mapName: "morningSeen"
-}),
-      progressBoxHTML: renderOnlineProgressBox(),
-      continueButtonHTML: hasOnlinePlayerSeenMorning()
-  ? `
-      <button class="skip-btn" disabled>
-        Waiting For Other Players
-      </button>
-    `
-  : `
-      <button class="morning-btn" onclick="window.advanceOnlineMorning()">
-        Continue
-      </button>
-    `
-    })
-  )
+  buildSharedMorningScreen({
+    resultsHTML,
+    playersHTML,
+    progressBoxHTML: renderOnlineVoteProgressBox(),
+    continueButtonHTML: hasOnlinePlayerSeenMorning()
+      ? `
+          <button class="primary-btn" disabled>
+            Waiting For Your Vote
+          </button>
+        `
+      : `
+          <button class="primary-btn" onclick="window.advanceOnlineMorning()">
+            Continue
+          </button>
+        `
+  })
+)
 }
 
 function renderOnlineVoting() {
@@ -1961,7 +2009,7 @@ const totalVoters = getOnlineAlivePlayers().length
         ${playersHTML}
       </div>
 
-      ${renderOnlineProgressBox()}
+      ${renderOnlineVoteProgressBox()}
 
     </div>
   `)
