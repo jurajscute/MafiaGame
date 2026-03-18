@@ -975,20 +975,6 @@ if (finalResult.type === "village_executioner_win") {
   `)
 }
 
-  const playersHTML = players.map(player => `
-    <div class="final-player-card" style="--final-role-color:${roleColors[player.role] || "white"};">
-      <div class="final-player-main">
-        <div class="final-player-name">${player.name}</div>
-        <div class="final-player-role" style="color:${roleColors[player.role] || "white"}">
-          ${roleDisplayName(player.role)}
-        </div>
-      </div>
-    </div>
-  `).join("")
-
-  document.body.className = bodyClass
-}
-
 window.flipOnlineRoleCard = function() {
   const card = document.getElementById("roleCard")
   if (card) {
