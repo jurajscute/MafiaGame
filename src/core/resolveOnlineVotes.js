@@ -18,7 +18,16 @@ export function resolveOnlineVotes(gameState) {
       voteCounts[targetName] = 0
     }
 
-    voteCounts[targetName] += 1
+    const voter = players.find(p => p.id === player.id)
+
+let votePower = 1
+
+if (voter?.role === "mayor" && voter.alive !== false) {
+  votePower = 2
+}
+
+voteCounts[targetName] += votePower
+
   })
 
   for (const [name, count] of Object.entries(voteCounts)) {
@@ -38,13 +47,58 @@ export function resolveOnlineVotes(gameState) {
     resultType = tie ? "tie" : "skip"
   } else {
     const player = players.find(p => p.name === eliminated)
+    const eliminatedRole = player?.role || null
     if (player) {
-      player.alive = false
-      resultType = "elimination"
+  player.alive = false
+  resultType = "elimination"
+
+  // 🎭 JESTER WIN
+  if (player.role === "jester") {
+    return {
+      players,
+      voteResults: {
+        voteCounts,
+        eliminated,
+        resultType: "jester_win"
+      }
+    }
+  }
+
+  // 🎯 EXECUTIONER WIN
+  const executioner = players.find(p =>
+    p.role === "executioner" &&
+    p.alive !== false &&
+    gameState.executionerTargets?.[p.name] === eliminated
+  )
+
+  if (executioner) {
+    return {
+      players,
+      voteResults: {
+        voteCounts,
+        eliminated,
+        resultType: "executioner_win",
+        winner: executioner.name
+      }
+    }
+  }
+}
     } else {
       eliminated = null
       resultType = "none"
     }
+
+    const revealSetting = gameState?.settings?.revealRolesOnElimination || "none"
+
+let revealedRole = null
+
+if (
+  revealSetting === "vote_only" ||
+  revealSetting === "death_and_vote"
+) {
+  revealedRole = player.role
+}
+
   }
 
   return {
