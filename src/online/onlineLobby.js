@@ -1187,53 +1187,22 @@ function renderOnlineNightResults() {
     result => result.playerId === currentPlayerId
   )
 
-  const roleColor = roleColors[me.role] || "white"
-  const alivePlayers = getOnlineAlivePlayers()
-  const currentNightPlayerNumber =
-    alivePlayers.findIndex(player => player.id === me.id) + 1
+  const color = roleColors[me.role] || "white"
 
-  function renderNightResultCard({
-    roleClass = "",
-    kicker = "Night Results",
-    title = me.name,
-    subtitle = "What happened to you tonight",
-    bodyHTML = "",
-    buttonText = "Continue"
-  }) {
+  if (myResult?.type === "investigate") {
     render(`
-      <div class="card reveal-role-card ${roleClass ? `role-${roleClass}` : ""}">
+      <div class="card reveal-role-card role-sheriff" style="--reveal-role-color:${roleColors.sheriff};">
 
         <div class="reveal-role-topbar">
-          <div class="reveal-role-kicker">${kicker}</div>
-          <div class="reveal-role-progress">
-            ${currentNightPlayerNumber > 0 ? `${currentNightPlayerNumber} / ${alivePlayers.length}` : demoRoom?.code || ""}
-          </div>
+          <div class="reveal-role-kicker">Night Results</div>
+          <div class="reveal-role-progress">${currentRoomCode}</div>
         </div>
 
         <div class="reveal-role-header">
-          <div class="reveal-role-player">${title}</div>
-          <div class="reveal-role-hint">${subtitle}</div>
+          <div class="reveal-role-player">${me.name}</div>
+          <div class="reveal-role-hint">Your investigation is complete</div>
         </div>
 
-        ${bodyHTML}
-
-        ${renderOnlineProgressBox()}
-
-        <div class="reveal-role-actions">
-          ${renderOnlineProceedButton(buttonText)}
-        </div>
-
-      </div>
-    `)
-  }
-
-  if (myResult && myResult.type === "investigate") {
-    renderNightResultCard({
-      roleClass: "sheriff",
-      kicker: "Night Results",
-      title: me.name,
-      subtitle: "Your investigation is complete",
-      bodyHTML: `
         <div class="night-action-role-box sheriff-result-box">
           <div class="night-action-role-kicker">Investigation Result</div>
           <div class="night-result-line">${myResult.targetName} is</div>
@@ -1246,18 +1215,32 @@ function renderOnlineNightResults() {
             ${myResult.result}
           </div>
         </div>
-      `
-    })
+
+        ${renderOnlineProgressBox()}
+
+        <div class="reveal-role-actions">
+          ${renderOnlineProceedButton("Continue")}
+        </div>
+
+      </div>
+    `)
     return
   }
 
-  if (myResult && myResult.type === "doctor_save_success") {
-    renderNightResultCard({
-      roleClass: "doctor",
-      kicker: "Night Results",
-      title: me.name,
-      subtitle: "You saved someone tonight",
-      bodyHTML: `
+  if (myResult?.type === "doctor_save_success") {
+    render(`
+      <div class="card reveal-role-card role-doctor" style="--reveal-role-color:${roleColors.doctor};">
+
+        <div class="reveal-role-topbar">
+          <div class="reveal-role-kicker">Night Results</div>
+          <div class="reveal-role-progress">${currentRoomCode}</div>
+        </div>
+
+        <div class="reveal-role-header">
+          <div class="reveal-role-player">${me.name}</div>
+          <div class="reveal-role-hint">You saved someone tonight</div>
+        </div>
+
         <div class="night-action-role-box doctor-result-box">
           <div class="night-action-role-kicker">Save Successful</div>
           <p class="role-description">You successfully saved your patient!</p>
@@ -1268,21 +1251,35 @@ function renderOnlineNightResults() {
               0 0 10px ${roleColors.doctor},
               0 0 20px ${roleColors.doctor};
           ">
-            ${(myResult.targetName || "UNKNOWN").toUpperCase()}
+            ${myResult.targetName.toUpperCase()}
           </div>
         </div>
-      `
-    })
+
+        ${renderOnlineProgressBox()}
+
+        <div class="reveal-role-actions">
+          ${renderOnlineProceedButton("Continue")}
+        </div>
+
+      </div>
+    `)
     return
   }
 
-  if (myResult && myResult.type === "framer_success") {
-    renderNightResultCard({
-      roleClass: "framer",
-      kicker: "Night Results",
-      title: me.name,
-      subtitle: "Your deception worked",
-      bodyHTML: `
+  if (myResult?.type === "framer_success") {
+    render(`
+      <div class="card reveal-role-card role-framer" style="--reveal-role-color:${roleColors.framer};">
+
+        <div class="reveal-role-topbar">
+          <div class="reveal-role-kicker">Night Results</div>
+          <div class="reveal-role-progress">${currentRoomCode}</div>
+        </div>
+
+        <div class="reveal-role-header">
+          <div class="reveal-role-player">${me.name}</div>
+          <div class="reveal-role-hint">Your deception worked</div>
+        </div>
+
         <div class="night-action-role-box framer-result-box">
           <div class="night-action-role-kicker">Framed Successfully</div>
           <p class="role-description">You successfully framed</p>
@@ -1293,78 +1290,56 @@ function renderOnlineNightResults() {
               0 0 10px ${roleColors.framer},
               0 0 20px ${roleColors.framer};
           ">
-            ${(myResult.targetName || "UNKNOWN").toUpperCase()}
+            ${myResult.targetName.toUpperCase()}
           </div>
         </div>
-      `
-    })
+
+        ${renderOnlineProgressBox()}
+
+        <div class="reveal-role-actions">
+          ${renderOnlineProceedButton("Continue")}
+        </div>
+
+      </div>
+    `)
     return
   }
 
-  if (myResult && myResult.type === "vigilante_outcome") {
-    renderNightResultCard({
-      roleClass: "vigilante",
-      kicker: "Night Results",
-      title: me.name,
-      subtitle: "You carried out your attack",
-      bodyHTML: `
-        <div class="night-action-role-box vigilante-result-box">
-          <div class="night-action-role-kicker">Vigilante Outcome</div>
+  render(`
+    <div class="card reveal-role-card role-${me.role}" style="--reveal-role-color:${color};">
 
-          <p class="role-description">You headed to slash <strong>${myResult.targetName}</strong>.</p>
+      <div class="reveal-role-topbar">
+        <div class="reveal-role-kicker">Night Results</div>
+        <div class="reveal-role-progress">${currentRoomCode}</div>
+      </div>
 
-          <div class="night-result-panel">
-            <p class="role-description">
-              ${
-                myResult.blocked
-                  ? "But the Doctor protected them. Your attack failed."
-                  : !myResult.targetDied && !myResult.vigilanteDies
-                    ? "But when you got there, they were already dead."
-                    : myResult.wrongTarget
-                      ? myResult.vigilanteDies && myResult.targetDied
-                        ? `${myResult.targetName} was innocent. You die from the guilt, and both of you perish.`
-                        : myResult.vigilanteDies && !myResult.targetDied
-                          ? `${myResult.targetName} was innocent. You cannot live with your choice.`
-                          : !myResult.vigilanteDies && myResult.targetDied
-                            ? `${myResult.targetName} was innocent. You survive, but the guilt lingers...`
-                            : "You attacked the wrong person."
-                      : `${myResult.targetName} was guilty, and justice was served.`
-              }
-            </p>
-          </div>
-        </div>
-      `
-    })
-    return
-  }
+      <div class="reveal-role-header">
+        <div class="reveal-role-player">${me.name}</div>
+        <div class="reveal-role-hint">Nothing special reached you tonight</div>
+      </div>
 
-  let noResultText = "Nothing special reached you tonight."
-
-  if (demoRoom?.gameState?.nightDeaths?.includes(me.name)) {
-    noResultText = "You had a terrifying nightmare, you have a bad feeling about tonight..."
-  }
-
-  renderNightResultCard({
-    roleClass: me.role,
-    kicker: "Night Results",
-    title: me.name,
-    subtitle: "Nothing special reached you tonight",
-    bodyHTML: `
       <div class="night-action-role-box">
         <div class="night-action-role-kicker">Your Role</div>
         <div class="night-action-role-name" style="
-          color:${roleColor};
-          text-shadow:0 0 10px ${roleColor};
+          color:${color};
+          text-shadow:0 0 10px ${color};
         ">
           ${roleDisplayName(me.role)}
         </div>
 
         <p class="role-description">
-          ${noResultText}
+          No results tonight.
         </p>
       </div>
-    `
-  })
+
+      ${renderOnlineProgressBox()}
+
+      <div class="reveal-role-actions">
+        ${renderOnlineProceedButton("Continue")}
+      </div>
+
+    </div>
+  `)
 }
 
 function renderOnlineMorning() {
