@@ -2308,14 +2308,14 @@ function resolveNightSelections(){
     if(state.doctorRevealSave){
       addLogEntry(`${killTarget} was saved by the Doctor.`)
     }else{
-      addLogEntry(`Someone was attacked but survived the night.`)
+      addLogEntry(`Someone was attacked, but someone saved them.`)
     }
 
     publicResults.push({
       type: "save",
       text: state.doctorRevealSave
         ? `${killTarget} was saved by the Doctor!`
-        : "Someone was attacked but survived the night."
+        : "Someone was attacked, but someone saved them."
     })
 
   }else if(killTarget){
@@ -2351,7 +2351,7 @@ function resolveNightSelections(){
         privateResults
       )
     }else{
-      addLogEntry(`${killTarget} was killed during the night.`)
+      addLogEntry(`${killTarget} was found dead in the morning.`)
 
       if(victim && victim.alive){
         victim.alive = false
@@ -2362,7 +2362,7 @@ function resolveNightSelections(){
 
 convertExecutionerAfterTargetDeath(victim.name, privateResults)
 
-        let deathText = `${killTarget} was killed during the night.`
+        let deathText = `${killTarget} was found dead in the morning.`
 
         if(shouldRevealOnNightDeath()){
           deathText += `<br>${revealedRoleText(victim)}`

@@ -1345,21 +1345,36 @@ function renderOnlineNightResults() {
 function renderOnlineMorning() {
   const publicResults = demoRoom?.gameState?.nightResolved?.publicResults || []
 
-  const playersHTML = (demoRoom?.gameState?.players || []).map(player => {
+  const players = demoRoom?.gameState?.players || []
+
+  const playersHTML = players.map(player => `
+    <div class="status-row ${player.alive !== false ? "alive" : "dead"}">
+      <span>${player.name}</span>
+      <span>${player.alive !== false ? "Alive" : "Dead ☠"}</span>
+    </div>
+  `).join("")
+
+  const resultsHTML = publicResults.map(result => {
+    let extraClass = "night-result-peace"
+
+    if (result.type === "death") extraClass = "night-result-death"
+    if (result.type === "save") extraClass = "night-result-save"
+
     return `
-      <div class="status-row ${player.alive !== false ? "alive" : "dead"}">
-        <span>${player.name}</span>
-        <span>${player.alive !== false ? "Alive" : "Dead ☠"}</span>
+      <div class="morning-result-card ${extraClass}">
+        <div class="morning-result-kicker">
+          ${
+            result.type === "death" ? "Elimination" :
+            result.type === "save" ? "Survival" :
+            "Night"
+          }
+        </div>
+        <div class="morning-result-text">
+          ${result.text}
+        </div>
       </div>
     `
   }).join("")
-
-  const resultsHTML = publicResults.map(result => `
-    <div class="morning-result-card night-result-${result.type}">
-      <div class="morning-result-kicker">Night Event</div>
-      <div class="morning-result-text">${result.text}</div>
-    </div>
-  `).join("")
 
   render(`
     <div class="card morning-card">
@@ -1368,7 +1383,7 @@ function renderOnlineMorning() {
         <div class="morning-kicker">Daybreak</div>
         <h2 class="morning-title">Morning</h2>
         <div class="morning-subtitle">
-          The town wakes up to learn what happened during the night.
+          The town wakes to see what the night has brought.
         </div>
       </div>
 

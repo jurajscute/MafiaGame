@@ -84,7 +84,7 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
       if (savedTargets.includes(target.name)) {
         publicResults.push({
           type: "save",
-          text: `${target.name} was attacked but survived the night.`
+          text: `${target.name} was attacked, but someone saved them.`
         })
 
         saves.forEach(action => {
@@ -104,7 +104,7 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
 
         publicResults.push({
           type: "death",
-          text: `${target.name} was killed during the night.`
+          text: `${target.name} was found dead in the morning.`
         })
       }
     }
