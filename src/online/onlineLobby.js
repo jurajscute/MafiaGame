@@ -2,9 +2,9 @@ import { render } from "../local/ui.js"
 import { createRoom, createRoomPlayer } from "../core/onlineRoom.js"
 import { buildOnlineGameState } from "../core/buildOnlineGameState.js"
 import { db } from "./firebase.js"
-import { ref, set, get, child, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"
 import { roleColors, roleDisplayName } from "../core/gameData.js"
 import { roles } from "../core/roles.js"
+import { ref, set, get, child, onValue, update, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"
 import { resolveOnlineVotes } from "../core/resolveOnlineVotes.js"
 import { resolveOnlineNight } from "../core/resolveOnlineNight.js"
 import {
@@ -31,6 +31,13 @@ function getMySubmittedAction() {
 
 function getOnlineSettings() {
   return demoRoom?.settings || null
+}
+
+async function registerPresence(roomCode, playerId) {
+  const presenceRef = ref(db, `rooms/${roomCode}/presence/${playerId}`)
+
+  await set(presenceRef, true)
+  onDisconnect(presenceRef).remove()
 }
 
 window.submitOnlineVote = async function(targetName) {
@@ -410,9 +417,40 @@ function subscribeToRoom(roomCode) {
 
   onValue(roomRef, async (snapshot) => {
     demoRoom = snapshot.val()
-    if (demoRoom?.hostId && currentPlayerId) {
-  currentIsHost = demoRoom.hostId === currentPlayerId
-}
+
+        if (demoRoom?.hostId && currentPlayerId) {
+      currentIsHost = demoRoom.hostId === currentPlayerId
+    }
+
+    if (demoRoom && currentIsHost) {
+      const players = demoRoom.players || []
+      const presence = demoRoom.presence || {}
+
+      const connectedPlayers = players.filter(player => presence[player.id])
+      const disconnectedPlayers = players.filter(player => !presence[player.id])
+
+      if (disconnectedPlayers.length > 0) {
+        const updates = {
+          players: connectedPlayers
+        }
+
+        if (demoRoom.hostId && !presence[demoRoom.hostId]) {
+          const nextHost = connectedPlayers[0] || null
+          updates.hostId = nextHost ? nextHost.id : null
+          updates.hostName = nextHost ? nextHost.name : null
+
+          if (nextHost) {
+            updates.players = connectedPlayers.map(player => ({
+              ...player,
+              isHost: player.id === nextHost.id
+            }))
+          }
+        }
+
+        await update(roomRef, updates)
+        return
+      }
+    }
 
     if (!demoRoom) {
       render(`
@@ -479,8 +517,11 @@ window.confirmCreateOnlineRoom = async function () {
   room.players.push(hostPlayer)
   room.hostId = hostPlayer.id
 
+  rooms/${code}/presence/${playerId} = true
+
   try {
     await set(ref(db, `rooms/${roomCode}`), room)
+    await registerPresence(roomCode, hostPlayerId)
 
     currentRoomCode = roomCode
     currentPlayerId = hostPlayerId
@@ -560,6 +601,8 @@ window.leaveOnlineRoom = async function () {
 
     await update(roomRef, updates)
 
+await remove(ref(db, `rooms/${currentRoomCode}/presence/${currentPlayerId}`))
+
     currentRoomCode = null
     currentPlayerId = null
     currentIsHost = false
@@ -617,11 +660,15 @@ window.fakeJoinRoom = async function () {
       isHost: false
     })
 
+    rooms/${code}/presence/${playerId} = true
+
     const updatedPlayers = [...players, newPlayer]
 
     await update(ref(db, `rooms/${code}`), {
       players: updatedPlayers
     })
+
+    await registerPresence(code, newPlayerId)
 
     currentRoomCode = code
     currentPlayerId = newPlayerId
