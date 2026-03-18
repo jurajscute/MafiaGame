@@ -1111,6 +1111,66 @@ function renderOnlineNightActionCard({
   `)
 }
 
+function renderOnlineNightResultCard({
+  me,
+  kicker = "Night Results",
+  hint = "Your night result",
+  boxClass = "",
+  boxKicker = "Result",
+  title = "",
+  titleColor = "",
+  bodyText = "",
+  continueLabel = "Continue"
+}) {
+  const color = roleColors[me.role] || "white"
+  const displayColor = titleColor || color
+
+  render(`
+    <div class="card reveal-role-card role-${me.role}" style="--reveal-role-color:${color};">
+
+      <div class="reveal-role-topbar">
+        <div class="reveal-role-kicker">${kicker}</div>
+        <div class="reveal-role-progress">${currentRoomCode}</div>
+      </div>
+
+      <div class="reveal-role-header">
+        <div class="reveal-role-player">${me.name}</div>
+        <div class="reveal-role-hint">${hint}</div>
+      </div>
+
+      <div class="night-action-role-box ${boxClass}">
+        <div class="night-action-role-kicker">${boxKicker}</div>
+
+        ${
+          title
+            ? `
+              <div class="night-action-role-name" style="
+                color:${displayColor};
+                text-shadow:
+                  0 0 10px ${displayColor},
+                  0 0 20px ${displayColor};
+              ">
+                ${title}
+              </div>
+            `
+            : ""
+        }
+
+        <p class="role-description">
+          ${bodyText}
+        </p>
+      </div>
+
+      ${renderOnlineProgressBox()}
+
+      <div class="reveal-role-actions">
+        ${renderOnlineProceedButton(continueLabel)}
+      </div>
+
+    </div>
+  `)
+}
+
 function renderOnlineNightSelect() {
   const me = getOnlineMe()
   if (!me) return
@@ -1226,159 +1286,66 @@ function renderOnlineNightResults() {
     result => result.playerId === currentPlayerId
   )
 
-  const color = roleColors[me.role] || "white"
-
   if (myResult?.type === "investigate") {
-    render(`
-      <div class="card reveal-role-card role-sheriff" style="--reveal-role-color:${roleColors.sheriff};">
-
-        <div class="reveal-role-topbar">
-          <div class="reveal-role-kicker">Night Results</div>
-          <div class="reveal-role-progress">${currentRoomCode}</div>
-        </div>
-
-        <div class="reveal-role-header">
-          <div class="reveal-role-player">${me.name}</div>
-          <div class="reveal-role-hint">Your investigation is complete</div>
-        </div>
-
-        <div class="night-action-role-box sheriff-result-box">
-          <div class="night-action-role-kicker">Investigation Result</div>
-          <div class="night-result-line">${myResult.targetName} is</div>
-          <div class="night-action-role-name" style="
-            color:${myResult.resultColor};
-            text-shadow:
-              0 0 10px ${myResult.resultColor},
-              0 0 20px ${myResult.resultColor};
-          ">
-            ${myResult.result}
-          </div>
-        </div>
-
-        ${renderOnlineProgressBox()}
-
-        <div class="reveal-role-actions">
-          ${renderOnlineProceedButton("Continue")}
-        </div>
-
-      </div>
-    `)
+    renderOnlineNightResultCard({
+      me,
+      hint: "Your investigation is complete",
+      boxClass: "sheriff-result-box",
+      boxKicker: "Investigation Result",
+      title: myResult.result || "UNKNOWN",
+      titleColor: myResult.resultColor || roleColors.sheriff,
+      bodyText: `${myResult.targetName} is your result tonight.`
+    })
     return
   }
 
   if (myResult?.type === "doctor_save_success") {
-    render(`
-      <div class="card reveal-role-card role-doctor" style="--reveal-role-color:${roleColors.doctor};">
-
-        <div class="reveal-role-topbar">
-          <div class="reveal-role-kicker">Night Results</div>
-          <div class="reveal-role-progress">${currentRoomCode}</div>
-        </div>
-
-        <div class="reveal-role-header">
-          <div class="reveal-role-player">${me.name}</div>
-          <div class="reveal-role-hint">You saved someone tonight</div>
-        </div>
-
-        <div class="night-action-role-box doctor-result-box">
-          <div class="night-action-role-kicker">Save Successful</div>
-          <p class="role-description">You successfully saved your patient!</p>
-
-          <div class="night-action-role-name" style="
-            color:${roleColors.doctor};
-            text-shadow:
-              0 0 10px ${roleColors.doctor},
-              0 0 20px ${roleColors.doctor};
-          ">
-            ${myResult.targetName.toUpperCase()}
-          </div>
-        </div>
-
-        ${renderOnlineProgressBox()}
-
-        <div class="reveal-role-actions">
-          ${renderOnlineProceedButton("Continue")}
-        </div>
-
-      </div>
-    `)
+    renderOnlineNightResultCard({
+      me,
+      hint: "You saved someone tonight",
+      boxClass: "doctor-result-box",
+      boxKicker: "Save Successful",
+      title: (myResult.targetName || "Unknown").toUpperCase(),
+      titleColor: roleColors.doctor,
+      bodyText: "You successfully saved your patient."
+    })
     return
   }
 
   if (myResult?.type === "framer_success") {
-    render(`
-      <div class="card reveal-role-card role-framer" style="--reveal-role-color:${roleColors.framer};">
-
-        <div class="reveal-role-topbar">
-          <div class="reveal-role-kicker">Night Results</div>
-          <div class="reveal-role-progress">${currentRoomCode}</div>
-        </div>
-
-        <div class="reveal-role-header">
-          <div class="reveal-role-player">${me.name}</div>
-          <div class="reveal-role-hint">Your deception worked</div>
-        </div>
-
-        <div class="night-action-role-box framer-result-box">
-          <div class="night-action-role-kicker">Framed Successfully</div>
-          <p class="role-description">You successfully framed</p>
-
-          <div class="night-action-role-name" style="
-            color:${roleColors.framer};
-            text-shadow:
-              0 0 10px ${roleColors.framer},
-              0 0 20px ${roleColors.framer};
-          ">
-            ${myResult.targetName.toUpperCase()}
-          </div>
-        </div>
-
-        ${renderOnlineProgressBox()}
-
-        <div class="reveal-role-actions">
-          ${renderOnlineProceedButton("Continue")}
-        </div>
-
-      </div>
-    `)
+    renderOnlineNightResultCard({
+      me,
+      hint: "Your deception worked",
+      boxClass: "framer-result-box",
+      boxKicker: "Framed Successfully",
+      title: (myResult.targetName || "Unknown").toUpperCase(),
+      titleColor: roleColors.framer,
+      bodyText: "You successfully framed your target."
+    })
     return
   }
 
-  render(`
-    <div class="card reveal-role-card role-${me.role}" style="--reveal-role-color:${color};">
+  if (myResult?.type === "vigilante_result") {
+    renderOnlineNightResultCard({
+      me,
+      hint: "Your action is complete",
+      boxClass: "vigilante-result-box",
+      boxKicker: "Vigilante Result",
+      title: myResult.title || "ACTION COMPLETE",
+      titleColor: roleColors.vigilante,
+      bodyText: myResult.text || "Your choice has been resolved."
+    })
+    return
+  }
 
-      <div class="reveal-role-topbar">
-        <div class="reveal-role-kicker">Night Results</div>
-        <div class="reveal-role-progress">${currentRoomCode}</div>
-      </div>
-
-      <div class="reveal-role-header">
-        <div class="reveal-role-player">${me.name}</div>
-        <div class="reveal-role-hint">Nothing special reached you tonight</div>
-      </div>
-
-      <div class="night-action-role-box">
-        <div class="night-action-role-kicker">Your Role</div>
-        <div class="night-action-role-name" style="
-          color:${color};
-          text-shadow:0 0 10px ${color};
-        ">
-          ${roleDisplayName(me.role)}
-        </div>
-
-        <p class="role-description">
-          No results tonight.
-        </p>
-      </div>
-
-      ${renderOnlineProgressBox()}
-
-      <div class="reveal-role-actions">
-        ${renderOnlineProceedButton("Continue")}
-      </div>
-
-    </div>
-  `)
+  renderOnlineNightResultCard({
+    me,
+    hint: "Nothing special reached you tonight",
+    boxKicker: "Your Role",
+    title: roleDisplayName(me.role),
+    titleColor: roleColors[me.role] || "white",
+    bodyText: "No results tonight."
+  })
 }
 
 function renderOnlineMorning() {
