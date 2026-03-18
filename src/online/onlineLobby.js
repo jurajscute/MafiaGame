@@ -1680,6 +1680,7 @@ document.body.className = "day"
 
   </div>
 `)
+}
 
 function getRoleDescription(role) {
   const roleDescriptions = {
