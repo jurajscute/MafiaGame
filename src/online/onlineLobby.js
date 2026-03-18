@@ -22,18 +22,34 @@ function getOnlineSettings() {
 }
 
 window.submitOnlineVote = async function(targetName) {
-  if (!demoRoom?.code || !currentPlayerId) return
+  console.log("Vote clicked:", targetName)
+  console.log("Room:", currentRoomCode)
+  console.log("Player:", currentPlayerId)
+
+  if (!currentRoomCode) {
+    console.warn("No room code")
+    return
+  }
+
+  if (!currentPlayerId) {
+    console.warn("No player id")
+    return
+  }
 
   const me = getOnlineMe()
-  if (!me || me.alive === false) return
+  if (!me || me.alive === false) {
+    console.warn("Player is dead or missing")
+    return
+  }
 
   try {
-    await update(ref(db, `rooms/${demoRoom.code}/gameState`), {
+    await update(ref(db, `rooms/${currentRoomCode}/gameState`), {
       [`votes/${currentPlayerId}`]: targetName
     })
+
+    console.log("Vote submitted")
   } catch (error) {
     console.error("Failed to submit vote:", error)
-    alert("Failed to submit vote: " + error.message)
   }
 }
 
