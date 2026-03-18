@@ -1412,16 +1412,19 @@ function renderOnlineVoting() {
 
   const alivePlayers = getOnlineAlivePlayers()
   const myVote = demoRoom?.gameState?.votes?.[currentPlayerId] || null
+  const votes = demoRoom?.gameState?.votes || {}
+const voteCount = Object.keys(votes).length
+const totalVoters = getOnlineAlivePlayers().length
 
   let buttons = ""
 
   alivePlayers.forEach(player => {
     buttons += `
       <button
-        class="vote-player-btn"
-        onclick="window.submitOnlineVote('${player.name}')"
-        ${myVote ? "disabled" : ""}
-      >
+  class="vote-player-btn ${myVote === player.name ? "selected-vote" : ""}"
+  onclick="window.submitOnlineVote('${player.name}')"
+  ${myVote ? "disabled" : ""}
+>
         <span class="vote-player-name">${player.name}</span>
         <span class="vote-player-label">Vote</span>
       </button>
@@ -1430,7 +1433,7 @@ function renderOnlineVoting() {
 
   buttons += `
     <button
-      class="skip-btn vote-skip-btn"
+      class="skip-btn vote-skip-btn ${myVote === "skip" ? "selected-vote" : ""}"
       onclick="window.submitOnlineVote('skip')"
       ${myVote ? "disabled" : ""}
     >
@@ -1452,6 +1455,10 @@ function renderOnlineVoting() {
     <div class="card voting-card morning-vote-card">
 
       <div class="voting-hero">
+      <div class="current-voter-pill">
+  <span class="current-voter-dot"></span>
+  <strong>${voteCount} / ${totalVoters} players have voted</strong>
+</div>
         <div class="voting-kicker">Town Judgment</div>
         <h2 class="voting-title">Cast Your Vote</h2>
         <div class="voting-subtitle">
