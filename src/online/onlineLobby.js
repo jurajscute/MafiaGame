@@ -1268,7 +1268,7 @@ function renderOnlineNightResults() {
               0 0 10px ${roleColors.doctor},
               0 0 20px ${roleColors.doctor};
           ">
-            ${myResult.targetName.toUpperCase()}
+            ${(myResult.targetName || "UNKNOWN").toUpperCase()}
           </div>
         </div>
       `
@@ -1293,7 +1293,7 @@ function renderOnlineNightResults() {
               0 0 10px ${roleColors.framer},
               0 0 20px ${roleColors.framer};
           ">
-            ${myResult.targetName.toUpperCase()}
+            ${(myResult.targetName || "UNKNOWN").toUpperCase()}
           </div>
         </div>
       `

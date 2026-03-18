@@ -24,6 +24,7 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
   const kills = actions.filter(a => a.type === "kill")
   const saves = actions.filter(a => a.type === "save")
   const investigates = actions.filter(a => a.type === "investigate")
+  const frames = actions.filter(a => a.type === "frame")
 
   let mafiaKill = null
 
@@ -43,6 +44,7 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
   }
 
   const savedTargets = saves.map(action => action.target)
+  const framedTargets = frames.map(action => action.target)
 
   investigates.forEach(action => {
     const sheriff = players.find(player => player.id === action.playerId)
@@ -50,14 +52,28 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
 
     if (!sheriff || !target || sheriff.alive === false) return
 
-    const suspicious = roles[target.role]?.team === "mafia"
+    const isFramed = framedTargets.includes(target.name)
+    const suspicious = isFramed || roles[target.role]?.team === "mafia"
 
     privateResults.push({
       playerId: sheriff.id,
       type: "investigate",
-      text: suspicious
-        ? `${target.name} is NOT INNOCENT`
-        : `${target.name} is INNOCENT`
+      targetName: target.name,
+      result: suspicious ? "NOT INNOCENT" : "INNOCENT",
+      resultColor: suspicious ? "#e74c3c" : "#b0e2ff"
+    })
+  })
+
+  frames.forEach(action => {
+    const framer = players.find(player => player.id === action.playerId)
+    const target = getPlayerByName(players, action.target)
+
+    if (!framer || framer.alive === false || !target) return
+
+    privateResults.push({
+      playerId: framer.id,
+      type: "framer_success",
+      targetName: target.name
     })
   })
 
@@ -79,7 +95,7 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
           privateResults.push({
             playerId: doctor.id,
             type: "doctor_save_success",
-            text: `You successfully saved ${target.name}.`
+            targetName: target.name
           })
         })
       } else {
