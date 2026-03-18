@@ -25,6 +25,32 @@ let currentIsHost = false
 let lastRenderedPhase = null
 let lastRenderedScreenKey = null
 
+function hasOnlinePlayerSeenMorning() {
+  return !!demoRoom?.gameState?.morningSeen?.[currentPlayerId]
+}
+
+function haveAllOnlinePlayersSeenMorning() {
+  const presence = demoRoom?.presence || {}
+  const players = (demoRoom?.gameState?.players || []).filter(
+    player => player.alive !== false && presence[player.id]
+  )
+  const seenMap = demoRoom?.gameState?.morningSeen || {}
+
+  return players.length > 0 && players.every(player => seenMap[player.id])
+}
+
+window.advanceOnlineMorning = async function () {
+  if (!currentRoomCode || !currentPlayerId) return
+
+  try {
+    await update(getOnlineRoomRef(), {
+      [`gameState/morningSeen/${currentPlayerId}`]: true
+    })
+  } catch (error) {
+    console.error("Failed to mark morning seen:", error)
+  }
+}
+
 function hasOnlinePlayerSeenFinalResults() {
   return !!demoRoom?.gameState?.finalResultsSeen?.[currentPlayerId]
 }
@@ -542,11 +568,23 @@ function subscribeToRoom(roomCode) {
     renderRoomLobby()
   })
 }
+
 function patchOnlineProgressBox() {
   const readyEl = document.getElementById("onlineReadyCount")
+  const barEl = document.getElementById("onlineReadyBar")
+
   if (readyEl) {
     const includeDead = readyEl.dataset.includeDead === "true"
-    readyEl.textContent = `${getOnlineReadyCount(includeDead)} / ${getOnlineRequiredReadyCount(includeDead)}`
+    const mapName = readyEl.dataset.mapName || "readyMap"
+    const readyCount = getOnlineReadyCount(includeDead, mapName)
+    const requiredCount = getOnlineRequiredReadyCount(includeDead)
+
+    readyEl.textContent = `${readyCount} / ${requiredCount}`
+
+    if (barEl) {
+      const percent = requiredCount > 0 ? (readyCount / requiredCount) * 100 : 0
+      barEl.style.width = `${percent}%`
+    }
   }
 
   const voteEl = document.getElementById("onlineVoteCount")
@@ -787,12 +825,12 @@ function isOnlineMeReady() {
   return !!getOnlineReadyMap()[currentPlayerId]
 }
 
-function getOnlineReadyCount(includeDead = false) {
-  const readyMap = getOnlineReadyMap()
+function getOnlineReadyCount(includeDead = false, mapName = "readyMap") {
+  const sourceMap = demoRoom?.gameState?.[mapName] || {}
   const eligiblePlayers = includeDead ? getOnlinePresentPlayers() : getOnlineAlivePlayers()
   const eligibleIds = new Set(eligiblePlayers.map(player => player.id))
 
-  return Object.entries(readyMap).filter(([playerId, isReady]) => {
+  return Object.entries(sourceMap).filter(([playerId, isReady]) => {
     return isReady && eligibleIds.has(playerId)
   }).length
 }
@@ -803,19 +841,34 @@ function getOnlineRequiredReadyCount(includeDead = false) {
 
 function renderOnlineProgressBox({
   includeDead = false,
-  label = "Ready Players"
+  label = "Ready Players",
+  mapName = "readyMap"
 } = {}) {
+  const readyCount = getOnlineReadyCount(includeDead, mapName)
+  const requiredCount = getOnlineRequiredReadyCount(includeDead)
+  const percent = requiredCount > 0 ? (readyCount / requiredCount) * 100 : 0
+
   return `
-    <div class="player-status-box" style="margin-top:16px;">
+    <div class="player-status-box online-progress-box" style="margin-top:16px;">
       <h3>Phase Progress</h3>
+
       <div class="status-row">
         <span>${label}</span>
         <span
           id="onlineReadyCount"
           data-include-dead="${includeDead ? "true" : "false"}"
+          data-map-name="${mapName}"
         >
-          ${getOnlineReadyCount(includeDead)} / ${getOnlineRequiredReadyCount(includeDead)}
+          ${readyCount} / ${requiredCount}
         </span>
+      </div>
+
+      <div class="online-progress-track">
+        <div
+          id="onlineReadyBar"
+          class="online-progress-fill"
+          style="width:${percent}%"
+        ></div>
       </div>
     </div>
   `
@@ -900,31 +953,30 @@ async function maybeAdvanceOnlinePhase() {
   let everyoneDone = false
 
   if (gameState.phase === "night_select") {
-    const actions = gameState.submittedActions || {}
+  const actions = gameState.submittedActions || {}
 
-    everyoneDone =
-      alivePlayers.length > 0 &&
-      alivePlayers.every(player => actions[player.id])
-  } else if (gameState.phase === "voting") {
-    const votes = gameState.votes || {}
-    const gameLog = [...(gameState.gameLog || [])]
-const gameStats = {
-  nights: 0,
-  votesCast: 0,
-  eliminations: 0,
-  ...(gameState.gameStats || {})
+  everyoneDone =
+    alivePlayers.length > 0 &&
+    alivePlayers.every(player => actions[player.id])
+} else if (gameState.phase === "voting") {
+  const votes = gameState.votes || {}
+
+  everyoneDone =
+    alivePlayers.length > 0 &&
+    alivePlayers.every(player => votes[player.id])
+} else if (gameState.phase === "morning") {
+  const morningSeen = gameState.morningSeen || {}
+
+  everyoneDone =
+    alivePlayers.length > 0 &&
+    alivePlayers.every(player => morningSeen[player.id])
+} else {
+  const readyMap = gameState.readyMap || {}
+
+  everyoneDone =
+    alivePlayers.length > 0 &&
+    alivePlayers.every(player => readyMap[player.id])
 }
-
-    everyoneDone =
-      alivePlayers.length > 0 &&
-      alivePlayers.every(player => votes[player.id])
-  } else {
-    const readyMap = gameState.readyMap || {}
-
-    everyoneDone =
-      alivePlayers.length > 0 &&
-      alivePlayers.every(player => readyMap[player.id])
-  }
 
   if (!everyoneDone) return
 
@@ -977,12 +1029,18 @@ const gameStats = {
       }
     }
 
-    await update(getOnlineRoomRef(), {
-      "gameState/phase": nextPhase,
-      "gameState/readyMap": {},
-      "gameState/submittedActions": {},
-      "gameState/votes": {}
-    })
+    const updates = {
+  "gameState/phase": nextPhase,
+  "gameState/readyMap": {},
+  "gameState/submittedActions": {},
+  "gameState/votes": {}
+}
+
+if (nextPhase === "morning") {
+  updates["gameState/morningSeen"] = {}
+}
+
+await update(getOnlineRoomRef(), updates)
   } catch (error) {
     console.error("Failed to advance online phase:", error)
   }
@@ -1795,8 +1853,22 @@ function renderOnlineMorning() {
     buildSharedMorningScreen({
       resultsHTML,
       playersHTML,
+      progressBoxHTML: renderOnlineProgressBox({
+  label: "Players Ready",
+  mapName: "morningSeen"
+}),
       progressBoxHTML: renderOnlineProgressBox(),
-      continueButtonHTML: renderOnlineProceedButton("Continue")
+      continueButtonHTML: hasOnlinePlayerSeenMorning()
+  ? `
+      <button class="skip-btn" disabled>
+        Waiting For Other Players
+      </button>
+    `
+  : `
+      <button class="morning-btn" onclick="window.advanceOnlineMorning()">
+        Continue
+      </button>
+    `
     })
   )
 }
