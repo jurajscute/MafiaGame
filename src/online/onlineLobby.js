@@ -289,7 +289,7 @@ function renderRoomLobby() {
       </div>
 
             <div class="setup-actions">
-        <button class="skip-btn" onclick="window.showOnlineLobbyHome()">Back</button>
+  <button class="skip-btn" onclick="window.leaveOnlineRoom()">Leave Room</button>
 
         ${
           currentIsHost
@@ -410,6 +410,9 @@ function subscribeToRoom(roomCode) {
 
   onValue(roomRef, async (snapshot) => {
     demoRoom = snapshot.val()
+    if (demoRoom?.hostId && currentPlayerId) {
+  currentIsHost = demoRoom.hostId === currentPlayerId
+}
 
     if (!demoRoom) {
       render(`
@@ -514,6 +517,61 @@ window.showJoinRoomScreen = function () {
   renderJoinSetup()
 }
 
+window.leaveOnlineRoom = async function () {
+  if (!currentRoomCode || !currentPlayerId) {
+    window.showOnlineMenu()
+    return
+  }
+
+  try {
+    const roomRef = ref(db, `rooms/${currentRoomCode}`)
+    const snapshot = await get(roomRef)
+
+    if (!snapshot.exists()) {
+      currentRoomCode = null
+      currentPlayerId = null
+      currentIsHost = false
+      demoRoom = null
+      window.showOnlineMenu()
+      return
+    }
+
+    const room = snapshot.val()
+    const players = room.players || []
+
+    const remainingPlayers = players.filter(player => player.id !== currentPlayerId)
+
+    const updates = {
+      players: remainingPlayers
+    }
+
+    if (room.hostId === currentPlayerId) {
+      const nextHost = remainingPlayers[0] || null
+      updates.hostId = nextHost ? nextHost.id : null
+      updates.hostName = nextHost ? nextHost.name : null
+
+      if (nextHost) {
+        updates.players = remainingPlayers.map(player => ({
+          ...player,
+          isHost: player.id === nextHost.id
+        }))
+      }
+    }
+
+    await update(roomRef, updates)
+
+    currentRoomCode = null
+    currentPlayerId = null
+    currentIsHost = false
+    demoRoom = null
+
+    window.showOnlineMenu()
+  } catch (error) {
+    console.error("Failed to leave room:", error)
+    alert("Failed to leave room: " + error.message)
+  }
+}
+
 window.fakeJoinRoom = async function () {
   const name = (document.getElementById("joinNameInput")?.value || "").trim()
   const code = (document.getElementById("joinCodeInput")?.value || "").trim().toUpperCase()
@@ -533,6 +591,24 @@ window.fakeJoinRoom = async function () {
 
     const room = snapshot.val()
     const players = room.players || []
+
+    if (room.phase === "in_game") {
+      alert("This game has already started.")
+      return
+    }
+
+    if (players.some(player => player.name.toLowerCase() === name.toLowerCase())) {
+      alert("That name is already taken in this room.")
+      return
+    }
+
+    if (currentRoomCode === code && currentPlayerId) {
+      const alreadyJoined = players.some(player => player.id === currentPlayerId)
+      if (alreadyJoined) {
+        subscribeToRoom(code)
+        return
+      }
+    }
 
     const newPlayerId = `player-${Date.now()}`
     const newPlayer = createRoomPlayer({
@@ -730,6 +806,12 @@ function renderOnlineGame() {
     return
   }
 
+const leaveButtonHTML = `
+  <div style="margin-top:16px; text-align:center;">
+    <button class="skip-btn" onclick="window.leaveOnlineRoom()">Leave Room</button>
+  </div>
+`
+
   if (gameState.phase === "role_reveal") {
     renderOnlineRoleReveal()
     return
@@ -879,23 +961,18 @@ if (finalResult.type === "village_executioner_win") {
   return
 }
 
-if (finalResult.type === "village_win") {
-  const screen = buildSharedWinScreen({
-    bodyClass: "win-village",
-    cardClass: "role-doctor",
-    title: "VILLAGE WINS",
-    linesHTML: `
-      <p>The town has eliminated all mafia members.</p>
-    `,
-    progressBoxHTML: renderOnlineProgressBox(),
-    continueButtonHTML: `
-      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
-    `
-  })
+  document.body.className = "win-village"
 
-  document.body.className = screen.bodyClass
-  render(screen.html)
-  return
+  render(`
+    <div class="card role-doctor">
+      <h1 class="role-title">GAME OVER</h1>
+      <p>The game has ended.</p>
+
+      ${renderOnlineProgressBox()}
+
+      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+    </div>
+  `)
 }
 
   const playersHTML = players.map(player => `
@@ -910,35 +987,6 @@ if (finalResult.type === "village_win") {
   `).join("")
 
   document.body.className = bodyClass
-
-  render(`
-    <div class="card final-results-card final-results-shell">
-
-      <div class="final-results-hero">
-        <div class="final-results-kicker">Online Match Complete</div>
-        <h2 class="final-results-title">${title}</h2>
-        <div class="final-results-subtitle">
-          ${subtitle}
-        </div>
-      </div>
-
-      <div class="final-team-card final-team-town">
-        <div class="final-team-header">
-          <div>
-            <div class="final-team-kicker">All Players</div>
-            <h3 class="final-team-title">Final Roles</h3>
-          </div>
-          <div class="final-team-count">${players.length}</div>
-        </div>
-
-        <div class="final-team-list">
-          ${playersHTML}
-        </div>
-      </div>
-
-      <button onclick="window.showOnlineMenu()">Back To Online Menu</button>
-    </div>
-  `)
 }
 
 window.flipOnlineRoleCard = function() {
@@ -1406,40 +1454,40 @@ function renderOnlineVoteResults() {
   }
 
   if (voteResults.resultType === "jester_win") {
-  document.body.className = "win-jester"
-
-  render(`
-    <div class="card role-jester">
-
-      <h1 class="role-title">JESTER WINS</h1>
-
+  const screen = buildSharedWinScreen({
+    bodyClass: "win-jester",
+    cardClass: "role-jester",
+    title: "JESTER WINS",
+    linesHTML: `
       <p>${voteResults.eliminated} tricked the town into voting them out!</p>
-
-      ${renderOnlineProgressBox()}
-
+    `,
+    progressBoxHTML: renderOnlineProgressBox(),
+    continueButtonHTML: `
       <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+    `
+  })
 
-    </div>
-  `)
+  document.body.className = screen.bodyClass
+  render(screen.html)
   return
 }
 
 if (voteResults.resultType === "executioner_win") {
-  document.body.className = "win-executioner"
-
-  render(`
-    <div class="card role-executioner">
-
-      <h1 class="role-title">EXECUTIONER WINS</h1>
-
+  const screen = buildSharedWinScreen({
+    bodyClass: "win-executioner",
+    cardClass: "role-executioner",
+    title: "EXECUTIONER WINS",
+    linesHTML: `
       <p>${voteResults.winner} succeeded in getting ${voteResults.eliminated} voted out!</p>
-
-      ${renderOnlineProgressBox()}
-
+    `,
+    progressBoxHTML: renderOnlineProgressBox(),
+    continueButtonHTML: `
       <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+    `
+  })
 
-    </div>
-  `)
+  document.body.className = screen.bodyClass
+  render(screen.html)
   return
 }
 
