@@ -21,6 +21,9 @@ let currentRoomCode = null
 let currentPlayerId = null
 let currentIsHost = false
 
+let lastRenderedPhase = null
+let lastRenderedScreenKey = null
+
 function getOnlineRoomRef() {
   return ref(db, `rooms/${currentRoomCode}`)
 }
@@ -37,7 +40,7 @@ async function registerPresence(roomCode, playerId) {
   const presenceRef = ref(db, `rooms/${roomCode}/presence/${playerId}`)
 
   await set(presenceRef, true)
-  onDisconnect(presenceRef).remove()
+  await onDisconnect(presenceRef).remove()
 }
 
 window.submitOnlineVote = async function(targetName) {
@@ -452,6 +455,20 @@ function subscribeToRoom(roomCode) {
       }
     }
 
+if (demoRoom.phase === "in_game") {
+  const nextScreenKey = getOnlineScreenKey()
+
+  if (nextScreenKey !== lastRenderedScreenKey) {
+    lastRenderedScreenKey = nextScreenKey
+    renderOnlineGame()
+  } else {
+    patchOnlineProgressBox()
+  }
+
+  await maybeAdvanceOnlinePhase()
+  return
+}
+
     if (!demoRoom) {
       render(`
         <div class="card home-screen-card">
@@ -474,13 +491,26 @@ function subscribeToRoom(roomCode) {
     }
 
     if (demoRoom.phase === "in_game") {
-      renderOnlineGame()
-      await maybeAdvanceOnlinePhase()
-      return
-    }
+  const nextScreenKey = getOnlineScreenKey()
+
+  if (nextScreenKey !== lastRenderedScreenKey) {
+    lastRenderedScreenKey = nextScreenKey
+    renderOnlineGame()
+  }
+
+  await maybeAdvanceOnlinePhase()
+  return
+}
 
     renderRoomLobby()
   })
+}
+
+function patchOnlineProgressBox() {
+  const el = document.getElementById("onlineReadyCount")
+  if (el) {
+    el.textContent = `${getOnlineReadyCount()} / ${getOnlineRequiredReadyCount()}`
+  }
 }
 
 window.showOnlineLobbyHome = function () {
@@ -516,8 +546,6 @@ window.confirmCreateOnlineRoom = async function () {
 
   room.players.push(hostPlayer)
   room.hostId = hostPlayer.id
-
-  rooms/${code}/presence/${playerId} = true
 
   try {
     await set(ref(db, `rooms/${roomCode}`), room)
@@ -660,8 +688,6 @@ window.fakeJoinRoom = async function () {
       isHost: false
     })
 
-    rooms/${code}/presence/${playerId} = true
-
     const updatedPlayers = [...players, newPlayer]
 
     await update(ref(db, `rooms/${code}`), {
@@ -685,8 +711,20 @@ function getOnlineMe() {
   return demoRoom?.gameState?.players?.find(player => player.id === currentPlayerId) || null
 }
 
+function getOnlinePresentAlivePlayers() {
+  const presence = demoRoom?.presence || {}
+  return (demoRoom?.gameState?.players || []).filter(
+    player => player.alive !== false && presence[player.id]
+  )
+}
+
+function getOnlinePresentPlayers() {
+  const presence = demoRoom?.presence || {}
+  return (demoRoom?.gameState?.players || []).filter(player => presence[player.id])
+}
+
 function getOnlineAlivePlayers() {
-  return (demoRoom?.gameState?.players || []).filter(player => player.alive !== false)
+  return getOnlinePresentAlivePlayers()
 }
 
 function getOnlineReadyMap() {
@@ -711,7 +749,7 @@ function renderOnlineProgressBox() {
       <h3>Phase Progress</h3>
       <div class="status-row">
         <span>Ready Players</span>
-        <span>${getOnlineReadyCount()} / ${getOnlineRequiredReadyCount()}</span>
+        <span id="onlineReadyCount">${getOnlineReadyCount()} / ${getOnlineRequiredReadyCount()}</span>
       </div>
     </div>
   `
@@ -748,7 +786,10 @@ async function maybeAdvanceOnlinePhase() {
   if (!currentIsHost || !demoRoom?.gameState) return
 
   const gameState = demoRoom.gameState
-  const alivePlayers = (gameState.players || []).filter(player => player.alive !== false)
+  const presence = demoRoom?.presence || {}
+const alivePlayers = (gameState.players || []).filter(
+  player => player.alive !== false && presence[player.id]
+)
 
   let everyoneDone = false
 
@@ -827,6 +868,31 @@ else if (gameState.phase === "vote_results") {
   } catch (error) {
     console.error("Failed to advance online phase:", error)
   }
+}
+
+function getOnlineScreenKey() {
+  const gameState = demoRoom?.gameState
+  if (!gameState) return "no_game"
+
+  const me = getOnlineMe()
+  const myVote = gameState.votes?.[currentPlayerId] || ""
+  const myReady = gameState.readyMap?.[currentPlayerId] ? "ready" : "not_ready"
+  const myAction = gameState.submittedActions?.[currentPlayerId]
+    ? JSON.stringify(gameState.submittedActions[currentPlayerId])
+    : ""
+
+  return JSON.stringify({
+    phase: gameState.phase,
+    meAlive: me?.alive,
+    myVote,
+    myReady,
+    myAction,
+    voteResultType: gameState.voteResults?.resultType || "",
+    finalResultType: gameState.finalResult?.type || "",
+    nightResultCount: (gameState.nightPrivateResults || []).filter(
+      r => r.playerId === currentPlayerId
+    ).length
+  })
 }
 
 function renderOnlineGame() {
@@ -996,6 +1062,25 @@ if (finalResult.type === "village_executioner_win") {
     title: "MAFIA WINS",
     linesHTML: `
       <p>The mafia have taken control of the town.</p>
+    `,
+    progressBoxHTML: renderOnlineProgressBox(),
+    continueButtonHTML: `
+      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+    `
+  })
+
+  document.body.className = screen.bodyClass
+  render(screen.html)
+  return
+}
+
+if (finalResult.type === "village_win") {
+  const screen = buildSharedWinScreen({
+    bodyClass: "win-village",
+    cardClass: "role-doctor",
+    title: "VILLAGE WINS",
+    linesHTML: `
+      <p>The town has eliminated all mafia members.</p>
     `,
     progressBoxHTML: renderOnlineProgressBox(),
     continueButtonHTML: `
@@ -1329,7 +1414,7 @@ function renderOnlineNightResults() {
 
 function renderOnlineMorning() {
   const publicResults = demoRoom?.gameState?.nightResolved?.publicResults || []
-  const players = demoRoom?.gameState?.players || []
+  const players = getOnlinePresentPlayers()
 
   const playersHTML = players.map(player => `
     <div class="status-row ${player.alive !== false ? "alive" : "dead"}">
@@ -1419,7 +1504,7 @@ const totalVoters = getOnlineAlivePlayers().length
     </button>
   `
 
-  const playersHTML = (demoRoom?.gameState?.players || []).map(player => {
+  const playersHTML = getOnlinePresentPlayers().map(player => {
     return `
       <div class="status-row ${player.alive !== false ? "alive" : "dead"}">
         <span>${player.name}</span>
@@ -1598,7 +1683,7 @@ document.body.className = "day"
     `
   }
 
-  const playersHTML = (demoRoom?.gameState?.players || []).map(player => {
+  const playersHTML = getOnlinePresentPlayers().map(player => {
     return `
       <div class="status-row ${player.alive !== false ? "alive" : "dead"}">
         <span>${player.name}</span>
