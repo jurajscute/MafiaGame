@@ -12,10 +12,21 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
   const players = structuredClone(gameState.players || [])
   const submittedActions = gameState.submittedActions || {}
 
+  const gameLog = [...(gameState.gameLog || [])]
+const gameStats = {
+  nights: 0,
+  votesCast: 0,
+  eliminations: 0,
+  ...(gameState.gameStats || {})
+}
+
   const actions = Object.entries(submittedActions).map(([playerId, action]) => ({
     playerId,
     ...action
   }))
+
+gameStats.nights += 1
+gameLog.push(`Night ${gameStats.nights}`)
 
   const publicResults = []
   const privateResults = []
@@ -51,6 +62,7 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
     const target = getPlayerByName(players, action.target)
 
     if (!sheriff || !target || sheriff.alive === false) return
+    gameLog.push(`${sheriff.name} investigated someone.`)
 
     const isFramed = framedTargets.includes(target.name)
     const suspicious = isFramed || roles[target.role]?.team === "mafia"
@@ -82,6 +94,7 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
 
     if (target && isAlive(target)) {
       if (savedTargets.includes(target.name)) {
+        gameLog.push(`${target.name} was saved by the Doctor.`)
         publicResults.push({
           type: "save",
           text: `${target.name} was attacked, but someone saved them.`
@@ -101,6 +114,7 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
       } else {
         target.alive = false
         nightDeaths.push(target.name)
+        gameLog.push(`${target.name} was killed during the night.`)
 
         publicResults.push({
           type: "death",
@@ -112,17 +126,20 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
 
   if (!publicResults.length) {
     publicResults.push({
+      gameLog.push("The night was quiet.")
       type: "peace",
       text: "The night was quiet."
     })
   }
 
   return {
-    players,
-    nightDeaths,
-    nightResolved: {
-      publicResults
-    },
-    nightPrivateResults: privateResults
-  }
+  players,
+  nightDeaths,
+  nightResolved: {
+    publicResults
+  },
+  nightPrivateResults: privateResults,
+  gameLog,
+  gameStats
+}
 }

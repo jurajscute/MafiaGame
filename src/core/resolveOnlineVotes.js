@@ -4,6 +4,9 @@ export function resolveOnlineVotes(gameState) {
 
   const alivePlayers = players.filter(player => player.alive !== false)
 
+  gameLog.push(`Day ${gameStats.nights}`)
+gameStats.votesCast += Object.keys(votes).length
+
   const voteCounts = {}
   let highest = 0
   let eliminated = null
@@ -45,17 +48,25 @@ export function resolveOnlineVotes(gameState) {
   let finalResult = null
 
   if (tie || !eliminated || eliminated === "skip") {
-    eliminated = null
-    resultType = tie ? "tie" : "skip"
+  if (tie) {
+    gameLog.push("The town vote ended in a tie.")
   } else {
+    gameLog.push("The town chose to skip elimination.")
+  }
+
+  eliminated = null
+  resultType = tie ? "tie" : "skip"
+} else {
     const eliminatedPlayer = players.find(p => p.name === eliminated)
 
     if (!eliminatedPlayer) {
       eliminated = null
       resultType = "none"
     } else {
-      eliminatedPlayer.alive = false
-      resultType = "elimination"
+      player.alive = false
+gameStats.eliminations += 1
+gameLog.push(`${player.name} was voted out by the town.`)
+resultType = "elimination"
 
       const revealSetting = gameState?.settings?.revealRolesOnElimination || "none"
 
@@ -87,6 +98,7 @@ export function resolveOnlineVotes(gameState) {
         }
       } else if (isJester) {
         resultType = "jester_win"
+        gameLog.push(`${player.name} was voted out and won as the Jester.`)
         finalResult = {
           type: "jester_win",
           winner: eliminatedPlayer.name
@@ -102,6 +114,7 @@ export function resolveOnlineVotes(gameState) {
       } else if (executioner) {
         resultType = "executioner_win"
         winner = executioner.name
+        gameLog.push(`${winner} achieved their goal when ${eliminated} was voted out.`)
         finalResult = {
           type: "executioner_win",
           winner: executioner.name,
@@ -128,14 +141,16 @@ export function resolveOnlineVotes(gameState) {
   }
 
   return {
-    players,
-    voteResults: {
-      voteCounts,
-      eliminated,
-      resultType,
-      revealedRole,
-      winner
-    },
-    finalResult
-  }
+  players,
+  voteResults: {
+    voteCounts,
+    eliminated,
+    resultType,
+    revealedRole,
+    winner
+  },
+  finalResult,
+  gameLog,
+  gameStats
+}
 }

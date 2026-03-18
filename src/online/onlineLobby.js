@@ -834,7 +834,7 @@ function renderOnlineProceedButton(label = "Continue", { includeDead = false } =
 
   if (!includeDead && me.alive === false) {
     return `
-      <button class="primary-btn" disabled>
+      <button class="skip-btn" disabled>
         You Died
       </button>
     `
@@ -842,7 +842,7 @@ function renderOnlineProceedButton(label = "Continue", { includeDead = false } =
 
   if (isOnlineMeReady()) {
     return `
-      <button class="primary-btn" disabled>
+      <button class="skip-btn" disabled>
         Waiting For Other Players
       </button>
     `
@@ -907,6 +907,13 @@ async function maybeAdvanceOnlinePhase() {
       alivePlayers.every(player => actions[player.id])
   } else if (gameState.phase === "voting") {
     const votes = gameState.votes || {}
+    const gameLog = [...(gameState.gameLog || [])]
+const gameStats = {
+  nights: 0,
+  votesCast: 0,
+  eliminations: 0,
+  ...(gameState.gameStats || {})
+}
 
     everyoneDone =
       alivePlayers.length > 0 &&
@@ -926,14 +933,16 @@ async function maybeAdvanceOnlinePhase() {
       const resolved = resolveOnlineNight(gameState, demoRoom.settings || {})
 
       await update(getOnlineRoomRef(), {
-        "gameState/players": resolved.players,
-        "gameState/nightDeaths": resolved.nightDeaths,
-        "gameState/nightResolved": resolved.nightResolved,
-        "gameState/nightPrivateResults": resolved.nightPrivateResults,
-        "gameState/phase": "night_results",
-        "gameState/readyMap": {},
-        "gameState/submittedActions": {}
-      })
+  "gameState/players": resolved.players,
+  "gameState/nightDeaths": resolved.nightDeaths,
+  "gameState/nightResolved": resolved.nightResolved,
+  "gameState/nightPrivateResults": resolved.nightPrivateResults,
+  "gameState/gameLog": resolved.gameLog,
+  "gameState/gameStats": resolved.gameStats,
+  "gameState/phase": "night_results",
+  "gameState/readyMap": {},
+  "gameState/submittedActions": {}
+})
       return
     }
 
@@ -941,14 +950,16 @@ async function maybeAdvanceOnlinePhase() {
       const resolved = resolveOnlineVotes(gameState)
 
       await update(getOnlineRoomRef(), {
-        "gameState/players": resolved.players,
-        "gameState/voteResults": resolved.voteResults,
-        "gameState/finalResult": resolved.finalResult || null,
-        "gameState/phase": resolved.finalResult ? "game_over" : "vote_results",
-        "gameState/readyMap": {},
-        "gameState/votes": {},
-        "gameState/finalResultsSeen": {}
-      })
+  "gameState/players": resolved.players,
+  "gameState/voteResults": resolved.voteResults,
+  "gameState/finalResult": resolved.finalResult || null,
+  "gameState/gameLog": resolved.gameLog,
+  "gameState/gameStats": resolved.gameStats,
+  "gameState/phase": resolved.finalResult ? "game_over" : "vote_results",
+  "gameState/readyMap": {},
+  "gameState/votes": {},
+  "gameState/finalResultsSeen": {}
+})
 
       return
     }

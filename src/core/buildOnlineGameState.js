@@ -27,6 +27,20 @@ export function buildOnlineGameState(room) {
   assignRolesToPlayers(tempState)
 
   return {
+
+  gameLog: [],
+gameStats: {
+  nights: 0,
+  votesCast: 0,
+  eliminations: 0,
+  nightKills: 0,
+  saves: 0,
+  investigations: 0,
+  frames: 0,
+  vigilanteShots: 0,
+  skippedVotes: 0
+},
+
   started: true,
   phase: "role_reveal",
   dayNumber: 1,
