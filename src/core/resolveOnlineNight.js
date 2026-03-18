@@ -126,7 +126,7 @@ gameLog.push(`Night ${gameStats.nights}`)
 
   if (!publicResults.length) {
     publicResults.push({
-      gameLog.push("The night was quiet.")
+      gameLog.push("The night was quiet."),
       type: "peace",
       text: "The night was quiet."
     })

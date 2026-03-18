@@ -98,7 +98,7 @@ resultType = "elimination"
         }
       } else if (isJester) {
         resultType = "jester_win"
-        gameLog.push(`${player.name} was voted out and won as the Jester.`)
+        gameLog.push(`${player.name} was voted out and won as the Jester.`),
         finalResult = {
           type: "jester_win",
           winner: eliminatedPlayer.name
@@ -114,7 +114,7 @@ resultType = "elimination"
       } else if (executioner) {
         resultType = "executioner_win"
         winner = executioner.name
-        gameLog.push(`${winner} achieved their goal when ${eliminated} was voted out.`)
+        gameLog.push(`${winner} achieved their goal when ${eliminated} was voted out.`),
         finalResult = {
           type: "executioner_win",
           winner: executioner.name,
