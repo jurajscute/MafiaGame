@@ -49,6 +49,7 @@ function getOnlineSettings() {
   return demoRoom?.settings || null
 }
 
+
 function applyOnlinePhaseTheme(phase) {
   if (phase === "role_reveal" || phase === "night_select" || phase === "night_results") {
     document.body.className = "night"
@@ -541,11 +542,11 @@ function subscribeToRoom(roomCode) {
     renderRoomLobby()
   })
 }
-
 function patchOnlineProgressBox() {
   const readyEl = document.getElementById("onlineReadyCount")
   if (readyEl) {
-    readyEl.textContent = `${getOnlineReadyCount()} / ${getOnlineRequiredReadyCount()}`
+    const includeDead = readyEl.dataset.includeDead === "true"
+    readyEl.textContent = `${getOnlineReadyCount(includeDead)} / ${getOnlineRequiredReadyCount(includeDead)}`
   }
 
   const voteEl = document.getElementById("onlineVoteCount")
@@ -786,27 +787,59 @@ function isOnlineMeReady() {
   return !!getOnlineReadyMap()[currentPlayerId]
 }
 
-function getOnlineReadyCount() {
-  return Object.values(getOnlineReadyMap()).filter(Boolean).length
+function getOnlineReadyCount(includeDead = false) {
+  const readyMap = getOnlineReadyMap()
+  const eligiblePlayers = includeDead ? getOnlinePresentPlayers() : getOnlineAlivePlayers()
+  const eligibleIds = new Set(eligiblePlayers.map(player => player.id))
+
+  return Object.entries(readyMap).filter(([playerId, isReady]) => {
+    return isReady && eligibleIds.has(playerId)
+  }).length
 }
 
-function getOnlineRequiredReadyCount() {
-  return getOnlineAlivePlayers().length
+function getOnlineRequiredReadyCount(includeDead = false) {
+  return includeDead ? getOnlinePresentPlayers().length : getOnlineAlivePlayers().length
 }
 
-function renderOnlineProgressBox() {
+function renderOnlineProgressBox({
+  includeDead = false,
+  label = "Ready Players"
+} = {}) {
   return `
     <div class="player-status-box" style="margin-top:16px;">
       <h3>Phase Progress</h3>
       <div class="status-row">
-        <span>Ready Players</span>
-        <span id="onlineReadyCount">${getOnlineReadyCount()} / ${getOnlineRequiredReadyCount()}</span>
+        <span>${label}</span>
+        <span
+          id="onlineReadyCount"
+          data-include-dead="${includeDead ? "true" : "false"}"
+        >
+          ${getOnlineReadyCount(includeDead)} / ${getOnlineRequiredReadyCount(includeDead)}
+        </span>
       </div>
     </div>
   `
 }
 
-function renderOnlineProceedButton(label = "Continue") {
+function renderOnlineProceedButton(label = "Continue", { includeDead = false } = {}) {
+  const me = getOnlineMe()
+
+  if (!me) {
+    return `
+      <button class="primary-btn" disabled>
+        Unavailable
+      </button>
+    `
+  }
+
+  if (!includeDead && me.alive === false) {
+    return `
+      <button class="primary-btn" disabled>
+        You Died
+      </button>
+    `
+  }
+
   if (isOnlineMeReady()) {
     return `
       <button class="primary-btn" disabled>
@@ -1250,11 +1283,14 @@ function renderOnlineFinalResults() {
       neutralHTML: renderOnlineFinalRoleList(neutral),
       logHTML,
       continueButtonHTML: `
-        ${renderOnlineProgressBox()}
-        <div class="reveal-role-actions">
-          ${renderOnlineProceedButton("Back To Lobby")}
-        </div>
-      `
+  ${renderOnlineProgressBox({
+    includeDead: true,
+    label: "Players Ready"
+  })}
+  <div class="reveal-role-actions">
+    ${renderOnlineProceedButton("Back To Lobby", { includeDead: true })}
+  </div>
+`
     })
   )
 }
