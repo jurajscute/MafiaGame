@@ -13,20 +13,20 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
   const submittedActions = gameState.submittedActions || {}
 
   const gameLog = [...(gameState.gameLog || [])]
-const gameStats = {
-  nights: 0,
-  votesCast: 0,
-  eliminations: 0,
-  ...(gameState.gameStats || {})
-}
+  const gameStats = {
+    nights: 0,
+    votesCast: 0,
+    eliminations: 0,
+    ...(gameState.gameStats || {})
+  }
 
   const actions = Object.entries(submittedActions).map(([playerId, action]) => ({
     playerId,
     ...action
   }))
 
-gameStats.nights += 1
-gameLog.push(`Night ${gameStats.nights}`)
+  gameStats.nights += 1
+  gameLog.push(`Night ${gameStats.nights}`)
 
   const publicResults = []
   const privateResults = []
@@ -62,6 +62,7 @@ gameLog.push(`Night ${gameStats.nights}`)
     const target = getPlayerByName(players, action.target)
 
     if (!sheriff || !target || sheriff.alive === false) return
+
     gameLog.push(`${sheriff.name} investigated someone.`)
 
     const isFramed = framedTargets.includes(target.name)
@@ -82,6 +83,8 @@ gameLog.push(`Night ${gameStats.nights}`)
 
     if (!framer || framer.alive === false || !target) return
 
+    gameLog.push(`${framer.name} framed someone.`)
+
     privateResults.push({
       playerId: framer.id,
       type: "framer_success",
@@ -95,6 +98,7 @@ gameLog.push(`Night ${gameStats.nights}`)
     if (target && isAlive(target)) {
       if (savedTargets.includes(target.name)) {
         gameLog.push(`${target.name} was saved by the Doctor.`)
+
         publicResults.push({
           type: "save",
           text: `${target.name} was attacked, but someone saved them.`
@@ -114,6 +118,7 @@ gameLog.push(`Night ${gameStats.nights}`)
       } else {
         target.alive = false
         nightDeaths.push(target.name)
+        gameStats.eliminations += 1
         gameLog.push(`${target.name} was killed during the night.`)
 
         publicResults.push({
@@ -125,21 +130,22 @@ gameLog.push(`Night ${gameStats.nights}`)
   }
 
   if (!publicResults.length) {
+    gameLog.push("The night was quiet.")
+
     publicResults.push({
-      gameLog.push("The night was quiet."),
       type: "peace",
       text: "The night was quiet."
     })
   }
 
   return {
-  players,
-  nightDeaths,
-  nightResolved: {
-    publicResults
-  },
-  nightPrivateResults: privateResults,
-  gameLog,
-  gameStats
-}
+    players,
+    nightDeaths,
+    nightResolved: {
+      publicResults
+    },
+    nightPrivateResults: privateResults,
+    gameLog,
+    gameStats
+  }
 }
