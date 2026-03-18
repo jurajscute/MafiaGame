@@ -13,7 +13,8 @@ import {
   buildSharedNightResultScreen,
   buildSharedMorningScreen,
   buildSharedVoteResultsScreen,
-  buildSharedWinScreen
+  buildSharedWinScreen,
+  buildSharedFinalResultsScreen
 } from "../core/sharedScreens.js"
 
 let demoRoom = null
@@ -23,6 +24,30 @@ let currentIsHost = false
 
 let lastRenderedPhase = null
 let lastRenderedScreenKey = null
+
+function hasOnlinePlayerSeenFinalResults() {
+  return !!demoRoom?.gameState?.finalResultsSeen?.[currentPlayerId]
+}
+
+function haveAllOnlinePlayersSeenFinalResults() {
+  const presence = demoRoom?.presence || {}
+  const seenMap = demoRoom?.gameState?.finalResultsSeen || {}
+  const players = (demoRoom?.gameState?.players || []).filter(player => presence[player.id])
+
+  return players.length > 0 && players.every(player => seenMap[player.id])
+}
+
+window.advanceToOnlineFinalResults = async function () {
+  if (!currentRoomCode || !currentPlayerId) return
+
+  try {
+    await update(getOnlineRoomRef(), {
+      [`gameState/finalResultsSeen/${currentPlayerId}`]: true
+    })
+  } catch (error) {
+    console.error("Failed to advance to final results:", error)
+  }
+}
 
 function getOnlineRoomRef() {
   return ref(db, `rooms/${currentRoomCode}`)
@@ -90,6 +115,18 @@ window.submitOnlineVote = async function(targetName) {
     console.log("Vote submitted")
   } catch (error) {
     console.error("Failed to submit vote:", error)
+  }
+}
+
+window.advanceToOnlineFinalResults = async function () {
+  if (!currentRoomCode || !currentPlayerId) return
+
+  try {
+    await update(getOnlineRoomRef(), {
+      [`gameState/finalResultsSeen/${currentPlayerId}`]: true
+    })
+  } catch (error) {
+    console.error("Failed to advance to final results:", error)
   }
 }
 
@@ -791,7 +828,7 @@ function renderOnlineProceedButton(label = "Continue") {
   }
 
   return `
-    <button class="primary-btn" onclick="window.markOnlineReady()">
+    <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
       ${label}
     </button>
   `
@@ -809,8 +846,35 @@ function getNextOnlinePhase(currentPhase) {
 }
 
 async function maybeAdvanceOnlinePhase() {
-  if (!currentIsHost || !demoRoom?.gameState) return
 
+if (gameState.phase === "game_over") {
+  if (haveAllOnlinePlayersSeenFinalResults()) {
+    // everyone has moved on personally; now they are all on final results
+  }
+  return
+}
+
+const allSeenFinalResults = haveAllOnlinePlayersSeenFinalResults()
+
+if (gameState.phase === "game_over" && allSeenFinalResults) {
+  const readyMap = gameState.readyMap || {}
+  const presence = demoRoom?.presence || {}
+  const playersForLobbyReturn = (gameState.players || []).filter(player => presence[player.id])
+
+  const everyoneReadyToReturn =
+    playersForLobbyReturn.length > 0 &&
+    playersForLobbyReturn.every(player => readyMap[player.id])
+
+  if (!everyoneReadyToReturn) return
+
+  await update(getOnlineRoomRef(), {
+    phase: "lobby",
+    gameState: null
+  })
+  return
+}
+
+  if (!currentIsHost || !demoRoom?.gameState) return
   const gameState = demoRoom.gameState
   const presence = demoRoom?.presence || {}
 const alivePlayers = (gameState.players || []).filter(
@@ -983,9 +1047,13 @@ const leaveButtonHTML = `
   }
 
   if (gameState.phase === "game_over") {
+  if (hasOnlinePlayerSeenFinalResults()) {
+    renderOnlineFinalResults()
+  } else {
     renderOnlineGameOver()
-    return
   }
+  return
+}
 
   render(`
     <div class="card home-screen-card">
@@ -998,6 +1066,211 @@ const leaveButtonHTML = `
       </div>
     </div>
   `)
+}
+
+
+function getOnlineFinalWinnerBanner() {
+  const finalResult = demoRoom?.gameState?.finalResult || {}
+
+  if (finalResult.type === "mafia_win") {
+    return {
+      className: "mafia-win-banner",
+      label: "Winner",
+      title: "MAFIA WINS",
+      subtitle: "The mafia have taken control of the town."
+    }
+  }
+
+  if (finalResult.type === "village_win") {
+    return {
+      className: "village-win-banner",
+      label: "Winner",
+      title: "VILLAGE WINS",
+      subtitle: "The town has eliminated all mafia members."
+    }
+  }
+
+  if (finalResult.type === "jester_win") {
+    return {
+      className: "neutral-win-banner",
+      label: "Winner",
+      title: "JESTER WINS",
+      subtitle: `${finalResult.winner} tricked the town into voting them out.`
+    }
+  }
+
+  if (finalResult.type === "executioner_win") {
+    return {
+      className: "neutral-win-banner",
+      label: "Winner",
+      title: "EXECUTIONER WINS",
+      subtitle: `${finalResult.winner} achieved their goal.`
+    }
+  }
+
+  if (finalResult.type === "jester_executioner_win") {
+    return {
+      className: "neutral-win-banner",
+      label: "Winners",
+      title: "JESTER & EXECUTIONER WIN",
+      subtitle: `${finalResult.winner} and ${finalResult.executionerWinner} both achieved victory.`
+    }
+  }
+
+  if (finalResult.type === "village_executioner_win") {
+    return {
+      className: "mixed-win-banner",
+      label: "Winners",
+      title: "VILLAGE & EXECUTIONER WIN",
+      subtitle: `${finalResult.winner} succeeded, and the town also won.`
+    }
+  }
+
+  return {
+    className: "village-win-banner",
+    label: "Result",
+    title: "GAME OVER",
+    subtitle: "The match has ended."
+  }
+}
+
+function getOnlineEffectiveTeam(player) {
+  if (player.role === "schrodingers_cat" && player.catAlignment) {
+    return player.catAlignment
+  }
+
+  return roles[player.role]?.team || "neutral"
+}
+
+function renderOnlineFinalRoleList(list) {
+  if (!list.length) {
+    return `<div class="final-empty-state">None</div>`
+  }
+
+  return list.map(p => {
+    const color = roleColors[p.role] || "white"
+    const target = demoRoom?.gameState?.executionerTargets?.[p.name]
+
+    if (p.role === "executioner" || p.wasExecutioner) {
+      const execColor = roleColors.executioner
+      const turnedInto = p.wasExecutioner && p.executionerConvertedTo
+        ? roleDisplayName(p.executionerConvertedTo)
+        : null
+
+      return `
+        <div class="final-player-card executioner-row"
+             style="--final-role-color:${execColor};">
+
+          <div class="final-player-main">
+            <div class="final-player-name">${p.name}</div>
+            <div class="final-player-role" style="color:${execColor}">
+              Executioner
+              ${
+                turnedInto
+                  ? `<span class="final-role-tag"
+                       style="
+                         color:${roleColors[p.executionerConvertedTo] || "white"};
+                         border-color:${(roleColors[p.executionerConvertedTo] || "white")}33;
+                         background:${(roleColors[p.executionerConvertedTo] || "white")}14;
+                       ">
+                       turned ${turnedInto}
+                     </span>`
+                  : ""
+              }
+            </div>
+          </div>
+
+        </div>
+
+        ${target ? `
+          <div class="executioner-target-reveal final-target-reveal">
+            <span class="executioner-target-reveal-label">Target:</span>
+            <span class="executioner-target-reveal-name">${target}</span>
+          </div>
+        ` : ""}
+      `
+    }
+
+    if (p.role === "schrodingers_cat" && p.catAlignment) {
+      const alignColor = p.catAlignment === "mafia" ? roleColors.mafia : roleColors.villager
+      const alignLabel = p.catAlignment === "mafia" ? "Joined Mafia" : "Joined Town"
+
+      return `
+        <div class="final-player-card" style="--final-role-color:${roleColors.schrodingers_cat};">
+          <div class="final-player-main">
+            <div class="final-player-name">${p.name}</div>
+            <div class="final-player-role" style="color:${roleColors.schrodingers_cat}">
+              Schrödinger's Cat
+              <span class="final-role-tag" style="color:${alignColor}; border-color:${alignColor}33; background:${alignColor}14;">
+                ${alignLabel}
+              </span>
+            </div>
+          </div>
+        </div>
+      `
+    }
+
+    return `
+      <div class="final-player-card" style="--final-role-color:${color};">
+        <div class="final-player-main">
+          <div class="final-player-name">${p.name}</div>
+          <div class="final-player-role" style="color:${color}">
+            ${roleDisplayName(p.role)}
+          </div>
+        </div>
+      </div>
+    `
+  }).join("")
+}
+
+function renderOnlineFinalResults() {
+  const players = demoRoom?.gameState?.players || []
+  const logEntries = demoRoom?.gameState?.gameLog || []
+  const stats = demoRoom?.gameState?.gameStats || {
+    nights: 0,
+    votesCast: 0,
+    eliminations: 0
+  }
+
+  const logHTML = logEntries.length
+    ? logEntries.map(entry => {
+        const isHeader = entry.startsWith("Night ") || entry.startsWith("Day ")
+        return `<p class="log-entry ${isHeader ? "log-header" : ""}">${entry}</p>`
+      }).join("")
+    : `<p style="opacity:0.7;">No log entries recorded.</p>`
+
+  const mafia = players.filter(p => getOnlineEffectiveTeam(p) === "mafia")
+  const town = players.filter(p => getOnlineEffectiveTeam(p) === "village")
+  const neutral = players.filter(p => getOnlineEffectiveTeam(p) === "neutral")
+
+  const winnerBanner = getOnlineFinalWinnerBanner()
+
+  document.body.className = "win-village"
+
+  render(
+    buildSharedFinalResultsScreen({
+      winnerBanner,
+      stats: {
+        nights: stats.nights || 0,
+        votesCast: stats.votesCast || 0,
+        eliminations: stats.eliminations || 0,
+        players: players.length,
+        mafiaCount: mafia.length,
+        townCount: town.length,
+        neutralCount: neutral.length
+      },
+      mafiaHTML: renderOnlineFinalRoleList(mafia),
+      townHTML: renderOnlineFinalRoleList(town),
+      neutralHTML: renderOnlineFinalRoleList(neutral),
+      logHTML,
+      continueButtonHTML: `
+        ${renderOnlineProgressBox()}
+        <div class="reveal-role-actions">
+          ${renderOnlineProceedButton("Back To Lobby")}
+        </div>
+      `
+    })
+  )
 }
 
 function renderOnlineGameOver() {
@@ -1015,7 +1288,7 @@ if (finalResult.type === "jester_executioner_win") {
     `,
     progressBoxHTML: renderOnlineProgressBox(),
     continueButtonHTML: `
-      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
     `
   })
 
@@ -1035,7 +1308,7 @@ if (finalResult.type === "village_executioner_win") {
     `,
     progressBoxHTML: renderOnlineProgressBox(),
     continueButtonHTML: `
-      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
     `
   })
 
@@ -1054,7 +1327,7 @@ if (finalResult.type === "village_executioner_win") {
     `,
     progressBoxHTML: renderOnlineProgressBox(),
     continueButtonHTML: `
-      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
     `
   })
 
@@ -1073,7 +1346,7 @@ if (finalResult.type === "village_executioner_win") {
     `,
     progressBoxHTML: renderOnlineProgressBox(),
     continueButtonHTML: `
-      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
     `
   })
 
@@ -1092,7 +1365,7 @@ if (finalResult.type === "village_executioner_win") {
     `,
     progressBoxHTML: renderOnlineProgressBox(),
     continueButtonHTML: `
-      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
     `
   })
 
@@ -1111,7 +1384,7 @@ if (finalResult.type === "village_win") {
     `,
     progressBoxHTML: renderOnlineProgressBox(),
     continueButtonHTML: `
-      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
     `
   })
 
@@ -1129,7 +1402,7 @@ if (finalResult.type === "village_win") {
 
       ${renderOnlineProgressBox()}
 
-      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
     </div>
   `)
 }
@@ -1608,7 +1881,7 @@ function renderOnlineVoteResults() {
     `,
     progressBoxHTML: renderOnlineProgressBox(),
     continueButtonHTML: `
-      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
     `
   })
 
@@ -1627,7 +1900,7 @@ if (voteResults.resultType === "executioner_win") {
     `,
     progressBoxHTML: renderOnlineProgressBox(),
     continueButtonHTML: `
-      <button class="primary-btn" onclick="window.markOnlineReady()">Continue</button>
+      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
     `
   })
 

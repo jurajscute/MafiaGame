@@ -295,3 +295,112 @@ export function buildSharedWinScreen({
     `
   }
 }
+
+export function buildSharedFinalResultsScreen({
+  winnerBanner,
+  stats,
+  mafiaHTML,
+  townHTML,
+  neutralHTML,
+  logHTML,
+  continueButtonHTML = ""
+}) {
+  return `
+    <div class="final-results-centered">
+      <div class="card final-results-card final-results-shell">
+
+        <div class="final-results-hero ${winnerBanner.className}">
+          <div class="final-results-kicker">${winnerBanner.label}</div>
+          <h2 class="final-results-title">${winnerBanner.title}</h2>
+          <div class="final-results-subtitle">
+            ${winnerBanner.subtitle}
+          </div>
+        </div>
+
+        <div class="final-summary-grid">
+          <div class="final-summary-stat">
+            <div class="final-summary-value">${stats.nights}</div>
+            <div class="final-summary-label">Nights</div>
+          </div>
+
+          <div class="final-summary-stat">
+            <div class="final-summary-value">${stats.votesCast}</div>
+            <div class="final-summary-label">Votes Cast</div>
+          </div>
+
+          <div class="final-summary-stat">
+            <div class="final-summary-value">${stats.eliminations}</div>
+            <div class="final-summary-label">Deaths</div>
+          </div>
+
+          <div class="final-summary-stat">
+            <div class="final-summary-value">${stats.players}</div>
+            <div class="final-summary-label">Players</div>
+          </div>
+        </div>
+
+        <div class="final-team-sections">
+
+          <div class="final-team-card final-team-mafia">
+            <div class="final-team-header">
+              <div>
+                <div class="final-team-kicker">Team</div>
+                <h3 class="final-team-title mafia-win">Mafia</h3>
+              </div>
+              <div class="final-team-count">${stats.mafiaCount}</div>
+            </div>
+
+            <div class="final-team-list">
+              ${mafiaHTML}
+            </div>
+          </div>
+
+          <div class="final-team-card final-team-town">
+            <div class="final-team-header">
+              <div>
+                <div class="final-team-kicker">Team</div>
+                <h3 class="final-team-title village-win">Town</h3>
+              </div>
+              <div class="final-team-count">${stats.townCount}</div>
+            </div>
+
+            <div class="final-team-list">
+              ${townHTML}
+            </div>
+          </div>
+
+          <div class="final-team-card final-team-neutral">
+            <div class="final-team-header">
+              <div>
+                <div class="final-team-kicker">Team</div>
+                <h3 class="final-team-title neutral-team">Neutral</h3>
+              </div>
+              <div class="final-team-count">${stats.neutralCount}</div>
+            </div>
+
+            <div class="final-team-list">
+              ${neutralHTML}
+            </div>
+          </div>
+
+        </div>
+
+        <div class="final-log-card">
+          <div class="final-log-header">
+            <div>
+              <div class="final-team-kicker">Timeline</div>
+              <h3 class="final-log-title">Game Log</h3>
+            </div>
+          </div>
+
+          <div class="game-log-box final-log-box">
+            ${logHTML}
+          </div>
+        </div>
+
+        ${continueButtonHTML}
+
+      </div>
+    </div>
+  `
+}
