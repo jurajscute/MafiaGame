@@ -37,6 +37,8 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
   const privateResults = []
   const nightDeaths = []
 
+let vigilantePublicReveal = null
+
   const priestBlockedRoles = []
 
   const holyShields = actions.filter(a => a.type === "holy_shield")
@@ -125,69 +127,129 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
   })
 
   vigilanteShots.forEach(action => {
-    const shooter = players.find(player => player.id === action.playerId)
-    const target = getPlayerByName(players, action.target)
+  const shooter = players.find(player => player.id === action.playerId)
+  const target = getPlayerByName(players, action.target)
 
-    if (!shooter || shooter.alive === false || !target || target.alive === false) {
-      return
+  if (!shooter || shooter.alive === false) return
+
+  // If target is already dead or missing
+  if (!target || target.alive === false) {
+    vigilantePublicReveal = {
+      shooter: shooter.name,
+      target: action.target,
+      targetRole: null,
+      targetDied: false,
+      vigilanteDies: false,
+      blocked: false,
+      blockedByHolySpirit: false,
+      wrongTarget: false
     }
 
-    if (holyShieldActive) {
-      priestBlockedRoles.push("Vigilante")
+    privateResults.push({
+      playerId: shooter.id,
+      type: "vigilante_result",
+      title: "NOTHING HAPPENED",
+      text: `${action.target} was already dead before you arrived.`
+    })
 
-      privateResults.push({
-        playerId: shooter.id,
-        type: "vigilante_blocked_priest",
-        targetName: target.name
-      })
+    return
+  }
 
-      return
+  // Priest blocks Vigilante
+  if (holyShieldActive) {
+    priestBlockedRoles.push("Vigilante")
+
+    vigilantePublicReveal = {
+      shooter: shooter.name,
+      target: target.name,
+      targetRole: target.role,
+      targetDied: false,
+      vigilanteDies: false,
+      blocked: true,
+      blockedByHolySpirit: true,
+      wrongTarget: false
     }
 
-    if (savedTargets.includes(target.name)) {
-      privateResults.push({
-        playerId: shooter.id,
-        type: "vigilante_blocked",
-        targetName: target.name
-      })
+    privateResults.push({
+      playerId: shooter.id,
+      type: "vigilante_blocked_priest",
+      targetName: target.name
+    })
 
-      return
+    return
+  }
+
+  // Doctor blocks Vigilante
+  if (savedTargets.includes(target.name)) {
+    vigilantePublicReveal = {
+      shooter: shooter.name,
+      target: target.name,
+      targetRole: target.role,
+      targetDied: false,
+      vigilanteDies: false,
+      blocked: true,
+      blockedByHolySpirit: false,
+      wrongTarget: false
     }
 
-    markDoomed(target)
-    if (!nightDeaths.includes(target.name)) {
-      nightDeaths.push(target.name)
+    privateResults.push({
+      playerId: shooter.id,
+      type: "vigilante_blocked",
+      targetName: target.name
+    })
+
+    return
+  }
+
+  // Successful hit
+  markDoomed(target)
+  if (!nightDeaths.includes(target.name)) {
+    nightDeaths.push(target.name)
+  }
+
+  const targetTeam = target.catAlignment || roles[target.role]?.team || "neutral"
+  const wrongTarget = targetTeam !== "mafia" && targetTeam !== "neutral"
+
+  let vigilanteDies = false
+
+  if (wrongTarget) {
+    markDoomed(shooter)
+    vigilanteDies = true
+
+    if (!nightDeaths.includes(shooter.name)) {
+      nightDeaths.push(shooter.name)
     }
 
-    const targetTeam = target.catAlignment || roles[target.role]?.team || "neutral"
-    const wrongTarget = targetTeam !== "mafia" && targetTeam !== "neutral"
+    gameLog.push(`${shooter.name} attacked the wrong target and will also die.`)
 
-    if (wrongTarget) {
-      markDoomed(shooter)
+    privateResults.push({
+      playerId: shooter.id,
+      type: "vigilante_result",
+      title: "WRONG TARGET",
+      text: `${target.name} was not Mafia or Neutral. You will die too.`
+    })
+  } else {
+    gameLog.push(`${shooter.name} killed ${target.name} as the Vigilante.`)
 
-      if (!nightDeaths.includes(shooter.name)) {
-        nightDeaths.push(shooter.name)
-      }
+    privateResults.push({
+      playerId: shooter.id,
+      type: "vigilante_result",
+      title: "TARGET ELIMINATED",
+      text: `${target.name} was eliminated.`
+    })
+  }
 
-      gameLog.push(`${shooter.name} attacked the wrong target and will also die.`)
-
-      privateResults.push({
-        playerId: shooter.id,
-        type: "vigilante_result",
-        title: "WRONG TARGET",
-        text: `${target.name} was not Mafia or Neutral. You will die too.`
-      })
-    } else {
-      gameLog.push(`${shooter.name} killed ${target.name} as the Vigilante.`)
-
-      privateResults.push({
-        playerId: shooter.id,
-        type: "vigilante_result",
-        title: "TARGET ELIMINATED",
-        text: `${target.name} was eliminated.`
-      })
-    }
-  })
+  vigilantePublicReveal = {
+    shooter: shooter.name,
+    target: target.name,
+    targetRole: target.role,
+    targetDied: true,
+    vigilanteDies,
+    blocked: false,
+    blockedByHolySpirit: false,
+    wrongTarget
+  }
+})
 
   if (mafiaKill) {
     const target = getPlayerByName(players, mafiaKill)
@@ -299,14 +361,15 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
   }
 
   return {
-    players,
-    nightDeaths,
-    nightResolved: {
-      publicResults
-    },
-    nightPrivateResults: privateResults,
-    gameLog,
-    gameStats,
-    finalResult
-  }
+  players,
+  nightDeaths,
+  nightResolved: {
+    publicResults
+  },
+  nightPrivateResults: privateResults,
+  vigilantePublicReveal,
+  gameLog,
+  gameStats,
+  finalResult
+}
 }

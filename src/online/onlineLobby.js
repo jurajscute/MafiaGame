@@ -1037,6 +1037,7 @@ async function maybeAdvanceOnlinePhase() {
     "gameState/nightDeaths": resolved.nightDeaths,
     "gameState/nightResolved": resolved.nightResolved,
     "gameState/nightPrivateResults": resolved.nightPrivateResults,
+    "gameState/vigilantePublicReveal": resolved.vigilantePublicReveal || null,
     "gameState/gameLog": resolved.gameLog,
     "gameState/gameStats": resolved.gameStats,
     "gameState/finalResult": resolved.finalResult || null,
@@ -1070,20 +1071,28 @@ async function maybeAdvanceOnlinePhase() {
 
     if (gameState.phase === "role_reveal") nextPhase = "night_select"
     if (gameState.phase === "night_results") {
-  const nextPlayers = (gameState.players || []).map(player => {
-    if (player.doomedTonight) {
-      return {
-        ...player,
-        alive: false,
-        doomedTonight: false
-      }
-    }
+  let eliminatedThisMorning = 0
 
+const nextPlayers = (gameState.players || []).map(player => {
+  if (player.doomedTonight) {
+    eliminatedThisMorning += 1
     return {
       ...player,
+      alive: false,
       doomedTonight: false
     }
-  })
+  }
+
+  return {
+    ...player,
+    doomedTonight: false
+  }
+})
+
+const nextGameStats = {
+  ...(gameState.gameStats || {}),
+  eliminations: (gameState.gameStats?.eliminations || 0) + eliminatedThisMorning
+}
 
   const mafiaAlive = nextPlayers.filter(player => {
     if (player.alive === false) return false
@@ -1108,15 +1117,15 @@ async function maybeAdvanceOnlinePhase() {
   }
 
   await update(getOnlineRoomRef(), {
-    "gameState/players": nextPlayers,
-    "gameState/finalResult": finalResult,
-    "gameState/finalResultsSeen": finalResult ? {} : (gameState.finalResultsSeen || {}),
-    "gameState/phase": finalResult ? "game_over" : "morning",
-    "gameState/readyMap": {},
-    "gameState/submittedActions": {},
-    "gameState/votes": {},
-    "gameState/morningSeen": {}
-  })
+  "gameState/players": nextPlayers,
+  "gameState/finalResult": finalResult,
+  "gameState/finalResultsSeen": finalResult ? {} : (gameState.finalResultsSeen || {}),
+  "gameState/phase": finalResult ? "game_over" : "morning",
+  "gameState/readyMap": {},
+  "gameState/submittedActions": {},
+  "gameState/votes": {},
+  "gameState/morningSeen": {}
+})
   return
 }
     else if (gameState.phase === "morning") nextPhase = "voting"
@@ -1132,7 +1141,8 @@ async function maybeAdvanceOnlinePhase() {
   "gameState/phase": nextPhase,
   "gameState/readyMap": {},
   "gameState/submittedActions": {},
-  "gameState/votes": {}
+  "gameState/votes": {},
+  "gameState/vigilantePublicReveal": null,
 }
 
 if (nextPhase === "morning") {
@@ -2004,6 +2014,7 @@ const doomedTonight = !!meInState?.doomedTonight
 
 function renderOnlineMorning() {
   const publicResults = demoRoom?.gameState?.nightResolved?.publicResults || []
+  const vigilanteReveal = demoRoom?.gameState?.vigilantePublicReveal || null
   const players = getOnlinePresentPlayers()
 
   const playersHTML = players.map(player => `
@@ -2013,59 +2024,79 @@ function renderOnlineMorning() {
     </div>
   `).join("")
 
-  let resultsHTML = ""
+  const morningCards = [...publicResults]
 
-  if (!publicResults.length) {
-    resultsHTML = `
-      <div class="morning-result-card night-result-peace">
-        <div class="morning-result-kicker">Night</div>
-        <div class="morning-result-text">The night was quiet.</div>
-      </div>
-    `
+if (vigilanteReveal) {
+  let text = ""
+
+  if (vigilanteReveal.blocked) {
+    if (vigilanteReveal.blockedByHolySpirit) {
+      text = `The Vigilante tried to slash <strong>${vigilanteReveal.target}</strong>, but a holy spirit shield protected the town.`
+    } else {
+      text = `The Vigilante tried to slash <strong>${vigilanteReveal.target}</strong>, but the Doctor protected them.`
+    }
+  } else if (vigilanteReveal.wrongTarget) {
+    text = `${vigilanteReveal.target} was slashed by the Vigilante.`
+
+    if (vigilanteReveal.vigilanteDies) {
+      text += `<br>The Vigilante stabs their own heart in devastation.`
+    }
+  } else if (!vigilanteReveal.targetDied) {
+    text = `The Vigilante tried to slash <strong>${vigilanteReveal.target}</strong>, but nothing happened.`
   } else {
-    resultsHTML = publicResults.map(result => {
-      let extraClass = "night-result-peace"
-      let kicker = "Night"
-
-      if (result.type === "death") {
-        extraClass = "night-result-death"
-        kicker = "Eliminated"
-      }
-
-      if (result.type === "save") {
-        extraClass = "night-result-save"
-        kicker = "Survived"
-      }
-
-      return `
-        <div class="morning-result-card ${extraClass}">
-          <div class="morning-result-kicker">${kicker}</div>
-          <div class="morning-result-text">
-            ${result.text}
-          </div>
-        </div>
-      `
-    }).join("")
+    text = `${vigilanteReveal.target} was slashed by the Vigilante.`
   }
 
-  render(
-  buildSharedMorningScreen({
-    resultsHTML,
-    playersHTML,
-    progressBoxHTML: renderOnlineVoteProgressBox(),
-    continueButtonHTML: hasOnlinePlayerSeenMorning()
-      ? `
-          <button class="primary-btn" disabled>
-            Waiting For Your Vote
-          </button>
-        `
-      : `
-          <button class="morning-btn" onclick="window.advanceOnlineMorning()">
-            Continue
-          </button>
-        `
+  morningCards.push({
+    type: "vigilante",
+    text
   })
-)
+}
+
+let resultsHTML = ""
+
+if (!morningCards.length) {
+  resultsHTML = `
+    <div class="morning-result-card night-result-peace">
+      <div class="morning-result-kicker">Night</div>
+      <div class="morning-result-text">The night was quiet.</div>
+    </div>
+  `
+} else {
+  resultsHTML = morningCards.map(result => {
+    let extraClass = "night-result-peace"
+    let kicker = "Night"
+
+    if (result.type === "death") {
+      extraClass = "night-result-death"
+      kicker = "Eliminated"
+    }
+
+    if (result.type === "save") {
+      extraClass = "night-result-save"
+      kicker = "Survived"
+    }
+
+    if (result.type === "priest_shield") {
+      extraClass = "night-result-priest"
+      kicker = "Holy Protection"
+    }
+
+    if (result.type === "vigilante") {
+      extraClass = "night-result-vigilante"
+      kicker = "Vigilante"
+    }
+
+    return `
+      <div class="morning-result-card ${extraClass}">
+        <div class="morning-result-kicker">${kicker}</div>
+        <div class="morning-result-text">
+          ${result.text}
+        </div>
+      </div>
+    `
+  }).join("")
+}
 }
 
 function renderOnlineVoting() {
