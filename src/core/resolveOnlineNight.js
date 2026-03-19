@@ -138,7 +138,30 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
     })
   }
 
-  return {
+  let finalResult = null
+
+  const aliveAfterNight = players.filter(player => player.alive !== false)
+  const mafiaAlive = aliveAfterNight.filter(player => {
+    const team = roles[player.role]?.team
+    return team === "mafia" || player.catAlignment === "mafia"
+  }).length
+
+  const nonMafiaAlive = aliveAfterNight.filter(player => {
+    const team = player.catAlignment || roles[player.role]?.team
+    return team !== "mafia"
+  }).length
+
+  if (mafiaAlive === 0) {
+    finalResult = {
+      type: "village_win"
+    }
+  } else if (mafiaAlive >= nonMafiaAlive) {
+    finalResult = {
+      type: "mafia_win"
+    }
+  }
+
+    return {
     players,
     nightDeaths,
     nightResolved: {
@@ -146,6 +169,7 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
     },
     nightPrivateResults: privateResults,
     gameLog,
-    gameStats
+    gameStats,
+    finalResult
   }
 }

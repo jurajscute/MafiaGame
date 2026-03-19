@@ -601,6 +601,66 @@ body.night .card:not(.role-mafia):not(.special-chaos-win):not(.special-spirit-wi
   filter:drop-shadow(0 0 6px rgba(255,255,255,0.3));
 }
 
+.role-jester button,
+.role-jester button:hover,
+.role-jester button:focus{
+  background:linear-gradient(135deg,#ff3ea5,#b3126b);
+}
+
+.role-mafia button,
+.role-mafia button:hover,
+.role-mafia button:focus{
+  background:linear-gradient(135deg,#7e0e0e,#690000);
+}
+
+.role-framer button,
+.role-framer button:hover,
+.role-framer button:focus{
+  background:linear-gradient(135deg,#7e0e0e,#690000);
+}
+
+.role-priest button,
+.role-priest button:hover,
+.role-priest button:focus{
+  background:linear-gradient(135deg,#f3d86bd3,#caa83abb);
+}
+
+.role-spirit button,
+.role-spirit button:hover,
+.role-spirit button:focus{
+  background:linear-gradient(135deg,#9c59b6b9,#6d3483a1);
+}
+
+.role-vigilante button,
+.role-vigilante button:hover,
+.role-vigilante button:focus{
+  background:linear-gradient(135deg,#190e7ea9,#0700698f);
+}
+
+.role-mayor button,
+.role-mayor button:hover,
+.role-mayor button:focus{
+  background:linear-gradient(135deg,#1f9f79ab,#147457b6);
+}
+
+.role-executioner button,
+.role-executioner button:hover,
+.role-executioner button:focus{
+  background:linear-gradient(135deg,#7a2f6fc0,#4a1b43a6);
+}
+
+.role-sheriff button,
+.role-sheriff button:hover,
+.role-sheriff button:focus{
+  background:linear-gradient(135deg,#775306ab,#e682008f);
+}
+
+.role-doctor button,
+.role-doctor button:hover,
+.role-doctor button:focus{
+  background:linear-gradient(135deg,#0b5375b0,#0038a19a);
+}
+
 /* =========================
    WIN BACKGROUNDS
 ========================= */
@@ -6376,7 +6436,7 @@ body.holy-night-flash .holy-pulse{
   height: 100%;
   width: 0%;
   border-radius: 999px;
-  background: linear-gradient(90deg, rgba(21, 43, 79), rgba(0, 17, 102));
+  background: linear-gradient(90deg, rgba(88, 125, 163), rgba(40, 63, 87));
   box-shadow: 0 0 12px rgba(120,220,255,0.35);
   transition: width 0.22s ease;
 }

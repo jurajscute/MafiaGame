@@ -1030,21 +1030,23 @@ async function maybeAdvanceOnlinePhase() {
 
   try {
     if (gameState.phase === "night_select") {
-      const resolved = resolveOnlineNight(gameState, demoRoom.settings || {})
+  const resolved = resolveOnlineNight(gameState, demoRoom.settings || {})
 
-      await update(getOnlineRoomRef(), {
-  "gameState/players": resolved.players,
-  "gameState/nightDeaths": resolved.nightDeaths,
-  "gameState/nightResolved": resolved.nightResolved,
-  "gameState/nightPrivateResults": resolved.nightPrivateResults,
-  "gameState/gameLog": resolved.gameLog,
-  "gameState/gameStats": resolved.gameStats,
-  "gameState/phase": "night_results",
-  "gameState/readyMap": {},
-  "gameState/submittedActions": {}
-})
-      return
-    }
+  await update(getOnlineRoomRef(), {
+    "gameState/players": resolved.players,
+    "gameState/nightDeaths": resolved.nightDeaths,
+    "gameState/nightResolved": resolved.nightResolved,
+    "gameState/nightPrivateResults": resolved.nightPrivateResults,
+    "gameState/gameLog": resolved.gameLog,
+    "gameState/gameStats": resolved.gameStats,
+    "gameState/finalResult": resolved.finalResult || null,
+    "gameState/finalResultsSeen": resolved.finalResult ? {} : (gameState.finalResultsSeen || {}),
+    "gameState/phase": resolved.finalResult ? "game_over" : "night_results",
+    "gameState/readyMap": {},
+    "gameState/submittedActions": {}
+  })
+  return
+}
 
     if (gameState.phase === "morning" || gameState.phase === "voting") {
   const resolved = resolveOnlineVotes(gameState)
