@@ -947,7 +947,7 @@ function renderOnlineProceedButton(label = "Continue", { includeDead = false } =
   }
 
   return `
-    <button class="primary-btn" onclick="window.markOnlineReady()">
+    <button class="morning-btn" onclick="window.markOnlineReady()">
       ${label}
     </button>
   `
@@ -1817,10 +1817,10 @@ if (me.role === "priest") {
   })
 
   const buttonsHTML = validTargets.map(player => `
-    <button onclick="window.submitNightAction('${getActionType(me.role)}', '${player.name}')">
-      ${player.name}
-    </button>
-  `).join("")
+  <button onclick="window.submitNightAction('${getActionType(me.role)}', '${player.name}')">
+    ${player.name}${player.id === me.id ? ` <span style="opacity:0.6;">(You)</span>` : ""}
+  </button>
+`).join("")
 
   const skipButton =
     me.role === "vigilante"
@@ -1941,15 +1941,46 @@ if (myResult?.type === "mafia_kill_blocked_priest") {
     return
   }
 
+  if (myResult?.type === "vigilante_blocked") {
+  renderOnlineNightResultCard({
+    me,
+    hint: "Your attack failed",
+    boxClass: "vigilante-result-box",
+    boxKicker: "Attack Failed",
+    title: (myResult.targetName || "Unknown").toUpperCase(),
+    titleColor: roleColors.vigilante,
+    bodyText: `Your attack on ${myResult.targetName} was stopped by the Doctor!`
+  })
+  return
+}
+
+if (myResult?.type === "vigilante_blocked_priest") {
+  renderOnlineNightResultCard({
+    me,
+    hint: "Holy power stopped the attack",
+    boxClass: "priest-result-box",
+    boxKicker: "Holy Shield Held",
+    title: (myResult.targetName || "Unknown").toUpperCase(),
+    titleColor: roleColors.priest,
+    bodyText: `Your attack on ${myResult.targetName} was stopped by the Holy Spirit.`
+  })
+  return
+}
+
   if (myResult?.type === "priest_result") {
+  const blockedRoles = myResult.blockedRoles || []
+  const blockedText = blockedRoles.length
+    ? blockedRoles.join(" and ")
+    : "No attacks"
+
   renderOnlineNightResultCard({
     me,
     hint: "Your blessing protected the town",
     boxClass: "priest-result-box",
-    boxKicker: "Holy Spirit",
-    title: "DIVINE SHIELD",
+    boxKicker: "Holy Spirit Outcome",
+    title: blockedText.toUpperCase(),
     titleColor: roleColors.priest,
-    bodyText: myResult.text || "The Holy Spirit shielded the town tonight."
+    bodyText: "were blocked by the Holy Spirit."
   })
   return
 }
@@ -2027,7 +2058,7 @@ function renderOnlineMorning() {
           </button>
         `
       : `
-          <button class="primary-btn" onclick="window.advanceOnlineMorning()">
+          <button class="morning-btn" onclick="window.advanceOnlineMorning()">
             Continue
           </button>
         `

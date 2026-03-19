@@ -37,11 +37,22 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
   const privateResults = []
   const nightDeaths = []
 
-  const holyShields = actions.filter(a => a.type === "holy_shield")
-  const kills = actions.filter(a => a.type === "kill")
-  const saves = actions.filter(a => a.type === "save")
-  const investigates = actions.filter(a => a.type === "investigate")
-  const frames = actions.filter(a => a.type === "frame")
+  const priestBlockedAttacks = []
+  
+const holyShields = actions.filter(a => a.type === "holy_shield")
+const saves = actions.filter(a => a.type === "save")
+const investigates = actions.filter(a => a.type === "investigate")
+const frames = actions.filter(a => a.type === "frame")
+
+const mafiaKills = actions.filter(a => {
+  const actor = players.find(player => player.id === a.playerId)
+  return actor?.role === "mafia" && a.type === "kill"
+})
+
+const vigilanteShots = actions.filter(a => {
+  const actor = players.find(player => player.id === a.playerId)
+  return actor?.role === "vigilante" && a.type === "kill"
+})
 
   const holyShieldUsers = holyShields.filter(action => action.target === "__use__")
   const holyShieldActive = holyShieldUsers.length > 0
@@ -54,12 +65,6 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
     if (currentUses <= 0) return
 
     priest.priestUsesLeft = Math.max(0, currentUses - 1)
-
-    privateResults.push({
-      playerId: priest.id,
-      type: "priest_result",
-      text: "The Holy Spirit shielded the town tonight."
-    })
   })
 
   let mafiaKill = null
@@ -119,66 +124,147 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
     })
   })
 
+vigilanteShots.forEach(action => {
+  const shooter = players.find(player => player.id === action.playerId)
+  const target = getPlayerByName(players, action.target)
+
+  if (!shooter || shooter.alive === false || !target || target.alive === false) {
+    return
+  }
+
+  if (holyShieldActive) {
+    priestBlockedRoles.push("Vigilante")
+
+    privateResults.push({
+      playerId: shooter.id,
+      type: "vigilante_blocked_priest",
+      targetName: target.name
+    })
+
+    return
+  }
+
+  if (savedTargets.includes(target.name)) {
+    privateResults.push({
+      playerId: shooter.id,
+      type: "vigilante_blocked",
+      targetName: target.name
+    })
+
+    return
+  }
+
+  markDoomed(target)
+  if (!nightDeaths.includes(target.name)) {
+    nightDeaths.push(target.name)
+  }
+
+  const targetTeam = target.catAlignment || roles[target.role]?.team || "neutral"
+  const wrongTarget = targetTeam !== "mafia" && targetTeam !== "neutral"
+
+  if (wrongTarget) {
+    markDoomed(shooter)
+
+    if (!nightDeaths.includes(shooter.name)) {
+      nightDeaths.push(shooter.name)
+    }
+
+    gameLog.push(`${shooter.name} attacked the wrong target and will also die.`)
+
+    privateResults.push({
+      playerId: shooter.id,
+      type: "vigilante_result",
+      title: "WRONG TARGET",
+      text: `${target.name} was not Mafia or Neutral. You will die too.`
+    })
+  } else {
+    gameLog.push(`${shooter.name} killed ${target.name} as the Vigilante.`)
+
+    privateResults.push({
+      playerId: shooter.id,
+      type: "vigilante_result",
+      title: "TARGET ELIMINATED",
+      text: `${target.name} was eliminated.`
+    })
+  }
+})
+
   if (mafiaKill) {
-    const target = getPlayerByName(players, mafiaKill)
+  const target = getPlayerByName(players, mafiaKill)
 
-    if (target && isAlive(target)) {
-      if (holyShieldActive) {
-        gameLog.push(`Holy Spirit blocked the Mafia's attack on ${target.name}.`)
+  if (target && isAlive(target)) {
+    if (holyShieldActive) {
+      priestBlockedRoles.push("Mafia")
 
-        publicResults.push({
-          type: "priest_shield",
-          text: "A holy spirit shield protected the town last night."
-        })
+      gameLog.push(`Holy Spirit blocked the Mafia's attack on ${target.name}.`)
 
-        const mafiaKiller = players.find(player => player.id === mafiaKillActorId)
-        if (mafiaKiller && mafiaKiller.alive !== false) {
-          privateResults.push({
-            playerId: mafiaKiller.id,
-            type: "mafia_kill_blocked_priest",
-            targetName: target.name
-          })
-        }
-      } else if (savedTargets.includes(target.name)) {
-        publicResults.push({
-          type: "save",
-          text: `${target.name} was attacked, but someone saved them.`
-        })
+      publicResults.push({
+        type: "priest_shield",
+        text: "A holy spirit shield protected the town last night."
+      })
 
-        gameLog.push(`${target.name} was saved by the Doctor.`)
-
-        saves.forEach(action => {
-          const doctor = players.find(player => player.id === action.playerId)
-          if (!doctor || doctor.alive === false) return
-          if (action.target !== target.name) return
-
-          privateResults.push({
-            playerId: doctor.id,
-            type: "doctor_save_success",
-            targetName: target.name
-          })
-        })
-
-        const mafiaKiller = players.find(player => player.id === mafiaKillActorId)
-        if (mafiaKiller && mafiaKiller.alive !== false) {
-          privateResults.push({
-            playerId: mafiaKiller.id,
-            type: "mafia_kill_blocked",
-            targetName: target.name
-          })
-        }
-      } else {
-        markDoomed(target)
-        nightDeaths.push(target.name)
-        gameLog.push(`${target.name} was killed during the night.`)
-
-        publicResults.push({
-          type: "death",
-          text: `${target.name} was found dead in the morning.`
+      const mafiaKiller = players.find(player => player.id === mafiaKillActorId)
+      if (mafiaKiller && mafiaKiller.alive !== false) {
+        privateResults.push({
+          playerId: mafiaKiller.id,
+          type: "mafia_kill_blocked_priest",
+          targetName: target.name
         })
       }
+    } else if (savedTargets.includes(target.name)) {
+      gameLog.push(`${target.name} was saved by the Doctor.`)
+
+      publicResults.push({
+        type: "save",
+        text: `${target.name} was attacked, but someone saved them.`
+      })
+
+      saves.forEach(action => {
+        const doctor = players.find(player => player.id === action.playerId)
+        if (!doctor || doctor.alive === false) return
+        if (action.target !== target.name) return
+
+        privateResults.push({
+          playerId: doctor.id,
+          type: "doctor_save_success",
+          targetName: target.name
+        })
+      })
+
+      const mafiaKiller = players.find(player => player.id === mafiaKillActorId)
+      if (mafiaKiller && mafiaKiller.alive !== false) {
+        privateResults.push({
+          playerId: mafiaKiller.id,
+          type: "mafia_kill_blocked",
+          targetName: target.name
+        })
+      }
+    } else {
+      markDoomed(target)
+      if (!nightDeaths.includes(target.name)) {
+        nightDeaths.push(target.name)
+      }
+
+      gameLog.push(`${target.name} was killed during the night.`)
+
+      publicResults.push({
+        type: "death",
+        text: `${target.name} was found dead in the morning.`
+      })
     }
   }
+}
+
+holyShieldUsers.forEach(action => {
+  const priest = players.find(player => player.id === action.playerId)
+  if (!priest || priest.alive === false) return
+
+  privateResults.push({
+    playerId: priest.id,
+    type: "priest_result",
+    blockedRoles: [...new Set(priestBlockedAttacks)]
+  })
+})
 
   if (!publicResults.length) {
     gameLog.push("The night was quiet.")
