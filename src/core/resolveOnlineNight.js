@@ -37,6 +37,11 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
   const privateResults = []
   const nightDeaths = []
 
+const currentUses = priest.priestUsesLeft ?? 1
+if (currentUses <= 0) return
+
+  const holyShieldActive = holyShields.some(action => action.target === "__use__")
+  const holyShields = actions.filter(a => a.type === "holy_shield")
   const kills = actions.filter(a => a.type === "kill")
   const saves = actions.filter(a => a.type === "save")
   const investigates = actions.filter(a => a.type === "investigate")
@@ -49,6 +54,16 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
   )
 
 let mafiaKillActorId = null
+
+holyShields.forEach(action => {
+  if (action.target !== "__use__") return
+
+  const priest = players.find(player => player.id === action.playerId)
+  if (!priest || priest.alive === false) return
+
+  const currentUses = priest.priestUsesLeft ?? 1
+  priest.priestUsesLeft = Math.max(0, currentUses - 1)
+})
 
 if (mafiaPlayers.length) {
   const mafiaKillAction = kills.find(action => {
@@ -110,6 +125,33 @@ if (mafiaPlayers.length) {
       targetName: target.name
     })
   })
+
+if (mafiaKill && holyShieldActive) {
+  const target = getPlayerByName(players, mafiaKill)
+
+  if (target && isAlive(target)) {
+    gameLog.push(`Holy Spirit blocked the Mafia's attack on ${target.name}.`)
+
+    publicResults.push({
+      type: "priest_shield",
+      text: "A holy spirit shield protected the town last night."
+    })
+
+    const mafiaActor = players.find(player => {
+      if (player.alive === false) return false
+      const submitted = submittedActions[player.id]
+      return player.role === "mafia" && submitted?.type === "kill"
+    })
+
+    if (mafiaActor) {
+      privateResults.push({
+        playerId: mafiaActor.id,
+        type: "mafia_kill_blocked_priest",
+        targetName: target.name
+      })
+    }
+  }
+}
 
   if (mafiaKill) {
   const target = getPlayerByName(players, mafiaKill)

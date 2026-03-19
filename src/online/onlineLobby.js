@@ -1751,7 +1751,11 @@ function renderOnlineNightSelect() {
       submittedText = `You chose to skip your action.`
     } else if (myAction.type === "none") {
       submittedText = `You have finished for the night.`
-    }
+    } else if (myAction.type === "holy_shield" && myAction.target === "__use__") {
+  submittedText = `You chose to use Holy Spirit.`
+} else if (myAction.type === "holy_shield" && myAction.target === "__skip__") {
+  submittedText = `You chose to skip Holy Spirit.`
+}
 
     renderOnlineNightActionCard({
       me,
@@ -1761,6 +1765,27 @@ function renderOnlineNightSelect() {
     })
     return
   }
+
+if (me.role === "priest") {
+  const usesLeft = me.priestUsesLeft ?? 1
+  const canUse = usesLeft > 0
+
+  renderOnlineNightActionCard({
+    me,
+    hint: "A blessing can change the whole night",
+    panelLabel: "Decision",
+    panelText: "Call upon the Holy Spirit to shield the town tonight?",
+    buttonsHTML: `
+      ${
+        canUse
+          ? `<button onclick="window.submitNightAction('holy_shield', '__use__')">Use Holy Spirit</button>`
+          : `<button disabled>No Uses Left</button>`
+      }
+      <button class="skip-btn" onclick="window.submitNightAction('holy_shield', '__skip__')">Skip Holy Spirit</button>
+    `
+  })
+  return
+}
 
   if (!role?.nightAction) {
   renderOnlineNightActionCard({
@@ -1864,6 +1889,19 @@ if (myResult?.type === "mafia_kill_blocked") {
   return
 }
 
+if (myResult?.type === "mafia_kill_blocked_priest") {
+  renderOnlineNightResultCard({
+    me,
+    hint: "Holy power stopped the attack",
+    boxClass: "priest-result-box",
+    boxKicker: "Holy Shield Held",
+    title: (myResult.targetName || "Unknown").toUpperCase(),
+    titleColor: roleColors.priest,
+    bodyText: `Your attack on ${myResult.targetName} was stopped by the Holy Spirit.`
+  })
+  return
+}
+
   if (myResult?.type === "doctor_save_success") {
     renderOnlineNightResultCard({
       me,
@@ -1902,6 +1940,19 @@ if (myResult?.type === "mafia_kill_blocked") {
     })
     return
   }
+
+  if (myResult?.type === "priest_result") {
+  renderOnlineNightResultCard({
+    me,
+    hint: "Your blessing protected the town",
+    boxClass: "priest-result-box",
+    boxKicker: "Holy Spirit",
+    title: "DIVINE SHIELD",
+    titleColor: roleColors.priest,
+    bodyText: myResult.text || "The Holy Spirit shielded the town tonight."
+  })
+  return
+}
 
 const meInState = getOnlineMe()
 const doomedTonight = !!meInState?.doomedTonight

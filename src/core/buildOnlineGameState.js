@@ -9,7 +9,8 @@ export function buildOnlineGameState(room) {
       role: null,
       catAlignment: null,
       wasExecutioner: false,
-      executionerConvertedTo: null
+      executionerConvertedTo: null,
+      priestUsesLeft: player.role === "priest" ? 1 : undefined
     })),
     rolesEnabled: room.settings.rolesEnabled || {},
     roleWeights: room.settings.roleWeights || {},
