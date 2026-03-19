@@ -8,6 +8,11 @@ function isAlive(player) {
   return !!player && player.alive !== false
 }
 
+function markDoomed(player) {
+  if (!player) return
+  player.doomedTonight = true
+}
+
 export function resolveOnlineNight(gameState, roomSettings = {}) {
   const players = structuredClone(gameState.players || [])
   const submittedActions = gameState.submittedActions || {}
@@ -42,6 +47,20 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
   const mafiaPlayers = players.filter(
     player => player.role === "mafia" && player.alive !== false
   )
+
+let mafiaKillActorId = null
+
+if (mafiaPlayers.length) {
+  const mafiaKillAction = kills.find(action => {
+    const actor = players.find(player => player.id === action.playerId)
+    return actor?.role === "mafia"
+  })
+
+  if (mafiaKillAction) {
+    mafiaKill = mafiaKillAction.target
+    mafiaKillActorId = mafiaKillAction.playerId
+  }
+}
 
   if (mafiaPlayers.length) {
     const mafiaKillAction = kills.find(action => {
@@ -93,41 +112,46 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
   })
 
   if (mafiaKill) {
-    const target = getPlayerByName(players, mafiaKill)
+  const target = getPlayerByName(players, mafiaKill)
 
-    if (target && isAlive(target)) {
-      if (savedTargets.includes(target.name)) {
-        gameLog.push(`${target.name} was saved by the Doctor.`)
+  if (target && isAlive(target)) {
+    if (savedTargets.includes(target.name)) {
+      publicResults.push({
+        type: "save",
+        text: `${target.name} was attacked, but someone saved them.`
+      })
 
-        publicResults.push({
-          type: "save",
-          text: `${target.name} was attacked, but someone saved them.`
+      saves.forEach(action => {
+        const doctor = players.find(player => player.id === action.playerId)
+        if (!doctor || doctor.alive === false) return
+        if (action.target !== target.name) return
+
+        privateResults.push({
+          playerId: doctor.id,
+          type: "doctor_save_success",
+          targetName: target.name
         })
+      })
 
-        saves.forEach(action => {
-          const doctor = players.find(player => player.id === action.playerId)
-          if (!doctor || doctor.alive === false) return
-          if (action.target !== target.name) return
-
-          privateResults.push({
-            playerId: doctor.id,
-            type: "doctor_save_success",
-            targetName: target.name
-          })
-        })
-      } else {
-        target.alive = false
-        nightDeaths.push(target.name)
-        gameStats.eliminations += 1
-        gameLog.push(`${target.name} was killed during the night.`)
-
-        publicResults.push({
-          type: "death",
-          text: `${target.name} was found dead in the morning.`
+      const mafiaKiller = players.find(player => player.id === mafiaKillActorId)
+      if (mafiaKiller && mafiaKiller.alive !== false) {
+        privateResults.push({
+          playerId: mafiaKiller.id,
+          type: "mafia_kill_blocked",
+          targetName: target.name
         })
       }
+    } else {
+      markDoomed(target)
+      nightDeaths.push(target.name)
+
+      publicResults.push({
+        type: "death",
+        text: `${target.name} was found dead in the morning.`
+      })
     }
   }
+}
 
   if (!publicResults.length) {
     gameLog.push("The night was quiet.")

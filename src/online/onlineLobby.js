@@ -1069,7 +1069,31 @@ async function maybeAdvanceOnlinePhase() {
     let nextPhase = gameState.phase
 
     if (gameState.phase === "role_reveal") nextPhase = "night_select"
-    else if (gameState.phase === "night_results") nextPhase = "morning"
+    if (gameState.phase === "night_results") {
+  const nextPlayers = (gameState.players || []).map(player => {
+    if (player.doomedTonight) {
+      return {
+        ...player,
+        alive: false,
+        doomedTonight: false
+      }
+    }
+
+    return {
+      ...player,
+      doomedTonight: false
+    }
+  })
+
+  await update(getOnlineRoomRef(), {
+    "gameState/players": nextPlayers,
+    "gameState/phase": "morning",
+    "gameState/readyMap": {},
+    "gameState/submittedActions": {},
+    "gameState/votes": {}
+  })
+  return
+}
     else if (gameState.phase === "morning") nextPhase = "voting"
     else if (gameState.phase === "vote_results") {
       if (gameState.finalResult) {
@@ -1802,6 +1826,19 @@ function renderOnlineNightResults() {
     return
   }
 
+if (myResult?.type === "mafia_kill_blocked") {
+  renderOnlineNightResultCard({
+    me,
+    hint: "Your attack failed",
+    boxClass: "mafia-result-box",
+    boxKicker: "Attack Failed",
+    title: (myResult.targetName || "Unknown").toUpperCase(),
+    titleColor: roleColors.mafia,
+    bodyText: `Your attack on ${myResult.targetName} was stopped by the Doctor!`
+  })
+  return
+}
+
   if (myResult?.type === "doctor_save_success") {
     renderOnlineNightResultCard({
       me,
@@ -1841,13 +1878,18 @@ function renderOnlineNightResults() {
     return
   }
 
+const meInState = getOnlineMe()
+const doomedTonight = !!meInState?.doomedTonight
+
   renderOnlineNightResultCard({
   me,
   hint: "Nothing special reached you tonight",
   boxKicker: "Your Role",
   title: roleDisplayName(me.role),
   titleColor: roleColors[me.role] || "white",
-  bodyText: getOnlineNoResultText(me.role)
+  bodyText: doomedTonight
+    ? "You had a terrifying nightmare, you have a bad feeling about tonight..."
+    : getOnlineNoResultText(me.role)
 })
 }
 
