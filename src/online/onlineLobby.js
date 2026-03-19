@@ -1085,12 +1085,37 @@ async function maybeAdvanceOnlinePhase() {
     }
   })
 
+  const mafiaAlive = nextPlayers.filter(player => {
+    if (player.alive === false) return false
+    return getOnlineEffectiveTeam(player) === "mafia"
+  }).length
+
+  const nonMafiaAlive = nextPlayers.filter(player => {
+    if (player.alive === false) return false
+    return getOnlineEffectiveTeam(player) !== "mafia"
+  }).length
+
+  let finalResult = null
+
+  if (mafiaAlive === 0) {
+    finalResult = {
+      type: "village_win"
+    }
+  } else if (mafiaAlive >= nonMafiaAlive) {
+    finalResult = {
+      type: "mafia_win"
+    }
+  }
+
   await update(getOnlineRoomRef(), {
     "gameState/players": nextPlayers,
-    "gameState/phase": "morning",
+    "gameState/finalResult": finalResult,
+    "gameState/finalResultsSeen": finalResult ? {} : (gameState.finalResultsSeen || {}),
+    "gameState/phase": finalResult ? "game_over" : "morning",
     "gameState/readyMap": {},
     "gameState/submittedActions": {},
-    "gameState/votes": {}
+    "gameState/votes": {},
+    "gameState/morningSeen": {}
   })
   return
 }
