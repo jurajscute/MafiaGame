@@ -6,6 +6,8 @@ import { buildDefaultGameSettings, mergeGameSettings } from "../core/gameSetting
 import { maxAllowedMafia, getResolvedMafiaCount } from "../core/setupLogic.js"
 import { assignRolesToPlayers } from "../core/roleAssignment.js"
 import { render } from "./ui.js"
+import { buildSharedSettingsContent } from "../core/settingsRenderer.js"
+import { setNestedValue } from "../core/settingsUtils.js"
 import {
   startNight,
   startVoting,
@@ -678,8 +680,8 @@ window.updateLocalSetting = function(path, value) {
   setNestedValue(settings, path, value)
   applySettingsToLocalState(settings)
   saveSettingsToStorage()
-  showSettings()
   refreshPregameSummaryIfOpen()
+  showSettings()
 }
 
 function loadSettingsFromStorage() {
@@ -774,447 +776,36 @@ window.confirmStartGame = function(){
 function showSettings() {
   const modal = document.getElementById("infoModal")
 
+  const settings = getSettingsFromLocalState()
   const playerCount = state.players.length
   const mafiaMax = maxAllowedMafia(playerCount)
   const autoMafia = playerCount > 0 ? mafiaCount(playerCount) : 1
 
-  const mafiaRoles = ["framer", "traitor"]
-  const townRoles = ["doctor", "sheriff", "mayor", "spirit", "vigilante", "priest"]
-  const neutralRoles = ["jester", "executioner", "schrodingers_cat"]
-
-  let mafiaOptions = `<option value="0" ${state.mafiaCountOverride === 0 ? "selected" : ""}>Auto (${autoMafia})</option>`
-  for(let i = 1; i <= mafiaMax; i++){
-    let label = i === 1 ? "1 Mafia Member" : `${i} Mafia`
-    mafiaOptions += `<option value="${i}" ${state.mafiaCountOverride === i ? "selected" : ""}>${label}</option>`
+  let mafiaOptionsHTML = `<option value="0" ${settings.mafiaCountOverride === 0 ? "selected" : ""}>Auto (${autoMafia})</option>`
+  for (let i = 1; i <= mafiaMax; i++) {
+    const label = i === 1 ? "1 Mafia Member" : `${i} Mafia`
+    mafiaOptionsHTML += `<option value="${i}" ${settings.mafiaCountOverride === i ? "selected" : ""}>${label}</option>`
   }
 
-  function roleTeamText(role){
-    if(mafiaRoles.includes(role)) return "Mafia role"
-    if(neutralRoles.includes(role)) return "Neutral role"
-    return "Town role"
-  }
-
-  function renderRoleCard(role){
-    const enabled = state.rolesEnabled[role]
-    const weight = state.roleWeights[role] || 0
-    const count = state.roleCounts[role] || 1
-    const color = roleColors[role] || "#fff"
-
-    let advancedHTML = ""
-
-    if(role === "doctor"){
-      advancedHTML = `
-        <div class="settings-field">
-          <div class="settings-field-inline">
-            <span class="settings-field-label-inline">Reveal saved player</span>
-            <label class="switch">
-              <input type="checkbox"
-                ${state.doctorRevealSave ? "checked" : ""}
-                onchange="toggleDoctorReveal(this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-      `
-    }
-
-    if(role === "sheriff"){
-      advancedHTML = `
-        <div class="settings-field">
-          <div class="settings-field-inline">
-            <span class="settings-field-label-inline">Reveal exact role</span>
-            <label class="switch">
-              <input type="checkbox"
-                ${state.sheriffExactReveal ? "checked" : ""}
-                onchange="toggleSheriffExactReveal(this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-      `
-    }
-
-    if(role === "mayor"){
-      advancedHTML = `
-        <div class="settings-field">
-          <label class="settings-field-label">Vote power</label>
-          <select class="settings-modern-select" onchange="setMayorVotePower(this.value)">
-            <option value="1.5" ${state.mayorVotePower == 1.5 ? "selected" : ""}>1.5 votes</option>
-            <option value="2" ${state.mayorVotePower == 2 ? "selected" : ""}>2 votes</option>
-            <option value="2.5" ${state.mayorVotePower == 2.5 ? "selected" : ""}>2.5 votes</option>
-            <option value="3" ${state.mayorVotePower == 3 ? "selected" : ""}>3 votes</option>
-          </select>
-        </div>
-      `
-    }
-
-    if(role === "spirit"){
-      advancedHTML = `
-        <div class="settings-field">
-          <label class="settings-field-label">Reveal type</label>
-          <select class="settings-modern-select" onchange="setSpiritRevealType(this.value)">
-            <option value="exact" ${state.spiritRevealType === "exact" ? "selected" : ""}>Exact Role</option>
-            <option value="team" ${state.spiritRevealType === "team" ? "selected" : ""}>Team Only</option>
-          </select>
-        </div>
-
-        <div class="settings-field">
-          <label class="settings-field-label">Activates on</label>
-          <select class="settings-modern-select" onchange="setSpiritActivation(this.value)">
-            <option value="night_only" ${state.spiritActivation === "night_only" ? "selected" : ""}>Night Death Only</option>
-            <option value="any_death" ${state.spiritActivation === "any_death" ? "selected" : ""}>Any Death</option>
-          </select>
-        </div>
-
-        <div class="settings-field">
-          <div class="settings-field-inline">
-            <span class="settings-field-label-inline">Can skip reveal</span>
-            <label class="switch">
-              <input type="checkbox"
-                ${state.spiritCanSkipReveal ? "checked" : ""}
-                onchange="toggleSpiritCanSkipReveal(this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-      `
-    }
-
-    if(role === "framer"){
-      advancedHTML = `
-        <div class="settings-field">
-          <div class="settings-field-inline">
-            <span class="settings-field-label-inline">Knows if frame was successful</span>
-            <label class="switch">
-              <input type="checkbox"
-                ${state.framerKnowsSuccess ? "checked" : ""}
-                onchange="toggleFramerKnowsSuccess(this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-
-        <div class="settings-field">
-          <div class="settings-field-inline">
-            <span class="settings-field-label-inline">Knows who the mafia are</span>
-            <label class="switch">
-              <input type="checkbox"
-                ${state.framerKnowsMafia ? "checked" : ""}
-                onchange="toggleFramerKnowsMafia(this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-      `
-    }
-
-    if(role === "jester"){
-      advancedHTML = `
-        <div class="settings-field">
-          <label class="settings-field-label">Sheriff sees Jester as...</label>
-          <select class="settings-modern-select" onchange="setSheriffJesterResult(this.value)">
-            <option value="innocent" ${state.sheriffJesterResult === "innocent" ? "selected" : ""}>Innocent</option>
-            <option value="not_innocent" ${state.sheriffJesterResult === "not_innocent" ? "selected" : ""}>Not Innocent</option>
-            <option value="exact" ${state.sheriffJesterResult === "exact" ? "selected" : ""}>Exact Role</option>
-          </select>
-        </div>
-
-        <div class="settings-field">
-          <div class="settings-field-inline">
-            <span class="settings-field-label-inline">Win if killed by Vigilante</span>
-            <label class="switch">
-              <input type="checkbox"
-                ${state.jesterWinIfVigilanteKilled ? "checked" : ""}
-                onchange="toggleJesterVigilanteWin(this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-      `
-    }
-
-    if(role === "executioner"){
-      advancedHTML = `
-        <div class="settings-field">
-          <label class="settings-field-label">Can target Jester or Mafia?</label>
-          <select class="settings-modern-select" onchange="setExecutionerTargetRule(this.value)">
-            <option value="neither" ${state.executionerTargetRule === "neither" ? "selected" : ""}>Neither</option>
-            <option value="mafia" ${state.executionerTargetRule === "mafia" ? "selected" : ""}>Mafia</option>
-            <option value="jester" ${state.executionerTargetRule === "jester" ? "selected" : ""}>Jester</option>
-            <option value="both" ${state.executionerTargetRule === "both" ? "selected" : ""}>Both</option>
-          </select>
-        </div>
-
-        <div class="settings-field">
-          <label class="settings-field-label">Sheriff sees Executioner as</label>
-          <select class="settings-modern-select" onchange="setSheriffExecutionerResult(this.value)">
-            <option value="innocent" ${state.sheriffExecutionerResult === "innocent" ? "selected" : ""}>Innocent</option>
-            <option value="not_innocent" ${state.sheriffExecutionerResult === "not_innocent" ? "selected" : ""}>Not Innocent</option>
-            <option value="exact" ${state.sheriffExecutionerResult === "exact" ? "selected" : ""}>Exact Role</option>
-          </select>
-        </div>
-
-        <div class="settings-field">
-          <div class="settings-field-inline">
-            <span class="settings-field-label-inline">Can win while dead</span>
-            <label class="switch">
-              <input type="checkbox"
-                ${state.executionerWinIfDead ? "checked" : ""}
-                onchange="toggleExecutionerWinIfDead(this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-
-        <div class="settings-field">
-          <div class="settings-field-inline">
-            <span class="settings-field-label-inline">Wins if Vigilante kills target</span>
-            <label class="switch">
-              <input type="checkbox"
-                ${state.executionerWinIfVigilanteKillsTarget ? "checked" : ""}
-                onchange="toggleExecutionerVigilanteWin(this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-
-        <div class="settings-field">
-          <label class="settings-field-label">After target dies, becomes</label>
-          <select class="settings-modern-select" onchange="setExecutionerBecomes(this.value)">
-            <option value="jester" ${state.executionerBecomes === "jester" ? "selected" : ""}>Jester</option>
-            <option value="villager" ${state.executionerBecomes === "villager" ? "selected" : ""}>Villager</option>
-            <option value="traitor" ${state.executionerBecomes === "traitor" ? "selected" : ""}>Traitor</option>
-          </select>
-        </div>
-      `
-    }
-
-    if(role === "vigilante"){
-      advancedHTML = `
-        <div class="settings-field">
-          <div class="settings-field-inline">
-            <span class="settings-field-label-inline">Can kill neutrals</span>
-            <label class="switch">
-              <input type="checkbox"
-                ${state.vigilanteCanKillNeutrals ? "checked" : ""}
-                onchange="toggleVigilanteCanKillNeutrals(this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-
-        <div class="settings-field">
-          <label class="settings-field-label">Wrong target result</label>
-          <select class="settings-modern-select" onchange="setVigilanteWrongKillOutcome(this.value)">
-            <option value="both_die" ${state.vigilanteWrongKillOutcome === "both_die" ? "selected" : ""}>Both die</option>
-            <option value="only_vigilante_dies" ${state.vigilanteWrongKillOutcome === "only_vigilante_dies" ? "selected" : ""}>Only Vigilante dies</option>
-            <option value="only_target_dies" ${state.vigilanteWrongKillOutcome === "only_target_dies" ? "selected" : ""}>Only target dies</option>
-          </select>
-        </div>
-      `
-    }
-
-    if(role === "priest"){
-  advancedHTML = `
-    <div class="settings-field">
-      <label class="settings-field-label">Holy Spirit uses per game</label>
-      <select class="settings-modern-select"
-        onchange="setPriestUsesPerGame(this.value)">
-        <option value="1" ${state.priestUsesPerGame == 1 ? "selected" : ""}>1 use</option>
-        <option value="2" ${state.priestUsesPerGame == 2 ? "selected" : ""}>2 uses</option>
-        <option value="3" ${state.priestUsesPerGame == 3 ? "selected" : ""}>3 uses</option>
-      </select>
-    </div>
-  `
-}
-
-    return `
-  <div class="settings-role-card ${enabled ? "role-enabled" : ""}" data-role="${role}" style="--role-accent:${color}">
-        <div class="settings-role-header">
-          <div class="settings-role-meta">
-            <div class="settings-role-name" style="color:${color}">${roleDisplayName(role)}</div>
-            <div class="settings-role-subtitle">${roleTeamText(role)}</div>
-          </div>
-
-          <div class="settings-role-actions">
-            <span class="settings-role-state">${enabled ? "ON" : "OFF"}</span>
-            <label class="switch">
-              <input type="checkbox" ${enabled ? "checked" : ""}
-                onchange="toggleRole('${role}', this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-
-        ${enabled ? `
-  <div class="settings-role-panel show">
-    <div class="settings-role-panel-inner">
-      <div class="settings-field">
-              <label class="settings-field-label">Role chance</label>
-              <div class="settings-slider-row">
-                <input type="range"
-                  id="${role}Slider"
-                  min="0"
-                  max="100"
-                  value="${weight}"
-                  oninput="updateSlider(this,'${role}'); setRoleWeight('${role}', this.value)">
-                <span class="settings-slider-value">${weight}%</span>
-              </div>
-            </div>
-
-            <div class="settings-field">
-              <label class="settings-field-label">Maximum amount</label>
-              <input class="settings-modern-number"
-                type="number"
-                min="1"
-                max="10"
-                value="${count}"
-                onchange="window.updateRoleCount('${role}', this.value)">
-            </div>
-
-            ${advancedHTML ? `
-              <div class="settings-advanced-label">Additional Settings</div>
-              ${advancedHTML}
-            ` : ""}
-          </div>
-        </div>
-        ` : ""}
-      </div>
+  const content = buildSharedSettingsContent({
+    title: "Game Settings",
+    subtitle: state.gameStarted
+      ? "Settings are locked during the game"
+      : "Configure roles, rules, and special conditions",
+    settings,
+    onChangeName: "window.updateLocalSetting",
+    includePresets: true,
+    locked: !!state.gameStarted,
+    mafiaOptionsHTML,
+    footerHTML: `
+      <button type="button" class="reset-settings-btn" onclick="confirmResetSettings()">Reset Settings</button>
+      <button class="close-settings-btn" onclick="closeInfo()">Close</button>
     `
-  }
+  })
 
-  const content = `
-    <div class="modal-content settings-modal-shell">
-      <div class="settings-header">
-        <div class="settings-header-main">
-          <div>
-            <h2 class="settings-title-modern">Game Settings</h2>
-            <div class="settings-subtitle-modern">
-              ${state.gameStarted ? "Settings are locked during the game" : "Configure roles, rules, and special conditions"}
-            </div>
-          </div>
-
-          ${state.gameStarted ? `
-            <div class="settings-lock-badge">🔒 Locked</div>
-          ` : ""}
-        </div>
-      </div>
-
-      <div class="settings-scroll">
-
-        <div class="settings-section-modern">
-          <div class="settings-section-title-modern">Quick Setup</div>
-
-          <div class="settings-grid-two">
-            <div class="settings-quick-card">
-              <label class="settings-field-label">Host Mode</label>
-              <div class="settings-field-inline">
-                <span class="settings-field-label-inline">Enable host controls</span>
-                <label class="switch">
-                  <input type="checkbox"
-                    ${state.hostMode ? "checked" : ""}
-                    onchange="toggleHostMode(this.checked)">
-                  <span class="slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="settings-quick-card">
-              <label class="settings-field-label">Reveal roles on elimination</label>
-              <select class="settings-modern-select" onchange="setRevealRolesOnElimination(this.value)">
-                <option value="none" ${state.revealRolesOnElimination === "none" ? "selected" : ""}>Never</option>
-                <option value="death" ${state.revealRolesOnElimination === "death" ? "selected" : ""}>Night kill only</option>
-                <option value="vote_only" ${state.revealRolesOnElimination === "vote_only" ? "selected" : ""}>Vote only</option>
-                <option value="death_and_vote" ${state.revealRolesOnElimination === "death_and_vote" ? "selected" : ""}>Night kill and vote</option>
-              </select>
-            </div>
-
-            <div class="settings-quick-card">
-              <label class="settings-field-label">How many mafia?</label>
-              <select class="settings-modern-select" onchange="window.updateMafiaCountOverride(this.value)">
-                ${mafiaOptions}
-              </select>
-              <div class="settings-help-text">
-                Auto recommends <strong>${autoMafia}</strong>. Max with ${playerCount} player${playerCount === 1 ? "" : "s"}: <strong>${mafiaMax}</strong>
-              </div>
-            </div>
-
-            <div class="settings-quick-card">
-              <label class="settings-field-label">Mafia kill method</label>
-              <select class="settings-modern-select" onchange="setMafiaKillMethod(this.value)">
-                <option value="leader" ${state.mafiaKillMethod === "leader" ? "selected" : ""}>Leader chooses</option>
-                <option value="vote" ${state.mafiaKillMethod === "vote" ? "selected" : ""}>Mafia vote</option>
-              </select>
-              <div class="settings-help-text">
-                Leader rotates nightly. Vote breaks ties randomly.
-              </div>
-            </div>
-          </div>
-
-          <div class="settings-quick-card settings-full-width-card">
-            <label class="settings-field-label">Presets</label>
-            <div class="settings-preset-row">
-              <button type="button" onclick="applyPreset('classic')">Classic</button>
-              <button type="button" onclick="applyPreset('beginner')">Beginner</button>
-              <button type="button" onclick="applyPreset('chaotic')">Chaotic</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="settings-section-modern">
-          <div class="settings-section-title-modern">Global Mafia Settings</div>
-
-          <div class="settings-grid-two">
-            <div class="settings-quick-card">
-              <div class="settings-field-inline">
-                <span class="settings-field-label-inline">Mafia know who the Framer is</span>
-                <label class="switch">
-                  <input type="checkbox"
-                    ${state.mafiaKnowsFramer ? "checked" : ""}
-                    onchange="toggleMafiaKnowsFramer(this.checked)">
-                  <span class="slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="settings-quick-card">
-              <div class="settings-field-inline">
-                <span class="settings-field-label-inline">Mafia know the first leader</span>
-                <label class="switch">
-                  <input type="checkbox"
-                    ${state.mafiaKnowsFirstLeader ? "checked" : ""}
-                    onchange="toggleMafiaKnowsFirstLeader(this.checked)">
-                  <span class="slider"></span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="settings-section-modern">
-          <div class="settings-section-title-modern">Roles</div>
-
-          <div class="settings-role-group-title">Town</div>
-          ${townRoles.map(renderRoleCard).join("")}
-
-          <div class="settings-role-group-title">Neutral</div>
-          ${neutralRoles.map(renderRoleCard).join("")}
-
-          <div class="settings-role-group-title">Mafia</div>
-          ${mafiaRoles.map(renderRoleCard).join("")}
-        </div>
-      </div>
-
-      <div class="settings-footer">
-        <button type="button" class="reset-settings-btn" onclick="confirmResetSettings()">Reset Settings</button>
-        <button class="close-settings-btn" onclick="closeInfo()">Close</button>
-      </div>
-    </div>
-  `
-
-  if(modal.classList.contains("show")){
+  if (modal.classList.contains("show")) {
     swapModalContent(content, initSettingsModal)
-  }else{
+  } else {
     openModal(content, initSettingsModal)
   }
 }

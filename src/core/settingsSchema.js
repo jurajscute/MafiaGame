@@ -486,6 +486,52 @@ export const SETTINGS_SECTIONS = [
       }
     ]
   }
+
+{
+  id: "framer",
+  title: "Framer",
+  role: "framer",
+  fields: [
+    {
+      key: "rolesEnabled.framer",
+      type: "role_toggle",
+      label: "Enable Framer"
+    },
+    {
+      key: "roleWeights.framer",
+      type: "range",
+      label: "Role chance",
+      min: 0,
+      max: 100,
+      suffix: "%"
+    },
+    {
+      key: "roleCounts.framer",
+      type: "number",
+      label: "Maximum amount",
+      min: 1,
+      max: 10
+    },
+    {
+      key: "framerKnowsSuccess",
+      type: "toggle",
+      label: "Knows if frame was successful"
+    },
+    {
+      key: "framerKnowsMafia",
+      type: "toggle",
+      label: "Knows who the mafia are"
+    }
+  ]
+}
+
+renderSettingsSections({
+  settings,
+  onChangeName,
+  isOnline,
+  isLocked
+})
+
 ]
 
 export function getNestedValue(obj, path) {
