@@ -1,6 +1,8 @@
 import { render } from "../local/ui.js"
 import { createRoom, createRoomPlayer } from "../core/onlineRoom.js"
 import { buildOnlineGameState } from "../core/buildOnlineGameState.js"
+import { mergeGameSettings } from "../core/gameSettings.js"
+import { SETTINGS_SECTIONS, buildSettingsField } from "../core/settingsSchema.js"
 import { db } from "./firebase.js"
 import { roleColors, roleDisplayName } from "../core/gameData.js"
 import { roles } from "../core/roles.js"
@@ -27,6 +29,21 @@ let lastRenderedScreenKey = null
 
 function hasOnlinePlayerSeenMorning() {
   return !!demoRoom?.gameState?.morningSeen?.[currentPlayerId]
+}
+
+window.updateOnlineSetting = async function(path, value) {
+  if (!currentIsHost || !demoRoom) return
+
+  const settings = mergeGameSettings({}, demoRoom.settings || {})
+  setNestedValue(settings, path, value)
+
+  try {
+    await update(getOnlineRoomRef(), {
+      settings
+    })
+  } catch (error) {
+    console.error("Failed to update online setting:", error)
+  }
 }
 
 function haveAllOnlinePlayersSeenMorning() {
@@ -209,22 +226,6 @@ window.markOnlineReady = async function() {
   } catch (error) {
     console.error("Failed to mark player ready:", error)
   }
-}
-
-async function pushOnlineSettings(partialSettings) {
-  if (!currentIsHost || !currentRoomCode) return
-
-  const currentSettings = getOnlineSettings()
-  if (!currentSettings) return
-
-  const merged = {
-    ...currentSettings,
-    ...partialSettings
-  }
-
-  await update(getOnlineRoomRef(), {
-    settings: merged
-  })
 }
 
 function generateRoomCode() {
@@ -428,14 +429,28 @@ function renderRoomLobby() {
 
 window.renderRoomLobby = renderRoomLobby
 
+function renderOnlineSettingsSection(section, settings) {
+  return `
+    <div class="settings-section-modern">
+      <div class="settings-section-title-modern">${section.title}</div>
+      <div class="settings-grid-two">
+        ${section.fields.map(field => `
+          <div class="settings-quick-card">
+            ${buildSettingsField(field, settings, "window.updateOnlineSetting")}
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `
+}
+
 function showOnlineSettingsEditor() {
   if (!currentIsHost || !demoRoom) {
     alert("Only the host can edit online settings.")
     return
   }
 
-  const settings = demoRoom.settings || {}
-  const rolesEnabled = settings.rolesEnabled || {}
+  const settings = mergeGameSettings({}, demoRoom.settings || {})
 
   render(`
     <div class="card setup-screen-card">
@@ -443,88 +458,19 @@ function showOnlineSettingsEditor() {
         <div class="setup-kicker">Online Lobby</div>
         <h2 class="setup-title">Edit Online Settings</h2>
         <div class="setup-subtitle">
-          These settings sync to every player in the room.
+          These settings sync live to every player in the room.
         </div>
       </div>
 
       <div class="setup-list-panel" style="text-align:left;">
-        <label style="display:block; margin-bottom:12px;">
-          Mafia Kill Method
-          <select id="onlineMafiaKillMethod" class="settings-modern-select">
-            <option value="leader" ${settings.mafiaKillMethod === "leader" ? "selected" : ""}>Leader chooses</option>
-            <option value="vote" ${settings.mafiaKillMethod === "vote" ? "selected" : ""}>Mafia vote</option>
-          </select>
-        </label>
-
-        <label style="display:block; margin-bottom:12px;">
-          Reveal Roles On Elimination
-          <select id="onlineRevealRoles" class="settings-modern-select">
-            <option value="none" ${settings.revealRolesOnElimination === "none" ? "selected" : ""}>Never</option>
-            <option value="death" ${settings.revealRolesOnElimination === "death" ? "selected" : ""}>Night kill only</option>
-            <option value="vote_only" ${settings.revealRolesOnElimination === "vote_only" ? "selected" : ""}>Vote only</option>
-            <option value="death_and_vote" ${settings.revealRolesOnElimination === "death_and_vote" ? "selected" : ""}>Night kill and vote</option>
-          </select>
-        </label>
-
-        <label style="display:block; margin-bottom:16px;">
-          Mafia Count Override
-          <input
-            id="onlineMafiaCountOverride"
-            type="number"
-            min="0"
-            max="5"
-            value="${settings.mafiaCountOverride ?? 0}"
-            class="settings-modern-number"
-          >
-        </label>
-
-        <div style="margin-bottom:10px; font-weight:700;">Enable Roles</div>
-
-        <div style="display:grid; gap:10px;">
-          ${Object.keys(rolesEnabled).map(role => `
-            <label style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 12px; border-radius:12px; background:rgba(255,255,255,0.04);">
-              <span>${roleDisplayName(role)}</span>
-              <input type="checkbox" data-online-role="${role}" ${rolesEnabled[role] ? "checked" : ""}>
-            </label>
-          `).join("")}
-        </div>
+        ${SETTINGS_SECTIONS.map(section => renderOnlineSettingsSection(section, settings)).join("")}
       </div>
 
       <div class="setup-actions">
         <button class="skip-btn" onclick="renderRoomLobby()">Back</button>
-        <button class="primary-btn" onclick="window.saveOnlineSettings()">Save Online Settings</button>
       </div>
     </div>
   `)
-}
-
-window.saveOnlineSettings = async function () {
-  if (!currentIsHost || !demoRoom) return
-
-  const mafiaKillMethod = document.getElementById("onlineMafiaKillMethod")?.value || "leader"
-  const revealRolesOnElimination = document.getElementById("onlineRevealRoles")?.value || "none"
-  const mafiaCountOverride = Number(document.getElementById("onlineMafiaCountOverride")?.value || 0)
-
-  const currentSettings = demoRoom.settings || {}
-  const nextRolesEnabled = { ...(currentSettings.rolesEnabled || {}) }
-
-  document.querySelectorAll("[data-online-role]").forEach(input => {
-    nextRolesEnabled[input.dataset.onlineRole] = input.checked
-  })
-
-  try {
-    await pushOnlineSettings({
-      mafiaKillMethod,
-      revealRolesOnElimination,
-      mafiaCountOverride,
-      rolesEnabled: nextRolesEnabled
-    })
-
-    alert("Online settings saved.")
-  } catch (error) {
-    console.error("Failed to save online settings:", error)
-    alert("Failed to save online settings: " + error.message)
-  }
 }
 
 function subscribeToRoom(roomCode) {
@@ -947,7 +893,7 @@ function renderOnlineProceedButton(label = "Continue", { includeDead = false } =
   }
 
   return `
-    <button class="morning-btn" onclick="window.markOnlineReady()">
+    <button class="primary-btn" onclick="window.markOnlineReady()">
       ${label}
     </button>
   `
@@ -1118,6 +1064,7 @@ const nextGameStats = {
 
   await update(getOnlineRoomRef(), {
   "gameState/players": nextPlayers,
+  "gameState/gameStats": nextGameStats,
   "gameState/finalResult": finalResult,
   "gameState/finalResultsSeen": finalResult ? {} : (gameState.finalResultsSeen || {}),
   "gameState/phase": finalResult ? "game_over" : "morning",
@@ -1939,17 +1886,35 @@ if (myResult?.type === "mafia_kill_blocked_priest") {
   }
 
   if (myResult?.type === "vigilante_result") {
-    renderOnlineNightResultCard({
-      me,
-      hint: "Your action is complete",
-      boxClass: "vigilante-result-box",
-      boxKicker: "Vigilante Result",
-      title: myResult.title || "ACTION COMPLETE",
-      titleColor: roleColors.vigilante,
-      bodyText: myResult.text || "Your choice has been resolved."
-    })
-    return
+  let title = "VIGILANTE OUTCOME"
+  let bodyText = `You headed to slash ${myResult.targetName}.`
+
+  if (!myResult.targetDied) {
+    bodyText = `You headed to slash ${myResult.targetName}. But when you got there, they were already dead.`
+  } else if (myResult.wrongTarget) {
+    const targetRole = myResult.targetRole?.toUpperCase() || "TOWN"
+
+    if (myResult.vigilanteDies) {
+      bodyText = `You headed to slash ${myResult.targetName}. ${myResult.targetName} was a ${targetRole}. How could this have happened? You slash yourself and both of you die.`
+    } else {
+      bodyText = `You headed to slash ${myResult.targetName}. ${myResult.targetName} was a ${targetRole}. You cannot believe your eyes, but you're determined to correct your mistakes...`
+    }
+  } else {
+    const targetRole = myResult.targetRole?.toUpperCase() || "MAFIA"
+    bodyText = `You headed to slash ${myResult.targetName}. ${myResult.targetName} was a ${targetRole}, and you stand proudly over the body.`
   }
+
+  renderOnlineNightResultCard({
+    me,
+    hint: "You carried out your attack",
+    boxClass: "vigilante-result-box",
+    boxKicker: "Night Results",
+    title,
+    titleColor: roleColors.vigilante,
+    bodyText
+  })
+  return
+}
 
   if (myResult?.type === "vigilante_blocked") {
   renderOnlineNightResultCard({
@@ -2026,77 +1991,96 @@ function renderOnlineMorning() {
 
   const morningCards = [...publicResults]
 
-if (vigilanteReveal) {
-  let text = ""
+  if (vigilanteReveal) {
+    let text = ""
 
-  if (vigilanteReveal.blocked) {
-    if (vigilanteReveal.blockedByHolySpirit) {
-      text = `The Vigilante tried to slash <strong>${vigilanteReveal.target}</strong>, but a holy spirit shield protected the town.`
+    if (vigilanteReveal.blocked) {
+      if (vigilanteReveal.blockedByHolySpirit) {
+        text = `The Vigilante tried to slash <strong>${vigilanteReveal.target}</strong>, but a holy spirit shield protected the town.`
+      } else {
+        text = `The Vigilante tried to slash <strong>${vigilanteReveal.target}</strong>, but the Doctor protected them.`
+      }
+    } else if (vigilanteReveal.wrongTarget) {
+      text = `${vigilanteReveal.target} was slashed by the Vigilante.`
+
+      if (vigilanteReveal.vigilanteDies) {
+        text += `<br>The Vigilante stabs their own heart in devastation.`
+      }
+    } else if (!vigilanteReveal.targetDied) {
+      text = `The Vigilante tried to slash <strong>${vigilanteReveal.target}</strong>, but nothing happened.`
     } else {
-      text = `The Vigilante tried to slash <strong>${vigilanteReveal.target}</strong>, but the Doctor protected them.`
+      text = `${vigilanteReveal.target} was slashed by the Vigilante.`
     }
-  } else if (vigilanteReveal.wrongTarget) {
-    text = `${vigilanteReveal.target} was slashed by the Vigilante.`
 
-    if (vigilanteReveal.vigilanteDies) {
-      text += `<br>The Vigilante stabs their own heart in devastation.`
-    }
-  } else if (!vigilanteReveal.targetDied) {
-    text = `The Vigilante tried to slash <strong>${vigilanteReveal.target}</strong>, but nothing happened.`
-  } else {
-    text = `${vigilanteReveal.target} was slashed by the Vigilante.`
+    morningCards.push({
+      type: "vigilante",
+      text
+    })
   }
 
-  morningCards.push({
-    type: "vigilante",
-    text
-  })
-}
+  let resultsHTML = ""
 
-let resultsHTML = ""
-
-if (!morningCards.length) {
-  resultsHTML = `
-    <div class="morning-result-card night-result-peace">
-      <div class="morning-result-kicker">Night</div>
-      <div class="morning-result-text">The night was quiet.</div>
-    </div>
-  `
-} else {
-  resultsHTML = morningCards.map(result => {
-    let extraClass = "night-result-peace"
-    let kicker = "Night"
-
-    if (result.type === "death") {
-      extraClass = "night-result-death"
-      kicker = "Eliminated"
-    }
-
-    if (result.type === "save") {
-      extraClass = "night-result-save"
-      kicker = "Survived"
-    }
-
-    if (result.type === "priest_shield") {
-      extraClass = "night-result-priest"
-      kicker = "Holy Protection"
-    }
-
-    if (result.type === "vigilante") {
-      extraClass = "night-result-vigilante"
-      kicker = "Vigilante"
-    }
-
-    return `
-      <div class="morning-result-card ${extraClass}">
-        <div class="morning-result-kicker">${kicker}</div>
-        <div class="morning-result-text">
-          ${result.text}
-        </div>
+  if (!morningCards.length) {
+    resultsHTML = `
+      <div class="morning-result-card night-result-peace">
+        <div class="morning-result-kicker">Night</div>
+        <div class="morning-result-text">The night was quiet.</div>
       </div>
     `
-  }).join("")
-}
+  } else {
+    resultsHTML = morningCards.map(result => {
+      let extraClass = "night-result-peace"
+      let kicker = "Night"
+
+      if (result.type === "death") {
+        extraClass = "night-result-death"
+        kicker = "Eliminated"
+      }
+
+      if (result.type === "save") {
+        extraClass = "night-result-save"
+        kicker = "Survived"
+      }
+
+      if (result.type === "priest_shield") {
+        extraClass = "night-result-priest"
+        kicker = "Holy Protection"
+      }
+
+      if (result.type === "vigilante") {
+        extraClass = "night-result-vigilante"
+        kicker = "Vigilante"
+      }
+
+      return `
+        <div class="morning-result-card ${extraClass}">
+          <div class="morning-result-kicker">${kicker}</div>
+          <div class="morning-result-text">
+            ${result.text}
+          </div>
+        </div>
+      `
+    }).join("")
+  }
+
+  render(
+    buildSharedMorningScreen({
+      resultsHTML,
+      playersHTML,
+      progressBoxHTML: renderOnlineVoteProgressBox(),
+      continueButtonHTML: hasOnlinePlayerSeenMorning()
+        ? `
+            <button class="primary-btn" disabled>
+              Waiting For Your Vote
+            </button>
+          `
+        : `
+            <button class="morning-btn" onclick="window.advanceOnlineMorning()">
+              Continue
+            </button>
+          `
+    })
+  )
 }
 
 function renderOnlineVoting() {

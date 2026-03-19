@@ -132,7 +132,7 @@ let vigilantePublicReveal = null
 
   if (!shooter || shooter.alive === false) return
 
-  // If target is already dead or missing
+  // Target already dead / missing
   if (!target || target.alive === false) {
     vigilantePublicReveal = {
       shooter: shooter.name,
@@ -148,8 +148,12 @@ let vigilantePublicReveal = null
     privateResults.push({
       playerId: shooter.id,
       type: "vigilante_result",
-      title: "NOTHING HAPPENED",
-      text: `${action.target} was already dead before you arrived.`
+      targetName: action.target,
+      targetRole: null,
+      targetDied: false,
+      vigilanteDies: false,
+      blocked: false,
+      wrongTarget: false
     })
 
     return
@@ -221,23 +225,20 @@ let vigilantePublicReveal = null
     }
 
     gameLog.push(`${shooter.name} attacked the wrong target and will also die.`)
-
-    privateResults.push({
-      playerId: shooter.id,
-      type: "vigilante_result",
-      title: "WRONG TARGET",
-      text: `${target.name} was not Mafia or Neutral. You will die too.`
-    })
   } else {
     gameLog.push(`${shooter.name} killed ${target.name} as the Vigilante.`)
-
-    privateResults.push({
-      playerId: shooter.id,
-      type: "vigilante_result",
-      title: "TARGET ELIMINATED",
-      text: `${target.name} was eliminated.`
-    })
   }
+
+  privateResults.push({
+    playerId: shooter.id,
+    type: "vigilante_result",
+    targetName: target.name,
+    targetRole: target.role,
+    targetDied: true,
+    vigilanteDies,
+    blocked: false,
+    wrongTarget
+  })
 
   vigilantePublicReveal = {
     shooter: shooter.name,

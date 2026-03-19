@@ -2,6 +2,7 @@ import { state, addLogEntry, resetGameTracking } from "./state.js"
 import { roles } from "../core/roles.js"
 import { shuffle, mafiaCount } from "../core/utils.js"
 import { roleColors, roleDisplayName } from "../core/gameData.js"
+import { buildDefaultGameSettings, mergeGameSettings } from "../core/gameSettings.js"
 import { maxAllowedMafia, getResolvedMafiaCount } from "../core/setupLogic.js"
 import { assignRolesToPlayers } from "../core/roleAssignment.js"
 import { render } from "./ui.js"
@@ -14,6 +15,8 @@ import {
   showVoteOptions,
   castVote
 } from "./phases.js"
+
+const SETTINGS_STORAGE_KEY = "mafiaSettings"
 
 window.updateRoleCount = function(role,value){
 
@@ -566,117 +569,131 @@ window.toggleHostMode = function(enabled){
   refreshPregameSummaryIfOpen()
 }
 
-window.resetSettings = function(){
+function applySettingsToLocalState(settings) {
+  const merged = mergeGameSettings({}, settings)
 
-state.rolesEnabled = {
-doctor: false,
-sheriff: false,
-jester: false,
-executioner: false,
-mayor: false,
-spirit: false,
-framer: false,
-vigilante: false,
-priest: false,
-schrodingers_cat: false,
-traitor: false,
+  state.hostMode = merged.hostMode
+  state.mafiaCountOverride = merged.mafiaCountOverride
+  state.mafiaKillMethod = merged.mafiaKillMethod
+  state.mafiaKnowsFirstLeader = merged.mafiaKnowsFirstLeader
+  state.mafiaKnowsFramer = merged.mafiaKnowsFramer
+  state.revealRolesOnElimination = merged.revealRolesOnElimination
+
+  state.doctorRevealSave = merged.doctorRevealSave
+  state.sheriffExactReveal = merged.sheriffExactReveal
+  state.sheriffJesterResult = merged.sheriffJesterResult
+  state.sheriffExecutionerResult = merged.sheriffExecutionerResult
+
+  state.mayorVotePower = merged.mayorVotePower
+
+  state.spiritRevealType = merged.spiritRevealType
+  state.spiritActivation = merged.spiritActivation
+  state.spiritCanSkipReveal = merged.spiritCanSkipReveal
+
+  state.framerKnowsSuccess = merged.framerKnowsSuccess
+  state.framerKnowsMafia = merged.framerKnowsMafia
+
+  state.executionerTargetRule = merged.executionerTargetRule
+  state.executionerWinIfDead = merged.executionerWinIfDead
+  state.executionerWinIfVigilanteKillsTarget = merged.executionerWinIfVigilanteKillsTarget
+  state.executionerBecomes = merged.executionerBecomes
+
+  state.jesterWinIfVigilanteKilled = merged.jesterWinIfVigilanteKilled
+
+  state.vigilanteCanKillNeutrals = merged.vigilanteCanKillNeutrals
+  state.vigilanteWrongKillOutcome = merged.vigilanteWrongKillOutcome
+
+  state.priestUsesPerGame = merged.priestUsesPerGame
+
+  state.rolesEnabled = merged.rolesEnabled
+  state.roleWeights = merged.roleWeights
+  state.roleCounts = merged.roleCounts
 }
 
-state.roleWeights = {
-doctor: 100,
-sheriff: 100,
-jester: 100,
-executioner: 100,
-mayor: 100,
-spirit: 100,
-framer: 100,
-vigilante: 100,
-priest: 100,
-schrodingers_cat: 100,
-traitor: 100,
+window.resetSettings = function() {
+  applySettingsToLocalState(buildDefaultGameSettings())
+
+  state.vigilanteOutcomeToShow = null
+  state.vigilantePublicReveal = null
+  state.priestShieldActive = false
+  state.priestBlockedAttacks = []
+  state.priestPublicShield = false
+  state.currentMafiaLeader = null
+  state.mafiaLeaderIndex = 0
+
+  saveSettingsToStorage()
+  showSettings()
 }
 
-state.roleCounts = {
-doctor: 1,
-sheriff: 1,
-jester: 1,
-executioner: 1,
-mayor: 1,
-spirit: 1,
-framer: 1,
-vigilante: 1,
-priest: 1,
-schrodingers_cat: 1,
-traitor: 1,
+function getSettingsFromLocalState() {
+  return {
+    hostMode: state.hostMode,
+    mafiaCountOverride: state.mafiaCountOverride,
+    mafiaKillMethod: state.mafiaKillMethod,
+    mafiaKnowsFirstLeader: state.mafiaKnowsFirstLeader,
+    mafiaKnowsFramer: state.mafiaKnowsFramer,
+    revealRolesOnElimination: state.revealRolesOnElimination,
+
+    doctorRevealSave: state.doctorRevealSave,
+    sheriffExactReveal: state.sheriffExactReveal,
+    sheriffJesterResult: state.sheriffJesterResult,
+    sheriffExecutionerResult: state.sheriffExecutionerResult,
+
+    mayorVotePower: state.mayorVotePower,
+
+    spiritRevealType: state.spiritRevealType,
+    spiritActivation: state.spiritActivation,
+    spiritCanSkipReveal: state.spiritCanSkipReveal,
+
+    framerKnowsSuccess: state.framerKnowsSuccess,
+    framerKnowsMafia: state.framerKnowsMafia,
+
+    executionerTargetRule: state.executionerTargetRule,
+    executionerWinIfDead: state.executionerWinIfDead,
+    executionerWinIfVigilanteKillsTarget: state.executionerWinIfVigilanteKillsTarget,
+    executionerBecomes: state.executionerBecomes,
+
+    jesterWinIfVigilanteKilled: state.jesterWinIfVigilanteKilled,
+
+    vigilanteCanKillNeutrals: state.vigilanteCanKillNeutrals,
+    vigilanteWrongKillOutcome: state.vigilanteWrongKillOutcome,
+
+    priestUsesPerGame: state.priestUsesPerGame,
+
+    rolesEnabled: state.rolesEnabled,
+    roleWeights: state.roleWeights,
+    roleCounts: state.roleCounts
+  }
 }
 
-state.vigilanteOutcomeToShow = null
-state.vigilantePublicReveal = null
+function saveSettingsToStorage() {
+  localStorage.setItem(
+    SETTINGS_STORAGE_KEY,
+    JSON.stringify(getSettingsFromLocalState())
+  )
+}
 
-state.executionerTargetRule = "neither"
+window.updateLocalSetting = function(path, value) {
+  const settings = getSettingsFromLocalState()
+  setNestedValue(settings, path, value)
+  applySettingsToLocalState(settings)
+  saveSettingsToStorage()
+  showSettings()
+  refreshPregameSummaryIfOpen()
+}
 
-state.mayorVotePower = 2
+function loadSettingsFromStorage() {
+  const saved = localStorage.getItem(SETTINGS_STORAGE_KEY)
+  if (!saved) {
+    applySettingsToLocalState(buildDefaultGameSettings())
+    return
+  }
 
-state.doctorRevealSave = false
-state.sheriffExactReveal = false
-state.mafiaCountOverride = 0
-
-state.revealRolesOnElimination = "none"
-state.executionerWinIfDead = false
-state.executionerBecomes = "jester"
-
-state.framerKnowsSuccess = true
-state.framerKnowsMafia = true
-state.mafiaKnowsFramer = true
-
-state.spiritRevealType = "exact"
-state.spiritActivation = "night_only"
-state.spiritCanSkipReveal = true
-
-state.sheriffJesterResult = "not_innocent"
-state.sheriffExecutionerResult = "not_innocent"
-
-state.mafiaKillMethod = "leader"
-state.currentMafiaLeader = null
-state.mafiaLeaderIndex = 0
-state.mafiaKnowsFirstLeader = false
-
-state.vigilanteCanKillNeutrals = true
-state.vigilanteWrongKillOutcome = "both_die"
-
-state.jesterWinIfVigilanteKilled = false
-state.executionerWinIfVigilanteKillsTarget = false
-state.priestShieldActive = false
-state.priestBlockedAttacks = []
-state.priestPublicShield = false
-state.priestUsesPerGame = 1
-
-localStorage.setItem("mafiaExecutionerBecomes", JSON.stringify(state.executionerBecomes))
-localStorage.setItem("mafiaExecutionerVigilanteWin",JSON.stringify(state.executionerWinIfVigilanteKillsTarget))
-localStorage.setItem("mafiaJesterVigilanteWin",JSON.stringify(state.jesterWinIfVigilanteKilled))
-localStorage.setItem("mafiaVigilanteCanKillNeutrals", JSON.stringify(state.vigilanteCanKillNeutrals))
-localStorage.setItem("mafiaVigilanteWrongKillOutcome", JSON.stringify(state.vigilanteWrongKillOutcome))
-localStorage.setItem("mafiaKnowsFirstLeader", JSON.stringify(state.mafiaKnowsFirstLeader))
-localStorage.setItem("mafiaSpiritRevealType", JSON.stringify(state.spiritRevealType))
-localStorage.setItem("mafiaSpiritActivation", JSON.stringify(state.spiritActivation))
-localStorage.setItem("mafiaSpiritCanSkipReveal", JSON.stringify(state.spiritCanSkipReveal))
-localStorage.setItem("mafiaFramerKnowsSuccess", JSON.stringify(state.framerKnowsSuccess))
-localStorage.setItem("mafiaFramerKnowsMafia", JSON.stringify(state.framerKnowsMafia))
-localStorage.setItem("mafiaMafiaKnowsFramer", JSON.stringify(state.mafiaKnowsFramer))
-localStorage.setItem("mafiaRoles", JSON.stringify(state.rolesEnabled))
-localStorage.setItem("mafiaRoleWeights", JSON.stringify(state.roleWeights))
-localStorage.setItem("mafiaRoleCounts", JSON.stringify(state.roleCounts))
-localStorage.setItem("mafiaDoctorReveal", JSON.stringify(state.doctorRevealSave))
-localStorage.setItem("mafiaSheriffExactReveal", JSON.stringify(state.sheriffExactReveal))
-localStorage.setItem("mafiaCountOverride", JSON.stringify(state.mafiaCountOverride))
-localStorage.setItem("mafiaExecutionerTargetRule", JSON.stringify(state.executionerTargetRule))
-localStorage.setItem("mafiaRevealRolesOnElimination", JSON.stringify(state.revealRolesOnElimination))
-localStorage.setItem("mafiaExecutionerWinIfDead", JSON.stringify(state.executionerWinIfDead))
-localStorage.setItem("mafiaSheriffJesterResult", JSON.stringify(state.sheriffJesterResult))
-localStorage.setItem("mafiaSheriffExecutionerResult", JSON.stringify(state.sheriffExecutionerResult))
-localStorage.setItem("mafiaMayorVotePower", JSON.stringify(state.mayorVotePower))
-
-showSettings()
+  try {
+    applySettingsToLocalState(mergeGameSettings({}, JSON.parse(saved)))
+  } catch {
+    applySettingsToLocalState(buildDefaultGameSettings())
+  }
 }
 
 window.setSpiritRevealType = function(value){
