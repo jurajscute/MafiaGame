@@ -661,6 +661,105 @@ body.night .card:not(.role-mafia):not(.special-chaos-win):not(.special-spirit-wi
   background:linear-gradient(135deg,#0b5375b0,#0038a19a);
 }
 
+.role-mafia button{
+  box-shadow:0 0 10px rgba(255,0,0,0.4);
+}
+
+.role-mafia button:hover{
+  box-shadow:0 0 18px rgba(255,0,0,0.7);
+  transform:translateY(-2px);
+}
+
+.role-framer button{
+  box-shadow:0 0 10px rgba(255,80,80,0.35);
+}
+
+.role-framer button:hover{
+  box-shadow:0 0 18px rgba(255,80,80,0.65);
+  transform:translateY(-2px);
+}
+
+.role-doctor button{
+  box-shadow:0 0 10px rgba(80,180,255,0.4);
+}
+
+.role-doctor button:hover{
+  box-shadow:0 0 18px rgba(80,180,255,0.7);
+  transform:translateY(-2px);
+}
+
+.role-sheriff button{
+  box-shadow:0 0 10px rgba(255,200,0,0.4);
+}
+
+.role-sheriff button:hover{
+  box-shadow:0 0 18px rgba(255,200,0,0.7);
+  transform:translateY(-2px);
+}
+
+.role-jester button{
+  box-shadow:0 0 10px rgba(255,62,165,0.4);
+}
+
+.role-jester button:hover{
+  box-shadow:0 0 18px rgba(255,62,165,0.7);
+  transform:translateY(-2px);
+}
+
+.role-jester button{
+  box-shadow:0 0 10px rgba(255,62,165,0.4);
+}
+
+.role-jester button:hover{
+  box-shadow:0 0 18px rgba(255,62,165,0.7);
+  transform:translateY(-2px);
+}
+
+.role-executioner button{
+  box-shadow:0 0 10px rgba(200,107,184,0.35);
+}
+
+.role-executioner button:hover{
+  box-shadow:0 0 18px rgba(200,107,184,0.65);
+  transform:translateY(-2px);
+}
+
+.role-mayor button{
+  box-shadow:0 0 10px rgba(46,204,154,0.4);
+}
+
+.role-mayor button:hover{
+  box-shadow:0 0 18px rgba(46,204,154,0.7);
+  transform:translateY(-2px);
+}
+
+.role-vigilante button{
+  box-shadow:0 0 10px rgba(77,89,255,0.4);
+}
+
+.role-vigilante button:hover{
+  box-shadow:0 0 18px rgba(77,89,255,0.7);
+  transform:translateY(-2px);
+}
+
+.role-spirit button{
+  box-shadow:0 0 10px rgba(192,132,252,0.4);
+}
+
+.role-spirit button:hover{
+  box-shadow:0 0 18px rgba(192,132,252,0.7);
+  transform:translateY(-2px);
+}
+
+.role-priest button{
+  box-shadow:0 0 10px rgba(243,216,107,0.4);
+}
+
+.role-priest button:hover{
+  box-shadow:0 0 18px rgba(243,216,107,0.7);
+  transform:translateY(-2px);
+}
+
 /* =========================
    WIN BACKGROUNDS
 ========================= */
