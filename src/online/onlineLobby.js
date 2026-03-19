@@ -1980,7 +1980,9 @@ if (myResult?.type === "vigilante_blocked_priest") {
     boxKicker: "Holy Spirit Outcome",
     title: blockedText.toUpperCase(),
     titleColor: roleColors.priest,
-    bodyText: "were blocked by the Holy Spirit."
+    bodyText: blockedRoles.length
+      ? "were blocked by the Holy Spirit."
+      : "No attacks were blocked by the Holy Spirit."
   })
   return
 }
