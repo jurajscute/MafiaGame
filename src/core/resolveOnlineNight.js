@@ -246,7 +246,7 @@ let vigilantePublicReveal = null
     playerId: shooter.id,
     type: "vigilante_result",
     targetName: target.name,
-    targetRole: target.role
+    targetRole: target.role,
     targetDied: true,
     vigilanteDies,
     blocked: false,
