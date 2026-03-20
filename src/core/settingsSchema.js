@@ -485,7 +485,7 @@ export const SETTINGS_SECTIONS = [
         max: 10
       }
     ]
-  }
+  },
 
 {
   id: "framer",
@@ -524,13 +524,6 @@ export const SETTINGS_SECTIONS = [
     }
   ]
 }
-
-renderSettingsSections({
-  settings,
-  onChangeName,
-  isOnline,
-  isLocked
-})
 
 ]
 
