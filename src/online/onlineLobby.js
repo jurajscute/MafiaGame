@@ -25,6 +25,8 @@ import {
 
 let isViewingOnlineSettings = false
 
+let onlineSettingsScrollTop = 0
+
 let demoRoom = null
 let currentRoomCode = null
 let currentPlayerId = null
@@ -39,6 +41,11 @@ function hasOnlinePlayerSeenMorning() {
 
 window.updateOnlineSetting = async function(path, value) {
   if (!currentIsHost || !demoRoom) return
+
+  const scrollEl = document.querySelector(".settings-scroll")
+  if (scrollEl) {
+    onlineSettingsScrollTop = scrollEl.scrollTop
+  }
 
   const settings = mergeGameSettings({}, demoRoom.settings || {})
   setNestedValue(settings, path, value)
@@ -483,6 +490,14 @@ isViewingOnlineSettings = true
       `
     })
   )
+
+  requestAnimationFrame(() => {
+    const scrollEl = document.querySelector(".settings-scroll")
+    if (scrollEl) {
+      scrollEl.scrollTop = onlineSettingsScrollTop
+    }
+  })
+
 }
 
 window.closeOnlineSettingsEditor = function() {
