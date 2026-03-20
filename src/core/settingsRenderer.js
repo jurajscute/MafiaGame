@@ -1,5 +1,4 @@
-import { SETTINGS_SECTIONS } from "./settingsSchema.js"
-import { buildSettingsField } from "./settingsSchema.js"
+import { SETTINGS_SECTIONS, buildSettingsField } from "./settingsSchema.js"
 import { roleColors, roleDisplayName } from "./gameData.js"
 
 const TOWN_ROLES = ["doctor", "sheriff", "mayor", "spirit", "vigilante", "priest"]

@@ -6548,3 +6548,12 @@ body.holy-night-flash .holy-pulse{
   box-shadow: 0 0 12px rgba(120,220,255,0.35);
   transition: width 0.22s ease;
 }
+
+.modal-content.settings-modal-shell{
+  max-width: none;
+  width: min(920px, 94vw);
+  height: min(88dvh, 920px);
+  padding: 0; /* IMPORTANT */
+  overflow: hidden; /* prevent double scroll */
+  display: flex;
+}
