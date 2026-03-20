@@ -1,4 +1,5 @@
 import { roles } from "./roles.js"
+import { shouldRevealRoleOnElimination } from "./gameSettings.js"
 export function resolveOnlineVotes(gameState) {
   const players = JSON.parse(JSON.stringify(gameState.players || []))
   const votes = gameState.votes || {}
@@ -78,14 +79,12 @@ export function resolveOnlineVotes(gameState) {
       gameLog.push(`${player.name} was voted out by the town.`)
       resultType = "elimination"
 
-      const revealSetting = gameState?.settings?.revealRolesOnElimination || "none"
+     const reveal = shouldRevealRoleOnElimination(
+  "vote",
+  gameState.settings
+)
 
-      if (
-        revealSetting === "vote_only" ||
-        revealSetting === "death_and_vote"
-      ) {
-        revealedRole = player.role
-      }
+revealedRole = reveal ? player.role : null
 
       if (player.role === "jester") {
         resultType = "jester_win"

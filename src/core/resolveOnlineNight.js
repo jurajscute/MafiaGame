@@ -1,4 +1,5 @@
 import { roles } from "./roles.js"
+import { shouldRevealRoleOnElimination } from "./gameSettings.js"
 
 function getPlayerByName(players, name) {
   return players.find(player => player.name === name)
@@ -166,7 +167,7 @@ let vigilantePublicReveal = null
     vigilantePublicReveal = {
       shooter: shooter.name,
       target: target.name,
-      targetRole: target.role,
+      targetRole: revealRoles ? target.role : null,
       targetDied: false,
       vigilanteDies: false,
       blocked: true,
@@ -188,7 +189,7 @@ let vigilantePublicReveal = null
     vigilantePublicReveal = {
       shooter: shooter.name,
       target: target.name,
-      targetRole: target.role,
+      targetRole: revealRoles ? target.role : null,
       targetDied: false,
       vigilanteDies: false,
       blocked: true,
@@ -233,7 +234,7 @@ let vigilantePublicReveal = null
     playerId: shooter.id,
     type: "vigilante_result",
     targetName: target.name,
-    targetRole: target.role,
+    targetRole: revealRoles ? target.role : null,
     targetDied: true,
     vigilanteDies,
     blocked: false,
@@ -243,7 +244,7 @@ let vigilantePublicReveal = null
   vigilantePublicReveal = {
     shooter: shooter.name,
     target: target.name,
-    targetRole: target.role,
+    targetRole: revealRoles ? target.role : null,
     targetDied: true,
     vigilanteDies,
     blocked: false,
@@ -311,9 +312,12 @@ let vigilantePublicReveal = null
         gameLog.push(`${target.name} was killed during the night.`)
 
         publicResults.push({
-          type: "death",
-          text: `${target.name} was found dead in the morning.`
-        })
+  type: "death",
+  text: revealRoles
+    ? `${target.name} was found dead. They were a ${target.role}.`
+    : `${target.name} was found dead in the morning.`,
+  role: revealRoles ? target.role : null
+})
       }
     }
   }

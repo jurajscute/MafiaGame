@@ -1,6 +1,8 @@
 import { assignRolesToPlayers } from "./roleAssignment.js"
 
 export function buildOnlineGameState(room) {
+  const settings = room.settings || {}
+const priestUsesPerGame = Number(settings.priestUsesPerGame ?? 1)
   const tempState = {
     players: room.players.map(player => ({
       name: player.name,
@@ -10,7 +12,7 @@ export function buildOnlineGameState(room) {
       catAlignment: null,
       wasExecutioner: false,
       executionerConvertedTo: null,
-      priestUsesLeft: player.role === "priest" ? 1 : undefined
+      priestUsesLeft: null
     })),
     rolesEnabled: room.settings.rolesEnabled || {},
     roleWeights: room.settings.roleWeights || {},
@@ -26,6 +28,14 @@ export function buildOnlineGameState(room) {
   }
 
   assignRolesToPlayers(tempState)
+
+tempState.players.forEach(player => {
+  if (player.role === "priest") {
+    player.priestUsesLeft = priestUsesPerGame
+  } else {
+    player.priestUsesLeft = 0
+  }
+})
 
   return {
 

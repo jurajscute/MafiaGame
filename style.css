@@ -6612,3 +6612,12 @@ body.holy-night-flash .holy-pulse{
   opacity:1 !important;
   transform:none !important;
 }
+
+.settings-role-card.role-enabled{
+  animation: roleEnable 0.2s ease;
+}
+
+@keyframes roleEnable{
+  from{ transform:scale(0.98); }
+  to{ transform:scale(1); }
+}

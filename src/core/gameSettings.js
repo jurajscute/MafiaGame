@@ -103,3 +103,14 @@ export function mergeGameSettings(base = {}, overrides = {}) {
     }
   }
 }
+
+export function shouldRevealRoleOnElimination(source, settings) {
+  const mode = settings?.revealRolesOnElimination || "none"
+
+  if (mode === "none") return false
+  if (mode === "death_and_vote") return true
+  if (mode === "death") return source === "death"
+  if (mode === "vote_only") return source === "vote"
+
+  return false
+}
