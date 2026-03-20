@@ -1731,6 +1731,11 @@ function renderOnlineNightSelect() {
   }
 
   if (myAction) {
+
+if (!currentPlayer?.alive) {
+  return showYouDiedScreen()
+}
+
     let submittedText = "You are ready."
 
     if (myAction.type === "kill" && myAction.target) {

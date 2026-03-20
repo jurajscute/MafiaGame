@@ -1,6 +1,7 @@
 import { roles } from "./roles.js"
 import { shouldRevealRoleOnElimination } from "./gameSettings.js"
 
+
 function getPlayerByName(players, name) {
   return players.find(player => player.name === name)
 }
@@ -15,6 +16,12 @@ function markDoomed(player) {
 }
 
 export function resolveOnlineNight(gameState, roomSettings = {}) {
+
+  const revealRoles = shouldRevealRoleOnElimination(
+  "death",
+  gameState.settings
+)
+
   const players = structuredClone(gameState.players || [])
   const submittedActions = gameState.submittedActions || {}
 
@@ -26,10 +33,15 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
     ...(gameState.gameStats || {})
   }
 
-  const actions = Object.entries(submittedActions).map(([playerId, action]) => ({
+ const actions = Object.entries(submittedActions)
+  .map(([playerId, action]) => ({
     playerId,
     ...action
   }))
+  .filter(action => {
+    const player = players.find(p => p.id === action.playerId)
+    return player && player.alive !== false
+  })
 
   gameStats.nights += 1
   gameLog.push(`Night ${gameStats.nights}`)
@@ -234,7 +246,7 @@ let vigilantePublicReveal = null
     playerId: shooter.id,
     type: "vigilante_result",
     targetName: target.name,
-    targetRole: revealRoles ? target.role : null,
+    targetRole: target.role
     targetDied: true,
     vigilanteDies,
     blocked: false,
