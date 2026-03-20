@@ -980,45 +980,33 @@ async function maybeAdvanceOnlinePhase() {
 
   let everyoneDone = false
 
-  if (gameState.phase === "night_select") {
+if (gameState.phase === "night_select") {
   const actions = gameState.submittedActions || {}
 
   everyoneDone =
     alivePlayers.length > 0 &&
-    alivePlayers.every(player => {
-  const p = gameState.players.find(x => x.id === player.id)
-  return p && p.alive !== false && actions[player.id]
-})
+    alivePlayers.every(player => actions[player.id])
 
 } else if (gameState.phase === "morning") {
-  const votes = gameState.votes || {}
+  const seenMap = gameState.morningSeen || {}
 
   everyoneDone =
     alivePlayers.length > 0 &&
-    alivePlayers.every(player => {
-  const p = gameState.players.find(x => x.id === player.id)
-  return p && p.alive !== false && actions[player.id]
-})
+    alivePlayers.every(player => seenMap[player.id])
 
 } else if (gameState.phase === "voting") {
   const votes = gameState.votes || {}
 
   everyoneDone =
     alivePlayers.length > 0 &&
-    alivePlayers.every(player => {
-  const p = gameState.players.find(x => x.id === player.id)
-  return p && p.alive !== false && actions[player.id]
-})
+    alivePlayers.every(player => votes[player.id])
 
 } else {
   const readyMap = gameState.readyMap || {}
 
   everyoneDone =
     alivePlayers.length > 0 &&
-    alivePlayers.every(player => {
-  const p = gameState.players.find(x => x.id === player.id)
-  return p && p.alive !== false && actions[player.id]
-})
+    alivePlayers.every(player => readyMap[player.id])
 }
 
   if (!everyoneDone) return
