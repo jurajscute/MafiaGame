@@ -985,28 +985,40 @@ async function maybeAdvanceOnlinePhase() {
 
   everyoneDone =
     alivePlayers.length > 0 &&
-    alivePlayers.every(player => actions[player.id])
+    alivePlayers.every(player => {
+  const p = gameState.players.find(x => x.id === player.id)
+  return p && p.alive !== false && actions[player.id]
+})
 
 } else if (gameState.phase === "morning") {
   const votes = gameState.votes || {}
 
   everyoneDone =
     alivePlayers.length > 0 &&
-    alivePlayers.every(player => votes[player.id])
+    alivePlayers.every(player => {
+  const p = gameState.players.find(x => x.id === player.id)
+  return p && p.alive !== false && actions[player.id]
+})
 
 } else if (gameState.phase === "voting") {
   const votes = gameState.votes || {}
 
   everyoneDone =
     alivePlayers.length > 0 &&
-    alivePlayers.every(player => votes[player.id])
+    alivePlayers.every(player => {
+  const p = gameState.players.find(x => x.id === player.id)
+  return p && p.alive !== false && actions[player.id]
+})
 
 } else {
   const readyMap = gameState.readyMap || {}
 
   everyoneDone =
     alivePlayers.length > 0 &&
-    alivePlayers.every(player => readyMap[player.id])
+    alivePlayers.every(player => {
+  const p = gameState.players.find(x => x.id === player.id)
+  return p && p.alive !== false && actions[player.id]
+})
 }
 
   if (!everyoneDone) return
@@ -1730,8 +1742,15 @@ function renderOnlineNightSelect() {
     vigilante: "Justice has a cost"
   }
 
-if (!currentPlayer?.alive) {
-  return showYouDiedScreen()
+if (!me || me.alive === false) {
+  return renderOnlineNightActionCard({
+    me,
+    hint: "You are dead",
+    panelLabel: "Eliminated",
+    panelText: "You can no longer act.",
+    submitted: true,
+    submittedText: "You Died"
+  })
 }
 
   if (myAction) {
