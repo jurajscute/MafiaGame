@@ -146,6 +146,10 @@ revealedRole = reveal ? player.role : null
     }
   }
 
+console.log("ELIMINATED:", eliminated)
+console.log("FOUND PLAYER:", eliminatedPlayer)
+console.log("ROLE:", eliminatedPlayer?.role)
+
   return {
     players,
     voteResults: {
