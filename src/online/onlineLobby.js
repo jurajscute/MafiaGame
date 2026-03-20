@@ -1730,11 +1730,11 @@ function renderOnlineNightSelect() {
     vigilante: "Justice has a cost"
   }
 
-  if (myAction) {
-
 if (!currentPlayer?.alive) {
   return showYouDiedScreen()
 }
+
+  if (myAction) {
 
     let submittedText = "You are ready."
 
