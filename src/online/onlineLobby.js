@@ -23,6 +23,8 @@ import {
   buildSharedFinalResultsScreen
 } from "../core/sharedScreens.js"
 
+let isViewingOnlineSettings = false
+
 let demoRoom = null
 let currentRoomCode = null
 let currentPlayerId = null
@@ -454,6 +456,8 @@ function showOnlineSettingsEditor() {
     return
   }
 
+isViewingOnlineSettings = true
+
   const settings = mergeGameSettings({}, demoRoom.settings || {})
   const playerCount = (demoRoom.players || []).length
   const mafiaMax = maxAllowedMafia(playerCount)
@@ -475,10 +479,15 @@ function showOnlineSettingsEditor() {
       locked: false,
       mafiaOptionsHTML,
       footerHTML: `
-        <button class="skip-btn" onclick="renderRoomLobby()">Back</button>
+        <button class="skip-btn" onclick="window.closeOnlineSettingsEditor()">Back</button>
       `
     })
   )
+}
+
+window.closeOnlineSettingsEditor = function() {
+  isViewingOnlineSettings = false
+  renderRoomLobby()
 }
 
 function subscribeToRoom(roomCode) {
@@ -557,7 +566,12 @@ function subscribeToRoom(roomCode) {
     }
 
     lastRenderedScreenKey = null
-    renderRoomLobby()
+
+if (isViewingOnlineSettings && currentIsHost) {
+  showOnlineSettingsEditor()
+} else {
+  renderRoomLobby()
+}
   })
 }
 
