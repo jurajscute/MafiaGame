@@ -9,6 +9,9 @@ import { roles } from "../core/roles.js"
 import { ref, set, get, child, onValue, update, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"
 import { resolveOnlineVotes } from "../core/resolveOnlineVotes.js"
 import { resolveOnlineNight } from "../core/resolveOnlineNight.js"
+import { buildSharedSettingsContent } from "../core/settingsRenderer.js"
+import { maxAllowedMafia } from "../core/setupLogic.js"
+import { mafiaCount } from "../core/utils.js"
 import {
   buildSharedRoleRevealScreen,
   buildSharedNightActionScreen,
@@ -451,26 +454,30 @@ function showOnlineSettingsEditor() {
   }
 
   const settings = mergeGameSettings({}, demoRoom.settings || {})
+  const playerCount = (demoRoom.players || []).length
+  const mafiaMax = maxAllowedMafia(playerCount)
+  const autoMafia = playerCount > 0 ? mafiaCount(playerCount) : 1
 
-  render(`
-    <div class="card setup-screen-card">
-      <div class="setup-hero">
-        <div class="setup-kicker">Online Lobby</div>
-        <h2 class="setup-title">Edit Online Settings</h2>
-        <div class="setup-subtitle">
-          These settings sync live to every player in the room.
-        </div>
-      </div>
+  let mafiaOptionsHTML = `<option value="0" ${settings.mafiaCountOverride === 0 ? "selected" : ""}>Auto (${autoMafia})</option>`
+  for (let i = 1; i <= mafiaMax; i++) {
+    const label = i === 1 ? "1 Mafia Member" : `${i} Mafia`
+    mafiaOptionsHTML += `<option value="${i}" ${settings.mafiaCountOverride === i ? "selected" : ""}>${label}</option>`
+  }
 
-      <div class="setup-list-panel" style="text-align:left;">
-        ${SETTINGS_SECTIONS.map(section => renderOnlineSettingsSection(section, settings)).join("")}
-      </div>
-
-      <div class="setup-actions">
+  render(
+    buildSharedSettingsContent({
+      title: "Online Settings",
+      subtitle: "These settings sync to every player in the room.",
+      settings,
+      onChangeName: "window.updateOnlineSetting",
+      includePresets: false,
+      locked: false,
+      mafiaOptionsHTML,
+      footerHTML: `
         <button class="skip-btn" onclick="renderRoomLobby()">Back</button>
-      </div>
-    </div>
-  `)
+      `
+    })
+  )
 }
 
 function subscribeToRoom(roomCode) {
