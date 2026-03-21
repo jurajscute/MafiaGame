@@ -35,6 +35,8 @@ let currentIsHost = false
 let lastRenderedPhase = null
 let lastRenderedScreenKey = null
 
+const targetId = votes[player.id]
+
 function hasOnlinePlayerSeenMorning() {
   return !!demoRoom?.gameState?.morningSeen?.[currentPlayerId]
 }
@@ -192,7 +194,7 @@ if (phase === "morning" && !hasOnlinePlayerSeenMorning()) {
 
   try {
     await update(ref(db, `rooms/${currentRoomCode}/gameState`), {
-      [`votes/${currentPlayerId}`]: targetName
+      [`votes/${currentPlayerId}`]: targetPlayerId
     })
 
     console.log("Vote submitted")

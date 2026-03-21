@@ -1,7 +1,6 @@
 import { roles } from "./roles.js"
 import { shouldRevealRoleOnElimination } from "./gameSettings.js"
 
-
 function getPlayerByName(players, name) {
   return players.find(player => player.name === name)
 }
@@ -16,11 +15,9 @@ function markDoomed(player) {
 }
 
 export function resolveOnlineNight(gameState, roomSettings = {}) {
+  const settings = roomSettings || gameState.settings || {}
 
-  const revealRoles = shouldRevealRoleOnElimination(
-  "death",
-  gameState.settings
-)
+  const revealRoles = shouldRevealRoleOnElimination("death", settings)
 
   const players = structuredClone(gameState.players || [])
   const submittedActions = gameState.submittedActions || {}
@@ -33,15 +30,15 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
     ...(gameState.gameStats || {})
   }
 
- const actions = Object.entries(submittedActions)
-  .map(([playerId, action]) => ({
-    playerId,
-    ...action
-  }))
-  .filter(action => {
-    const player = players.find(p => p.id === action.playerId)
-    return player && player.alive !== false
-  })
+  const actions = Object.entries(submittedActions)
+    .map(([playerId, action]) => ({
+      playerId,
+      ...action
+    }))
+    .filter(action => {
+      const player = players.find(p => p.id === action.playerId)
+      return player && player.alive !== false
+    })
 
   gameStats.nights += 1
   gameLog.push(`Night ${gameStats.nights}`)
@@ -50,8 +47,7 @@ export function resolveOnlineNight(gameState, roomSettings = {}) {
   const privateResults = []
   const nightDeaths = []
 
-let vigilantePublicReveal = null
-
+  let vigilantePublicReveal = null
   const priestBlockedRoles = []
 
   const holyShields = actions.filter(a => a.type === "holy_shield")
@@ -140,130 +136,126 @@ let vigilantePublicReveal = null
   })
 
   vigilanteShots.forEach(action => {
-  const shooter = players.find(player => player.id === action.playerId)
-  const target = getPlayerByName(players, action.target)
+    const shooter = players.find(player => player.id === action.playerId)
+    const target = getPlayerByName(players, action.target)
 
-  if (!shooter || shooter.alive === false) return
+    if (!shooter || shooter.alive === false) return
 
-  // Target already dead / missing
-  if (!target || target.alive === false) {
-    vigilantePublicReveal = {
-      shooter: shooter.name,
-      target: action.target,
-      targetRole: null,
-      targetDied: false,
-      vigilanteDies: false,
-      blocked: false,
-      blockedByHolySpirit: false,
-      wrongTarget: false
+    if (!target || target.alive === false) {
+      vigilantePublicReveal = {
+        shooter: shooter.name,
+        target: action.target,
+        targetRole: null,
+        targetDied: false,
+        vigilanteDies: false,
+        blocked: false,
+        blockedByHolySpirit: false,
+        wrongTarget: false
+      }
+
+      privateResults.push({
+        playerId: shooter.id,
+        type: "vigilante_result",
+        targetName: action.target,
+        targetRole: null,
+        targetDied: false,
+        vigilanteDies: false,
+        blocked: false,
+        wrongTarget: false
+      })
+
+      return
+    }
+
+    if (holyShieldActive) {
+      priestBlockedRoles.push("Vigilante")
+
+      vigilantePublicReveal = {
+        shooter: shooter.name,
+        target: target.name,
+        targetRole: revealRoles ? target.role : null,
+        targetDied: false,
+        vigilanteDies: false,
+        blocked: true,
+        blockedByHolySpirit: true,
+        wrongTarget: false
+      }
+
+      privateResults.push({
+        playerId: shooter.id,
+        type: "vigilante_blocked_priest",
+        targetName: target.name
+      })
+
+      return
+    }
+
+    if (savedTargets.includes(target.name)) {
+      vigilantePublicReveal = {
+        shooter: shooter.name,
+        target: target.name,
+        targetRole: revealRoles ? target.role : null,
+        targetDied: false,
+        vigilanteDies: false,
+        blocked: true,
+        blockedByHolySpirit: false,
+        wrongTarget: false
+      }
+
+      privateResults.push({
+        playerId: shooter.id,
+        type: "vigilante_blocked",
+        targetName: target.name
+      })
+
+      return
+    }
+
+    markDoomed(target)
+    if (!nightDeaths.includes(target.name)) {
+      nightDeaths.push(target.name)
+    }
+
+    const targetTeam = target.catAlignment || roles[target.role]?.team || "neutral"
+    const wrongTarget = targetTeam !== "mafia" && targetTeam !== "neutral"
+
+    let vigilanteDies = false
+
+    if (wrongTarget) {
+      markDoomed(shooter)
+      vigilanteDies = true
+
+      if (!nightDeaths.includes(shooter.name)) {
+        nightDeaths.push(shooter.name)
+      }
+
+      gameLog.push(`${shooter.name} attacked the wrong target and will also die.`)
+    } else {
+      gameLog.push(`${shooter.name} killed ${target.name} as the Vigilante.`)
     }
 
     privateResults.push({
       playerId: shooter.id,
       type: "vigilante_result",
-      targetName: action.target,
-      targetRole: null,
-      targetDied: false,
-      vigilanteDies: false,
+      targetName: target.name,
+      targetRole: target.role,
+      targetDied: true,
+      vigilanteDies,
       blocked: false,
-      wrongTarget: false
+      wrongTarget
     })
-
-    return
-  }
-
-  // Priest blocks Vigilante
-  if (holyShieldActive) {
-    priestBlockedRoles.push("Vigilante")
 
     vigilantePublicReveal = {
       shooter: shooter.name,
       target: target.name,
       targetRole: revealRoles ? target.role : null,
-      targetDied: false,
-      vigilanteDies: false,
-      blocked: true,
-      blockedByHolySpirit: true,
-      wrongTarget: false
-    }
-
-    privateResults.push({
-      playerId: shooter.id,
-      type: "vigilante_blocked_priest",
-      targetName: target.name
-    })
-
-    return
-  }
-
-  // Doctor blocks Vigilante
-  if (savedTargets.includes(target.name)) {
-    vigilantePublicReveal = {
-      shooter: shooter.name,
-      target: target.name,
-      targetRole: revealRoles ? target.role : null,
-      targetDied: false,
-      vigilanteDies: false,
-      blocked: true,
+      targetDied: true,
+      vigilanteDies,
+      blocked: false,
       blockedByHolySpirit: false,
-      wrongTarget: false
+      wrongTarget
     }
-
-    privateResults.push({
-      playerId: shooter.id,
-      type: "vigilante_blocked",
-      targetName: target.name
-    })
-
-    return
-  }
-
-  // Successful hit
-  markDoomed(target)
-  if (!nightDeaths.includes(target.name)) {
-    nightDeaths.push(target.name)
-  }
-
-  const targetTeam = target.catAlignment || roles[target.role]?.team || "neutral"
-  const wrongTarget = targetTeam !== "mafia" && targetTeam !== "neutral"
-
-  let vigilanteDies = false
-
-  if (wrongTarget) {
-    markDoomed(shooter)
-    vigilanteDies = true
-
-    if (!nightDeaths.includes(shooter.name)) {
-      nightDeaths.push(shooter.name)
-    }
-
-    gameLog.push(`${shooter.name} attacked the wrong target and will also die.`)
-  } else {
-    gameLog.push(`${shooter.name} killed ${target.name} as the Vigilante.`)
-  }
-
-  privateResults.push({
-    playerId: shooter.id,
-    type: "vigilante_result",
-    targetName: target.name,
-    targetRole: target.role,
-    targetDied: true,
-    vigilanteDies,
-    blocked: false,
-    wrongTarget
   })
-
-  vigilantePublicReveal = {
-    shooter: shooter.name,
-    target: target.name,
-    targetRole: revealRoles ? target.role : null,
-    targetDied: true,
-    vigilanteDies,
-    blocked: false,
-    blockedByHolySpirit: false,
-    wrongTarget
-  }
-})
 
   if (mafiaKill) {
     const target = getPlayerByName(players, mafiaKill)
@@ -324,12 +316,12 @@ let vigilantePublicReveal = null
         gameLog.push(`${target.name} was killed during the night.`)
 
         publicResults.push({
-  type: "death",
-  text: revealRoles
-    ? `${target.name} was found dead. They were a ${target.role}.`
-    : `${target.name} was found dead in the morning.`,
-  role: revealRoles ? target.role : null
-})
+          type: "death",
+          text: revealRoles
+            ? `${target.name} was found dead. They were a ${target.role}.`
+            : `${target.name} was found dead in the morning.`,
+          role: revealRoles ? target.role : null
+        })
       }
     }
   }
@@ -378,15 +370,15 @@ let vigilantePublicReveal = null
   }
 
   return {
-  players,
-  nightDeaths,
-  nightResolved: {
-    publicResults
-  },
-  nightPrivateResults: privateResults,
-  vigilantePublicReveal,
-  gameLog,
-  gameStats,
-  finalResult
-}
+    players,
+    nightDeaths,
+    nightResolved: {
+      publicResults
+    },
+    nightPrivateResults: privateResults,
+    vigilantePublicReveal,
+    gameLog,
+    gameStats,
+    finalResult
+  }
 }
