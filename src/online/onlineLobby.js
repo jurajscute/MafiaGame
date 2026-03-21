@@ -24,7 +24,6 @@ import {
 } from "../core/sharedScreens.js"
 
 let isViewingOnlineSettings = false
-
 let onlineSettingsScrollTop = 0
 
 let demoRoom = null
@@ -34,8 +33,6 @@ let currentIsHost = false
 
 let lastRenderedPhase = null
 let lastRenderedScreenKey = null
-
-const targetId = votes[player.id]
 
 function hasOnlinePlayerSeenMorning() {
   return !!demoRoom?.gameState?.morningSeen?.[currentPlayerId]
@@ -133,7 +130,6 @@ function getOnlineSettings() {
   return demoRoom?.settings || null
 }
 
-
 function applyOnlinePhaseTheme(phase) {
   if (phase === "role_reveal" || phase === "night_select" || phase === "night_results") {
     document.body.className = "night"
@@ -182,19 +178,19 @@ window.submitOnlineVote = async function(targetName) {
 
   const phase = demoRoom?.gameState?.phase
 
-if (phase !== "morning" && phase !== "voting") {
-  console.warn("Voting is not available right now")
-  return
-}
+  if (phase !== "morning" && phase !== "voting") {
+    console.warn("Voting is not available right now")
+    return
+  }
 
-if (phase === "morning" && !hasOnlinePlayerSeenMorning()) {
-  console.warn("Player has not advanced past morning yet")
-  return
-}
+  if (phase === "morning" && !hasOnlinePlayerSeenMorning()) {
+    console.warn("Player has not advanced past morning yet")
+    return
+  }
 
   try {
     await update(ref(db, `rooms/${currentRoomCode}/gameState`), {
-      [`votes/${currentPlayerId}`]: targetPlayerId
+      [`votes/${currentPlayerId}`]: targetName
     })
 
     console.log("Vote submitted")
@@ -426,8 +422,8 @@ function renderRoomLobby() {
         </div>
       </div>
 
-            <div class="setup-actions">
-  <button class="skip-btn" onclick="window.leaveOnlineRoom()">Leave Room</button>
+      <div class="setup-actions">
+        <button class="skip-btn" onclick="window.leaveOnlineRoom()">Leave Room</button>
 
         ${
           currentIsHost
@@ -465,7 +461,7 @@ function showOnlineSettingsEditor() {
     return
   }
 
-isViewingOnlineSettings = true
+  isViewingOnlineSettings = true
 
   const settings = mergeGameSettings({}, demoRoom.settings || {})
   const playerCount = (demoRoom.players || []).length
@@ -499,7 +495,6 @@ isViewingOnlineSettings = true
       scrollEl.scrollTop = onlineSettingsScrollTop
     }
   })
-
 }
 
 window.closeOnlineSettingsEditor = function() {
@@ -584,11 +579,11 @@ function subscribeToRoom(roomCode) {
 
     lastRenderedScreenKey = null
 
-if (isViewingOnlineSettings && currentIsHost) {
-  showOnlineSettingsEditor()
-} else {
-  renderRoomLobby()
-}
+    if (isViewingOnlineSettings && currentIsHost) {
+      showOnlineSettingsEditor()
+    } else {
+      renderRoomLobby()
+    }
   })
 }
 
@@ -662,13 +657,13 @@ window.confirmCreateOnlineRoom = async function () {
 
   try {
     await set(ref(db, `rooms/${roomCode}`), {
-  ...room,
-  presence: {
-    [hostPlayerId]: true
-  }
-})
+      ...room,
+      presence: {
+        [hostPlayerId]: true
+      }
+    })
 
-await onDisconnect(ref(db, `rooms/${roomCode}/presence/${hostPlayerId}`)).remove()
+    await onDisconnect(ref(db, `rooms/${roomCode}/presence/${hostPlayerId}`)).remove()
 
     currentRoomCode = roomCode
     currentPlayerId = hostPlayerId
@@ -747,8 +742,7 @@ window.leaveOnlineRoom = async function () {
     }
 
     await update(roomRef, updates)
-
-await remove(ref(db, `rooms/${currentRoomCode}/presence/${currentPlayerId}`))
+    await remove(ref(db, `rooms/${currentRoomCode}/presence/${currentPlayerId}`))
 
     currentRoomCode = null
     currentPlayerId = null
@@ -809,12 +803,12 @@ window.fakeJoinRoom = async function () {
 
     const updatedPlayers = [...players, newPlayer]
 
-await update(ref(db), {
-  [`rooms/${code}/players`]: updatedPlayers,
-  [`rooms/${code}/presence/${newPlayerId}`]: true
-})
+    await update(ref(db), {
+      [`rooms/${code}/players`]: updatedPlayers,
+      [`rooms/${code}/presence/${newPlayerId}`]: true
+    })
 
-await onDisconnect(ref(db, `rooms/${code}/presence/${newPlayerId}`)).remove()
+    await onDisconnect(ref(db, `rooms/${code}/presence/${newPlayerId}`)).remove()
 
     currentRoomCode = code
     currentPlayerId = newPlayerId
@@ -982,140 +976,140 @@ async function maybeAdvanceOnlinePhase() {
 
   let everyoneDone = false
 
-if (gameState.phase === "night_select") {
-  const actions = gameState.submittedActions || {}
+  if (gameState.phase === "night_select") {
+    const actions = gameState.submittedActions || {}
 
-  everyoneDone =
-    alivePlayers.length > 0 &&
-    alivePlayers.every(player => actions[player.id])
+    everyoneDone =
+      alivePlayers.length > 0 &&
+      alivePlayers.every(player => actions[player.id])
 
-} else if (gameState.phase === "morning") {
-  const seenMap = gameState.morningSeen || {}
+  } else if (gameState.phase === "morning") {
+    const seenMap = gameState.morningSeen || {}
 
-  everyoneDone =
-    alivePlayers.length > 0 &&
-    alivePlayers.every(player => seenMap[player.id])
+    everyoneDone =
+      alivePlayers.length > 0 &&
+      alivePlayers.every(player => seenMap[player.id])
 
-} else if (gameState.phase === "voting") {
-  const votes = gameState.votes || {}
+  } else if (gameState.phase === "voting") {
+    const votes = gameState.votes || {}
 
-  everyoneDone =
-    alivePlayers.length > 0 &&
-    alivePlayers.every(player => votes[player.id])
+    everyoneDone =
+      alivePlayers.length > 0 &&
+      alivePlayers.every(player => votes[player.id])
 
-} else {
-  const readyMap = gameState.readyMap || {}
+  } else {
+    const readyMap = gameState.readyMap || {}
 
-  everyoneDone =
-    alivePlayers.length > 0 &&
-    alivePlayers.every(player => readyMap[player.id])
-}
+    everyoneDone =
+      alivePlayers.length > 0 &&
+      alivePlayers.every(player => readyMap[player.id])
+  }
 
   if (!everyoneDone) return
 
   try {
     if (gameState.phase === "night_select") {
-  const resolved = resolveOnlineNight(gameState, demoRoom.settings || {})
+      const resolved = resolveOnlineNight(gameState, demoRoom.settings || {})
 
-  await update(getOnlineRoomRef(), {
-    "gameState/players": resolved.players,
-    "gameState/nightDeaths": resolved.nightDeaths,
-    "gameState/nightResolved": resolved.nightResolved,
-    "gameState/nightPrivateResults": resolved.nightPrivateResults,
-    "gameState/vigilantePublicReveal": resolved.vigilantePublicReveal || null,
-    "gameState/gameLog": resolved.gameLog,
-    "gameState/gameStats": resolved.gameStats,
-    "gameState/finalResult": resolved.finalResult || null,
-    "gameState/finalResultsSeen": resolved.finalResult ? {} : (gameState.finalResultsSeen || {}),
-    "gameState/phase": resolved.finalResult ? "game_over" : "night_results",
-    "gameState/readyMap": {},
-    "gameState/submittedActions": {}
-  })
-  return
-}
+      await update(getOnlineRoomRef(), {
+        "gameState/players": resolved.players,
+        "gameState/nightDeaths": resolved.nightDeaths,
+        "gameState/nightResolved": resolved.nightResolved,
+        "gameState/nightPrivateResults": resolved.nightPrivateResults,
+        "gameState/vigilantePublicReveal": resolved.vigilantePublicReveal || null,
+        "gameState/gameLog": resolved.gameLog,
+        "gameState/gameStats": resolved.gameStats,
+        "gameState/finalResult": resolved.finalResult || null,
+        "gameState/finalResultsSeen": resolved.finalResult ? {} : (gameState.finalResultsSeen || {}),
+        "gameState/phase": resolved.finalResult ? "game_over" : "night_results",
+        "gameState/readyMap": {},
+        "gameState/submittedActions": {}
+      })
+      return
+    }
 
     if (gameState.phase === "morning" || gameState.phase === "voting") {
-  const resolved = resolveOnlineVotes(gameState)
+      const resolved = resolveOnlineVotes(gameState)
 
-  await update(getOnlineRoomRef(), {
-    "gameState/players": resolved.players,
-    "gameState/voteResults": resolved.voteResults,
-    "gameState/finalResult": resolved.finalResult || null,
-    "gameState/gameLog": resolved.gameLog,
-    "gameState/gameStats": resolved.gameStats,
-    "gameState/phase": resolved.finalResult ? "game_over" : "vote_results",
-    "gameState/readyMap": {},
-    "gameState/votes": {},
-    "gameState/finalResultsSeen": {}
-  })
+      await update(getOnlineRoomRef(), {
+        "gameState/players": resolved.players,
+        "gameState/voteResults": resolved.voteResults,
+        "gameState/finalResult": resolved.finalResult || null,
+        "gameState/gameLog": resolved.gameLog,
+        "gameState/gameStats": resolved.gameStats,
+        "gameState/phase": resolved.finalResult ? "game_over" : "vote_results",
+        "gameState/readyMap": {},
+        "gameState/votes": {},
+        "gameState/finalResultsSeen": {}
+      })
 
-  return
-}
+      return
+    }
 
     let nextPhase = gameState.phase
 
     if (gameState.phase === "role_reveal") nextPhase = "night_select"
     if (gameState.phase === "night_results") {
-  let eliminatedThisMorning = 0
+      let eliminatedThisMorning = 0
 
-const nextPlayers = (gameState.players || []).map(player => {
-  if (player.doomedTonight) {
-    eliminatedThisMorning += 1
-    return {
-      ...player,
-      alive: false,
-      doomedTonight: false
-    }
-  }
+      const nextPlayers = (gameState.players || []).map(player => {
+        if (player.doomedTonight) {
+          eliminatedThisMorning += 1
+          return {
+            ...player,
+            alive: false,
+            doomedTonight: false
+          }
+        }
 
-  return {
-    ...player,
-    doomedTonight: false
-  }
-})
+        return {
+          ...player,
+          doomedTonight: false
+        }
+      })
 
-const nextGameStats = {
-  ...(gameState.gameStats || {}),
-  eliminations: (gameState.gameStats?.eliminations || 0) + eliminatedThisMorning
-}
+      const nextGameStats = {
+        ...(gameState.gameStats || {}),
+        eliminations: (gameState.gameStats?.eliminations || 0) + eliminatedThisMorning
+      }
 
-  const mafiaAlive = nextPlayers.filter(player => {
-    if (player.alive === false) return false
-    return getOnlineEffectiveTeam(player) === "mafia"
-  }).length
+      const mafiaAlive = nextPlayers.filter(player => {
+        if (player.alive === false) return false
+        return getOnlineEffectiveTeam(player) === "mafia"
+      }).length
 
-  const nonMafiaAlive = nextPlayers.filter(player => {
-    if (player.alive === false) return false
-    return getOnlineEffectiveTeam(player) !== "mafia"
-  }).length
+      const nonMafiaAlive = nextPlayers.filter(player => {
+        if (player.alive === false) return false
+        return getOnlineEffectiveTeam(player) !== "mafia"
+      }).length
 
-  let finalResult = null
+      let finalResult = null
 
-  if (mafiaAlive === 0) {
-    finalResult = {
-      type: "village_win"
-    }
-  } else if (mafiaAlive >= nonMafiaAlive) {
-    finalResult = {
-      type: "mafia_win"
-    }
-  }
+      if (mafiaAlive === 0) {
+        finalResult = {
+          type: "village_win"
+        }
+      } else if (mafiaAlive >= nonMafiaAlive) {
+        finalResult = {
+          type: "mafia_win"
+        }
+      }
 
-  await update(getOnlineRoomRef(), {
-  "gameState/players": nextPlayers,
-  "gameState/gameStats": nextGameStats,
-  "gameState/finalResult": finalResult,
-  "gameState/finalResultsSeen": finalResult ? {} : (gameState.finalResultsSeen || {}),
-  "gameState/phase": finalResult ? "game_over" : "morning",
-  "gameState/readyMap": {},
-  "gameState/submittedActions": {},
-  "gameState/votes": {},
-  "gameState/morningSeen": {}
-})
-  return
-}
-    else if (gameState.phase === "morning") nextPhase = "voting"
-    else if (gameState.phase === "vote_results") {
+      await update(getOnlineRoomRef(), {
+        "gameState/players": nextPlayers,
+        "gameState/gameStats": nextGameStats,
+        "gameState/finalResult": finalResult,
+        "gameState/finalResultsSeen": finalResult ? {} : (gameState.finalResultsSeen || {}),
+        "gameState/phase": finalResult ? "game_over" : "morning",
+        "gameState/readyMap": {},
+        "gameState/submittedActions": {},
+        "gameState/votes": {},
+        "gameState/morningSeen": {}
+      })
+      return
+    } else if (gameState.phase === "morning") {
+      nextPhase = "voting"
+    } else if (gameState.phase === "vote_results") {
       if (gameState.finalResult) {
         nextPhase = "game_over"
       } else {
@@ -1124,18 +1118,18 @@ const nextGameStats = {
     }
 
     const updates = {
-  "gameState/phase": nextPhase,
-  "gameState/readyMap": {},
-  "gameState/submittedActions": {},
-  "gameState/votes": {},
-  "gameState/vigilantePublicReveal": null,
-}
+      "gameState/phase": nextPhase,
+      "gameState/readyMap": {},
+      "gameState/submittedActions": {},
+      "gameState/votes": {},
+      "gameState/vigilantePublicReveal": null,
+    }
 
-if (nextPhase === "morning") {
-  updates["gameState/morningSeen"] = {}
-}
+    if (nextPhase === "morning") {
+      updates["gameState/morningSeen"] = {}
+    }
 
-await update(getOnlineRoomRef(), updates)
+    await update(getOnlineRoomRef(), updates)
   } catch (error) {
     console.error("Failed to advance online phase:", error)
   }
@@ -1195,11 +1189,11 @@ function renderOnlineGame() {
     return
   }
 
-const leaveButtonHTML = `
-  <div style="margin-top:16px; text-align:center;">
-    <button class="skip-btn" onclick="window.leaveOnlineRoom()">Leave Room</button>
-  </div>
-`
+  const leaveButtonHTML = `
+    <div style="margin-top:16px; text-align:center;">
+      <button class="skip-btn" onclick="window.leaveOnlineRoom()">Leave Room</button>
+    </div>
+  `
 
   if (gameState.phase === "role_reveal") {
     renderOnlineRoleReveal()
@@ -1217,18 +1211,18 @@ const leaveButtonHTML = `
   }
 
   if (gameState.phase === "morning") {
-  if (hasOnlinePlayerSeenMorning()) {
-    renderOnlineVoting()
-  } else {
-    renderOnlineMorning()
+    if (hasOnlinePlayerSeenMorning()) {
+      renderOnlineVoting()
+    } else {
+      renderOnlineMorning()
+    }
+    return
   }
-  return
-}
 
-if (gameState.phase === "voting") {
-  renderOnlineVoting()
-  return
-}
+  if (gameState.phase === "voting") {
+    renderOnlineVoting()
+    return
+  }
 
   if (gameState.phase === "vote_results") {
     renderOnlineVoteResults()
@@ -1236,13 +1230,13 @@ if (gameState.phase === "voting") {
   }
 
   if (gameState.phase === "game_over") {
-  if (hasOnlinePlayerSeenFinalResults()) {
-    renderOnlineFinalResults()
-  } else {
-    renderOnlineGameOver()
+    if (hasOnlinePlayerSeenFinalResults()) {
+      renderOnlineFinalResults()
+    } else {
+      renderOnlineGameOver()
+    }
+    return
   }
-  return
-}
 
   render(`
     <div class="card home-screen-card">
@@ -1256,7 +1250,6 @@ if (gameState.phase === "voting") {
     </div>
   `)
 }
-
 
 function getOnlineFinalWinnerBanner() {
   const finalResult = demoRoom?.gameState?.finalResult || {}
@@ -1453,14 +1446,14 @@ function renderOnlineFinalResults() {
       neutralHTML: renderOnlineFinalRoleList(neutral),
       logHTML,
       continueButtonHTML: `
-  ${renderOnlineProgressBox({
-    includeDead: true,
-    label: "Players Ready"
-  })}
-  <div class="reveal-role-actions">
-    ${renderOnlineProceedButton("Back To Lobby", { includeDead: true })}
-  </div>
-`
+        ${renderOnlineProgressBox({
+          includeDead: true,
+          label: "Players Ready"
+        })}
+        <div class="reveal-role-actions">
+          ${renderOnlineProceedButton("Back To Lobby", { includeDead: true })}
+        </div>
+      `
     })
   )
 }
@@ -1469,115 +1462,115 @@ function renderOnlineGameOver() {
   const finalResult = demoRoom?.gameState?.finalResult || {}
   const players = demoRoom?.gameState?.players || []
 
-if (finalResult.type === "jester_executioner_win") {
-  const screen = buildSharedWinScreen({
-    bodyClass: "win-jester-executioner",
-    cardClass: "role-jester",
-    title: "JESTER & EXECUTIONER WIN",
-    linesHTML: `
-      <p>${finalResult.winner} was voted out and wins as the Jester.</p>
-      <p>${finalResult.executionerWinner} also wins because ${finalResult.winner} was their target.</p>
-    `,
-    continueButtonHTML: `
-      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
-    `
-  })
+  if (finalResult.type === "jester_executioner_win") {
+    const screen = buildSharedWinScreen({
+      bodyClass: "win-jester-executioner",
+      cardClass: "role-jester",
+      title: "JESTER & EXECUTIONER WIN",
+      linesHTML: `
+        <p>${finalResult.winner} was voted out and wins as the Jester.</p>
+        <p>${finalResult.executionerWinner} also wins because ${finalResult.winner} was their target.</p>
+      `,
+      continueButtonHTML: `
+        <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
+      `
+    })
 
-  document.body.className = screen.bodyClass
-  render(screen.html)
-  return
-}
+    document.body.className = screen.bodyClass
+    render(screen.html)
+    return
+  }
 
-if (finalResult.type === "village_executioner_win") {
-  const screen = buildSharedWinScreen({
-    bodyClass: "win-village-executioner",
-    cardClass: "role-executioner",
-    title: "VILLAGE & EXECUTIONER WIN",
-    linesHTML: `
-      <p>${finalResult.winner} succeeded in getting ${finalResult.target} voted out!</p>
-      <p>The village also wins because ${finalResult.target} was a part of the mafia.</p>
-    `,
-    continueButtonHTML: `
-      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
-    `
-  })
+  if (finalResult.type === "village_executioner_win") {
+    const screen = buildSharedWinScreen({
+      bodyClass: "win-village-executioner",
+      cardClass: "role-executioner",
+      title: "VILLAGE & EXECUTIONER WIN",
+      linesHTML: `
+        <p>${finalResult.winner} succeeded in getting ${finalResult.target} voted out!</p>
+        <p>The village also wins because ${finalResult.target} was a part of the mafia.</p>
+      `,
+      continueButtonHTML: `
+        <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
+      `
+    })
 
-  document.body.className = screen.bodyClass
-  render(screen.html)
-  return
-}
+    document.body.className = screen.bodyClass
+    render(screen.html)
+    return
+  }
 
   if (finalResult.type === "jester_win") {
-  const screen = buildSharedWinScreen({
-    bodyClass: "win-jester",
-    cardClass: "role-jester",
-    title: "JESTER WINS",
-    linesHTML: `
-      <p>${finalResult.winner} tricked the town into voting them out!</p>
-    `,
-    continueButtonHTML: `
-      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
-    `
-  })
+    const screen = buildSharedWinScreen({
+      bodyClass: "win-jester",
+      cardClass: "role-jester",
+      title: "JESTER WINS",
+      linesHTML: `
+        <p>${finalResult.winner} tricked the town into voting them out!</p>
+      `,
+      continueButtonHTML: `
+        <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
+      `
+    })
 
-  document.body.className = screen.bodyClass
-  render(screen.html)
-  return
-}
+    document.body.className = screen.bodyClass
+    render(screen.html)
+    return
+  }
 
   if (finalResult.type === "executioner_win") {
-  const screen = buildSharedWinScreen({
-    bodyClass: "win-executioner",
-    cardClass: "role-executioner",
-    title: "EXECUTIONER WINS",
-    linesHTML: `
-      <p>${finalResult.winner} succeeded in getting ${finalResult.target} voted out!</p>
-    `,
-    continueButtonHTML: `
-      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
-    `
-  })
+    const screen = buildSharedWinScreen({
+      bodyClass: "win-executioner",
+      cardClass: "role-executioner",
+      title: "EXECUTIONER WINS",
+      linesHTML: `
+        <p>${finalResult.winner} succeeded in getting ${finalResult.target} voted out!</p>
+      `,
+      continueButtonHTML: `
+        <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
+      `
+    })
 
-  document.body.className = screen.bodyClass
-  render(screen.html)
-  return
-}
+    document.body.className = screen.bodyClass
+    render(screen.html)
+    return
+  }
 
   if (finalResult.type === "mafia_win") {
-  const screen = buildSharedWinScreen({
-    bodyClass: "win-mafia",
-    cardClass: "role-mafia",
-    title: "MAFIA WINS",
-    linesHTML: `
-      <p>The mafia have taken control of the town.</p>
-    `,
-    continueButtonHTML: `
-      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
-    `
-  })
+    const screen = buildSharedWinScreen({
+      bodyClass: "win-mafia",
+      cardClass: "role-mafia",
+      title: "MAFIA WINS",
+      linesHTML: `
+        <p>The mafia have taken control of the town.</p>
+      `,
+      continueButtonHTML: `
+        <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
+      `
+    })
 
-  document.body.className = screen.bodyClass
-  render(screen.html)
-  return
-}
+    document.body.className = screen.bodyClass
+    render(screen.html)
+    return
+  }
 
-if (finalResult.type === "village_win") {
-  const screen = buildSharedWinScreen({
-    bodyClass: "win-village",
-    cardClass: "role-doctor",
-    title: "VILLAGE WINS",
-    linesHTML: `
-      <p>The town has eliminated all mafia members.</p>
-    `,
-    continueButtonHTML: `
-      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
-    `
-  })
+  if (finalResult.type === "village_win") {
+    const screen = buildSharedWinScreen({
+      bodyClass: "win-village",
+      cardClass: "role-doctor",
+      title: "VILLAGE WINS",
+      linesHTML: `
+        <p>The town has eliminated all mafia members.</p>
+      `,
+      continueButtonHTML: `
+        <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
+      `
+    })
 
-  document.body.className = screen.bodyClass
-  render(screen.html)
-  return
-}
+    document.body.className = screen.bodyClass
+    render(screen.html)
+    return
+  }
 
   document.body.className = "win-village"
 
@@ -1732,19 +1725,18 @@ function renderOnlineNightSelect() {
     vigilante: "Justice has a cost"
   }
 
-if (!me || me.alive === false) {
-  return renderOnlineNightActionCard({
-    me,
-    hint: "You are dead",
-    panelLabel: "Eliminated",
-    panelText: "You can no longer act.",
-    submitted: true,
-    submittedText: "You Died"
-  })
-}
+  if (!me || me.alive === false) {
+    return renderOnlineNightActionCard({
+      me,
+      hint: "You are dead",
+      panelLabel: "Eliminated",
+      panelText: "You can no longer act.",
+      submitted: true,
+      submittedText: "You Died"
+    })
+  }
 
   if (myAction) {
-
     let submittedText = "You are ready."
 
     if (myAction.type === "kill" && myAction.target) {
@@ -1760,10 +1752,10 @@ if (!me || me.alive === false) {
     } else if (myAction.type === "none") {
       submittedText = `You have finished for the night.`
     } else if (myAction.type === "holy_shield" && myAction.target === "__use__") {
-  submittedText = `You chose to use Holy Spirit.`
-} else if (myAction.type === "holy_shield" && myAction.target === "__skip__") {
-  submittedText = `You chose to skip Holy Spirit.`
-}
+      submittedText = `You chose to use Holy Spirit.`
+    } else if (myAction.type === "holy_shield" && myAction.target === "__skip__") {
+      submittedText = `You chose to skip Holy Spirit.`
+    }
 
     renderOnlineNightActionCard({
       me,
@@ -1774,37 +1766,37 @@ if (!me || me.alive === false) {
     return
   }
 
-if (me.role === "priest") {
-  const usesLeft = me.priestUsesLeft ?? 1
-  const canUse = usesLeft > 0
+  if (me.role === "priest") {
+    const usesLeft = me.priestUsesLeft ?? 1
+    const canUse = usesLeft > 0
 
-  renderOnlineNightActionCard({
-    me,
-    hint: "A blessing can change the whole night",
-    panelLabel: "Decision",
-    panelText: "Call upon the Holy Spirit to shield the town tonight?",
-    buttonsHTML: `
-      ${
-        canUse
-          ? `<button onclick="window.submitNightAction('holy_shield', '__use__')">Use Holy Spirit</button>`
-          : `<button disabled>No Uses Left</button>`
-      }
-      <button class="skip-btn" onclick="window.submitNightAction('holy_shield', '__skip__')">Skip Holy Spirit</button>
-    `
-  })
-  return
-}
+    renderOnlineNightActionCard({
+      me,
+      hint: "A blessing can change the whole night",
+      panelLabel: "Decision",
+      panelText: "Call upon the Holy Spirit to shield the town tonight?",
+      buttonsHTML: `
+        ${
+          canUse
+            ? `<button onclick="window.submitNightAction('holy_shield', '__use__')">Use Holy Spirit</button>`
+            : `<button disabled>No Uses Left</button>`
+        }
+        <button class="skip-btn" onclick="window.submitNightAction('holy_shield', '__skip__')">Skip Holy Spirit</button>
+      `
+    })
+    return
+  }
 
   if (!role?.nightAction) {
-  renderOnlineNightActionCard({
-    me,
-    hint: "Sleep peacefully tonight",
-    panelLabel: "Night",
-    panelText: "You have no action tonight.",
-    actionButtonHTML: `<button class="primary-btn" onclick="window.submitNightAction('none')">Continue</button>`
-  })
-  return
-}
+    renderOnlineNightActionCard({
+      me,
+      hint: "Sleep peacefully tonight",
+      panelLabel: "Night",
+      panelText: "You have no action tonight.",
+      actionButtonHTML: `<button class="primary-btn" onclick="window.submitNightAction('none')">Continue</button>`
+    })
+    return
+  }
 
   const alivePlayers = getOnlineAlivePlayers()
 
@@ -1825,10 +1817,10 @@ if (me.role === "priest") {
   })
 
   const buttonsHTML = validTargets.map(player => `
-  <button onclick="window.submitNightAction('${getActionType(me.role)}', '${player.name}')">
-    ${player.name}${player.id === me.id ? ` <span style="opacity:0.6;">(You)</span>` : ""}
-  </button>
-`).join("")
+    <button onclick="window.submitNightAction('${getActionType(me.role)}', '${player.name}')">
+      ${player.name}${player.id === me.id ? ` <span style="opacity:0.6;">(You)</span>` : ""}
+    </button>
+  `).join("")
 
   const skipButton =
     me.role === "vigilante"
@@ -1884,31 +1876,31 @@ function renderOnlineNightResults() {
     return
   }
 
-if (myResult?.type === "mafia_kill_blocked") {
-  renderOnlineNightResultCard({
-    me,
-    hint: "Your attack failed",
-    boxClass: "mafia-result-box",
-    boxKicker: "Attack Failed",
-    title: (myResult.targetName || "Unknown").toUpperCase(),
-    titleColor: roleColors.mafia,
-    bodyText: `Your attack on ${myResult.targetName} was stopped by the Doctor!`
-  })
-  return
-}
+  if (myResult?.type === "mafia_kill_blocked") {
+    renderOnlineNightResultCard({
+      me,
+      hint: "Your attack failed",
+      boxClass: "mafia-result-box",
+      boxKicker: "Attack Failed",
+      title: (myResult.targetName || "Unknown").toUpperCase(),
+      titleColor: roleColors.mafia,
+      bodyText: `Your attack on ${myResult.targetName} was stopped by the Doctor!`
+    })
+    return
+  }
 
-if (myResult?.type === "mafia_kill_blocked_priest") {
-  renderOnlineNightResultCard({
-    me,
-    hint: "Holy power stopped the attack",
-    boxClass: "priest-result-box",
-    boxKicker: "Holy Shield Held",
-    title: (myResult.targetName || "Unknown").toUpperCase(),
-    titleColor: roleColors.priest,
-    bodyText: `Your attack on ${myResult.targetName} was stopped by the Holy Spirit.`
-  })
-  return
-}
+  if (myResult?.type === "mafia_kill_blocked_priest") {
+    renderOnlineNightResultCard({
+      me,
+      hint: "Holy power stopped the attack",
+      boxClass: "priest-result-box",
+      boxKicker: "Holy Shield Held",
+      title: (myResult.targetName || "Unknown").toUpperCase(),
+      titleColor: roleColors.priest,
+      bodyText: `Your attack on ${myResult.targetName} was stopped by the Holy Spirit.`
+    })
+    return
+  }
 
   if (myResult?.type === "doctor_save_success") {
     renderOnlineNightResultCard({
@@ -1937,95 +1929,95 @@ if (myResult?.type === "mafia_kill_blocked_priest") {
   }
 
   if (myResult?.type === "vigilante_result") {
-  let title = "VIGILANTE OUTCOME"
-  let bodyText = `You headed to slash ${myResult.targetName}.`
+    let title = "VIGILANTE OUTCOME"
+    let bodyText = `You headed to slash ${myResult.targetName}.`
 
-  if (!myResult.targetDied) {
-    bodyText = `You headed to slash ${myResult.targetName}. But when you got there, they were already dead.`
-  } else if (myResult.wrongTarget) {
-    const targetRole = myResult.targetRole?.toUpperCase() || "TOWN"
+    if (!myResult.targetDied) {
+      bodyText = `You headed to slash ${myResult.targetName}. But when you got there, they were already dead.`
+    } else if (myResult.wrongTarget) {
+      const targetRole = myResult.targetRole?.toUpperCase() || "TOWN"
 
-    if (myResult.vigilanteDies) {
-      bodyText = `You headed to slash ${myResult.targetName}. ${myResult.targetName} was a ${targetRole}. How could this have happened? You slash yourself and both of you die.`
+      if (myResult.vigilanteDies) {
+        bodyText = `You headed to slash ${myResult.targetName}. ${myResult.targetName} was a ${targetRole}. How could this have happened? You slash yourself and both of you die.`
+      } else {
+        bodyText = `You headed to slash ${myResult.targetName}. ${myResult.targetName} was a ${targetRole}. You cannot believe your eyes, but you're determined to correct your mistakes...`
+      }
     } else {
-      bodyText = `You headed to slash ${myResult.targetName}. ${myResult.targetName} was a ${targetRole}. You cannot believe your eyes, but you're determined to correct your mistakes...`
+      const targetRole = myResult.targetRole?.toUpperCase() || "MAFIA"
+      bodyText = `You headed to slash ${myResult.targetName}. ${myResult.targetName} was a ${targetRole}, and you stand proudly over the body.`
     }
-  } else {
-    const targetRole = myResult.targetRole?.toUpperCase() || "MAFIA"
-    bodyText = `You headed to slash ${myResult.targetName}. ${myResult.targetName} was a ${targetRole}, and you stand proudly over the body.`
+
+    renderOnlineNightResultCard({
+      me,
+      hint: "You carried out your attack",
+      boxClass: "vigilante-result-box",
+      boxKicker: "Night Results",
+      title,
+      titleColor: roleColors.vigilante,
+      bodyText
+    })
+    return
   }
 
-  renderOnlineNightResultCard({
-    me,
-    hint: "You carried out your attack",
-    boxClass: "vigilante-result-box",
-    boxKicker: "Night Results",
-    title,
-    titleColor: roleColors.vigilante,
-    bodyText
-  })
-  return
-}
-
   if (myResult?.type === "vigilante_blocked") {
-  renderOnlineNightResultCard({
-    me,
-    hint: "Your attack failed",
-    boxClass: "vigilante-result-box",
-    boxKicker: "Attack Failed",
-    title: (myResult.targetName || "Unknown").toUpperCase(),
-    titleColor: roleColors.vigilante,
-    bodyText: `Your attack on ${myResult.targetName} was stopped by the Doctor!`
-  })
-  return
-}
+    renderOnlineNightResultCard({
+      me,
+      hint: "Your attack failed",
+      boxClass: "vigilante-result-box",
+      boxKicker: "Attack Failed",
+      title: (myResult.targetName || "Unknown").toUpperCase(),
+      titleColor: roleColors.vigilante,
+      bodyText: `Your attack on ${myResult.targetName} was stopped by the Doctor!`
+    })
+    return
+  }
 
-if (myResult?.type === "vigilante_blocked_priest") {
-  renderOnlineNightResultCard({
-    me,
-    hint: "Holy power stopped the attack",
-    boxClass: "priest-result-box",
-    boxKicker: "Holy Shield Held",
-    title: (myResult.targetName || "Unknown").toUpperCase(),
-    titleColor: roleColors.priest,
-    bodyText: `Your attack on ${myResult.targetName} was stopped by the Holy Spirit.`
-  })
-  return
-}
+  if (myResult?.type === "vigilante_blocked_priest") {
+    renderOnlineNightResultCard({
+      me,
+      hint: "Holy power stopped the attack",
+      boxClass: "priest-result-box",
+      boxKicker: "Holy Shield Held",
+      title: (myResult.targetName || "Unknown").toUpperCase(),
+      titleColor: roleColors.priest,
+      bodyText: `Your attack on ${myResult.targetName} was stopped by the Holy Spirit.`
+    })
+    return
+  }
 
   if (myResult?.type === "priest_result") {
-  const blockedRoles = myResult.blockedRoles || []
-  const blockedText = blockedRoles.length
-    ? blockedRoles.join(" and ")
-    : "No attacks"
+    const blockedRoles = myResult.blockedRoles || []
+    const blockedText = blockedRoles.length
+      ? blockedRoles.join(" and ")
+      : "No attacks"
+
+    renderOnlineNightResultCard({
+      me,
+      hint: "Your blessing protected the town",
+      boxClass: "priest-result-box",
+      boxKicker: "Holy Spirit Outcome",
+      title: blockedText.toUpperCase(),
+      titleColor: roleColors.priest,
+      bodyText: blockedRoles.length
+        ? "were blocked by the Holy Spirit."
+        : "No attacks were blocked by the Holy Spirit."
+    })
+    return
+  }
+
+  const meInState = getOnlineMe()
+  const doomedTonight = !!meInState?.doomedTonight
 
   renderOnlineNightResultCard({
     me,
-    hint: "Your blessing protected the town",
-    boxClass: "priest-result-box",
-    boxKicker: "Holy Spirit Outcome",
-    title: blockedText.toUpperCase(),
-    titleColor: roleColors.priest,
-    bodyText: blockedRoles.length
-      ? "were blocked by the Holy Spirit."
-      : "No attacks were blocked by the Holy Spirit."
+    hint: "Nothing special reached you tonight",
+    boxKicker: "Your Role",
+    title: roleDisplayName(me.role),
+    titleColor: roleColors[me.role] || "white",
+    bodyText: doomedTonight
+      ? "You had a terrifying nightmare, you have a bad feeling about tonight..."
+      : getOnlineNoResultText(me.role)
   })
-  return
-}
-
-const meInState = getOnlineMe()
-const doomedTonight = !!meInState?.doomedTonight
-
-  renderOnlineNightResultCard({
-  me,
-  hint: "Nothing special reached you tonight",
-  boxKicker: "Your Role",
-  title: roleDisplayName(me.role),
-  titleColor: roleColors[me.role] || "white",
-  bodyText: doomedTonight
-    ? "You had a terrifying nightmare, you have a bad feeling about tonight..."
-    : getOnlineNoResultText(me.role)
-})
 }
 
 function renderOnlineMorning() {
@@ -2141,18 +2133,18 @@ function renderOnlineVoting() {
   const alivePlayers = getOnlineAlivePlayers()
   const myVote = demoRoom?.gameState?.votes?.[currentPlayerId] || null
   const votes = demoRoom?.gameState?.votes || {}
-const voteCount = Object.keys(votes).length
-const totalVoters = getOnlineAlivePlayers().length
+  const voteCount = Object.keys(votes).length
+  const totalVoters = getOnlineAlivePlayers().length
 
   let buttons = ""
 
   alivePlayers.forEach(player => {
     buttons += `
       <button
-  class="vote-player-btn ${myVote === player.name ? "selected-vote" : ""}"
-  onclick="window.submitOnlineVote('${player.name}')"
-  ${myVote ? "disabled" : ""}
->
+        class="vote-player-btn ${myVote === player.name ? "selected-vote" : ""}"
+        onclick="window.submitOnlineVote('${player.name}')"
+        ${myVote ? "disabled" : ""}
+      >
         <span class="vote-player-name">${player.name}</span>
         <span class="vote-player-label">Vote</span>
       </button>
@@ -2183,35 +2175,33 @@ const totalVoters = getOnlineAlivePlayers().length
     <div class="card voting-card morning-vote-card">
 
       <div class="voting-hero">
+        <div class="voting-kicker">Town Judgment</div>
+        <h2 class="voting-title">Cast Your Vote</h2>
 
-  <div class="voting-kicker">Town Judgment</div>
-  <h2 class="voting-title">Cast Your Vote</h2>
+        <div class="voting-subtitle">
+          ${
+            myVote
+              ? `You have chosen ${myVote === "skip" ? "to skip" : myVote}.`
+              : "Choose who should be eliminated before night falls."
+          }
+        </div>
 
-  <div class="voting-subtitle">
-    ${
-      myVote
-        ? `You have chosen ${myVote === "skip" ? "to skip" : myVote}.`
-        : "Choose who should be eliminated before night falls."
-    }
-  </div>
+        <div class="current-voter-pill">
+          <span class="current-voter-dot"></span>
+          <strong id="onlineVoteCount">${voteCount} / ${totalVoters} players have voted</strong>
+        </div>
+      </div>
 
-  <div class="current-voter-pill">
-  <span class="current-voter-dot"></span>
-  <strong id="onlineVoteCount">${voteCount} / ${totalVoters} players have voted</strong>
-</div>
-
-</div>
-
-        ${
-          myVote
-            ? `
-              <div class="current-voter-pill">
-                <span class="current-voter-dot"></span>
-                <strong>You voted for ${myVote === "skip" ? "Skip Vote" : myVote}</strong>
-              </div>
-            `
-            : ""
-        }
+      ${
+        myVote
+          ? `
+            <div class="current-voter-pill">
+              <span class="current-voter-dot"></span>
+              <strong>You voted for ${myVote === "skip" ? "Skip Vote" : myVote}</strong>
+            </div>
+          `
+          : ""
+      }
 
       <div class="voting-grid">
         ${buttons}
@@ -2223,7 +2213,6 @@ const totalVoters = getOnlineAlivePlayers().length
       </div>
 
       ${renderOnlineVoteProgressBox()}
-
     </div>
   `)
 }
@@ -2238,42 +2227,42 @@ function renderOnlineVoteResults() {
   }
 
   if (voteResults.resultType === "jester_win") {
-  const screen = buildSharedWinScreen({
-    bodyClass: "win-jester",
-    cardClass: "role-jester",
-    title: "JESTER WINS",
-    linesHTML: `
-      <p>${voteResults.eliminated} tricked the town into voting them out!</p>
-    `,
-    progressBoxHTML: renderOnlineProgressBox(),
-    continueButtonHTML: `
-      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
-    `
-  })
+    const screen = buildSharedWinScreen({
+      bodyClass: "win-jester",
+      cardClass: "role-jester",
+      title: "JESTER WINS",
+      linesHTML: `
+        <p>${voteResults.eliminated} tricked the town into voting them out!</p>
+      `,
+      progressBoxHTML: renderOnlineProgressBox(),
+      continueButtonHTML: `
+        <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
+      `
+    })
 
-  document.body.className = screen.bodyClass
-  render(screen.html)
-  return
-}
+    document.body.className = screen.bodyClass
+    render(screen.html)
+    return
+  }
 
-if (voteResults.resultType === "executioner_win") {
-  const screen = buildSharedWinScreen({
-    bodyClass: "win-executioner",
-    cardClass: "role-executioner",
-    title: "EXECUTIONER WINS",
-    linesHTML: `
-      <p>${voteResults.winner} succeeded in getting ${voteResults.eliminated} voted out!</p>
-    `,
-    progressBoxHTML: renderOnlineProgressBox(),
-    continueButtonHTML: `
-      <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
-    `
-  })
+  if (voteResults.resultType === "executioner_win") {
+    const screen = buildSharedWinScreen({
+      bodyClass: "win-executioner",
+      cardClass: "role-executioner",
+      title: "EXECUTIONER WINS",
+      linesHTML: `
+        <p>${voteResults.winner} succeeded in getting ${voteResults.eliminated} voted out!</p>
+      `,
+      progressBoxHTML: renderOnlineProgressBox(),
+      continueButtonHTML: `
+        <button class="primary-btn" onclick="window.advanceToOnlineFinalResults()">Continue</button>
+      `
+    })
 
-  document.body.className = screen.bodyClass
-  render(screen.html)
-  return
-}
+    document.body.className = screen.bodyClass
+    render(screen.html)
+    return
+  }
 
   const voteCounts = voteResults.voteCounts || {}
   const maxVotes = Object.values(voteCounts).length
@@ -2320,24 +2309,24 @@ if (voteResults.resultType === "executioner_win") {
       </div>
     `
   } else if (voteResults.resultType === "elimination") {
-  outcomeHTML = `
-    <div class="vote-outcome-banner vote-outcome-elimination">
-      <div class="vote-outcome-kicker">Eliminated</div>
-      <div class="vote-outcome-title">${voteResults.eliminated}</div>
-      ${
-        voteResults.revealedRole
-          ? `
-            <div class="vote-reveal-wrap">
-              <div class="revealed-role">
-                ${roleDisplayName(voteResults.revealedRole)}
+    outcomeHTML = `
+      <div class="vote-outcome-banner vote-outcome-elimination">
+        <div class="vote-outcome-kicker">Eliminated</div>
+        <div class="vote-outcome-title">${voteResults.eliminated}</div>
+        ${
+          voteResults.revealedRole
+            ? `
+              <div class="vote-reveal-wrap">
+                <div class="revealed-role">
+                  ${roleDisplayName(voteResults.revealedRole)}
+                </div>
               </div>
-            </div>
-          `
-          : ""
-      }
-      <div class="vote-outcome-subtitle">The town has voted them out.</div>
-    </div>
-  `
+            `
+            : ""
+        }
+        <div class="vote-outcome-subtitle">The town has voted them out.</div>
+      </div>
+    `
   } else {
     outcomeHTML = `
       <div class="vote-outcome-banner vote-outcome-neutral">
@@ -2357,14 +2346,14 @@ if (voteResults.resultType === "executioner_win") {
   }).join("")
 
   render(
-  buildSharedVoteResultsScreen({
-    outcomeHTML,
-    resultsHTML,
-    playersHTML,
-    progressBoxHTML: renderOnlineProgressBox(),
-    continueButtonHTML: renderOnlineProceedButton("Continue")
-  })
-)
+    buildSharedVoteResultsScreen({
+      outcomeHTML,
+      resultsHTML,
+      playersHTML,
+      progressBoxHTML: renderOnlineProgressBox(),
+      continueButtonHTML: renderOnlineProceedButton("Continue")
+    })
+  )
 }
 
 function getRoleDescription(role) {
@@ -2394,10 +2383,10 @@ window.advanceOnlinePhase = async function () {
 
   try {
     await update(getOnlineRoomRef(), {
-  "gameState/phase": nextPhase,
-  "gameState/readyMap": {},
-  "gameState/submittedActions": {}
-})
+      "gameState/phase": nextPhase,
+      "gameState/readyMap": {},
+      "gameState/submittedActions": {}
+    })
   } catch (error) {
     console.error("Failed to advance phase:", error)
     alert("Failed to advance phase: " + error.message)
